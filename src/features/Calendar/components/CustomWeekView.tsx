@@ -1,6 +1,6 @@
 import React from 'react'
-import Week from 'react-big-calendar/lib/Week'
 import type { ViewStatic } from 'react-big-calendar'
+import Week from 'react-big-calendar/lib/Week'
 
 type WeekProps = React.ComponentProps<typeof Week>
 

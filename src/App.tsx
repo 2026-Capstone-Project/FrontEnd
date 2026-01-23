@@ -1,8 +1,9 @@
 import './App.css'
-import Calendar from './pages/Calendar/Calendar'
+
+import CalendarPage from './pages/Calendar/CalendarPage'
 
 function App() {
-  return <Calendar></Calendar>
+  return <CalendarPage></CalendarPage>
 }
 
 export default App

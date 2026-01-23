@@ -1,7 +1,8 @@
-import { type ToolbarProps } from 'react-big-calendar'
 import moment from 'moment'
-import Arrow from '../../../assets/icons/chevron.svg?react'
-import * as S from '../Calendar.style'
+import { type ToolbarProps } from 'react-big-calendar'
+
+import Arrow from '@/assets/icons/chevron.svg?react'
+import * as S from '@/pages/Calendar/Calendar.style'
 
 const CustomToolbar = <TEvent extends object>({
   date,

@@ -1,8 +1,9 @@
-import styled from '@emotion/styled'
 import { css } from '@emotion/react'
-import { monthViewStyles } from './styles/monthView'
-import { weekViewStyles } from './styles/weekView'
-import { dayViewStyles } from './styles/dayView'
+import styled from '@emotion/styled'
+
+import { dayViewStyles } from '@/features/Calendar/components/styles/dayView'
+import { monthViewStyles } from '@/features/Calendar/components/styles/monthView'
+import { weekViewStyles } from '@/features/Calendar/components/styles/weekView'
 
 export const HeaderContainer = styled.div`
   display: flex;

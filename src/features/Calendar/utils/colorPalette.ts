@@ -1,6 +1,6 @@
-type PaletteKey = 'sky' | 'mint' | 'pink' | 'violet' | 'yellow' | 'gray'
+import type { EventColorType } from '@/types/color'
 
-const palette: Record<PaletteKey, { base: string; point: string }> = {
+const palette: Record<EventColorType, { base: string; point: string }> = {
   sky: { base: '#dcecfc', point: '#94c8ff' },
   mint: { base: '#dcf2ec', point: '#8fd2c0' },
   pink: { base: '#ffebe8', point: '#f5b4aa' },
@@ -11,8 +11,8 @@ const palette: Record<PaletteKey, { base: string; point: string }> = {
 
 export const getColorPalette = (name?: string) => {
   if (!name) return null
-  const key = name.toLowerCase() as PaletteKey
+  const key = name.toLowerCase() as EventColorType
   return palette[key] ?? null
 }
 
-export type { PaletteKey }
+export type { EventColorType }

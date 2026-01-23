@@ -1,8 +1,9 @@
-import React from 'react'
 import moment from 'moment'
+import React from 'react'
+
+import { getColorPalette } from '../utils/colorPalette'
 import type { CalendarEvent } from './CustomDayView'
-import * as S from './CustomEvent.style'
-import { getColorPalette } from '../../../utils/colorPalette'
+import * as S from './styles/CustomEvent.style'
 
 const formatTimeRange = (event: CalendarEvent) => {
   if (event.allDay) {

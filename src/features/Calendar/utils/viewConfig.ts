@@ -1,12 +1,12 @@
+import moment from 'moment'
+import type { ComponentType } from 'react'
+import { createElement } from 'react'
 import type { Components, Formats, HeaderProps, View } from 'react-big-calendar'
 import { Views } from 'react-big-calendar'
-import moment from 'moment'
-import CustomHeader from './components/CalendarHeader'
 
-import { formatWeekday, formatDayHeaderLabel, formatDayNumber } from './formatters'
-import type { CalendarEvent } from './components/CustomDayView'
-import { createElement } from 'react'
-import type { ComponentType } from 'react'
+import CustomHeader from '../components/CalendarHeader'
+import type { CalendarEvent } from '../components/CustomDayView'
+import { formatDayHeaderLabel, formatDayNumber, formatWeekday } from './formatters'
 
 type ViewConfigOptions = {
   onAddHeader?: (date: Date) => void

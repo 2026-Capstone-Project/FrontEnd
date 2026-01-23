@@ -1,4 +1,4 @@
-import type { CalendarEvent } from '../pages/Calendar/components/CustomDayView'
+import type { CalendarEvent } from '../components/CustomDayView'
 
 export const mockCalendarEvents: CalendarEvent[] = [
   {

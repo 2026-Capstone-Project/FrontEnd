@@ -1,8 +1,9 @@
 import moment from 'moment'
 import type { EventProps } from 'react-big-calendar'
+
+import { getColorPalette } from '../utils/colorPalette'
 import type { CalendarEvent } from './CustomDayView'
-import * as S from './CustomEvent.style'
-import { getColorPalette } from '../../../utils/colorPalette'
+import * as S from './styles/CustomEvent.style'
 
 const formatTimeRange = (event: CalendarEvent) => {
   if (event.allDay) {
