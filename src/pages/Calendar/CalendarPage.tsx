@@ -21,6 +21,8 @@ moment.locale('ko')
 const localizer = momentLocalizer(moment)
 const DragAndDropCalendar = withDragAndDrop<CalendarEvent, object>(Calendar)
 
+//TODO: 디자인이랑 레이아웃 일치시키기
+//TODO: 모달 및 특정 일 상세 조회 컴포넌트 추가
 const CalendarPage = () => {
   const [view, setView] = useState<View>(Views.MONTH)
   const [date, setDate] = useState(new Date())

@@ -13,7 +13,9 @@ const formatTimeRange = (event: CalendarEvent) => {
   const start = moment(event.start).format('HH:mm')
   return `${start}`
 }
-
+//TODO: 이벤트 클릭 시 해당 이벤트를 수정할 수 있는 모달 띄우기
+//TODO: 이벤트를 길게 늘리거나 줄여서 날짜 변경 기능 추가
+//TODO: 반응형 (모바일 뷰)
 const CustomMonthEvent = ({ event }: EventProps<CalendarEvent>) => {
   const palette = getColorPalette(event.palette ?? event.color)
   const baseColor = palette?.base ?? '#ffffff'

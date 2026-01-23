@@ -17,7 +17,7 @@ const formatTimeRange = (event: CalendarEvent) => {
 type CustomWeekEventProps = {
   event: CalendarEvent
 }
-
+//TODO: 이벤트 클릭 시 해당 이벤트를 수정할 수 있는 모달 띄우기
 const CustomWeekEvent: React.FC<CustomWeekEventProps> = ({ event }) => {
   const palette = getColorPalette(event.palette ?? event.color)
   const baseColor = palette?.base ?? '#ffffff'

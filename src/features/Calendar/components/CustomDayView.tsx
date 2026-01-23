@@ -20,6 +20,11 @@ interface CustomDayViewProps {
   date?: Date
 }
 
+//TODO: 반응형 디자인 추가: 모바일 환경에서는 grid 1
+//TODO: 이벤트가 차지하는 높이가 작을 때 텍스트가 넘치는 문제 해결
+//TODO: 드래그해서 시간 선택, 이벤트 시간 변경 기능 추가
+//TODO: 이벤트 겹침 처리 -> 디자인 요청
+
 /** 24시간을 12시간씩 두 컬럼으로 나누어 시간 라인을 렌더링합니다. */
 const renderTimeSlotRows = (startHour: number) => {
   const TOTAL_SLOTS = TIMED_SLOT_CONFIG.MAX_VISUAL_HOURS
