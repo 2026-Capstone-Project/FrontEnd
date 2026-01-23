@@ -13,7 +13,8 @@ export const HeaderContainer = styled.div`
     width: 100%;
     display: flex;
     border-top: 1px solid #f5f5f5;
-    border-right: 1px solid #f5f5f5;
+    border-right: 0.5px solid #f5f5f5;
+    border-left: 0.5px solid #f5f5f5;
     padding: 12px;
     justify-content: flex-start;
     align-items: center;
@@ -80,21 +81,15 @@ export const CalendarWrapper = styled.div<{ view: string }>`
   .rbc-time-view,
   .rbc-header,
   .rbc-month-row,
-  .rbc-day-bg,
   .rbc-time-header {
     border: none !important;
   }
   .rbc-label {
     padding: 0;
   }
-  /* 2. 주간/일간 뷰 세로선 (All-day 영역 포함) */
-  .rbc-day-bg {
-    border-left: 1px solid #f5f5f5 !important;
-    &:first-of-type {
-      border-left: none !important;
-    }
+  .rbc-row-bg {
+    right: 0;
   }
-
   /* 3. 헤더 영역 스타일 */
   .rbc-header {
     border-bottom: none !important;
@@ -122,13 +117,12 @@ export const CalendarWrapper = styled.div<{ view: string }>`
 
   /* --- 이벤트 스타일 --- */
   .rbc-event {
-    background-color: #f3f4f6;
-    color: #374151;
+    background-color: transparent;
+    color: inherit;
     border: none !important;
-    border-radius: 8px !important;
-    padding: 6px 10px;
-    margin: 2px 4px !important;
-    font-size: 12px;
+    border-radius: 0 !important;
+    padding: 0;
+    font-size: inherit;
   }
 `
 export const ToolbarWrapper = styled.div`

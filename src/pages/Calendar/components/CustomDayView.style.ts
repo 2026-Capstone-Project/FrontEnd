@@ -9,10 +9,13 @@ export const DayViewContainer = styled.div`
 `
 
 export const AllDaySection = styled.div`
-  padding: 0 0 20px 50px;
-  display: flex;
+  padding: 0 92px 20px 140px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   flex-direction: column;
-  gap: 8px;
+  width: 100%;
+  column-gap: 84px;
+  row-gap: 8px;
 `
 
 export const GridContainer = styled.div`
@@ -21,6 +24,17 @@ export const GridContainer = styled.div`
   column-gap: 40px;
   padding-top: 10px;
   padding: 0 92px;
+`
+
+export const SlotColumn = styled.div`
+  position: relative;
+  min-height: 650px;
+`
+
+export const TimeOverlay = styled.div`
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 `
 
 export const TimeSlotRow = styled.div`
@@ -55,11 +69,7 @@ export const SlotContent = styled.div`
 `
 
 export const EventBadge = styled.div<{ color?: string }>`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  position: relative;
   background-color: ${(props) => props.color || '#FFF2B2'};
   padding: 8px 12px;
   font-size: 13px;
@@ -67,6 +77,19 @@ export const EventBadge = styled.div<{ color?: string }>`
   display: flex;
   align-items: center;
   z-index: 1;
+`
+
+export const DayEventBadge = styled(EventBadge)`
+  position: absolute;
+  right: 1px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  display: flex;
+  max-width: 268px;
+  padding: 8px;
+  width: 266px;
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: flex-start;
 `
 
 export const DateInfo = styled.div`
@@ -102,10 +125,34 @@ export const DateCircle = styled.div<{ highlight?: boolean }>`
 export const EventBadgeWrapper = styled.div<{ color?: string }>`
   background-color: ${(props) => props.color || '#E2F2ED'};
   border-radius: 20px;
-  padding: 4px 16px;
+  padding: 0px 8px;
+  gap: 4px;
   font-size: 12px;
-  width: fit-content;
-  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  display: flex;
+`
+
+export const EventTitle = styled.div`
+  font-weight: 600;
+  font-size: 13px;
+  color: #111827;
+`
+
+export const EventMeta = styled.div`
+  font-size: 11px;
+  color: #4b5563;
+`
+
+export const EventLocation = styled.div`
+  font-size: 11px;
+  color: #4b5563;
+`
+
+export const EventRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
 `
 
 export const PlaceholderLabel = styled.div`
@@ -119,4 +166,10 @@ export const CalendarWrapper = styled.div`
   flex-direction: column;
   width: 100%;
   height: 100%;
+`
+export const Circle = styled.div<{ backgroundColor?: string }>`
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: ${({ backgroundColor }) => backgroundColor ?? 'transparent'};
 `

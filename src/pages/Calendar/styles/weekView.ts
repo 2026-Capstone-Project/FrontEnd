@@ -49,6 +49,24 @@ export const weekViewStyles = css`
     min-height: 540px !important;
   }
 
+  .rbc-row {
+    margin: 0;
+    border: none;
+  }
+
+  .rbc-row-segment {
+    padding: 0;
+    margin: 0;
+    height: fit-content;
+  }
+
+  .rbc-time-view .rbc-row,
+  .rbc-time-view .rbc-row-segment {
+    border: none !important;
+    box-sizing: border-box;
+    gap: 0;
+  }
+
   /* 일요일/토요일 색상 (모든 뷰 공통) */
   .rbc-header:first-of-type .day-name,
   .rbc-header:first-of-type .day-number {
@@ -57,5 +75,27 @@ export const weekViewStyles = css`
   .rbc-header:last-child .day-name,
   .rbc-header:last-child .day-number {
     color: #4784c1;
+  }
+
+  .rbc-day-bg {
+    height: 100%;
+    width: 100%;
+    right: 0;
+    border-right: 0.5px solid #f5f5f5;
+    border-left: 0.5px solid #f5f5f5;
+  }
+  .rbc-time-gutter {
+    display: none;
+  }
+  .rbc-addons-dnd-row-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .rbc-addons-dnd-row-body > div {
+    width: 100%;
+  }
+  .rbc-event-content {
+    padding: 2px;
   }
 `

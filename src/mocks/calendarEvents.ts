@@ -1,0 +1,63 @@
+import type { CalendarEvent } from '../pages/Calendar/components/CustomDayView'
+
+export const mockCalendarEvents: CalendarEvent[] = [
+  {
+    id: 'sky-meeting',
+    title: 'Sky Base 회의',
+    start: '2026-01-23',
+    end: '2026-01-23',
+    color: 'sky',
+    location: '1층 스카이룸',
+    allDay: true,
+  },
+  {
+    id: 'mint-lunch',
+    title: 'Mint Base 점심',
+    start: '2026-01-23T12:00:00',
+    end: '2026-01-23T12:30:00',
+    color: 'mint',
+    location: '카페테리아',
+  },
+  {
+    id: 'pink-planning',
+    title: 'Pink Base 기획',
+    start: '2026-01-24T14:30:00',
+    end: '2026-01-24T16:00:00',
+    color: 'pink',
+    location: '3층 대회의실',
+  },
+  {
+    id: 'violet-review',
+    title: 'Violet Base 리뷰',
+    start: '2026-01-25',
+    end: '2026-01-28',
+    color: 'violet',
+    allDay: true,
+  },
+  {
+    id: 'yellow-retro',
+    title: 'Yellow Base 회고 제목이 길어져볼게 얍!',
+    start: '2026-01-25',
+    end: '2026-01-25',
+    color: 'yellow',
+    location: '2층 미팅룸',
+    allDay: true,
+  },
+  {
+    id: 'gray-offsite',
+    title: 'Gray Base 외근',
+    start: '2026-01-26',
+    end: '2026-01-26',
+    color: 'gray',
+    location: '외부 미팅',
+    allDay: true,
+  },
+  {
+    id: 'sky-wrapup',
+    title: 'Sky Point 총괄',
+    start: '2026-01-27T15:00:00',
+    end: '2026-01-27T16:00:00',
+    color: 'sky',
+    location: '연남동 카페',
+  },
+]
