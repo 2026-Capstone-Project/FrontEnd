@@ -63,6 +63,10 @@ Vite + React 기반의 프론트엔드 프로젝트입니다.
 - vite-plugin-svgr  
   SVG를 React 컴포넌트로 사용하기 위한 플러그인
 
+### react-big-calendar
+
+- 캘린더 캘린더 react-big-calendar 사용
+
 ---
 
 ## Node Version
