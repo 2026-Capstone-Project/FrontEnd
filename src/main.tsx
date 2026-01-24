@@ -1,18 +1,15 @@
-import './index.css'
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { ThemeProvider } from '@emotion/react'
+import App from './App'
+import { theme } from '@/styles/theme'
+import GlobalStyle from '@/styles/GlobalStyle'
 
-import { QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-
-import App from './App.tsx'
-import { queryClient } from './shared/api/queryClient.ts'
-
-createRoot(document.getElementById('root')!).render(
-  <QueryClientProvider client={queryClient}>
-    <StrictMode>
-      {import.meta.env.VITE_DEV_MODE === 'true' && <ReactQueryDevtools initialIsOpen={false} />}
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <ThemeProvider theme={theme}>
+      <GlobalStyle />
       <App />
-    </StrictMode>
-  </QueryClientProvider>,
+    </ThemeProvider>
+  </React.StrictMode>,
 )
