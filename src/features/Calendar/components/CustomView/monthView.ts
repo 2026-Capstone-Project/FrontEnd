@@ -1,5 +1,7 @@
 import { css } from '@emotion/react'
 
+import { theme } from '@/shared/styles/theme'
+
 export const monthViewStyles = css`
   .rbc-month-view {
     display: flex !important;
@@ -7,7 +9,7 @@ export const monthViewStyles = css`
       display: none;
     }
     .rbc-month-row {
-      border-top: 1px solid #f5f5f5 !important;
+      border-top: 1px solid ${theme.colors.lightGray} !important;
       &:first-of-type {
         border-top: none !important;
       }
@@ -25,7 +27,7 @@ export const monthViewStyles = css`
   }
 
   .rbc-day-bg {
-    border-left: 1px solid #f5f5f5 !important;
+    border-left: 1px solid ${theme.colors.lightGray} !important;
   }
 
   .rbc-date-cell {
@@ -35,7 +37,7 @@ export const monthViewStyles = css`
       font-size: 16px;
     }
     &.rbc-now .rbc-button-link {
-      background-color: #e94b43;
+      background-color: ${theme.colors.red};
       color: white !important;
       border-radius: 50%;
       width: 28px;
@@ -47,21 +49,21 @@ export const monthViewStyles = css`
   }
 
   .rbc-date-cell:first-of-type {
-    color: #e94b43;
+    color: ${theme.colors.red};
   }
   .rbc-date-cell:last-child {
     color: #4784c1;
   }
 
   .rbc-header {
-    color: #111827;
+    color: ${theme.colors.black};
     font-weight: 500;
     display: flex;
     padding: 10px 12px;
   }
 
   .rbc-header:first-of-type {
-    color: #e94b43;
+    color: ${theme.colors.red};
   }
   .rbc-header:last-child {
     color: #4784c1;

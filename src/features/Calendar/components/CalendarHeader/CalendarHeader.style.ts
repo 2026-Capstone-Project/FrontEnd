@@ -8,9 +8,9 @@ export const HeaderContainer = styled.div`
   .day-number-wrapper {
     width: 100%;
     display: flex;
-    border-top: 1px solid #f5f5f5;
-    border-right: 0.5px solid #f5f5f5;
-    border-left: 0.5px solid #f5f5f5;
+    border-top: 1px solid ${({ theme }) => theme.colors.lightGray};
+    border-right: 0.5px solid ${({ theme }) => theme.colors.lightGray};
+    border-left: 0.5px solid ${({ theme }) => theme.colors.lightGray};
     padding: 12px;
     justify-content: flex-start;
     align-items: center;

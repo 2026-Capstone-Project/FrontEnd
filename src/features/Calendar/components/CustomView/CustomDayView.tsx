@@ -4,8 +4,8 @@ import type { NavigateAction, ViewStatic } from 'react-big-calendar'
 
 import { formatWeekday } from '@/features/Calendar/utils/formatters'
 
-import { DEFAULT_PALETTE, TIMED_SLOT_CONFIG } from '../../domain/constants/dayView'
-import type { CalendarEvent } from '../../domain/types/calendarEvent'
+import { TIMED_SLOT_CONFIG } from '../../domain/constants'
+import type { CalendarEvent } from '../../domain/types'
 import { getColorPalette } from '../../utils/colorPalette'
 import {
   buildTimedSlots,
@@ -81,7 +81,7 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
       <S.CalendarWrapper>
         <S.AllDaySection>
           {allDayEvents.map((event) => {
-            const palette = getColorPalette(event?.color) ?? DEFAULT_PALETTE
+            const palette = getColorPalette(event?.color)
             return (
               <S.EventBadgeWrapper key={event.id} color={palette.base}>
                 <S.Circle backgroundColor={palette.point} />

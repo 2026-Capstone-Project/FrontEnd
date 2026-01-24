@@ -28,7 +28,7 @@ export const WeekEventContainer = styled.div<{ backgroundColor?: string }>`
   justify-self: center;
   gap: 8px;
   color: #1b1b1b;
-  background-color: ${({ backgroundColor }) => backgroundColor ?? '#ffffff'};
+  background-color: ${({ backgroundColor }) => backgroundColor ?? 'white'};
   padding: 6px 8px;
   border-radius: 4px;
 `
@@ -44,18 +44,18 @@ export const EventTitle = styled.div`
 
 export const EventMeta = styled.div`
   font-size: 8px;
-  color: #111827;
+  color: ${({ theme }) => theme.colors.black};
   white-space: nowrap;
   width: fit-content;
 `
 export const EventWeekMeta = styled.div`
   font-size: 10px;
-  color: #111827;
+  color: ${({ theme }) => theme.colors.black};
 `
 
 export const EventLocation = styled.div`
   font-size: 10px;
-  color: #111827;
+  color: ${({ theme }) => theme.colors.black};
 `
 
 export const EventRow = styled.div`

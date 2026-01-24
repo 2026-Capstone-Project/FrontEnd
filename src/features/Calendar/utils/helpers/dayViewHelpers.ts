@@ -1,16 +1,16 @@
 import moment from 'moment'
 import type { stringOrDate } from 'react-big-calendar'
 
-import { DEFAULT_PALETTE, TIMED_SLOT_CONFIG } from '@/features/Calendar/domain/constants/dayView'
-import type { CalendarEvent } from '@/features/Calendar/domain/types/calendarEvent'
+import type { CalendarEvent } from '@/features/Calendar/domain/types'
 
+import { TIMED_SLOT_CONFIG } from '../../domain/constants'
 import { getColorPalette } from '../colorPalette'
 
 export type TimedSlotEvent = {
   event: CalendarEvent
   top: number
   height: number
-  palette: typeof DEFAULT_PALETTE
+  palette: { base: string; point: string }
 }
 
 export const isDateOnlyString = (value?: stringOrDate) =>
@@ -32,7 +32,7 @@ export const buildTimedSlots = (events: CalendarEvent[]) => {
   events.forEach((event) => {
     const start = moment(event.start)
     const columnIndex = start.hour() < 12 ? 0 : 1
-    const palette = getColorPalette(event.palette ?? event.color) ?? DEFAULT_PALETTE
+    const palette = getColorPalette(event.color)
     const minutesSinceColumnStart =
       (start.hour() % 12) * SLOT_HEIGHT + (start.minute() / 60) * SLOT_HEIGHT
     const durationMinutes = Math.max(moment(event.end).diff(start, 'minutes'), 15)

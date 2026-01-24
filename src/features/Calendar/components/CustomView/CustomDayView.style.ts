@@ -57,7 +57,7 @@ export const TimeLabel = styled.div`
 export const SlotContent = styled.div`
   flex: 1;
   height: 100%;
-  background-color: #f5f5f5;
+  background-color: ${({ theme }) => theme.colors.lightGray};
   border-top: 1px solid #e0e0e0;
   border-left: 1px solid #e0e0e0;
   border-right: 1px solid #e0e0e0;
@@ -100,7 +100,7 @@ export const DateInfo = styled.div`
   gap: 6px;
   width: 100%;
 
-  border-bottom: 1px solid #f5f5f5;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.lightGray};
 `
 
 export const DateLabel = styled.div`
@@ -113,8 +113,8 @@ export const DateCircle = styled.div<{ highlight?: boolean }>`
   top: 50px;
   width: 30px;
   height: 30px;
-  background-color: ${(props) => (props.highlight ? '#e94b43' : 'transparent')};
-  color: ${(props) => (props.highlight ? 'white' : '#111827')};
+  background-color: ${(props) => (props.highlight ? props.theme.colors.red : 'transparent')};
+  color: ${(props) => (props.highlight ? 'white' : props.theme.colors.black)};
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -136,7 +136,7 @@ export const EventBadgeWrapper = styled.div<{ color?: string }>`
 export const EventTitle = styled.div`
   font-weight: 600;
   font-size: 13px;
-  color: #111827;
+  color: ${({ theme }) => theme.colors.black};
 `
 
 export const EventMeta = styled.div`

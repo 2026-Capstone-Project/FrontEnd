@@ -10,7 +10,7 @@ export default defineConfig({
       jsxImportSource: '@emotion/react',
     }),
     svgr(),
-    tsconfigPaths()],
+    tsconfigPaths(),
   ],
   resolve: {
     alias: {

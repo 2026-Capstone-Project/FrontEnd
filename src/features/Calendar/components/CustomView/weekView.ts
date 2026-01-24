@@ -1,5 +1,7 @@
 import { css } from '@emotion/react'
 
+import { theme } from '@/shared/styles/theme'
+
 export const weekViewStyles = css`
   .rbc-time-view {
     display: flex !important;
@@ -10,7 +12,7 @@ export const weekViewStyles = css`
 
     .rbc-time-content {
       display: none !important;
-      border-top: 1px solid #f5f5f5 !important;
+      border-top: 1px solid ${theme.colors.lightGray} !important;
     }
   }
   .rbc-time-header-cell {
@@ -33,7 +35,7 @@ export const weekViewStyles = css`
   }
   .rbc-today {
     .day-number {
-      background-color: #e94b43;
+      background-color: ${theme.colors.red};
       color: white !important;
       width: 30px;
       height: 30px;
@@ -70,7 +72,7 @@ export const weekViewStyles = css`
   /* 일요일/토요일 색상 (모든 뷰 공통) */
   .rbc-header:first-of-type .day-name,
   .rbc-header:first-of-type .day-number {
-    color: #e94b43;
+    color: ${theme.colors.red};
   }
   .rbc-header:last-child .day-name,
   .rbc-header:last-child .day-number {
@@ -81,8 +83,8 @@ export const weekViewStyles = css`
     height: 100%;
     width: 100%;
     right: 0;
-    border-right: 0.5px solid #f5f5f5;
-    border-left: 0.5px solid #f5f5f5;
+    border-right: 0.5px solid ${theme.colors.lightGray};
+    border-left: 0.5px solid ${theme.colors.lightGray};
   }
   .rbc-time-gutter {
     display: none;

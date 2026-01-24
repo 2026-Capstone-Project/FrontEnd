@@ -18,8 +18,8 @@ const formatTimeRange = (event: CalendarEvent) => {
 //TODO: 반응형 (모바일 뷰)
 const CustomMonthEvent = ({ event }: EventProps<CalendarEvent>) => {
   const palette = getColorPalette(event.color)
-  const baseColor = palette?.base ?? '#ffffff'
-  const pointColor = palette?.point ?? '#1f1f1f'
+  const baseColor = palette?.base
+  const pointColor = palette?.point
 
   return (
     <S.MonthEventContainer backgroundColor={baseColor}>

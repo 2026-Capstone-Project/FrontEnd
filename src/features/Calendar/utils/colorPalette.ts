@@ -1,8 +1,7 @@
 import { theme } from '@/shared/styles/theme'
-import type { EventColorType } from '@/types/color'
+import type { EventColorType } from '@/shared/types/color'
 
-export const getColorPalette = (name?: EventColorType) => {
-  if (!name) return null
+export const getColorPalette = (name: EventColorType) => {
   return theme.colors[name]
 }
 

@@ -1,23 +1,24 @@
-import MainLayout from '@/layout/MainLayout'
-import Calendar from '@/pages/main/Calendar'
-import Home from '@/pages/main/Home'
-import TodoList from '@/pages/main/TodoList'
 import type { RouteObject } from 'react-router-dom'
+
+import CalendarPage from '@/pages/main/CalendarPage/CalendarPage'
+import HomePage from '@/pages/main/HomePage/HomePage'
+import TodoListPage from '@/pages/main/TodoListPage/TodoListPage'
+import MainLayout from '@/shared/layout/MainLayout'
 
 const MainRoutes: RouteObject = {
   element: <MainLayout />,
   children: [
     {
       path: '/',
-      element: <Home />,
+      element: <HomePage />,
     },
     {
       path: '/calendar',
-      element: <Calendar />,
+      element: <CalendarPage />,
     },
     {
       path: '/todo',
-      element: <TodoList />,
+      element: <TodoListPage />,
     },
   ],
 }

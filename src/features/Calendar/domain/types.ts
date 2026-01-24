@@ -1,6 +1,6 @@
 import type { stringOrDate } from 'react-big-calendar'
 
-import type { EventColorType } from '@/types/color'
+import type { EventColorType } from '@/shared/types/color'
 
 export interface CalendarEvent {
   id: string

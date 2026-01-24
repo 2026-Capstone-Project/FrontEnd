@@ -1,12 +1,14 @@
 import moment from 'moment'
 import type { stringOrDate } from 'react-big-calendar'
 
+import { theme } from '@/shared/styles/theme'
+
 import type { CalendarEvent } from '../../components/CustomView/CustomDayView'
 import {
   DEFAULT_ALL_DAY_TITLE,
   DEFAULT_EVENT_DURATION_HOURS,
   DEFAULT_EVENT_TITLE,
-} from '../../domain/constants/calendarPage'
+} from '../../domain/constants'
 
 /** 문자열 또는 숫자/Date 혼합 값을 Date로 정규화합니다. */
 export const normalizeDate = (value: stringOrDate): Date =>
@@ -23,6 +25,7 @@ export const createEvent = (date: Date, index: number, allDay = false): Calendar
     title: allDay ? DEFAULT_ALL_DAY_TITLE : DEFAULT_EVENT_TITLE,
     start,
     end: allDay ? date : moment(date).add(eventDurationMs).toDate(),
+    color: 'gray',
     allDay,
   }
 }
@@ -58,7 +61,7 @@ export const getDayPropStyle = (calendarDate: Date, selectedDate: Date | null) =
   return moment(selectedDate).isSame(calendarDate, 'day')
     ? {
         style: {
-          backgroundColor: '#f5f5f5',
+          backgroundColor: theme.colors.lightGray,
         },
       }
     : {}

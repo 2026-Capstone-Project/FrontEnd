@@ -18,10 +18,10 @@ export const ToolbarWrapper = styled.div`
       background: transparent;
       cursor: pointer;
       font-size: 13px;
-      color: #111827;
+      color: ${({ theme }) => theme.colors.black};
       &.active {
-        background: #e9f4f7;
-        color: #025a74;
+        background: ${({ theme }) => theme.colors.sub};
+        color: ${({ theme }) => theme.colors.textPrimary};
         font-weight: 600;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
       }

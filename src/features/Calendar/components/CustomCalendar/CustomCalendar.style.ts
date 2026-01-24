@@ -4,6 +4,7 @@ import styled from '@emotion/styled'
 import { dayViewStyles } from '@/features/Calendar/components/CustomView/dayView'
 import { monthViewStyles } from '@/features/Calendar/components/CustomView/monthView'
 import { weekViewStyles } from '@/features/Calendar/components/CustomView/weekView'
+import { theme } from '@/shared/styles/theme'
 
 export const DayContainer = styled.div`
   display: flex;
@@ -12,8 +13,8 @@ export const DayContainer = styled.div`
   padding: 12px;
   width: 100%;
   height: 44px; /* 높이 고정 */
-  border-top: 1px solid #f5f5f5; /* 요일과 숫자 사이 구분선 */
-  border-right: 1px solid #f5f5f5; /* 요일과 숫자 사이 구분선 */
+  border-top: 1px solid ${({ theme }) => theme.colors.lightGray}; /* 요일과 숫자 사이 구분선 */
+  border-right: 1px solid ${({ theme }) => theme.colors.lightGray}; /* 요일과 숫자 사이 구분선 */
 
   .day-number {
     font-size: 16px;
@@ -78,11 +79,11 @@ export const CalendarWrapper = styled.div<{ view: string }>`
   .rbc-current {
     background-color: transparent !important;
     .day-number {
-      background-color: #e94b43;
+      background-color: ${theme.colors.red};
       color: white !important;
     }
     .day-name {
-      color: ${(props) => (props.view === 'month' ? '#e94b43' : '')} !important;
+      color: ${(props) => (props.view === 'month' ? theme.colors.red : '')} !important;
     }
   }
 
