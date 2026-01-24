@@ -8,7 +8,6 @@ export interface CalendarEvent {
   start: stringOrDate
   end: stringOrDate
   allDay?: boolean
-  color?: EventColorType
+  color: EventColorType
   location?: string
-  palette?: string
 }

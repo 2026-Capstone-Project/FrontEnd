@@ -11,7 +11,7 @@ import { queryClient } from './shared/api/queryClient.ts'
 createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryClient}>
     <StrictMode>
-      {import.meta.env.VITE_DEV_MODE && <ReactQueryDevtools initialIsOpen={false} />}
+      {import.meta.env.VITE_DEV_MODE === 'true' && <ReactQueryDevtools initialIsOpen={false} />}
       <App />
     </StrictMode>
   </QueryClientProvider>,
