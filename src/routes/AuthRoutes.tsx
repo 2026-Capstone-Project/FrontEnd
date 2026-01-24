@@ -1,6 +1,7 @@
-import AuthLayout from '@/layout/AuthLayout'
-import Login from '@/pages/auth/Login'
 import type { RouteObject } from 'react-router-dom'
+
+import Login from '@/pages/auth/Login'
+import AuthLayout from '@/shared/layout/AuthLayout'
 
 const AuthRoutes: RouteObject = {
   element: <AuthLayout />,
