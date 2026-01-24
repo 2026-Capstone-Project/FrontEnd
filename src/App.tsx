@@ -1,9 +1,15 @@
 import './App.css'
 
-import CalendarPage from './pages/Calendar/CalendarPage'
+import { RouterProvider } from 'react-router-dom'
+
+import router from './routes/routes'
 
 function App() {
-  return <CalendarPage></CalendarPage>
+  return (
+    <>
+      <RouterProvider router={router} />
+    </>
+  )
 }
 
 export default App

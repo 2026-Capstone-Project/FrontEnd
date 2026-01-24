@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 
-import type { CalendarEvent } from '../components/CustomDayView'
+import type { CalendarEvent } from '../components/CustomView/CustomDayView'
 import { mockCalendarEvents } from '../mocks/calendarEvents'
 import { appendEvent, normalizeDate, updateEventRange } from '../utils/helpers/calendarPageHelpers'
 

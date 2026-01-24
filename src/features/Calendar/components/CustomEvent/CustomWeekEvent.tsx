@@ -1,9 +1,9 @@
 import moment from 'moment'
 import React from 'react'
 
-import { getColorPalette } from '../utils/colorPalette'
-import type { CalendarEvent } from './CustomDayView'
-import * as S from './styles/CustomEvent.style'
+import { getColorPalette } from '../../utils/colorPalette'
+import type { CalendarEvent } from '../CustomView/CustomDayView'
+import * as S from './CustomEvent.style'
 
 const formatTimeRange = (event: CalendarEvent) => {
   if (event.allDay) {
@@ -19,7 +19,7 @@ type CustomWeekEventProps = {
 }
 //TODO: 이벤트 클릭 시 해당 이벤트를 수정할 수 있는 모달 띄우기
 const CustomWeekEvent: React.FC<CustomWeekEventProps> = ({ event }) => {
-  const palette = getColorPalette(event.palette ?? event.color)
+  const palette = getColorPalette(event.color)
   const baseColor = palette?.base ?? '#ffffff'
   const pointColor = palette?.point ?? '#1f1f1f'
 

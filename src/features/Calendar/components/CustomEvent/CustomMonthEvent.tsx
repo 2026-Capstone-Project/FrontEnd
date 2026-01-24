@@ -1,9 +1,9 @@
 import moment from 'moment'
 import type { EventProps } from 'react-big-calendar'
 
-import { getColorPalette } from '../utils/colorPalette'
-import type { CalendarEvent } from './CustomDayView'
-import * as S from './styles/CustomEvent.style'
+import { getColorPalette } from '../../utils/colorPalette'
+import type { CalendarEvent } from '../CustomView/CustomDayView'
+import * as S from './CustomEvent.style'
 
 const formatTimeRange = (event: CalendarEvent) => {
   if (event.allDay) {
@@ -17,7 +17,7 @@ const formatTimeRange = (event: CalendarEvent) => {
 //TODO: 이벤트를 길게 늘리거나 줄여서 날짜 변경 기능 추가
 //TODO: 반응형 (모바일 뷰)
 const CustomMonthEvent = ({ event }: EventProps<CalendarEvent>) => {
-  const palette = getColorPalette(event.palette ?? event.color)
+  const palette = getColorPalette(event.color)
   const baseColor = palette?.base ?? '#ffffff'
   const pointColor = palette?.point ?? '#1f1f1f'
 

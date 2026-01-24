@@ -1,8 +1,8 @@
 import moment from 'moment'
 
-export const weekdays = ['일', '월', '화', '수', '목', '금', '토']
+import { WEEK_DAYS } from '@/shared/constants/weekDays'
 
-export const formatWeekday = (date: Date) => weekdays[moment(date).day()]
+export const formatWeekday = (date: Date) => WEEK_DAYS[moment(date).day()]
 
 export const formatDayHeaderLabel = (date: Date) => {
   const dayMoment = moment(date)

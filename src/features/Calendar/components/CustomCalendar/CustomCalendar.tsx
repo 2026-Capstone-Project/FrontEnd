@@ -6,16 +6,18 @@ import { useCallback, useMemo, useState } from 'react'
 import { Calendar, momentLocalizer, type SlotInfo, type View, Views } from 'react-big-calendar'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 
-import CustomToolbar from '@/features/Calendar/components/CalendarToolbar'
-import CustomDayView, { type CalendarEvent } from '@/features/Calendar/components/CustomDayView'
-import CustomMonthEvent from '@/features/Calendar/components/CustomMonthEvent'
-import CustomWeekEvent from '@/features/Calendar/components/CustomWeekEvent'
-import CustomWeekView from '@/features/Calendar/components/CustomWeekView'
+import CustomToolbar from '@/features/Calendar/components/CalendarToolbar/CalendarToolbar'
+import CustomMonthEvent from '@/features/Calendar/components/CustomEvent/CustomMonthEvent'
+import CustomWeekEvent from '@/features/Calendar/components/CustomEvent/CustomWeekEvent'
+import CustomDayView, {
+  type CalendarEvent,
+} from '@/features/Calendar/components/CustomView/CustomDayView'
+import CustomWeekView from '@/features/Calendar/components/CustomView/CustomWeekView'
 import { useCalendarEvents } from '@/features/Calendar/hooks/useCalendarEvents'
 import { getDayPropStyle } from '@/features/Calendar/utils/helpers/calendarPageHelpers'
 import { getViewConfig } from '@/features/Calendar/utils/viewConfig'
 
-import * as S from './Calendar.style'
+import * as S from './CustomCalendar.style'
 
 moment.locale('ko')
 const localizer = momentLocalizer(moment)
@@ -23,7 +25,7 @@ const DragAndDropCalendar = withDragAndDrop<CalendarEvent, object>(Calendar)
 
 //TODO: 디자인이랑 레이아웃 일치시키기
 //TODO: 모달 및 특정 일 상세 조회 컴포넌트 추가
-const CalendarPage = () => {
+const CustomCalendar = () => {
   const [view, setView] = useState<View>(Views.MONTH)
   const [date, setDate] = useState(new Date())
   const { events, addEvent: enqueueEvent, moveEvent, resizeEvent } = useCalendarEvents()
@@ -109,4 +111,4 @@ const CalendarPage = () => {
   )
 }
 
-export default CalendarPage
+export default CustomCalendar

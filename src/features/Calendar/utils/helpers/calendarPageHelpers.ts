@@ -1,7 +1,7 @@
 import moment from 'moment'
 import type { stringOrDate } from 'react-big-calendar'
 
-import type { CalendarEvent } from '../../components/CustomDayView'
+import type { CalendarEvent } from '../../components/CustomView/CustomDayView'
 import {
   DEFAULT_ALL_DAY_TITLE,
   DEFAULT_EVENT_DURATION_HOURS,

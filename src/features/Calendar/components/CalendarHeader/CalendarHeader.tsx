@@ -1,7 +1,8 @@
 import { type HeaderProps } from 'react-big-calendar'
 
-import * as S from '../../../pages/Calendar/Calendar.style'
-import { formatDayHeaderLabel, formatWeekday } from '../utils/formatters'
+import { formatDayHeaderLabel, formatWeekday } from '@/features/Calendar/utils/formatters'
+
+import * as S from './CalendarHeader.style'
 
 const CustomHeader = ({ date }: HeaderProps) => {
   const dayName = formatWeekday(date)

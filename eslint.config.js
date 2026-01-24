@@ -1,5 +1,6 @@
 import js from '@eslint/js'
 import globals from 'globals'
+import pluginReact from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import simpleImportSort from 'eslint-plugin-simple-import-sort'
@@ -12,6 +13,7 @@ export default defineConfig([
     ignores: ['node_modules', 'dist', 'build'],
     plugins: {
       'simple-import-sort': simpleImportSort,
+      react: pluginReact,
     },
     extends: [
       js.configs.recommended,
@@ -27,6 +29,7 @@ export default defineConfig([
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
       'sort-imports': 'off',
+      'react/self-closing-comp': 'error',
     },
   },
 ])
