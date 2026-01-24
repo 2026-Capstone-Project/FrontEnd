@@ -17,13 +17,13 @@ import { useCalendarEvents } from '@/features/Calendar/hooks/useCalendarEvents'
 import { getDayPropStyle } from '@/features/Calendar/utils/helpers/calendarPageHelpers'
 import { getViewConfig } from '@/features/Calendar/utils/viewConfig'
 
+import { CustomViewButton } from '../CustomViewButton/CustomViewButton'
 import * as S from './CustomCalendar.style'
 
 moment.locale('ko')
 const localizer = momentLocalizer(moment)
 const DragAndDropCalendar = withDragAndDrop<CalendarEvent, object>(Calendar)
 
-//TODO: 디자인이랑 레이아웃 일치시키기
 //TODO: 모달 및 특정 일 상세 조회 컴포넌트 추가
 const CustomCalendar = () => {
   const [view, setView] = useState<View>(Views.MONTH)
@@ -80,34 +80,37 @@ const CustomCalendar = () => {
   )
 
   return (
-    <S.CalendarWrapper view={view}>
-      <DragAndDropCalendar
-        localizer={localizer}
-        culture="ko"
-        views={{
-          month: true,
-          week: CustomWeekView,
-          day: CustomDayView,
-        }}
-        defaultView={Views.MONTH}
-        view={view}
-        date={date}
-        events={events}
-        onView={onView}
-        onNavigate={onNavigate}
-        onEventDrop={moveEvent}
-        onEventResize={resizeEvent}
-        resizable
-        draggableAccessor={() => true}
-        selectable
-        onSelectSlot={handleSelectSlot}
-        dayPropGetter={dayPropGetter}
-        components={mergedComponents}
-        formats={view === Views.DAY ? {} : viewConfig.formats}
-        {...(viewConfig.allDayAccessor ? { allDayAccessor: viewConfig.allDayAccessor } : {})}
-        style={{ height: '100%', width: '100%' }}
-      />
-    </S.CalendarWrapper>
+    <>
+      <CustomViewButton view={view} onView={onView} className="mobile-custom-view-button" />
+      <S.CalendarWrapper view={view}>
+        <DragAndDropCalendar
+          localizer={localizer}
+          culture="ko"
+          views={{
+            month: true,
+            week: CustomWeekView,
+            day: CustomDayView,
+          }}
+          defaultView={Views.MONTH}
+          view={view}
+          date={date}
+          events={events}
+          onView={onView}
+          onNavigate={onNavigate}
+          onEventDrop={moveEvent}
+          onEventResize={resizeEvent}
+          resizable
+          draggableAccessor={() => true}
+          selectable
+          onSelectSlot={handleSelectSlot}
+          dayPropGetter={dayPropGetter}
+          components={mergedComponents}
+          formats={view === Views.DAY ? {} : viewConfig.formats}
+          {...(viewConfig.allDayAccessor ? { allDayAccessor: viewConfig.allDayAccessor } : {})}
+          style={{ height: '100%', width: '100%' }}
+        />
+      </S.CalendarWrapper>
+    </>
   )
 }
 

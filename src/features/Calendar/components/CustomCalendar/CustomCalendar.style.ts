@@ -33,7 +33,6 @@ export const CalendarWrapper = styled.div<{ view: string }>`
   max-width: 900px;
   height: ${(props) => (props.view === 'week' ? 'auto' : 'fit-content')};
   min-height: 600px;
-  margin: 0 auto;
   padding: 20px 0 0 0;
   background-color: white;
   border: 1px solid #efefef;

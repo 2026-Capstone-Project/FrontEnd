@@ -1,20 +1,16 @@
 /** @jsxImportSource @emotion/react */
-import { css } from '@emotion/react'
-
 import CustomCalendar from '@/features/Calendar/components/CustomCalendar/CustomCalendar'
+import EventsCard from '@/features/Calendar/components/EventsCard/EventsCard'
+
+import * as S from './CalendarPage.styles'
 
 const CalendarPage = () => {
   return (
-    <div css={PageLayout}>
+    <S.PageWrapper>
       <CustomCalendar />
-    </div>
+      <EventsCard />
+    </S.PageWrapper>
   )
 }
 
 export default CalendarPage
-
-const PageLayout = css`
-  width: 100%;
-  height: 100%;
-  display: flex;
-`

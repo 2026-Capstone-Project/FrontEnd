@@ -3,6 +3,7 @@ import { type ToolbarProps } from 'react-big-calendar'
 
 import Arrow from '@/shared/assets/icons/chevron.svg?react'
 
+import { CustomViewButton } from '../CustomViewButton/CustomViewButton'
 import * as S from './CalendarToolbar.style'
 
 const CustomToolbar = <TEvent extends object>({
@@ -19,17 +20,7 @@ const CustomToolbar = <TEvent extends object>({
         : moment(date).format('YYYY년 M월')
   return (
     <S.ToolbarWrapper>
-      <div className="view-buttons">
-        <button className={view === 'month' ? 'active' : ''} onClick={() => onView('month')}>
-          월
-        </button>
-        <button className={view === 'week' ? 'active' : ''} onClick={() => onView('week')}>
-          주
-        </button>
-        <button className={view === 'day' ? 'active' : ''} onClick={() => onView('day')}>
-          일
-        </button>
-      </div>
+      <CustomViewButton view={view} onView={onView} className="view-buttons" />
       <div className="date-label">{formattedLabel}</div>
       <div className="nav-buttons">
         <button onClick={() => onNavigate('PREV')}>
