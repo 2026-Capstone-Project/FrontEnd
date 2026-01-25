@@ -3,14 +3,38 @@ import styled from '@emotion/styled'
 import { media } from '@/shared/styles/media'
 import { theme } from '@/shared/styles/theme'
 
+export const CardOverlay = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+
+  ${media.down(theme.breakPoints.desktop)} {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  }
+`
+
+export const CardWrapper = styled.div`
+  display: flex;
+`
+
 export const Card = styled.div`
   display: flex;
   flex-direction: column;
   border-radius: 20px;
   box-shadow: 0px 0px 10px 0 rgba(0, 0, 0, 0.1);
-  width: 470px;
+  width: 400px;
+  height: fit-content;
+  background-color: #ffffff;
   ${media.down(theme.breakPoints.desktop)} {
-    display: none;
+    position: absolute;
+    z-index: 1000;
+    align-self: center;
+    left: calc(50% - 200px);
   }
 `
 export const EventCards = styled.div`
@@ -27,7 +51,8 @@ export const EventCards = styled.div`
 `
 export const Header = styled.div`
   width: 100%;
-  border-top: 20px;
+  border-top-right-radius: 20px;
+  border-top-left-radius: 20px;
   padding: 20px 32px;
   font-size: 18px;
   display: flex;
@@ -44,6 +69,7 @@ export const Dot = styled.div`
   background-color: ${theme.colors.red};
   border-radius: 50%;
   display: inline-block;
+  cursor: pointer;
 `
 export const EmptyEvent = styled.div`
   font-size: 18px;

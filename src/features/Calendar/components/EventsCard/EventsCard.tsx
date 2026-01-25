@@ -1,7 +1,13 @@
 import { mockCalendarEvents } from '../../mocks/calendarEvents'
 import EventDetailCard from '../EventDetailCard/EventDetailCard'
 import * as S from './EventsCard.style'
-const EventsCard = ({ selectedDate }: { selectedDate: Date }) => {
+const EventsCard = ({
+  selectedDate,
+  setCardOpen,
+}: {
+  selectedDate: Date
+  setCardOpen: React.Dispatch<React.SetStateAction<boolean>>
+}) => {
   const startOfSelectedDay = new Date(selectedDate)
   startOfSelectedDay.setHours(0, 0, 0, 0)
   const endOfSelectedDay = new Date(startOfSelectedDay)
@@ -13,26 +19,34 @@ const EventsCard = ({ selectedDate }: { selectedDate: Date }) => {
     return eventStart <= endOfSelectedDay && eventEnd >= startOfSelectedDay
   })
   return (
-    <S.Card>
-      <S.Header>
-        {selectedDate.toLocaleDateString('ko-KR', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-          weekday: 'long',
-        })}
-        <S.Dot />
-      </S.Header>
-      {data.length > 0 ? (
-        <S.EventCards>
-          {data.map((event) => (
-            <EventDetailCard key={event.id} event={event} />
-          ))}
-        </S.EventCards>
-      ) : (
-        <S.EmptyEvent>예정된 일정 없음</S.EmptyEvent>
-      )}
-    </S.Card>
+    <S.CardOverlay onClick={() => setCardOpen(false)}>
+      <S.CardWrapper
+        onClick={(event) => {
+          event.stopPropagation()
+        }}
+      >
+        <S.Card>
+          <S.Header>
+            {selectedDate.toLocaleDateString('ko-KR', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              weekday: 'long',
+            })}
+            <S.Dot onClick={() => setCardOpen(false)} />
+          </S.Header>
+          {data.length > 0 ? (
+            <S.EventCards>
+              {data.map((event) => (
+                <EventDetailCard key={event.id} event={event} />
+              ))}
+            </S.EventCards>
+          ) : (
+            <S.EmptyEvent>예정된 일정 없음</S.EmptyEvent>
+          )}
+        </S.Card>
+      </S.CardWrapper>
+    </S.CardOverlay>
   )
 }
 

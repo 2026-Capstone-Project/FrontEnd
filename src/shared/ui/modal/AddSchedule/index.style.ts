@@ -19,6 +19,12 @@ export const Button = styled.button<{ isActive?: boolean }>`
   font-weight: 400;
   cursor: pointer;
 `
+export const FormContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 0 20px;
+`
 export const Textarea = styled.textarea`
   width: 382px;
   height: 80px;
@@ -72,10 +78,12 @@ export const CalendarPopover = styled.div`
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
-  width: min(360px, 100%);
-  background: ${theme.colors.white};
+  width: min(330px, 100%);
+  background: rgba(245, 245, 245, 0.5);
+  backdrop-filter: blur(16px);
   border-radius: 16px;
   padding: 14px;
+  height: fit-content;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
   z-index: 10;
 `
@@ -89,4 +97,25 @@ export const CalendarPlaceholder = styled.div`
   font-size: 14px;
   text-align: center;
   padding: 16px;
+`
+export const TitleInput = styled.input`
+  width: 100%;
+  height: 43px;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  background-color: ${theme.colors.inputColor};
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px ${theme.colors.primary2};
+  }
+`
+
+export const Section = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px;
+  gap: 20px;
 `

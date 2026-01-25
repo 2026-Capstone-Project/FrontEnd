@@ -1,12 +1,20 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
-import { type TimePickerRenderProps } from './AddSchedule.types'
+import type { TimePickerRenderProps } from '@/shared/types/event'
+
 import * as S from './CustomTimePicker.style'
 
 const CustomTimePicker = ({ value, onChange }: TimePickerRenderProps) => {
-  // 초기값 분리 (HH:mm -> HH, mm)
   const [hour, setHour] = useState(value?.split(':')[0] || '09')
   const [minute, setMinute] = useState(value?.split(':')[1] || '00')
+
+  useEffect(() => {
+    if (!value) return
+    const [nextHour = '00', nextMinute = '00'] = value.split(':')
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHour(nextHour)
+    setMinute(nextMinute)
+  }, [value])
 
   // 입력값 검증 및 업데이트 (시: 0-23, 분: 0-59)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'hour' | 'minute') => {

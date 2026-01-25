@@ -9,7 +9,7 @@ const Checkbox = ({
   onChange,
   label,
 }: {
-  label: string
+  label?: string
   checked: boolean
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
 }) => {
@@ -28,7 +28,7 @@ const Checkbox = ({
           <Check width={12} height={12} />
         </S.CheckIcon>
       </S.CheckboxContainer>
-      <label htmlFor={id}>{label}</label>
+      {label && <label htmlFor={id}>{label}</label>}
     </S.CheckboxWrapper>
   )
 }

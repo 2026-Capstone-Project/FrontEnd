@@ -43,14 +43,6 @@ export const CalendarWrapper = styled.div<{ view: string }>`
     font-family: 'Pretendard', sans-serif;
   }
 
-  .rbc-date-cell {
-    text-align: start;
-    padding: 12px;
-    .rbc-button-link {
-      font-size: 16px;
-    }
-  }
-
   /* 1. 모든 기본 테두리 제거 및 초기화 */
   .rbc-month-view,
   .rbc-time-view,

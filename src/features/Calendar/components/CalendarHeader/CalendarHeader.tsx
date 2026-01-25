@@ -4,14 +4,18 @@ import { formatDayHeaderLabel, formatWeekday } from '@/features/Calendar/utils/f
 
 import * as S from './CalendarHeader.style'
 
-const CustomHeader = ({ date }: HeaderProps) => {
+type CalendarHeaderProps = HeaderProps & {
+  onAdd?: (date: Date) => void
+}
+
+const CustomHeader = ({ date, onAdd }: CalendarHeaderProps) => {
   const dayName = formatWeekday(date)
   const dayNumber = formatDayHeaderLabel(date)
 
   return (
     <S.HeaderContainer>
       <span className="day-name">{dayName}</span>
-      <div className="day-number-wrapper" onClick={() => {}}>
+      <div className="day-number-wrapper" onClick={() => onAdd?.(date)}>
         <span className="day-number">{dayNumber}</span>
       </div>
     </S.HeaderContainer>

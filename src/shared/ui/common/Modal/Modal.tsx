@@ -5,11 +5,13 @@ import { createPortal } from 'react-dom'
 
 type TModalprops = {
   children: ReactNode
+  onOverlayClick?: () => void
 }
 
-export default function Modal({ children }: TModalprops) {
+export default function Modal({ children, onOverlayClick }: TModalprops) {
   return createPortal(
     <div
+      onClick={onOverlayClick}
       css={{
         position: 'fixed',
         top: 0,
@@ -22,7 +24,13 @@ export default function Modal({ children }: TModalprops) {
         zIndex: 1000,
       }}
     >
-      <div>{children}</div>
+      <div
+        onClick={(event) => {
+          event.stopPropagation()
+        }}
+      >
+        {children}
+      </div>
     </div>,
     document.getElementById('modal-root')!,
   )

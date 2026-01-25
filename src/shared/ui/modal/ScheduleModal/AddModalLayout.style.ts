@@ -1,22 +1,51 @@
 import styled from '@emotion/styled'
 
+import { media } from '@/shared/styles/media'
 import { theme } from '@/shared/styles/theme'
+
+export const ModalOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.45);
+  z-index: 2000;
+  padding: 16px;
+`
+
+export const ModalInner = styled.div`
+  width: 100%;
+  max-width: 100%;
+`
+
 export const ModalWrapper = styled.div`
   width: 100%;
-  max-width: 540px;
+  max-width: 90vw;
+  width: 420px;
+  height: fit-content;
+  max-height: 80vh;
+  overflow: hidden;
   background-color: ${theme.colors.white};
+  background: ${theme.colors.white};
   border-radius: 20px;
   box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);
   overflow: visible;
-  padding: 30px 24px 24px 24px;
   gap: 26px;
   display: flex;
   flex-direction: column;
+  ${media.down(theme.breakPoints.desktop)} {
+    position: absolute;
+    align-self: center;
+    left: calc(50% - 210px);
+    z-index: 10000;
+  }
 `
 export const ModalHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 30px 24px 0px 24px;
 `
 export const ModalTitle = styled.h2`
   font-size: 20px;
@@ -26,10 +55,12 @@ export const ModalTitle = styled.h2`
 export const ModalContent = styled.div`
   display: flex;
   flex-direction: column;
+  overflow-y: scroll;
 `
 export const ModalFooter = styled.div`
   display: flex;
   justify-content: flex-end;
+  padding: 0px 24px 24px 24px;
 `
 export const Button = styled.button`
   background-color: ${theme.colors.primary2};

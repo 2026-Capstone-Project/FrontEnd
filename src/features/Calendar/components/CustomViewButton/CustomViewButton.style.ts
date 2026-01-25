@@ -4,6 +4,8 @@ export const ButtonWrapper = styled.div`
   padding: 4px;
   border-radius: 12px;
   display: flex;
+  width: fit-content;
+  align-self: center;
   box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1);
   button {
     border: none;
