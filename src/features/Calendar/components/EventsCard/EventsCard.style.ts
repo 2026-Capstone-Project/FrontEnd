@@ -9,6 +9,7 @@ export const CardOverlay = styled.div`
   justify-content: center;
   align-items: center;
   position: relative;
+  height: fit-content;
 
   ${media.down(theme.breakPoints.desktop)} {
     position: fixed;
