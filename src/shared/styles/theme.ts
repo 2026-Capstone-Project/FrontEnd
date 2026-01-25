@@ -4,7 +4,9 @@ export const colors = {
   sub: '#E9F4F7', // --Sub-Color
 
   textPrimary: '#025A74', // --Text-Color-1
-
+  textColor2: '#505050', // --Text-Color-2
+  textColor3: '#757575', // --Text-Color-3
+  inputColor: '#F7F7F7',
   red: '#E94B43', // --Red
 
   white: '#FDFDFD', // 메뉴 탭

@@ -29,8 +29,11 @@ export const Header = styled.div`
   width: 100%;
   border-top: 20px;
   padding: 20px 32px;
+  font-size: 18px;
   display: flex;
+  color: ${theme.colors.textPrimary};
   justify-content: space-between;
+  font-weight: 500;
   align-items: center;
   background: linear-gradient(0deg, #e9f4f7 0%, #e9f4f7 100%), #deecec;
 `
@@ -41,4 +44,10 @@ export const Dot = styled.div`
   background-color: ${theme.colors.red};
   border-radius: 50%;
   display: inline-block;
+`
+export const EmptyEvent = styled.div`
+  font-size: 18px;
+  color: ${theme.colors.primary2};
+  font-weight: 500;
+  margin: 24px;
 `

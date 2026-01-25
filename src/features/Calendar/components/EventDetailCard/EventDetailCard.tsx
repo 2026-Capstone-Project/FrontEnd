@@ -1,11 +1,21 @@
+import type { CalendarEvent } from '../CustomView/CustomDayView'
 import * as S from './EventDetailCard.style'
-const EventCard = () => {
+
+const EventCard = ({ event }: { event: CalendarEvent }) => {
+  const time = event.allDay
+    ? '종일'
+    : new Date(event.start).toLocaleTimeString('ko-KR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      })
+
   return (
     <S.EventWrapper>
-      <S.Time>14:00</S.Time>
+      <S.Time>{time}</S.Time>
       <S.TextWrapper>
-        <S.Title>졸프회의</S.Title>
-        <S.Content>회의 대비 발표 자료 준비</S.Content>
+        <S.Title>{event.title}</S.Title>
+        <S.Content>{event.memo ?? '-'}</S.Content>
       </S.TextWrapper>
     </S.EventWrapper>
   )

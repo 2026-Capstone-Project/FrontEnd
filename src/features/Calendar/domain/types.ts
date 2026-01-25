@@ -10,4 +10,5 @@ export interface CalendarEvent {
   allDay?: boolean
   color: EventColorType
   location?: string
+  memo?: string
 }

@@ -11,7 +11,7 @@ const CustomHeader = ({ date }: HeaderProps) => {
   return (
     <S.HeaderContainer>
       <span className="day-name">{dayName}</span>
-      <div className="day-number-wrapper">
+      <div className="day-number-wrapper" onClick={() => {}}>
         <span className="day-number">{dayNumber}</span>
       </div>
     </S.HeaderContainer>

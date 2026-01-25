@@ -9,6 +9,8 @@ export const EventWrapper = styled.div`
 `
 export const Time = styled.div`
   color: ${theme.colors.primary2};
+  white-space: nowrap;
+  min-width: 46px;
   font-size: 18px;
   font-weight: 500;
   ${media.down(theme.breakPoints.desktop)} {
@@ -28,6 +30,7 @@ export const Title = styled.div`
 export const Content = styled.div`
   font-size: 16px;
   color: #5d5d5d;
+  word-break: keep-all;
   font-weight: 500;
   ${media.down(theme.breakPoints.desktop)} {
     font-size: 14px;

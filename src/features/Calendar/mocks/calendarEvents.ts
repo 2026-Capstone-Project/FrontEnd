@@ -9,6 +9,7 @@ export const mockCalendarEvents: CalendarEvent[] = [
     color: 'sky',
     location: '1층 스카이룸',
     allDay: true,
+    memo: '회의 준비물 챙기기',
   },
   {
     id: 'mint-lunch',
@@ -25,6 +26,7 @@ export const mockCalendarEvents: CalendarEvent[] = [
     end: '2026-01-24T16:00:00',
     color: 'pink',
     location: '3층 대회의실',
+    memo: '새 프로젝트 아이디어 브레인스토밍',
   },
   {
     id: 'violet-review',
@@ -42,6 +44,7 @@ export const mockCalendarEvents: CalendarEvent[] = [
     color: 'yellow',
     location: '2층 미팅룸',
     allDay: true,
+    memo: '지난 분기 성과 및 개선점 논의',
   },
   {
     id: 'gray-offsite',
@@ -51,6 +54,7 @@ export const mockCalendarEvents: CalendarEvent[] = [
     color: 'gray',
     location: '외부 미팅',
     allDay: true,
+    memo: '고객사 미팅 준비물 챙기기',
   },
   {
     id: 'sky-wrapup',
