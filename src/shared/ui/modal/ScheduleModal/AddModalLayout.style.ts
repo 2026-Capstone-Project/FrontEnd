@@ -4,14 +4,19 @@ import { media } from '@/shared/styles/media'
 import { theme } from '@/shared/styles/theme'
 
 export const ModalOverlay = styled.div`
-  position: fixed;
-  inset: 0;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.45);
-  z-index: 2000;
-  padding: 16px;
+  position: relative;
+  height: fit-content;
+
+  ${media.down(theme.breakPoints.desktop)} {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  }
 `
 
 export const ModalInner = styled.div`
