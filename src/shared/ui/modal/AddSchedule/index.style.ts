@@ -74,10 +74,8 @@ export const DateFieldButton = styled.button`
   align-items: center;
   cursor: pointer;
 `
-export const CalendarPopover = styled.div`
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
+export const CalendarPortal = styled.div`
+  position: fixed;
   width: min(330px, 100%);
   background: rgba(245, 245, 245, 0.5);
   backdrop-filter: blur(16px);
@@ -85,7 +83,7 @@ export const CalendarPopover = styled.div`
   padding: 14px;
   height: fit-content;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
-  z-index: 10;
+  z-index: 3000;
 `
 export const CalendarPlaceholder = styled.div`
   border: 1px dashed ${theme.colors.lightGray};
