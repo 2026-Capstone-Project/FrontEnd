@@ -54,6 +54,7 @@ export const CalendarWrapper = styled.div<{ view: string }>`
   .rbc-label {
     padding: 0;
   }
+
   .rbc-row-bg {
     right: 0;
   }
@@ -68,13 +69,35 @@ export const CalendarWrapper = styled.div<{ view: string }>`
   /* 4. 오늘 날짜 하이라이트 */
   .rbc-today,
   .rbc-current {
-    background-color: transparent !important;
+    background-color: transparent;
     .day-number {
       background-color: ${theme.colors.red};
       color: white !important;
     }
     .day-name {
       color: ${(props) => (props.view === 'month' ? theme.colors.red : '')} !important;
+    }
+  }
+
+  .rbc-date-header {
+    .day-number {
+      transition:
+        background-color 0.2s,
+        color 0.2s;
+    }
+    &.rbc-active .day-number,
+    .rbc-active .day-number {
+      background-color: ${theme.colors.primary2};
+      color: ${theme.colors.white};
+    }
+  }
+
+  .rbc-date-cell {
+    &.rbc-selected .day-number,
+    &:focus-within .day-number {
+      background-color: ${theme.colors.primary2};
+      color: ${theme.colors.white};
+      box-shadow: 0 0 0 2px ${theme.colors.primary2}40;
     }
   }
 
