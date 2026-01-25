@@ -16,6 +16,7 @@ export const ModalOverlay = styled.div`
     inset: 0;
     background-color: rgba(0, 0, 0, 0.1);
     z-index: 1000;
+    height: 100vh;
   }
 `
 
