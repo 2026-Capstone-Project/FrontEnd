@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import CustomCalendar from '@/features/Calendar/components/CustomCalendar/CustomCalendar'
 import { theme } from '@/shared/styles/theme'
@@ -8,6 +8,8 @@ import * as S from './CalendarPage.styles'
 
 const CalendarPage = () => {
   const [isModalMode, setIsModalMode] = useState(false)
+  const cardAreaRef = useRef<HTMLDivElement | null>(null)
+  const [cardPortalElement, setCardPortalElement] = useState<HTMLElement | null>(null)
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined
@@ -20,10 +22,17 @@ const CalendarPage = () => {
     return () => window.removeEventListener('resize', updateMode)
   }, [])
 
+  useEffect(() => {
+    setCardPortalElement(cardAreaRef.current)
+  }, [])
+
   return (
     <S.PageWrapper>
-      <CustomCalendar mode={isModalMode ? 'modal' : 'inline'} />
-      <div id="desktop-card-area" />
+      <CustomCalendar
+        mode={isModalMode ? 'modal' : 'inline'}
+        cardPortalElement={cardPortalElement}
+      />
+      <div ref={cardAreaRef} id="desktop-card-area" />
     </S.PageWrapper>
   )
 }

@@ -43,9 +43,10 @@ export type SelectDateSource = 'date-cell' | 'slot' | 'header' | 'date-header'
 
 type CustomCalendarProps = {
   mode?: 'modal' | 'inline'
+  cardPortalElement?: HTMLElement | null
 }
 
-const CustomCalendar = ({ mode }: CustomCalendarProps) => {
+const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
   const [view, setView] = useState<View>(Views.MONTH)
   const [date, setDate] = useState<Date>(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
@@ -58,10 +59,19 @@ const CustomCalendar = ({ mode }: CustomCalendarProps) => {
     return document.getElementById('modal-root')
   }, [])
 
-  const cardPortalRoot = useMemo(() => {
-    if (typeof document === 'undefined') return null
-    return document.getElementById('desktop-card-area')
-  }, [])
+  const [cardPortalRoot, setCardPortalRoot] = useState<HTMLElement | null>(null)
+  useEffect(() => {
+    if (cardPortalElement) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCardPortalRoot(cardPortalElement)
+      return
+    }
+    if (typeof document === 'undefined') {
+      setCardPortalRoot(null)
+      return
+    }
+    setCardPortalRoot(document.getElementById('desktop-card-area'))
+  }, [cardPortalElement])
   const onView = useCallback((newView: View) => setView(newView), [])
   const onNavigate = useCallback((newDate: Date) => setDate(newDate), [])
 
@@ -70,11 +80,10 @@ const CustomCalendar = ({ mode }: CustomCalendarProps) => {
       // 슬롯 선택/더블클릭 처리: 선택 날짜 설정 후 더블클릭이면 새 일정 추가
       if (slotInfo.action === 'doubleClick') {
         setSelectedDate(null)
+        setModal(true)
         setModalDate(slotInfo.start.toISOString())
-
         enqueueEvent(slotInfo.start, slotInfo.slots.length === 1)
       }
-      setSelectedDate(slotInfo.start)
     },
     [enqueueEvent, setModalDate],
   )
@@ -132,7 +141,7 @@ const CustomCalendar = ({ mode }: CustomCalendarProps) => {
       ...viewEventComponent,
       dateCellWrapper: DateCellWrapper,
       dateHeader: ({ label, date }: { label: string; date: Date }) => (
-        <CalendarHeader label={label} date={date} onClick={() => setDate(date)} />
+        <CalendarHeader label={label} date={date} onClick={() => setSelectedDate(date)} />
       ),
     }),
     [view, viewConfig.components, viewEventComponent, DateCellWrapper],
