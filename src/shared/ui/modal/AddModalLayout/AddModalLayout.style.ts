@@ -65,6 +65,7 @@ export const ModalContent = styled.div`
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
+  scrollbar-gutter: stable both-edges;
 `
 export const ModalFooter = styled.div`
   display: flex;

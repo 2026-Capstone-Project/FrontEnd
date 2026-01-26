@@ -6,6 +6,7 @@ export const EventWrapper = styled.div`
   display: flex;
   gap: 24px;
   padding-left: 16px;
+  align-items: center;
 `
 export const Time = styled.div`
   color: ${theme.colors.primary2};
@@ -40,4 +41,14 @@ export const TextWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
+`
+
+export const DeleteButton = styled.button`
+  margin-left: auto;
+  cursor: pointer;
+  border: none;
+  background-color: transparent;
+  padding: 0;
+  display: flex;
+  align-items: center;
 `

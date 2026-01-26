@@ -9,7 +9,7 @@ import { formatDisplayDate } from '@/shared/utils/date'
 
 import { useAddScheduleForm } from '../../../hooks/useAddScheduleForm'
 import Checkbox from '../../common/Checkbox/Checkbox'
-import AddModalLayout from '../ScheduleModal/AddModalLayout'
+import AddModalLayout from '../AddModalLayout/AddModalLayout'
 import CustomBasisPanel from './components/CustomBasisPanel/CustomBasisPanel'
 import CustomDatePicker from './components/CustomDatePicker/CustomDatePicker'
 import CustomTimePicker from './components/CustomTimePicker/CustomTimePicker'
@@ -24,8 +24,6 @@ type AddScheduleProps = {
   date: string
   mode?: 'modal' | 'inline'
 }
-//TODO: textarea에 메모 라벨 추가
-//TODO: textarea에 위치 버튼 추가
 //TODO: 위치 버튼 누르면 위치 선택 모달 오픈
 //TODO: 제목 입력시 검색해서 최근 타이틀 추천
 
@@ -59,6 +57,7 @@ const AddScheduleModal = ({ onClose, date, mode = 'modal' }: AddScheduleProps) =
   const [isMobileLayout, setIsMobileLayout] = useState(false)
   const startDate = formatDisplayDate(eventStartDate)
   const endDate = formatDisplayDate(eventEndDate)
+
   const handleCalendarButtonClick =
     (field: DatePickerField) => (event: MouseEvent<HTMLButtonElement>) => {
       handleCalendarOpen(field)
@@ -225,7 +224,9 @@ const AddScheduleModal = ({ onClose, date, mode = 'modal' }: AddScheduleProps) =
             </S.TextareaWrapper>
             <S.FieldRow>
               <S.FieldLabel>위치</S.FieldLabel>
-              <S.FieldMap onClick={handleMapButtonClick}>장소 추가</S.FieldMap>
+              <S.FieldMap type="button" onClick={handleMapButtonClick}>
+                장소 추가
+              </S.FieldMap>
               {isSearchPlaceOpen &&
                 searchPortalPosition &&
                 createPortal(

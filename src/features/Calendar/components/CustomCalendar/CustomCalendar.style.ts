@@ -60,6 +60,10 @@ export const CalendarWrapper = styled.div<{ view: string }>`
   box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1);
   border-radius: 16px;
   overflow: hidden;
+
+  ${media.down(theme.breakPoints.tablet)} {
+    min-height: fit-content;
+  }
   .rbc-calendar {
     font-family: 'Pretendard', sans-serif;
   }
@@ -118,7 +122,7 @@ export const CalendarWrapper = styled.div<{ view: string }>`
     &:focus-within .day-number {
       background-color: ${theme.colors.primary2};
       color: ${theme.colors.white};
-      box-shadow: 0 0 0 2px ${theme.colors.primary2}40;
+      box-shadow: 0 0 0 2px ${theme.colors.primary2};
     }
   }
 

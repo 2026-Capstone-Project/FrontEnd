@@ -1,5 +1,12 @@
-import styled from '@emotion/styled'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  type MouseEvent as ReactMouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import { createPortal } from 'react-dom'
 
 import { theme } from '@/shared/styles/theme'
 import type { RepeatConfigSchema } from '@/shared/types/event'
@@ -37,7 +44,13 @@ const TerminationPanel = ({ config, updateConfig, minDate }: Props) => {
     return clone
   }, [minDate])
   const [calendarOpen, setCalendarOpen] = useState(false)
+  const [calendarAnchor, setCalendarAnchor] = useState<DOMRect | null>(null)
+  const [isMobileLayout, setIsMobileLayout] = useState(false)
   const calendarRef = useRef<HTMLDivElement | null>(null)
+  const portalRoot = useMemo(() => {
+    if (typeof document === 'undefined') return null
+    return document.getElementById('modal-root')
+  }, [])
 
   const closeCalendar = useCallback(() => setCalendarOpen(false), [])
 
@@ -52,14 +65,49 @@ const TerminationPanel = ({ config, updateConfig, minDate }: Props) => {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [calendarOpen, closeCalendar])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined
+    const mediaQuery = window.matchMedia(`(max-width: ${theme.breakPoints.tablet})`)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsMobileLayout(mediaQuery.matches)
+    const handler = (event: MediaQueryListEvent) => {
+      setIsMobileLayout(event.matches)
+    }
+    mediaQuery.addEventListener('change', handler)
+    return () => mediaQuery.removeEventListener('change', handler)
+  }, [])
+
+  useEffect(() => {
+    if (!calendarOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCalendarAnchor(null)
+    }
+  }, [calendarOpen])
+
   const handleDateSelect = (date: Date) => {
     if (normalizedMinDate && date < normalizedMinDate) return
     updateConfig({ customEndDate: date.toISOString().split('T')[0] })
     closeCalendar()
   }
 
+  const handleCalendarTriggerClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
+    setCalendarAnchor(event.currentTarget.getBoundingClientRect())
+    setCalendarOpen((prev) => !prev)
+  }
+
+  const calendarPortalStyle = useMemo(() => {
+    if (!calendarAnchor || isMobileLayout) return undefined
+    if (typeof window === 'undefined') return undefined
+    const scrollY = window.scrollY || 0
+    const scrollX = window.scrollX || 0
+    return {
+      bottom: scrollY + 290,
+      left: calendarAnchor.left + scrollX,
+    }
+  }, [calendarAnchor, isMobileLayout])
+
   return (
-    <RepeatDetail>
+    <S.RepeatDetail>
       <S.Label>종료</S.Label>
       <S.TerminationRow>
         <Checkbox
@@ -67,18 +115,21 @@ const TerminationPanel = ({ config, updateConfig, minDate }: Props) => {
           onChange={() => updateConfig({ customEndType: 'until' })}
         />
         <S.CalendarWrapper>
-          <S.CalendarTrigger type="button" onClick={() => setCalendarOpen((prev) => !prev)}>
+          <S.CalendarTrigger type="button" onClick={handleCalendarTriggerClick}>
             {formatDateLabel(config.customEndDate)}
           </S.CalendarTrigger>
-          {calendarOpen && (
-            <S.CalendarPopover ref={calendarRef}>
-              <CustomDatePicker
-                field="end"
-                selectedDate={baseDate}
-                onSelectDate={handleDateSelect}
-              />
-            </S.CalendarPopover>
-          )}
+          {calendarOpen &&
+            portalRoot &&
+            createPortal(
+              <S.CalendarPopover ref={calendarRef} style={calendarPortalStyle}>
+                <CustomDatePicker
+                  field="end"
+                  selectedDate={baseDate}
+                  onSelectDate={handleDateSelect}
+                />
+              </S.CalendarPopover>,
+              portalRoot,
+            )}
         </S.CalendarWrapper>
         까지 반복
       </S.TerminationRow>
@@ -99,18 +150,8 @@ const TerminationPanel = ({ config, updateConfig, minDate }: Props) => {
         />
         번 반복
       </S.TerminationRow>
-    </RepeatDetail>
+    </S.RepeatDetail>
   )
 }
 
 export default TerminationPanel
-
-export const RepeatDetail = styled.div`
-  border: 1px solid ${theme.colors.lightGray};
-  padding: 10px 20px;
-  background: ${theme.colors.inputColor};
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  position: relative;
-`

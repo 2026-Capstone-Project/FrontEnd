@@ -1,9 +1,10 @@
 import styled from '@emotion/styled'
 
+import { media } from '@/shared/styles/media'
 import { theme } from '@/shared/styles/theme'
 export const Label = styled.span`
-  font-size: 12px;
-  color: ${theme.colors.textColor3};
+  font-size: 14px;
+  color: ${theme.colors.textColor2};
 `
 export const InlineInput = styled.input`
   border: 1px solid ${theme.colors.lightGray};
@@ -14,6 +15,9 @@ export const InlineInput = styled.input`
   font-size: 16px;
   color: ${theme.colors.textColor2};
   text-align: end;
+  ${media.down(theme.breakPoints.mobile)} {
+    font-size: 14px;
+  }
 `
 export const MultiSelectGrid = styled.div`
   display: grid;
@@ -34,6 +38,7 @@ export const DayChip = styled.button<{ isActive?: boolean }>`
   width: 32px;
   height: 32px;
   font-size: 14px;
+  min-width: 32px;
   cursor: pointer;
 `
 
@@ -44,6 +49,9 @@ export const MonthChip = styled.button<{ isActive?: boolean }>`
   padding: 8px 10px;
   font-size: 14px;
   cursor: pointer;
+  ${media.down(theme.breakPoints.mobile)} {
+    font-size: 12px;
+  }
 `
 
 export const RepeatRow = styled.div`
@@ -73,9 +81,14 @@ export const NumberRepeat = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+  ${media.down(theme.breakPoints.mobile)} {
+    font-size: 14px;
+  }
 `
 export const DayGrid = styled.div`
   display: flex;
-  padding: 0 40px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
   gap: 6px;
 `

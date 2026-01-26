@@ -12,19 +12,22 @@ type Props = {
 
 const RepeatTypeGroup = ({ repeatType, customBasis, onToggleType }: Props) => (
   <S.RepeatRow>
-    <Rotate />
-    {MAIN_OPTIONS.map((option) => (
-      <S.RepeatButton
-        key={option.type}
-        isActive={
-          repeatType === option.type || (repeatType === 'custom' && customBasis === option.type)
-        }
-        onClick={() => onToggleType(option.type)}
-        type="button"
-      >
-        {option.label}
-      </S.RepeatButton>
-    ))}
+    <S.Label>반복</S.Label>
+    <Rotate className="icon" />
+    <S.ButtonsWrapper>
+      {MAIN_OPTIONS.map((option) => (
+        <S.RepeatButton
+          key={option.type}
+          isActive={
+            repeatType === option.type || (repeatType === 'custom' && customBasis === option.type)
+          }
+          onClick={() => onToggleType(option.type)}
+          type="button"
+        >
+          {option.label}
+        </S.RepeatButton>
+      ))}
+    </S.ButtonsWrapper>
   </S.RepeatRow>
 )
 

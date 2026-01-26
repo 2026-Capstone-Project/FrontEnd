@@ -49,7 +49,16 @@ type CustomCalendarProps = {
 const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
   const [view, setView] = useState<View>(Views.MONTH)
   const [date, setDate] = useState<Date>(new Date())
+
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  useEffect(() => {
+    if (mode === 'inline') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedDate((prev) => prev ?? new Date())
+      return
+    }
+    setSelectedDate(null)
+  }, [mode])
   const [modal, setModal] = useState(false)
   const { events, addEvent: enqueueEvent, moveEvent, resizeEvent } = useCalendarEvents()
   const isInlineMode = mode === 'inline'
@@ -83,6 +92,8 @@ const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
         setModal(true)
         setModalDate(slotInfo.start.toISOString())
         enqueueEvent(slotInfo.start, slotInfo.slots.length === 1)
+      } else {
+        setSelectedDate(slotInfo.start)
       }
     },
     [enqueueEvent, setModalDate],
@@ -96,8 +107,8 @@ const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
   )
   /** 선택된 날짜에 배경 강조 스타일을 적용하도록 props를 반환합니다. */
   const dayPropGetter = useCallback(
-    (calendarDate: Date) => getDayPropStyle(calendarDate, date),
-    [date],
+    (calendarDate: Date) => getDayPropStyle(calendarDate, selectedDate),
+    [selectedDate],
   )
 
   const handleSelectDate = useCallback((next: Date) => setDate(next), [])
@@ -161,7 +172,7 @@ const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
           className="add-button"
           onClick={() => {
             setModalDate(date ? date.toISOString() : new Date().toISOString())
-            // setModal(true)
+            setModal(true)
           }}
         >
           <Plus height={20} width={20} color={theme.colors.primary} />
@@ -185,9 +196,7 @@ const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
           onSelectEvent={handleSelectEvent}
           onEventDrop={moveEvent}
           onEventResize={resizeEvent}
-          resizable
           draggableAccessor={() => true}
-          selectable
           onSelectSlot={handleSelectSlot}
           dayPropGetter={dayPropGetter}
           components={mergedComponents}
@@ -195,6 +204,9 @@ const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
           {...(viewConfig.allDayAccessor ? { allDayAccessor: viewConfig.allDayAccessor } : {})}
           drilldownView={null}
           style={{ height: '100%', width: '100%' }}
+          selectable
+          popup
+          resizable
         />
       </S.CalendarWrapper>
       {modal &&

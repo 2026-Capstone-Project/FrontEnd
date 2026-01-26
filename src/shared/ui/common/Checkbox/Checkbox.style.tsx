@@ -1,5 +1,6 @@
 import styled from '@emotion/styled'
 
+import { media } from '@/shared/styles/media'
 import { theme } from '@/shared/styles/theme'
 
 export const Checkbox = styled.input<{ isChecked?: boolean }>`
@@ -17,6 +18,10 @@ export const CheckboxContainer = styled.div`
   position: relative;
   width: 18px;
   height: 18px;
+  ${media.down(theme.breakPoints.mobile)} {
+    width: 16px;
+    height: 16px;
+  }
 `
 
 export const CheckIcon = styled.div<{ isVisible?: boolean }>`
@@ -36,4 +41,7 @@ export const CheckboxWrapper = styled.div`
   gap: 8px;
   font-size: 16px;
   font-weight: 400;
+  ${media.down(theme.breakPoints.mobile)} {
+    font-size: 14px;
+  }
 `

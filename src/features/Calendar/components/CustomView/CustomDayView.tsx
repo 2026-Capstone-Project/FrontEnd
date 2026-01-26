@@ -13,7 +13,7 @@ import {
   eventCoversDate,
   isDateOnlyString,
 } from '../../utils/helpers/dayViewHelpers'
-import * as S from './CustomDayView.style'
+import * as S from './dayView'
 
 interface CustomDayViewProps {
   events?: CalendarEvent[]
