@@ -1,42 +1,29 @@
 /** @jsxImportSource @emotion/react */
 import { useEffect, useState } from 'react'
 
-import CustomCalendar, {
-  type SelectDateSource,
-} from '@/features/Calendar/components/CustomCalendar/CustomCalendar'
-import EventsCard from '@/features/Calendar/components/EventsCard/EventsCard'
+import CustomCalendar from '@/features/Calendar/components/CustomCalendar/CustomCalendar'
+import { theme } from '@/shared/styles/theme'
 
 import * as S from './CalendarPage.styles'
 
 const CalendarPage = () => {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const [modal, setModal] = useState<boolean>(false)
-  const [cardOpen, setCardOpen] = useState<boolean>(false)
-  const handleSelectDate = (date: Date | null, meta?: { source?: SelectDateSource }) => {
-    setSelectedDate(date)
-    if (!date) {
-      setCardOpen(false)
-      return
-    }
-    setCardOpen(meta?.source === 'date-header')
-  }
+  const [isModalMode, setIsModalMode] = useState(false)
+
   useEffect(() => {
-    if (!selectedDate) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCardOpen(false)
+    if (typeof window === 'undefined') return undefined
+    const breakpoint = parseInt(theme.breakPoints.desktop, 10)
+    const updateMode = () => {
+      setIsModalMode(window.innerWidth < breakpoint)
     }
-  }, [selectedDate])
+    updateMode()
+    window.addEventListener('resize', updateMode)
+    return () => window.removeEventListener('resize', updateMode)
+  }, [])
+
   return (
     <S.PageWrapper>
-      <CustomCalendar
-        selectedDate={selectedDate}
-        onSelectDate={handleSelectDate}
-        modal={modal}
-        setModal={setModal}
-      />
-      {selectedDate && !modal && cardOpen && (
-        <EventsCard selectedDate={selectedDate} setCardOpen={setCardOpen} />
-      )}
+      <CustomCalendar mode={isModalMode ? 'modal' : 'inline'} />
+      <div id="desktop-card-area" />
     </S.PageWrapper>
   )
 }

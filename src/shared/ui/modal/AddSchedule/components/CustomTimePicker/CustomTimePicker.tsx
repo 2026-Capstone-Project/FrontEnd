@@ -45,6 +45,8 @@ const CustomTimePicker = ({ value, onChange }: TimePickerRenderProps) => {
       <S.TimeInputContainer>
         <S.DirectInput
           type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
           value={hour}
           onChange={(e) => handleInputChange(e, 'hour')}
           onBlur={handleBlur}
@@ -53,6 +55,8 @@ const CustomTimePicker = ({ value, onChange }: TimePickerRenderProps) => {
         <S.TimeDivider>:</S.TimeDivider>
         <S.DirectInput
           type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
           value={minute}
           onChange={(e) => handleInputChange(e, 'minute')}
           onBlur={handleBlur}

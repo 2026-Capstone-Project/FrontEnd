@@ -1,5 +1,8 @@
 import styled from '@emotion/styled'
 
+import { media } from '@/shared/styles/media'
+import { theme } from '@/shared/styles/theme'
+
 export const DayViewContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -16,6 +19,10 @@ export const AllDaySection = styled.div`
   width: 100%;
   column-gap: 84px;
   row-gap: 8px;
+  ${media.down(theme.breakPoints.desktop)} {
+    padding: 40px 0 0 0;
+    grid-template-columns: 1fr;
+  }
 `
 
 export const GridContainer = styled.div`
@@ -24,23 +31,38 @@ export const GridContainer = styled.div`
   column-gap: 40px;
   padding-top: 10px;
   padding: 0 92px;
+  ${media.down(theme.breakPoints.desktop)} {
+    padding: 10px 0;
+    column-gap: 20px;
+    margin-top: 20px;
+  }
 `
 
 export const SlotColumn = styled.div`
   position: relative;
-  min-height: 650px;
+  width: 100%;
 `
 
 export const TimeOverlay = styled.div`
   position: absolute;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: 50px;
+  right: 0;
   pointer-events: none;
+  width: auto;
+  ${media.down(theme.breakPoints.tablet)} {
+    left: 33px;
+  }
 `
 
 export const TimeSlotRow = styled.div`
   display: flex;
   height: 50px;
   position: relative;
+  ${media.down(theme.breakPoints.tablet)} {
+    height: 40px;
+  }
 `
 
 export const TimeLabel = styled.div`
@@ -52,6 +74,10 @@ export const TimeLabel = styled.div`
   display: flex;
   align-items: flex-start;
   line-height: 1;
+  ${media.down(theme.breakPoints.tablet)} {
+    width: 33px;
+    font-size: 10px;
+  }
 `
 
 export const SlotContent = styled.div`
@@ -82,11 +108,11 @@ export const EventBadge = styled.div<{ color?: string }>`
 export const DayEventBadge = styled(EventBadge)`
   position: absolute;
   right: 1px;
+  left: 0;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   display: flex;
-  max-width: 268px;
+  width: 100%;
   padding: 8px;
-  width: 266px;
   align-items: flex-start;
   flex-direction: column;
   justify-content: flex-start;
@@ -131,6 +157,10 @@ export const EventBadgeWrapper = styled.div<{ color?: string }>`
   align-items: center;
   width: 100%;
   display: flex;
+
+  ${media.down(theme.breakPoints.desktop)} {
+    padding: 4px;
+  }
 `
 
 export const EventTitle = styled.div`

@@ -22,13 +22,14 @@ import * as S from './index.style'
 type AddScheduleProps = {
   onClose: () => void
   date: string
+  mode?: 'modal' | 'inline'
 }
 //TODO: textarea에 메모 라벨 추가
 //TODO: textarea에 위치 버튼 추가
 //TODO: 위치 버튼 누르면 위치 선택 모달 오픈
 //TODO: 제목 입력시 검색해서 최근 타이틀 추천
 
-const AddScheduleModal = ({ onClose, date }: AddScheduleProps) => {
+const AddScheduleModal = ({ onClose, date, mode = 'modal' }: AddScheduleProps) => {
   const {
     activeCalendarField,
     calendarRef,
@@ -135,11 +136,18 @@ const AddScheduleModal = ({ onClose, date }: AddScheduleProps) => {
     }
   }, [portalPosition, isMobileLayout])
 
-  const shouldShowModalOverlay = activeCalendarField || isSearchPlaceOpen
+  const isInlineMode = mode === 'inline'
+  const shouldShowModalOverlay = !isInlineMode && (activeCalendarField || isSearchPlaceOpen)
+
+  const handleFormSubmit = handleSubmit((values) => {
+    onSubmit(values)
+    onClose()
+  })
 
   return (
     <>
-      {shouldShowModalOverlay &&
+      {!isInlineMode &&
+        shouldShowModalOverlay &&
         typeof document !== 'undefined' &&
         createPortal(<S.PortalDarkLayer />, document.getElementById('modal-root')!)}
       <AddModalLayout
@@ -148,9 +156,10 @@ const AddScheduleModal = ({ onClose, date }: AddScheduleProps) => {
           <SelectColor value={eventColor} onChange={(value) => setEventColor(value)} />
         }
         onClose={onClose}
+        embedded={isInlineMode}
         submitFormId="add-schedule-form"
       >
-        <form id="add-schedule-form" onSubmit={handleSubmit(onSubmit)}>
+        <form id="add-schedule-form" onSubmit={handleFormSubmit}>
           <S.FormContent>
             <S.TitleInput
               type="text"

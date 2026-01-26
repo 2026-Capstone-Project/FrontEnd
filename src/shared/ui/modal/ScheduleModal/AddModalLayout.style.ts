@@ -90,3 +90,9 @@ export const FooterRight = styled.div`
 export const FooterLeft = styled.div`
   flex: 1;
 `
+
+export const InlineWrapper = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: center;
+`

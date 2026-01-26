@@ -1,13 +1,7 @@
 import { mockCalendarEvents } from '../../mocks/calendarEvents'
 import EventDetailCard from '../EventDetailCard/EventDetailCard'
 import * as S from './EventsCard.style'
-const EventsCard = ({
-  selectedDate,
-  setCardOpen,
-}: {
-  selectedDate: Date
-  setCardOpen: React.Dispatch<React.SetStateAction<boolean>>
-}) => {
+const EventsCard = ({ selectedDate, onClose }: { selectedDate: Date; onClose: () => void }) => {
   const startOfSelectedDay = new Date(selectedDate)
   startOfSelectedDay.setHours(0, 0, 0, 0)
   const endOfSelectedDay = new Date(startOfSelectedDay)
@@ -19,7 +13,7 @@ const EventsCard = ({
     return eventStart <= endOfSelectedDay && eventEnd >= startOfSelectedDay
   })
   return (
-    <S.CardOverlay onClick={() => setCardOpen(false)}>
+    <S.CardOverlay onClick={onClose}>
       <S.CardWrapper
         onClick={(event) => {
           event.stopPropagation()
@@ -33,7 +27,7 @@ const EventsCard = ({
               day: 'numeric',
               weekday: 'long',
             })}
-            <S.Dot onClick={() => setCardOpen(false)} />
+            <S.Dot />
           </S.Header>
           {data.length > 0 ? (
             <S.EventCards>

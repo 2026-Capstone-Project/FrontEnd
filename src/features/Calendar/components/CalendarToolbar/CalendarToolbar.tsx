@@ -13,12 +13,7 @@ const CustomToolbar = <TEvent extends object>({
   onNavigate,
   view,
 }: ToolbarProps<TEvent>) => {
-  const formattedLabel =
-    view === 'day'
-      ? moment(date).format('YYYY년 MM월 DD일')
-      : view === 'week'
-        ? moment(date).format('YYYY년 M월')
-        : moment(date).format('YYYY년 M월')
+  const formattedLabel = moment(date).format('YYYY년 M월')
   return (
     <S.ToolbarWrapper>
       <CustomViewButton view={view} onView={onView} className="view-buttons" />

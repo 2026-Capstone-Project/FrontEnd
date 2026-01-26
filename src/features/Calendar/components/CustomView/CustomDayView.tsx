@@ -34,12 +34,14 @@ const renderTimeSlotRows = (startHour: number) => {
     const isLast = index === TOTAL_SLOTS - 1
 
     return (
-      <S.TimeSlotRow key={hour}>
-        {!isLast ? <S.TimeLabel>{hourLabel}</S.TimeLabel> : <S.PlaceholderLabel />}
+      <>
         {!isLast && (
-          <S.SlotContent className={hour === startHour + TOTAL_SLOTS - 2 ? 'last-slot' : ''} />
+          <S.TimeSlotRow key={hour}>
+            <S.TimeLabel>{hourLabel}</S.TimeLabel>
+            <S.SlotContent className={hour === startHour + TOTAL_SLOTS - 2 ? 'last-slot' : ''} />
+          </S.TimeSlotRow>
         )}
-      </S.TimeSlotRow>
+      </>
     )
   })
 }
@@ -74,7 +76,7 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
   return (
     <S.DayViewContainer>
       <S.DateInfo>
-        <S.DateLabel>{formatWeekday(date)}</S.DateLabel>
+        <S.DateLabel>{formatWeekday(date)}요일</S.DateLabel>
         <S.DateCircle highlight={isToday}>{moment(date).format('D')}</S.DateCircle>
       </S.DateInfo>
 
