@@ -23,6 +23,9 @@ export const ModalOverlay = styled.div`
 export const ModalInner = styled.div`
   width: 100%;
   max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `
 
 export const ModalWrapper = styled.div`
@@ -43,7 +46,7 @@ export const ModalWrapper = styled.div`
   ${media.down(theme.breakPoints.desktop)} {
     position: absolute;
     align-self: center;
-    left: calc(50% - 210px);
+    justify-self: center;
     z-index: 10000;
   }
 `

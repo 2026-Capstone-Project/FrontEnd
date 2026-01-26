@@ -17,7 +17,11 @@ export const CalendarDateHeaderCell = styled.button<{
     align-items: center;
     justify-content: center;
     color: ${({ weekend }) =>
-      weekend === 'sun' ? theme.colors.red : weekend === 'sat' ? theme.colors.primary2 : 'inherit'};
+      weekend === 'sun'
+        ? theme.colors.red
+        : weekend === 'sat'
+          ? theme.colors.primary2
+          : theme.colors.textColor2};
     ${({ isToday }) =>
       isToday
         ? `

@@ -4,6 +4,7 @@ import styled from '@emotion/styled'
 import { dayViewStyles } from '@/features/Calendar/components/CustomView/dayView'
 import { monthViewStyles } from '@/features/Calendar/components/CustomView/monthView'
 import { weekViewStyles } from '@/features/Calendar/components/CustomView/weekView'
+import { media } from '@/shared/styles/media'
 import { theme } from '@/shared/styles/theme'
 
 export const DayContainer = styled.div`
@@ -28,9 +29,29 @@ export const DayContainer = styled.div`
   }
 `
 
+export const MobileButtons = styled.div`
+  display: none;
+  width: 100%;
+  margin-bottom: 12px;
+  ${media.down(theme.breakPoints.desktop)} {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .add-button {
+    position: absolute;
+    right: 0;
+    background-color: #e9f4f7;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+  }
+`
+
 export const CalendarWrapper = styled.div<{ view: string }>`
   width: 100%;
-  max-width: 900px;
   height: ${(props) => (props.view === 'week' ? 'auto' : 'fit-content')};
   min-height: 600px;
   padding: 20px 0 0 0;

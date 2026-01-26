@@ -50,6 +50,10 @@ export type UseAddScheduleFormResult = {
   setEventColor: (value: EventColorType) => void
   handleRepeatType: (value: RepeatType) => void
   updateConfig: (changes: Partial<RepeatConfig>) => void
+  mapRef: React.RefObject<HTMLDivElement | null>
+  isSearchPlaceOpen: boolean
+  openSearchPlace: () => void
+  closeSearchPlace: () => void
 }
 
 const compareDates = (a: Date | null | undefined, b: Date | null | undefined) =>
@@ -123,6 +127,10 @@ export const useAddScheduleForm = ({ date }: UseAddScheduleFormProps): UseAddSch
   const handleCalendarClose = useCallback(() => setActiveCalendarField(null), [])
 
   const calendarRef = useRef<HTMLDivElement | null>(null)
+  const mapRef = useRef<HTMLDivElement | null>(null)
+  const [isSearchPlaceOpen, setIsSearchPlaceOpen] = useState(false)
+  const openSearchPlace = useCallback(() => setIsSearchPlaceOpen(true), [])
+  const closeSearchPlace = useCallback(() => setIsSearchPlaceOpen(false), [])
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (!activeCalendarField) return
@@ -133,6 +141,17 @@ export const useAddScheduleForm = ({ date }: UseAddScheduleFormProps): UseAddSch
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [activeCalendarField, handleCalendarClose])
+
+  useEffect(() => {
+    if (!isSearchPlaceOpen) return undefined
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node
+      if (mapRef.current?.contains(target)) return
+      closeSearchPlace()
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [isSearchPlaceOpen, closeSearchPlace])
 
   const handleDateSelect = (selectedDate: Date) => {
     if (!activeCalendarField) return
@@ -239,5 +258,9 @@ export const useAddScheduleForm = ({ date }: UseAddScheduleFormProps): UseAddSch
     onSubmit,
     setIsAllday,
     setEventColor,
+    mapRef,
+    isSearchPlaceOpen,
+    openSearchPlace,
+    closeSearchPlace,
   }
 }

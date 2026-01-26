@@ -13,7 +13,7 @@ export const PageWrapper = styled.div`
   width: 100%;
   max-width: 1440px;
   position: relative;
-  height: 100vh;
+  height: fit-content;
   padding: 24px 48px;
   .mobile-custom-view-button {
     display: none;

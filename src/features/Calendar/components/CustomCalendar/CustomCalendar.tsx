@@ -1,3 +1,4 @@
+/** @JsxImportSource @emotion/react */
 import 'moment/locale/ko'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 
@@ -12,6 +13,7 @@ import {
   Views,
 } from 'react-big-calendar'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
+import { createPortal } from 'react-dom'
 
 import CustomToolbar from '@/features/Calendar/components/CalendarToolbar/CalendarToolbar'
 import CustomMonthEvent from '@/features/Calendar/components/CustomEvent/CustomMonthEvent'
@@ -23,6 +25,8 @@ import CustomWeekView from '@/features/Calendar/components/CustomView/CustomWeek
 import { useCalendarEvents } from '@/features/Calendar/hooks/useCalendarEvents'
 import { getDayPropStyle } from '@/features/Calendar/utils/helpers/calendarPageHelpers'
 import { getViewConfig } from '@/features/Calendar/utils/viewConfig'
+import Plus from '@/shared/assets/icons/plus.svg?react'
+import { theme } from '@/shared/styles/theme'
 import AddSchedule from '@/shared/ui/modal/AddSchedule'
 
 import CalendarHeader from '../CalendarDateHeader/CalendarDateHeader'
@@ -49,6 +53,10 @@ const CustomCalendar = ({ selectedDate, onSelectDate, modal, setModal }: CustomC
   const { events, addEvent: enqueueEvent, moveEvent, resizeEvent } = useCalendarEvents()
 
   const [modalDate, setModalDate] = useState<string>(() => new Date().toISOString())
+  const modalPortalRoot = useMemo(() => {
+    if (typeof document === 'undefined') return null
+    return document.getElementById('modal-root')
+  }, [])
   const onView = useCallback((newView: View) => setView(newView), [])
   const onNavigate = useCallback((newDate: Date) => setDate(newDate), [])
 
@@ -139,8 +147,19 @@ const CustomCalendar = ({ selectedDate, onSelectDate, modal, setModal }: CustomC
   }, [selectedDate, setModal, modalDate])
 
   return (
-    <>
-      <CustomViewButton view={view} onView={onView} className="mobile-custom-view-button" />
+    <div css={{ position: 'relative', height: 'fit-content', width: '100%' }}>
+      <S.MobileButtons>
+        <CustomViewButton view={view} onView={onView} className="mobile-custom-view-button" />
+        <button
+          className="add-button"
+          onClick={() => {
+            setModalDate(selectedDate ? selectedDate.toISOString() : new Date().toISOString())
+            setModal(true)
+          }}
+        >
+          <Plus height={20} width={20} color={theme.colors.primary} />
+        </button>
+      </S.MobileButtons>
       <S.CalendarWrapper view={view}>
         <DragAndDropCalendar
           localizer={localizer}
@@ -171,8 +190,13 @@ const CustomCalendar = ({ selectedDate, onSelectDate, modal, setModal }: CustomC
           style={{ height: '100%', width: '100%' }}
         />
       </S.CalendarWrapper>
-      {modal && <AddSchedule date={modalDate} onClose={() => setModal(false)} />}
-    </>
+      {modal &&
+        modalPortalRoot &&
+        createPortal(
+          <AddSchedule date={modalDate} onClose={() => setModal(false)} />,
+          modalPortalRoot,
+        )}
+    </div>
   )
 }
 

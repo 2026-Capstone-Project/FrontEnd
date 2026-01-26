@@ -2,6 +2,7 @@ import moment from 'moment'
 import { type ToolbarProps } from 'react-big-calendar'
 
 import Arrow from '@/shared/assets/icons/chevron.svg?react'
+import { theme } from '@/shared/styles/theme'
 
 import { CustomViewButton } from '../CustomViewButton/CustomViewButton'
 import * as S from './CalendarToolbar.style'
@@ -24,10 +25,10 @@ const CustomToolbar = <TEvent extends object>({
       <div className="date-label">{formattedLabel}</div>
       <div className="nav-buttons">
         <button onClick={() => onNavigate('PREV')}>
-          <Arrow className="back" />
+          <Arrow className="back" color={theme.colors.black} />
         </button>
         <button onClick={() => onNavigate('NEXT')}>
-          <Arrow className="next" />
+          <Arrow className="next" color={theme.colors.black} />
         </button>
       </div>
     </S.ToolbarWrapper>

@@ -36,7 +36,10 @@ export const Card = styled.div`
     position: absolute;
     z-index: 1000;
     align-self: center;
-    left: calc(50% - 200px);
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 90vw;
   }
 `
 export const EventCards = styled.div`
