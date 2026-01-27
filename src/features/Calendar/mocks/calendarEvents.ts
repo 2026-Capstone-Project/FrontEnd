@@ -37,6 +37,14 @@ export const mockCalendarEvents: CalendarEvent[] = [
     allDay: true,
   },
   {
+    id: 10,
+    title: 'Violet Base 리뷰',
+    start: '2026-01-25',
+    end: '2026-01-28',
+    color: 'violet',
+    allDay: true,
+  },
+  {
     id: 5,
     title: 'Yellow Base 회고 제목이 길어져볼게 얍!',
     start: '2026-01-25',

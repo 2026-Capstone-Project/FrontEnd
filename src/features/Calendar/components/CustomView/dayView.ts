@@ -20,8 +20,8 @@ export const AllDaySection = styled.div`
   width: 100%;
   column-gap: 40px;
   row-gap: 8px;
+  margin-top: 30px;
   ${media.down(theme.breakPoints.desktop)} {
-    padding: 40px 0 0 0;
     grid-template-columns: 1fr;
   }
 `
