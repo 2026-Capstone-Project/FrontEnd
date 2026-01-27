@@ -60,6 +60,7 @@ const AddScheduleModal = ({ onClose, date, mode = 'modal', eventId }: AddSchedul
     openSearchPlace,
     eventTitle,
   } = useAddScheduleForm({ date })
+  const { register } = formMethods
 
   const [calendarAnchor, setCalendarAnchor] = useState<DOMRect | null>(null)
   const [deleteWarningVisible, setDeleteWarningVisible] = useState(false)
@@ -234,7 +235,7 @@ const AddScheduleModal = ({ onClose, date, mode = 'modal', eventId }: AddSchedul
               />
               <S.TextareaWrapper>
                 <S.TextareaHeader>메모</S.TextareaHeader>
-                <S.Textarea />
+                <S.Textarea {...register('eventDescription')} />
               </S.TextareaWrapper>
               <S.FieldRow>
                 <S.FieldLabel>위치</S.FieldLabel>

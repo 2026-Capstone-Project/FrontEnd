@@ -1,23 +1,39 @@
+import { useId, useState } from 'react'
+
 import Modal from '../../common/Modal/Modal'
 import * as S from './DeleteConfirmModal.style'
+
 const DeleteConfirmModal = ({ onClose, title }: { onClose: () => void; title: string }) => {
+  const radioName = useId()
+  const [selectedOption, setSelectedOption] = useState<'single' | 'future' | 'all'>('single')
+
+  const options = [
+    { value: 'single', label: '이 이벤트' },
+    { value: 'future', label: '이 이벤트부터 이후 이벤트' },
+    { value: 'all', label: '모든 이벤트' },
+  ] as const
+
   return (
     <Modal onClick={onClose}>
       <S.ModalWrapper>
         <S.Title>반복 일정 "{title}" 삭제</S.Title>
         <S.OptionsContainer>
-          <S.OptionWrapper>
-            <input type="radio" />
-            <S.OptionLabel htmlFor="">이 이벤트</S.OptionLabel>
-          </S.OptionWrapper>
-          <S.OptionWrapper>
-            <input type="radio" />
-            <S.OptionLabel htmlFor="">이 이벤트부터 이후 이벤트</S.OptionLabel>
-          </S.OptionWrapper>
-          <S.OptionWrapper>
-            <input type="radio" />
-            <S.OptionLabel htmlFor="">모든 이벤트</S.OptionLabel>
-          </S.OptionWrapper>
+          {options.map((option) => {
+            const optionId = `${radioName}-${option.value}`
+            return (
+              <S.OptionWrapper key={option.value}>
+                <input
+                  id={optionId}
+                  name={radioName}
+                  type="radio"
+                  value={option.value}
+                  checked={selectedOption === option.value}
+                  onChange={() => setSelectedOption(option.value)}
+                />
+                <S.OptionLabel htmlFor={optionId}>{option.label}</S.OptionLabel>
+              </S.OptionWrapper>
+            )
+          })}
         </S.OptionsContainer>
         <S.ButtonsContainer>
           <S.CancelButton>취소</S.CancelButton>

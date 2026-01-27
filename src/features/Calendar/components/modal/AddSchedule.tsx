@@ -1,5 +1,5 @@
-const AddScedule = () => {
+const AddSchedule = () => {
   return <div>AddSchedule Modal</div>
 }
 
-export default AddScedule
+export default AddSchedule

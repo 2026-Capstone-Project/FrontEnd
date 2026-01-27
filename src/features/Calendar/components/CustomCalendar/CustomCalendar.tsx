@@ -258,9 +258,10 @@ const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
         !modal.isOpen &&
         !isInlineMode &&
         selectedDate &&
+        modalPortalRoot &&
         createPortal(
           <EventsCard onClose={() => setSelectedDate(null)} selectedDate={date} />,
-          modalPortalRoot!,
+          modalPortalRoot,
         )}
 
       {date &&

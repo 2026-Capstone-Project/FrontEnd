@@ -41,7 +41,6 @@ export const OptionLabel = styled.label`
 
 export const ButtonsContainer = styled.div`
   display: flex;
-  justify-content: flex-end;
   gap: 12px;
   width: 100%;
   align-items: center;

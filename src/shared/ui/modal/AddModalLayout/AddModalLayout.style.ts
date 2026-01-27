@@ -36,10 +36,8 @@ export const ModalWrapper = styled.div`
   max-height: 80vh;
   overflow: hidden;
   background-color: ${theme.colors.white};
-  background: ${theme.colors.white};
   border-radius: 20px;
   box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);
-  overflow: visible;
   gap: 26px;
   display: flex;
   flex-direction: column;
