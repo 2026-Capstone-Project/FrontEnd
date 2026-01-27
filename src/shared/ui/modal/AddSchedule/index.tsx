@@ -3,6 +3,7 @@
 
 import { type MouseEvent as ReactMouseEvent, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { FormProvider } from 'react-hook-form'
 
 import { useAddScheduleForm } from '@/shared/hooks/useAddScheduleForm'
 import { theme } from '@/shared/styles/theme'
@@ -32,6 +33,7 @@ type AddScheduleProps = {
 
 const AddScheduleModal = ({ onClose, date, mode = 'modal' }: AddScheduleProps) => {
   const {
+    formMethods,
     activeCalendarField,
     calendarRef,
     eventStartDate,
@@ -46,7 +48,6 @@ const AddScheduleModal = ({ onClose, date, mode = 'modal' }: AddScheduleProps) =
     handleTimeChange,
     handleSubmit,
     onSubmit,
-    register,
     setIsAllday,
     setEventColor,
     updateConfig,
@@ -55,8 +56,8 @@ const AddScheduleModal = ({ onClose, date, mode = 'modal' }: AddScheduleProps) =
     isSearchPlaceOpen,
     openSearchPlace,
     eventTitle,
-    setEventTitle,
   } = useAddScheduleForm({ date })
+
   const [calendarAnchor, setCalendarAnchor] = useState<DOMRect | null>(null)
   const [deleteWarningVisible, setDeleteWarningVisible] = useState(false)
   const [mapAnchor, setMapAnchor] = useState<DOMRect | null>(null)
@@ -171,107 +172,105 @@ const AddScheduleModal = ({ onClose, date, mode = 'modal' }: AddScheduleProps) =
         submitFormId="add-schedule-form"
         handleDelete={handleDelete}
       >
-        <form id="add-schedule-form" onSubmit={handleFormSubmit}>
-          <S.FormContent>
-            <TitleSuggestionInput
-              register={register}
-              eventTitle={eventTitle}
-              setEventTitle={setEventTitle}
-            />
-            <S.Selection>
-              <S.SelectionColumn>
-                <S.FieldRow>
-                  <S.FieldLabel>시작:</S.FieldLabel>
-                  <S.DateFieldButton type="button" onClick={handleCalendarButtonClick('start')}>
-                    {startDate}
-                  </S.DateFieldButton>
-                  {!isAllday && (
-                    <CustomTimePicker
-                      field="start"
-                      value={eventStartTime ?? ''}
-                      onChange={(value) => handleTimeChange('start', value)}
-                    />
+        <FormProvider {...formMethods}>
+          <form id="add-schedule-form" onSubmit={handleFormSubmit}>
+            <S.FormContent>
+              <TitleSuggestionInput />
+              <S.Selection>
+                <S.SelectionColumn>
+                  <S.FieldRow>
+                    <S.FieldLabel>시작:</S.FieldLabel>
+                    <S.DateFieldButton type="button" onClick={handleCalendarButtonClick('start')}>
+                      {startDate}
+                    </S.DateFieldButton>
+                    {!isAllday && (
+                      <CustomTimePicker
+                        field="start"
+                        value={eventStartTime ?? ''}
+                        onChange={(value) => handleTimeChange('start', value)}
+                      />
+                    )}
+                  </S.FieldRow>
+                  <S.FieldRow>
+                    <S.FieldLabel>종료:</S.FieldLabel>
+                    <S.DateFieldButton type="button" onClick={handleCalendarButtonClick('end')}>
+                      {endDate}
+                    </S.DateFieldButton>
+                    {!isAllday && (
+                      <CustomTimePicker
+                        field="end"
+                        value={eventEndTime ?? ''}
+                        onChange={(value) => handleTimeChange('end', value)}
+                      />
+                    )}
+                  </S.FieldRow>
+                </S.SelectionColumn>
+                {activeCalendarField &&
+                  portalPosition &&
+                  typeof document !== 'undefined' &&
+                  createPortal(
+                    <S.CalendarPortal ref={calendarRef} style={calendarPortalStyle}>
+                      <CustomDatePicker
+                        key={activeCalendarField}
+                        field={activeCalendarField}
+                        selectedDate={
+                          activeCalendarField === 'start'
+                            ? (eventStartDate ?? null)
+                            : (eventEndDate ?? null)
+                        }
+                        onSelectDate={handleDateSelect}
+                      />
+                    </S.CalendarPortal>,
+                    document.getElementById('modal-root')!,
                   )}
-                </S.FieldRow>
-                <S.FieldRow>
-                  <S.FieldLabel>종료:</S.FieldLabel>
-                  <S.DateFieldButton type="button" onClick={handleCalendarButtonClick('end')}>
-                    {endDate}
-                  </S.DateFieldButton>
-                  {!isAllday && (
-                    <CustomTimePicker
-                      field="end"
-                      value={eventEndTime ?? ''}
-                      onChange={(value) => handleTimeChange('end', value)}
-                    />
+              </S.Selection>
+              <Checkbox
+                checked={isAllday}
+                onChange={() => setIsAllday((prev) => !prev)}
+                label="종일"
+              />
+              <S.TextareaWrapper>
+                <S.TextareaHeader>메모</S.TextareaHeader>
+                <S.Textarea />
+              </S.TextareaWrapper>
+              <S.FieldRow>
+                <S.FieldLabel>위치</S.FieldLabel>
+                <S.FieldMap type="button" onClick={handleMapButtonClick}>
+                  장소 추가
+                </S.FieldMap>
+                {isSearchPlaceOpen &&
+                  searchPortalPosition &&
+                  createPortal(
+                    <S.SearchPlacePortal ref={mapRef} style={searchPortalStyle}>
+                      <SearchPlace />
+                    </S.SearchPlacePortal>,
+                    document.getElementById('modal-root')!,
                   )}
-                </S.FieldRow>
-              </S.SelectionColumn>
-              {activeCalendarField &&
-                portalPosition &&
-                typeof document !== 'undefined' &&
-                createPortal(
-                  <S.CalendarPortal ref={calendarRef} style={calendarPortalStyle}>
-                    <CustomDatePicker
-                      key={activeCalendarField}
-                      field={activeCalendarField}
-                      selectedDate={
-                        activeCalendarField === 'start'
-                          ? (eventStartDate ?? null)
-                          : (eventEndDate ?? null)
-                      }
-                      onSelectDate={handleDateSelect}
-                    />
-                  </S.CalendarPortal>,
-                  document.getElementById('modal-root')!,
-                )}
-            </S.Selection>
-            <Checkbox
-              checked={isAllday}
-              onChange={() => setIsAllday((prev) => !prev)}
-              label="종일"
-            />
-            <S.TextareaWrapper>
-              <S.TextareaHeader>메모</S.TextareaHeader>
-              <S.Textarea />
-            </S.TextareaWrapper>
-            <S.FieldRow>
-              <S.FieldLabel>위치</S.FieldLabel>
-              <S.FieldMap type="button" onClick={handleMapButtonClick}>
-                장소 추가
-              </S.FieldMap>
-              {isSearchPlaceOpen &&
-                searchPortalPosition &&
-                createPortal(
-                  <S.SearchPlacePortal ref={mapRef} style={searchPortalStyle}>
-                    <SearchPlace />
-                  </S.SearchPlacePortal>,
-                  document.getElementById('modal-root')!,
-                )}
-            </S.FieldRow>
-            <RepeatTypeGroup
-              repeatType={repeatConfig.repeatType}
-              customBasis={repeatConfig.customBasis}
-              onToggleType={handleRepeatType}
-            />
-          </S.FormContent>
-          <div css={{ marginTop: '12px' }}>
-            {repeatConfig.repeatType === 'custom' && (
-              <CustomBasisPanel
-                config={repeatConfig}
+              </S.FieldRow>
+              <RepeatTypeGroup
+                repeatType={repeatConfig.repeatType}
                 customBasis={repeatConfig.customBasis}
-                updateConfig={updateConfig}
+                onToggleType={handleRepeatType}
               />
-            )}
-            {repeatConfig.repeatType !== 'none' && (
-              <TerminationPanel
-                config={repeatConfig}
-                updateConfig={updateConfig}
-                minDate={eventEndDate ?? null}
-              />
-            )}
-          </div>
-        </form>
+            </S.FormContent>
+            <div css={{ marginTop: '12px' }}>
+              {repeatConfig.repeatType === 'custom' && (
+                <CustomBasisPanel
+                  config={repeatConfig}
+                  customBasis={repeatConfig.customBasis}
+                  updateConfig={updateConfig}
+                />
+              )}
+              {repeatConfig.repeatType !== 'none' && (
+                <TerminationPanel
+                  config={repeatConfig}
+                  updateConfig={updateConfig}
+                  minDate={eventEndDate ?? null}
+                />
+              )}
+            </div>
+          </form>
+        </FormProvider>
       </AddModalLayout>
       {deleteWarningVisible && (
         <DeleteConfirmModal

@@ -1,5 +1,5 @@
 import { type MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from 'react'
-import type { UseFormRegister } from 'react-hook-form'
+import { useFormContext } from 'react-hook-form'
 
 import type { AddScheduleFormValues } from '@/shared/types/event'
 
@@ -43,20 +43,16 @@ const getHighlightedSegments = (text: string, query: string) => {
 }
 
 type TitleSuggestionInputProps = {
-  register: UseFormRegister<AddScheduleFormValues>
-  eventTitle: string | undefined
-  setEventTitle: (value: string) => void
   placeholder?: string
   suggestions?: string[]
 }
 
 const TitleSuggestionInput = ({
-  register,
-  eventTitle,
-  setEventTitle,
   placeholder = '새로운 일정',
   suggestions = defaultSuggestions,
 }: TitleSuggestionInputProps) => {
+  const { register, watch, setValue } = useFormContext<AddScheduleFormValues>()
+  const eventTitle = watch('eventTitle')
   const normalizedTitleQuery = eventTitle?.trim() ?? ''
   const filteredSuggestions = useMemo(() => {
     if (!normalizedTitleQuery) return []
@@ -93,7 +89,7 @@ const TitleSuggestionInput = ({
   }, [suggestionsVisible, normalizedTitleQuery])
 
   const handleSelectSuggestion = (value: string) => {
-    setEventTitle(value)
+    setValue('eventTitle', value, { shouldValidate: true })
     setSuggestionsVisible(false)
     setDismissedTitleQuery(value.trim())
   }
