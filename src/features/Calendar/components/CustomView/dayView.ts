@@ -52,9 +52,10 @@ export const TimeOverlay = styled.div`
   left: 50px;
   right: 0;
   pointer-events: none;
-  width: auto;
-  ${media.down(theme.breakPoints.tablet)} {
+  width: calc(100% - 50px);
+  ${media.down(theme.breakPoints.desktop)} {
     left: 33px;
+    width: calc(100% - 34px);
   }
 `
 

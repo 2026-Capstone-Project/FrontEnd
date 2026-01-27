@@ -11,6 +11,7 @@ const AddModalLayout = ({
   footerChildren,
   submitFormId,
   embedded,
+  handleDelete,
 }: {
   title?: string
   onClose: () => void
@@ -19,6 +20,8 @@ const AddModalLayout = ({
   footerChildren?: React.ReactNode
   submitFormId?: string
   embedded?: boolean
+
+  handleDelete?: () => void
 }) => {
   // TODO: Button -> 추후 공용 컴포넌트로 분리 필요
   const modalTitle = title ? title : type === 'todo' ? '새로운 할 일' : '새로운 일정'
@@ -37,7 +40,7 @@ const AddModalLayout = ({
         <S.ModalFooter>
           <S.FooterLeft>{type === 'schedule' && footerChildren}</S.FooterLeft>
           <S.FooterRight>
-            <Trash />
+            <Trash onClick={handleDelete} />
             <S.Button type="submit" form={submitFormId}>
               <Check />
             </S.Button>

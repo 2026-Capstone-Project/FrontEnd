@@ -5,13 +5,13 @@ import { createPortal } from 'react-dom'
 
 type TModalprops = {
   children: ReactNode
-  onOverlayClick?: () => void
+  onClick?: () => void
 }
 
-export default function Modal({ children, onOverlayClick }: TModalprops) {
+export default function Modal({ children, onClick }: TModalprops) {
   return createPortal(
     <div
-      onClick={onOverlayClick}
+      onClick={onClick}
       css={{
         position: 'fixed',
         top: 0,

@@ -85,6 +85,9 @@ export const CalendarPortal = styled.div`
   height: fit-content;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
   z-index: 3000;
+  ${media.down(theme.breakPoints.desktop)} {
+    background: rgba(245, 245, 245, 0.8);
+  }
   ${media.down(theme.breakPoints.tablet)} {
     width: min(90vw, 360px);
     top: 50%;
@@ -128,20 +131,6 @@ export const CalendarPlaceholder = styled.div`
   font-size: 14px;
   text-align: center;
   padding: 16px;
-`
-export const TitleInput = styled.input`
-  width: 100%;
-  height: 43px;
-  border: none;
-  border-radius: 8px;
-  padding: 12px;
-  font-size: 16px;
-  font-weight: 500;
-  background-color: ${theme.colors.inputColor};
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px ${theme.colors.primary2};
-  }
 `
 
 export const Section = styled.div`

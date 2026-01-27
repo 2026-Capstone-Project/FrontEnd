@@ -1,15 +1,17 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /** @jsxImportSource @emotion/react */
 
-import { type MouseEvent, useEffect, useMemo, useState } from 'react'
+import { type MouseEvent as ReactMouseEvent, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 
+import { useAddScheduleForm } from '@/shared/hooks/useAddScheduleForm'
 import { theme } from '@/shared/styles/theme'
 import type { DatePickerField } from '@/shared/types/event'
 import { formatDisplayDate } from '@/shared/utils/date'
 
-import { useAddScheduleForm } from '../../../hooks/useAddScheduleForm'
 import Checkbox from '../../common/Checkbox/Checkbox'
 import AddModalLayout from '../AddModalLayout/AddModalLayout'
+import DeleteConfirmModal from '../DeleteConfirmModal/DeleteConfirmModal'
 import CustomBasisPanel from './components/CustomBasisPanel/CustomBasisPanel'
 import CustomDatePicker from './components/CustomDatePicker/CustomDatePicker'
 import CustomTimePicker from './components/CustomTimePicker/CustomTimePicker'
@@ -17,6 +19,7 @@ import RepeatTypeGroup from './components/RepeatTypeGroup/RepeatTypeGroup'
 import SearchPlace from './components/SearchPlace/SearchPlace'
 import SelectColor from './components/SelectColor/SelectColor'
 import TerminationPanel from './components/TerminationPanel/TerminationPanel'
+import TitleSuggestionInput from './components/TitleSuggestionInput/TitleSuggestionInput'
 import * as S from './index.style'
 
 type AddScheduleProps = {
@@ -51,21 +54,24 @@ const AddScheduleModal = ({ onClose, date, mode = 'modal' }: AddScheduleProps) =
     mapRef,
     isSearchPlaceOpen,
     openSearchPlace,
+    eventTitle,
+    setEventTitle,
   } = useAddScheduleForm({ date })
   const [calendarAnchor, setCalendarAnchor] = useState<DOMRect | null>(null)
+  const [deleteWarningVisible, setDeleteWarningVisible] = useState(false)
   const [mapAnchor, setMapAnchor] = useState<DOMRect | null>(null)
   const [isMobileLayout, setIsMobileLayout] = useState(false)
   const startDate = formatDisplayDate(eventStartDate)
   const endDate = formatDisplayDate(eventEndDate)
 
   const handleCalendarButtonClick =
-    (field: DatePickerField) => (event: MouseEvent<HTMLButtonElement>) => {
+    (field: DatePickerField) => (event: ReactMouseEvent<HTMLButtonElement>) => {
       handleCalendarOpen(field)
       const target = event.currentTarget
       setCalendarAnchor(target.getBoundingClientRect())
     }
 
-  const handleMapButtonClick = (event: MouseEvent<HTMLButtonElement>) => {
+  const handleMapButtonClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     openSearchPlace()
     const target = event.currentTarget
     setMapAnchor(target.getBoundingClientRect())
@@ -95,14 +101,12 @@ const AddScheduleModal = ({ onClose, date, mode = 'modal' }: AddScheduleProps) =
 
   useEffect(() => {
     if (!activeCalendarField) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCalendarAnchor(null)
     }
   }, [activeCalendarField])
 
   useEffect(() => {
     if (!isSearchPlaceOpen) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMapAnchor(null)
     }
   }, [isSearchPlaceOpen])
@@ -110,7 +114,7 @@ const AddScheduleModal = ({ onClose, date, mode = 'modal' }: AddScheduleProps) =
   useEffect(() => {
     if (typeof window === 'undefined') return undefined
     const mediaQuery = window.matchMedia(`(max-width: ${theme.breakPoints.tablet})`)
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+
     setIsMobileLayout(mediaQuery.matches)
     const handler = (event: MediaQueryListEvent) => {
       setIsMobileLayout(event.matches)
@@ -143,6 +147,14 @@ const AddScheduleModal = ({ onClose, date, mode = 'modal' }: AddScheduleProps) =
     onClose()
   })
 
+  const handleDelete = () => {
+    if (repeatConfig.repeatType !== 'none') {
+      setDeleteWarningVisible(true)
+    } else {
+      console.log('일정 삭제 로직 처리')
+    }
+  }
+
   return (
     <>
       {!isInlineMode &&
@@ -157,13 +169,14 @@ const AddScheduleModal = ({ onClose, date, mode = 'modal' }: AddScheduleProps) =
         onClose={onClose}
         embedded={isInlineMode}
         submitFormId="add-schedule-form"
+        handleDelete={handleDelete}
       >
         <form id="add-schedule-form" onSubmit={handleFormSubmit}>
           <S.FormContent>
-            <S.TitleInput
-              type="text"
-              {...register('eventTitle')}
-              placeholder="일정 제목을 입력하세요"
+            <TitleSuggestionInput
+              register={register}
+              eventTitle={eventTitle}
+              setEventTitle={setEventTitle}
             />
             <S.Selection>
               <S.SelectionColumn>
@@ -260,6 +273,12 @@ const AddScheduleModal = ({ onClose, date, mode = 'modal' }: AddScheduleProps) =
           </div>
         </form>
       </AddModalLayout>
+      {deleteWarningVisible && (
+        <DeleteConfirmModal
+          title={eventTitle || '새로운 이벤트'}
+          onClose={() => setDeleteWarningVisible(false)}
+        />
+      )}
     </>
   )
 }

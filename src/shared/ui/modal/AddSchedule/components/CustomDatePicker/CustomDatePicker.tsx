@@ -81,7 +81,13 @@ const CustomDatePicker = ({ selectedDate, onSelectDate }: DatePickerRenderProps)
             disabled={!day}
             onClick={() => day && onSelectDate(new Date(day))}
           >
-            {day && <S.CustomCalendarDayNumber>{day.getDate()}</S.CustomCalendarDayNumber>}
+            {day && (
+              <S.CustomCalendarDayNumber
+                isActive={activeDay ? activeDay.toDateString() === day.toDateString() : false}
+              >
+                {day.getDate()}
+              </S.CustomCalendarDayNumber>
+            )}
           </S.CustomCalendarDay>
         ))}
       </S.CustomCalendarDays>

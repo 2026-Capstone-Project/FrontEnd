@@ -91,6 +91,7 @@ const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
         setSelectedDate(null)
         setModal(true)
         setModalDate(slotInfo.start.toISOString())
+        //TODO: 추후 API로 대체
         enqueueEvent(slotInfo.start, slotInfo.slots.length === 1)
       } else {
         setSelectedDate(slotInfo.start)
@@ -157,12 +158,6 @@ const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
     }),
     [view, viewConfig.components, viewEventComponent, DateCellWrapper],
   )
-
-  useEffect(() => {
-    if (date && date.toISOString() !== modalDate) {
-      // 임시: 달력에서 날짜가 변경되면 모달에 반영
-    }
-  }, [date, modalDate])
 
   return (
     <div css={{ position: 'relative', height: 'fit-content', width: '100%' }}>

@@ -1,5 +1,5 @@
 import { yupResolver } from '@hookform/resolvers/yup'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   type Control,
   type Resolver,
@@ -8,6 +8,8 @@ import {
   useWatch,
 } from 'react-hook-form'
 
+import { useCalendarFieldPicker } from '@/shared/hooks/useCalendarFieldPicker'
+import { useSearchPlaceToggle } from '@/shared/hooks/useSearchPlaceToggle'
 import { addScheduleSchema } from '@/shared/schemas/schedule'
 import {
   type AddScheduleFormValues,
@@ -54,27 +56,12 @@ export type UseAddScheduleFormResult = {
   isSearchPlaceOpen: boolean
   openSearchPlace: () => void
   closeSearchPlace: () => void
-}
-
-const compareDates = (a: Date | null | undefined, b: Date | null | undefined) =>
-  !!a && !!b && a.toDateString() === b.toDateString()
-
-const toMinutes = (time?: string) => {
-  if (!time) return 0
-  const [hours, minutes] = time.split(':').map((part) => Number(part))
-  return hours * 60 + minutes
-}
-
-const formatMinutes = (total: number) => {
-  const normalized = Math.max(total, 0)
-  const hours = Math.floor(normalized / 60)
-  const minutes = normalized % 60
-  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+  eventTitle: string | undefined
+  setEventTitle: (value: string) => void
 }
 
 export const useAddScheduleForm = ({ date }: UseAddScheduleFormProps): UseAddScheduleFormResult => {
   const [isAllday, setIsAllday] = useState(false)
-  const [activeCalendarField, setActiveCalendarField] = useState<DatePickerField | null>(null)
 
   const resolver = yupResolver(addScheduleSchema) as Resolver<AddScheduleFormValues>
   const { control, register, setValue, handleSubmit } = useForm<AddScheduleFormValues>({
@@ -100,6 +87,7 @@ export const useAddScheduleForm = ({ date }: UseAddScheduleFormProps): UseAddSch
   const repeatConfig = (useWatch({ control, name: 'repeatConfig' }) ??
     (defaultRepeatConfig as RepeatConfigSchema)) as RepeatConfigSchema
   const eventColor = (useWatch({ control, name: 'eventColor' }) ?? 'sky') as EventColorType
+  const eventTitle = useWatch({ control, name: 'eventTitle' })
 
   useEffect(() => {
     register('eventStartDate')
@@ -121,74 +109,20 @@ export const useAddScheduleForm = ({ date }: UseAddScheduleFormProps): UseAddSch
     setValue('eventEndDate', baseDate)
   }, [date, setValue])
 
-  const handleCalendarOpen = (field: DatePickerField) => {
-    setActiveCalendarField(field)
-  }
-  const handleCalendarClose = useCallback(() => setActiveCalendarField(null), [])
-
-  const calendarRef = useRef<HTMLDivElement | null>(null)
-  const mapRef = useRef<HTMLDivElement | null>(null)
-  const [isSearchPlaceOpen, setIsSearchPlaceOpen] = useState(false)
-  const openSearchPlace = useCallback(() => setIsSearchPlaceOpen(true), [])
-  const closeSearchPlace = useCallback(() => setIsSearchPlaceOpen(false), [])
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (!activeCalendarField) return
-      const target = event.target as Node
-      if (calendarRef.current?.contains(target)) return
-      handleCalendarClose()
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [activeCalendarField, handleCalendarClose])
-
-  useEffect(() => {
-    if (!isSearchPlaceOpen) return undefined
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node
-      if (mapRef.current?.contains(target)) return
-      closeSearchPlace()
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [isSearchPlaceOpen, closeSearchPlace])
-
-  const handleDateSelect = (selectedDate: Date) => {
-    if (!activeCalendarField) return
-    if (activeCalendarField === 'start') {
-      setValue('eventStartDate', selectedDate, { shouldValidate: true })
-      setValue('eventEndDate', selectedDate, { shouldValidate: true })
-    } else {
-      if (eventStartDate && selectedDate < eventStartDate) {
-        const adjusted = new Date(selectedDate)
-        adjusted.setDate(adjusted.getDate() - 1)
-        setValue('eventStartDate', adjusted, { shouldValidate: true })
-      }
-      setValue('eventEndDate', selectedDate, { shouldValidate: true })
-    }
-    handleCalendarClose()
-  }
-
-  const handleTimeChange = (field: TimePickerField, value: string) => {
-    const fieldName = field === 'start' ? 'eventStartTime' : 'eventEndTime'
-    setValue(fieldName, value, { shouldValidate: true })
-    const sameDay = compareDates(eventStartDate, eventEndDate)
-    const newMinutes = toMinutes(value)
-    if (field === 'end' && sameDay) {
-      const currentStartMinutes = toMinutes(eventStartTime)
-      if (currentStartMinutes >= newMinutes) {
-        const adjustedStart = formatMinutes(newMinutes - 60)
-        setValue('eventStartTime', adjustedStart, { shouldValidate: true })
-      }
-    }
-    if (field === 'start' && sameDay) {
-      const currentEndMinutes = toMinutes(eventEndTime)
-      if (currentEndMinutes <= newMinutes) {
-        const adjustedEnd = formatMinutes(newMinutes + 60)
-        setValue('eventEndTime', adjustedEnd, { shouldValidate: true })
-      }
-    }
-  }
+  const {
+    activeCalendarField,
+    calendarRef,
+    handleCalendarOpen,
+    handleDateSelect,
+    handleTimeChange,
+  } = useCalendarFieldPicker({
+    setValue,
+    eventStartDate,
+    eventEndDate,
+    eventStartTime,
+    eventEndTime,
+  })
+  const { mapRef, isSearchPlaceOpen, closeSearchPlace, openSearchPlace } = useSearchPlaceToggle()
 
   const handleRepeatConfigChange = (value: RepeatConfigSchema) => {
     setValue('repeatConfig', value, { shouldValidate: true })
@@ -199,6 +133,9 @@ export const useAddScheduleForm = ({ date }: UseAddScheduleFormProps): UseAddSch
     setValue('eventColor', value, { shouldValidate: true })
   }
 
+  const setEventTitle = (value: string) => {
+    setValue('eventTitle', value, { shouldValidate: true })
+  }
   const onSubmit = (values: AddScheduleFormValues) => {
     const payload = {
       ...values,
@@ -262,5 +199,7 @@ export const useAddScheduleForm = ({ date }: UseAddScheduleFormProps): UseAddSch
     isSearchPlaceOpen,
     openSearchPlace,
     closeSearchPlace,
+    eventTitle,
+    setEventTitle,
   }
 }

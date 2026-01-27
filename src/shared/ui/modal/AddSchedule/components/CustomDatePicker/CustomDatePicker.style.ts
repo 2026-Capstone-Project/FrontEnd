@@ -79,7 +79,8 @@ export const CustomCalendarDay = styled.button<{
   color: ${(props) => (props.isActive ? theme.colors.primary2 : theme.colors.textPrimary)};
 `
 
-export const CustomCalendarDayNumber = styled.span`
+export const CustomCalendarDayNumber = styled.span<{ isActive?: boolean }>`
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
+  color: ${(props) => (props.isActive ? theme.colors.primary2 : theme.colors.textColor2)};
 `
