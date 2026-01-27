@@ -6,8 +6,14 @@ import { theme } from '@/shared/styles/theme'
 
 import * as S from './CalendarPage.styles'
 
+const getInitialModalMode = () => {
+  if (typeof window === 'undefined') return false
+  const breakpoint = parseInt(theme.breakPoints.desktop, 10)
+  return window.innerWidth < breakpoint
+}
+
 const CalendarPage = () => {
-  const [isModalMode, setIsModalMode] = useState(false)
+  const [isModalMode, setIsModalMode] = useState(getInitialModalMode)
   const cardAreaRef = useRef<HTMLDivElement | null>(null)
   const [cardPortalElement, setCardPortalElement] = useState<HTMLElement | null>(null)
 

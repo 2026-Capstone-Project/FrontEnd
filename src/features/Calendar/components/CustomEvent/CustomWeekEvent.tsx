@@ -16,15 +16,16 @@ const formatTimeRange = (event: CalendarEvent) => {
 
 type CustomWeekEventProps = {
   event: CalendarEvent
+  onEventClick: (event: CalendarEvent) => void
 }
 //TODO: 이벤트 클릭 시 해당 이벤트를 수정할 수 있는 모달 띄우기
-const CustomWeekEvent: React.FC<CustomWeekEventProps> = ({ event }) => {
+const CustomWeekEvent: React.FC<CustomWeekEventProps> = ({ event, onEventClick }) => {
   const palette = getColorPalette(event.color)
   const baseColor = palette?.base
   const pointColor = palette?.point
 
   return (
-    <S.WeekEventContainer backgroundColor={baseColor}>
+    <S.WeekEventContainer backgroundColor={baseColor} onClick={() => onEventClick(event)}>
       <S.EventRow>
         <S.Circle backgroundColor={pointColor} />
         <S.EventTitle>{event.title}</S.EventTitle>

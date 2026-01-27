@@ -2,7 +2,7 @@ import type { CalendarEvent } from '../components/CustomView/CustomDayView'
 
 export const mockCalendarEvents: CalendarEvent[] = [
   {
-    id: 'sky-meeting',
+    id: 1,
     title: 'Sky Base 회의',
     start: '2026-01-23',
     end: '2026-01-23',
@@ -12,7 +12,7 @@ export const mockCalendarEvents: CalendarEvent[] = [
     memo: '회의 준비물 챙기기',
   },
   {
-    id: 'mint-lunch',
+    id: 2,
     title: 'Mint Base 점심',
     start: '2026-01-23T12:00:00',
     end: '2026-01-23T12:30:00',
@@ -20,7 +20,7 @@ export const mockCalendarEvents: CalendarEvent[] = [
     location: '카페테리아',
   },
   {
-    id: 'pink-planning',
+    id: 3,
     title: 'Pink Base 기획',
     start: '2026-01-24T14:30:00',
     end: '2026-01-24T16:00:00',
@@ -29,7 +29,7 @@ export const mockCalendarEvents: CalendarEvent[] = [
     memo: '새 프로젝트 아이디어 브레인스토밍',
   },
   {
-    id: 'violet-review',
+    id: 4,
     title: 'Violet Base 리뷰',
     start: '2026-01-25',
     end: '2026-01-28',
@@ -37,7 +37,7 @@ export const mockCalendarEvents: CalendarEvent[] = [
     allDay: true,
   },
   {
-    id: 'yellow-retro',
+    id: 5,
     title: 'Yellow Base 회고 제목이 길어져볼게 얍!',
     start: '2026-01-25',
     end: '2026-01-25',
@@ -47,7 +47,7 @@ export const mockCalendarEvents: CalendarEvent[] = [
     memo: '지난 분기 성과 및 개선점 논의',
   },
   {
-    id: 'gray-offsite',
+    id: 6,
     title: 'Gray Base 외근',
     start: '2026-01-26',
     end: '2026-01-26',
@@ -57,7 +57,7 @@ export const mockCalendarEvents: CalendarEvent[] = [
     memo: '고객사 미팅 준비물 챙기기',
   },
   {
-    id: 'sky-wrapup',
+    id: 7,
     title: 'Sky Point 총괄',
     start: '2026-01-27T15:00:00',
     end: '2026-01-27T16:00:00',

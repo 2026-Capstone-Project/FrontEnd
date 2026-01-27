@@ -27,11 +27,14 @@ type AddScheduleProps = {
   onClose: () => void
   date: string
   mode?: 'modal' | 'inline'
+  eventId: number
 }
 //TODO: 위치 버튼 누르면 위치 선택 모달 오픈
 //TODO: 제목 입력시 검색해서 최근 타이틀 추천
 
-const AddScheduleModal = ({ onClose, date, mode = 'modal' }: AddScheduleProps) => {
+const AddScheduleModal = ({ onClose, date, mode = 'modal', eventId }: AddScheduleProps) => {
+  //TODO: eventId로 데이터 불러오기
+  console.log('편집할 이벤트 ID:', eventId)
   const {
     formMethods,
     activeCalendarField,
