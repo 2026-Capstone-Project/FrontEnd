@@ -7,7 +7,7 @@ export const colors = {
   textColor2: '#505050', // --Text-Color-2
   textColor3: '#757575', // --Text-Color-3
   inputColor: '#F7F7F7',
-  red: '#E94B43', // --Red
+  red: '#080505', // --Red
 
   white: '#FDFDFD', // 메뉴 탭
   background: '#FAFAFA', // 전체 바탕
@@ -21,6 +21,21 @@ export const colors = {
   violet: { base: '#f1ebf9', point: '#c9b0f0' },
   yellow: { base: '#fff0b3', point: '#f4d144' },
   gray: { base: '#e9e9e9', point: '#757575' },
+
+  priority: {
+    red: {
+      base: '#fbe2e1',
+      point: '#bd3730',
+    },
+    green: {
+      base: '#dcf2ec',
+      point: '#089b43',
+    },
+    yellow: {
+      base: '#fff0b3',
+      point: '#8e7d02',
+    },
+  },
 }
 
 /* 그라데이션 등록 */

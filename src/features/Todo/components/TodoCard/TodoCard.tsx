@@ -1,0 +1,60 @@
+import { useState } from 'react'
+
+import Repeat from '@/shared/assets/icons/rotate.svg?react'
+import Trash from '@/shared/assets/icons/trash-2.svg?react'
+import { theme } from '@/shared/styles/theme'
+
+import PriorityBadge from '../ImportantBadge/PriorityBadge'
+import TodoCheckbox from '../TodoCheckbox/TodoCheckbox'
+import * as S from './TodoCard.style'
+const TodoCard = ({
+  title,
+  date,
+  isHighlight,
+  time,
+  priority,
+  repeat,
+  repeatInfo,
+}: {
+  title: string
+  date: string
+  time?: string
+  isHighlight?: boolean
+  priority: 'HIGH' | 'MEDIUM' | 'LOW'
+  repeat?: boolean
+  repeatInfo?: string
+}) => {
+  const [selected, setSelected] = useState(false)
+
+  return (
+    <S.Wrapper $isHighlight={isHighlight}>
+      <S.TodoLeftWrapper>
+        <TodoCheckbox checked={selected} onChange={() => setSelected(!selected)} />
+        <S.TodoInfoWrapper>
+          <S.Title>{title}</S.Title>
+          <S.Info $isHighlight={isHighlight}>
+            {date} {time}{' '}
+            {repeat && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  color: theme.colors.textColor3,
+                }}
+              >
+                <Repeat width={20} height={20} /> {repeatInfo}
+              </div>
+            )}
+          </S.Info>
+        </S.TodoInfoWrapper>
+      </S.TodoLeftWrapper>
+      <S.ButtonWrapper>
+        <PriorityBadge priority={priority} />
+        <Trash color="#c5c5c5" />
+      </S.ButtonWrapper>
+    </S.Wrapper>
+  )
+}
+
+export default TodoCard
