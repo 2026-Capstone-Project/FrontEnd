@@ -1,13 +1,14 @@
 import type { stringOrDate } from 'react-big-calendar'
 
-import type { EventColorType } from '@/shared/types/color'
+import type { EventColorType } from '@/shared/types/event'
 
 export interface CalendarEvent {
-  id: string
+  id: number
   title: string
   start: stringOrDate
   end: stringOrDate
   allDay?: boolean
   color: EventColorType
   location?: string
+  memo?: string
 }

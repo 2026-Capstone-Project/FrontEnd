@@ -1,5 +1,6 @@
 import { css } from '@emotion/react'
 
+import { media } from '@/shared/styles/media'
 import { theme } from '@/shared/styles/theme'
 
 export const monthViewStyles = css`
@@ -24,6 +25,12 @@ export const monthViewStyles = css`
   .rbc-month-row {
     border-top: none;
     min-height: 120px;
+    ${media.down(theme.breakPoints.desktop)} {
+      min-height: 100px;
+    }
+    ${media.down(theme.breakPoints.tablet)} {
+      min-height: 80px;
+    }
   }
 
   .rbc-day-bg {
@@ -60,6 +67,10 @@ export const monthViewStyles = css`
     font-weight: 500;
     display: flex;
     padding: 10px 12px;
+    ${media.down(theme.breakPoints.tablet)} {
+      width: 100%;
+      justify-content: center;
+    }
   }
 
   .rbc-header:first-of-type {

@@ -4,6 +4,7 @@ import styled from '@emotion/styled'
 import { dayViewStyles } from '@/features/Calendar/components/CustomView/dayView'
 import { monthViewStyles } from '@/features/Calendar/components/CustomView/monthView'
 import { weekViewStyles } from '@/features/Calendar/components/CustomView/weekView'
+import { media } from '@/shared/styles/media'
 import { theme } from '@/shared/styles/theme'
 
 export const DayContainer = styled.div`
@@ -28,28 +29,43 @@ export const DayContainer = styled.div`
   }
 `
 
+export const MobileButtons = styled.div`
+  display: none;
+  width: 100%;
+  margin-bottom: 12px;
+  ${media.down(theme.breakPoints.desktop)} {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .add-button {
+    position: absolute;
+    right: 0;
+    background-color: #e9f4f7;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+  }
+`
+
 export const CalendarWrapper = styled.div<{ view: string }>`
   width: 100%;
-  max-width: 900px;
   height: ${(props) => (props.view === 'week' ? 'auto' : 'fit-content')};
   min-height: 600px;
-  margin: 0 auto;
   padding: 20px 0 0 0;
   background-color: white;
   border: 1px solid #efefef;
   box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1);
   border-radius: 16px;
   overflow: hidden;
+
+  ${media.down(theme.breakPoints.tablet)} {
+    min-height: fit-content;
+  }
   .rbc-calendar {
     font-family: 'Pretendard', sans-serif;
-  }
-
-  .rbc-date-cell {
-    text-align: start;
-    padding: 12px;
-    .rbc-button-link {
-      font-size: 16px;
-    }
   }
 
   /* 1. 모든 기본 테두리 제거 및 초기화 */
@@ -63,6 +79,7 @@ export const CalendarWrapper = styled.div<{ view: string }>`
   .rbc-label {
     padding: 0;
   }
+
   .rbc-row-bg {
     right: 0;
   }
@@ -77,13 +94,35 @@ export const CalendarWrapper = styled.div<{ view: string }>`
   /* 4. 오늘 날짜 하이라이트 */
   .rbc-today,
   .rbc-current {
-    background-color: transparent !important;
+    background-color: transparent;
     .day-number {
       background-color: ${theme.colors.red};
       color: white !important;
     }
     .day-name {
       color: ${(props) => (props.view === 'month' ? theme.colors.red : '')} !important;
+    }
+  }
+
+  .rbc-date-header {
+    .day-number {
+      transition:
+        background-color 0.2s,
+        color 0.2s;
+    }
+    &.rbc-active .day-number,
+    .rbc-active .day-number {
+      background-color: ${theme.colors.primary2};
+      color: ${theme.colors.white};
+    }
+  }
+
+  .rbc-date-cell {
+    &.rbc-selected .day-number,
+    &:focus-within .day-number {
+      background-color: ${theme.colors.primary2};
+      color: ${theme.colors.white};
+      box-shadow: 0 0 0 2px ${theme.colors.primary2};
     }
   }
 

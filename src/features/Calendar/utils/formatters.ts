@@ -1,6 +1,6 @@
 import moment from 'moment'
 
-import { WEEK_DAYS } from '@/shared/constants/weekDays'
+import { WEEK_DAYS } from '@/shared/constants/event'
 
 export const formatWeekday = (date: Date) => WEEK_DAYS[moment(date).day()]
 

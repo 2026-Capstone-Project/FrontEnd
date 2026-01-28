@@ -1,36 +1,31 @@
 /** @jsxImportSource @emotion/react */
-import { css } from '@emotion/react'
-import { Outlet } from 'react-router-dom'
+
+import styled from '@emotion/styled'
 
 import { media } from '../styles/media'
 import { theme } from '../styles/theme'
-//TODO: 추후 헤더 교체
-const DefaultAppLayout = () => {
-  return (
-    <div css={LayoutWrapper}>
-      <div>헤더입니다</div>
-      <div css={ContentWrapper}>
-        <Outlet />
-      </div>
-    </div>
-  )
+
+const DefaultAppLayout = ({ children }: { children: React.ReactNode }) => {
+  return <ContentWrapper>{children}</ContentWrapper>
 }
 
 export default DefaultAppLayout
 
-const LayoutWrapper = css`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100vh;
-  overflow-x: hidden;
-`
-const ContentWrapper = css`
+const ContentWrapper = styled.div`
   flex: 1;
-  width: 100%;
+  flex-direction: row;
+  justify-self: center;
+  align-self: flex-start;
+  height: fit-content;
   display: flex;
   overflow-x: hidden;
+  justify-content: center;
+  align-items: flex-start;
   padding: 24px 48px;
+  gap: 32px;
+
+  max-width: 1440px;
+  width: 100%;
   ${media.down(theme.breakPoints.tablet)} {
     padding: 16px 24px;
   }
