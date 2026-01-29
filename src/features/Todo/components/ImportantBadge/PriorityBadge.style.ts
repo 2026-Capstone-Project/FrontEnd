@@ -12,6 +12,7 @@ export const Badge = styled.span<{ baseColor: string; pointColor: string }>`
   color: ${(props) => props.pointColor};
   background-color: ${(props) => props.baseColor};
   ${media.down(theme.breakPoints.tablet)} {
-    padding: 8px 10px;
+    padding: 6px 10px;
+    font-size: 10px;
   }
 `

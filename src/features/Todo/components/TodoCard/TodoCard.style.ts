@@ -17,12 +17,20 @@ export const Wrapper = styled.div<{ $isHighlight?: boolean }>`
   justify-content: space-between;
   align-items: center;
   ${media.down(theme.breakPoints.tablet)} {
-    height: 60px;
+    padding: 15px 15px;
+    height: fit-content;
   }
 `
 export const ButtonWrapper = styled.div`
   display: flex;
   gap: 16px;
+  align-items: center;
+  svg {
+    ${media.down(theme.breakPoints.tablet)} {
+      width: 16px;
+      height: 16px;
+    }
+  }
 `
 export const TodoLeftWrapper = styled.div`
   display: flex;
