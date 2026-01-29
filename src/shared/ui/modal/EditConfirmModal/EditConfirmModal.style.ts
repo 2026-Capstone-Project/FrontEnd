@@ -102,7 +102,6 @@ export const RadioIndicator = styled.span<{ $checked: boolean }>`
 
 export const ButtonsContainer = styled.div`
   display: flex;
-  gap: 12px;
   width: 100%;
   align-items: center;
   justify-content: center;
@@ -110,7 +109,6 @@ export const ButtonsContainer = styled.div`
 `
 
 export const CancelButton = styled.button`
-  background-color: transparent;
   border: none;
   color: ${theme.colors.primary2};
   font-size: 16px;

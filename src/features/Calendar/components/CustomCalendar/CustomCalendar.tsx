@@ -1,4 +1,4 @@
-/** @JsxImportSource @emotion/react */
+/** @jsxImportSource @emotion/react */
 import 'moment/locale/ko'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 

@@ -1,4 +1,4 @@
-/** @JsxImportSource @emotion/react */
+/** @jsxImportSource @emotion/react */
 import { useRef } from 'react'
 
 import TodoSection from '@/features/Todo/components/TodoSection/TodoSection'

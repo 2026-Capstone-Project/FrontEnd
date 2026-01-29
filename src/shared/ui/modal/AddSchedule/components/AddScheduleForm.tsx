@@ -1,4 +1,4 @@
-/** @JSXImportSource @emotion/react  */
+/** @jsxImportSource @emotion/react  */
 import {
   type MouseEvent as ReactMouseEvent,
   type ReactNode,

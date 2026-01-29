@@ -17,7 +17,7 @@ export const title = yup
   .string()
   .required('제목은 필수 입력 사항입니다.')
   .max(50, '제목은 최대 50자까지 입력 가능합니다.')
-export const description = yup.string().max(500, ' 설명은 최대 500자까지 입력 가능합니다.')
+export const description = yup.string().max(500, '설명은 최대 500자까지 입력 가능합니다.')
 export const isAllday = yup.boolean()
 export const repeatConfigSchema = yup.object().shape({
   repeatType: yup

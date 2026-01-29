@@ -9,7 +9,7 @@ export function translatePriority(priority: 'HIGH' | 'MEDIUM' | 'LOW'): string {
     case 'LOW':
       return '낮음'
     default:
-      return ''
+      return '낮음'
   }
 }
 
@@ -20,6 +20,8 @@ export function getPriorityColor(priority: 'HIGH' | 'MEDIUM' | 'LOW'): PriorityC
     case 'MEDIUM':
       return 'yellow'
     case 'LOW':
+      return 'green'
+    default:
       return 'green'
   }
 }
