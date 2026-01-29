@@ -43,6 +43,8 @@ export const gradients = {
   default: 'linear-gradient(90deg, #DEECEC 0%, #9ECFDD 100%)',
 
   ai: 'linear-gradient(112deg, #4784C1 0%, #6BDAD2 100%)',
+
+  ai2: 'linear-gradient(90deg, #DEECEC 0%, #9ECFDD 100%)',
 }
 
 /* 폰트 스타일 */
