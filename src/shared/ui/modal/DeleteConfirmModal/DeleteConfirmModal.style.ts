@@ -2,6 +2,7 @@ import styled from '@emotion/styled'
 
 import { media } from '@/shared/styles/media'
 import { theme } from '@/shared/styles/theme'
+
 export const ModalWrapper = styled.div`
   background-color: #fff;
   padding: 40px 50px 20px 50px;
@@ -14,6 +15,7 @@ export const ModalWrapper = styled.div`
   flex-direction: column;
   ${media.down(theme.breakPoints.mobile)} {
     max-width: 90vw;
+    padding: 30px;
   }
 `
 
@@ -21,7 +23,10 @@ export const Title = styled.h2`
   margin-top: 0;
   margin-bottom: 16px;
   font-size: 24px;
-  font-weight: bold;
+  font-weight: 600;
+  ${media.down(theme.breakPoints.tablet)} {
+    font-size: 20px;
+  }
 `
 
 export const OptionsContainer = styled.div`
@@ -31,12 +36,68 @@ export const OptionsContainer = styled.div`
   margin-bottom: 24px;
 `
 
+export const OptionWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+`
+
+export const HiddenRadio = styled.input`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+`
+
 export const OptionLabel = styled.label`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   font-size: 18px;
   color: ${theme.colors.textColor2};
+  width: 100%;
+  cursor: pointer;
+  ${media.down(theme.breakPoints.tablet)} {
+    font-size: 16px;
+  }
+`
+
+export const RadioIndicator = styled.span<{ $checked: boolean }>`
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid ${theme.colors.lightGray};
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
+
+  ${({ $checked }) =>
+    $checked
+      ? `
+        border-color: ${theme.colors.primary2};
+        background-color: ${theme.colors.primary2};
+      `
+      : `
+        border-color: ${theme.colors.lightGray};
+        background-color: transparent;
+      `}
+
+  &::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: ${({ $checked }) => ($checked ? theme.colors.white : 'transparent')};
+    transition: background-color 0.2s;
+  }
 `
 
 export const ButtonsContainer = styled.div`
@@ -58,6 +119,10 @@ export const CancelButton = styled.button`
   padding: 12px 20px;
   font-weight: 600;
   cursor: pointer;
+  ${media.down(theme.breakPoints.tablet)} {
+    font-size: 12px;
+    padding: 10px 16px;
+  }
 `
 
 export const DeleteButton = styled.button`
@@ -68,10 +133,8 @@ export const DeleteButton = styled.button`
   padding: 12px 20px;
   font-weight: 600;
   cursor: pointer;
-`
-
-export const OptionWrapper = styled.div`
-  cursor: pointer;
-  display: flex;
-  gap: 8px;
+  ${media.down(theme.breakPoints.tablet)} {
+    font-size: 12px;
+    padding: 10px 16px;
+  }
 `

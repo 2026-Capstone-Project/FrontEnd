@@ -1,4 +1,4 @@
-/** @JsxImportSource @emotion/react */
+/** @jsxImportSource @emotion/react */
 import 'moment/locale/ko'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 
@@ -56,6 +56,7 @@ const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
     isOpen: false,
     eventId: null,
   })
+  const [isModalEditing, setIsModalEditing] = useState(false)
   const { events, addEvent: enqueueEvent, moveEvent, resizeEvent } = useCalendarEvents()
 
   const modalPortalRoot = useMemo(() => {
@@ -71,6 +72,7 @@ const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
     (event: CalendarEvent) => {
       const start = event.start instanceof Date ? event.start : new Date(event.start ?? Date.now())
       setModalDate(start.toISOString())
+      setIsModalEditing(true)
       setModal({ isOpen: true, eventId: event.id ?? null })
     },
     [setModal, setModalDate],
@@ -80,8 +82,14 @@ const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
     const referenceDate = date ?? new Date()
     const eventId = 1
     setModalDate(referenceDate.toISOString())
+    setIsModalEditing(false)
     setModal({ isOpen: true, eventId })
   }, [date, setModal, setModalDate])
+
+  const handleCloseModal = useCallback(() => {
+    setModal({ isOpen: false, eventId: null })
+    setIsModalEditing(false)
+  }, [setModal, setIsModalEditing])
 
   const handleSelectSlot = useCallback(
     (slotInfo: SlotInfo) => {
@@ -233,9 +241,10 @@ const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
         createPortal(
           <AddSchedule
             date={modalDate}
-            onClose={() => setModal({ isOpen: false, eventId: null })}
+            onClose={handleCloseModal}
             mode={mode}
             eventId={modal.eventId}
+            tabsVisible={!isModalEditing}
           />,
           modalPortalRoot,
         )}
@@ -247,9 +256,10 @@ const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
         createPortal(
           <AddSchedule
             date={modalDate}
-            onClose={() => setModal({ isOpen: false, eventId: null })}
+            onClose={handleCloseModal}
             mode={mode}
             eventId={modal.eventId}
+            tabsVisible={!isModalEditing}
           />,
           cardPortalRoot,
         )}

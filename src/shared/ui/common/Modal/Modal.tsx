@@ -21,7 +21,7 @@ export default function Modal({ children, onClick }: TModalprops) {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        zIndex: 1000,
+        zIndex: 20000,
       }}
     >
       <div

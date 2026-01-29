@@ -26,9 +26,11 @@ export const ModalInner = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  position: absolute;
+  top: 0;
 `
 
-export const ModalWrapper = styled.div`
+export const ModalWrapper = styled.div<{ mode: 'modal' | 'inline' }>`
   width: 100%;
   max-width: 90vw;
   width: 420px;
@@ -41,11 +43,15 @@ export const ModalWrapper = styled.div`
   gap: 26px;
   display: flex;
   flex-direction: column;
+  position: absolute;
+  z-index: 10000;
+  top: 0;
+  inset: 0;
   ${media.down(theme.breakPoints.desktop)} {
-    position: absolute;
+    position: fixed;
     align-self: center;
     justify-self: center;
-    z-index: 10000;
+    gap: 0;
   }
 `
 export const ModalHeader = styled.div`
@@ -54,6 +60,18 @@ export const ModalHeader = styled.div`
   justify-content: space-between;
   padding: 30px 24px 0px 24px;
 `
+
+export const ModalHeaderTitle = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+`
+
+export const HeaderExtras = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+`
 export const ModalTitle = styled.h2`
   font-size: 20px;
   font-weight: 600;
@@ -61,6 +79,7 @@ export const ModalTitle = styled.h2`
 `
 export const ModalContent = styled.div`
   display: flex;
+  margin: 10px 0;
   flex-direction: column;
   overflow-y: scroll;
   scrollbar-gutter: stable both-edges;

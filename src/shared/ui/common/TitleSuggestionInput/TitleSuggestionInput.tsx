@@ -1,7 +1,6 @@
 import { type MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from 'react'
+import type { FieldValues, Path, PathValue } from 'react-hook-form'
 import { useFormContext } from 'react-hook-form'
-
-import type { AddScheduleFormValues } from '@/shared/types/event'
 
 import * as S from './TitleSuggestionInput.style'
 
@@ -42,18 +41,20 @@ const getHighlightedSegments = (text: string, query: string) => {
   return segments
 }
 
-type TitleSuggestionInputProps = {
+type TitleSuggestionInputProps<TFieldValues extends FieldValues> = {
+  fieldName: Path<TFieldValues>
   placeholder?: string
   suggestions?: string[]
 }
 
-const TitleSuggestionInput = ({
+const TitleSuggestionInput = <TFieldValues extends FieldValues>({
+  fieldName,
   placeholder = '새로운 일정',
   suggestions = defaultSuggestions,
-}: TitleSuggestionInputProps) => {
-  const { register, watch, setValue } = useFormContext<AddScheduleFormValues>()
-  const eventTitle = watch('eventTitle')
-  const normalizedTitleQuery = eventTitle?.trim() ?? ''
+}: TitleSuggestionInputProps<TFieldValues>) => {
+  const { register, watch, setValue } = useFormContext<TFieldValues>()
+  const rawTitle = watch(fieldName) as PathValue<TFieldValues, typeof fieldName>
+  const normalizedTitleQuery = typeof rawTitle === 'string' ? rawTitle.trim() : ''
   const filteredSuggestions = useMemo(() => {
     if (!normalizedTitleQuery) return []
     const lowerQuery = normalizedTitleQuery.toLowerCase()
@@ -89,14 +90,16 @@ const TitleSuggestionInput = ({
   }, [suggestionsVisible, normalizedTitleQuery])
 
   const handleSelectSuggestion = (value: string) => {
-    setValue('eventTitle', value, { shouldValidate: true })
+    setValue(fieldName, value as PathValue<TFieldValues, typeof fieldName>, {
+      shouldValidate: true,
+    })
     setSuggestionsVisible(false)
     setDismissedTitleQuery(value.trim())
   }
 
   return (
     <S.Wrapper ref={wrapperRef}>
-      <S.Input {...register('eventTitle')} placeholder={placeholder} />
+      <S.Input {...register(fieldName)} placeholder={placeholder} />
       {suggestionsVisible && filteredSuggestions.length > 0 && (
         <S.SuggestionList>
           {filteredSuggestions.map((item) => (
