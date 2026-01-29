@@ -21,7 +21,6 @@ const ContentWrapper = styled.div`
   overflow-x: hidden;
   justify-content: center;
   align-items: flex-start;
-  padding: 24px 48px;
   gap: 32px;
 
   max-width: 1440px;
