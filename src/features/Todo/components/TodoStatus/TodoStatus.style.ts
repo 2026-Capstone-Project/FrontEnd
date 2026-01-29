@@ -18,6 +18,9 @@ export const Wrapper = styled.div`
     linear-gradient(270deg, rgba(189, 210, 211, 0.4) 0%, rgba(238, 238, 238, 0.5) 100%), #fdfdfd;
   ${media.down(theme.breakPoints.desktop)} {
     width: 100%;
+    gap: 10px;
+    padding: 20px 26px;
+    height: fit-content;
   }
 `
 export const StatusBar = styled.div`
@@ -38,6 +41,11 @@ export const StatusInfo = styled.div<{ width: number }>`
   height: 100%;
   padding: 16px 0;
   border-radius: 20px;
+  ${media.down(theme.breakPoints.desktop)} {
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 0;
+  }
 `
 export const Header = styled.div`
   width: 100%;
@@ -50,9 +58,15 @@ export const Description = styled.div`
   font-weight: 600;
   font-size: 20px;
   color: ${theme.colors.black};
+  ${media.down(theme.breakPoints.desktop)} {
+    font-size: 16px;
+  }
 `
 export const Percentage = styled.div`
   font-weight: 700;
   font-size: 24px;
   color: ${theme.colors.primary2};
+  ${media.down(theme.breakPoints.desktop)} {
+    font-size: 20px;
+  }
 `

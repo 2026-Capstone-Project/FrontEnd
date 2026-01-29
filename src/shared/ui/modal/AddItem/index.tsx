@@ -68,11 +68,14 @@ const AddItemModal = ({
     </S.TabControls>
   )
 
-  const portalRoot = useMemo(() => {
+  const inlinePortalRoot = useMemo(() => {
     if (typeof document === 'undefined') return null
     return document.getElementById('desktop-card-area')
   }, [])
-
+  const modalRoot = useMemo(() => {
+    if (typeof document === 'undefined') return null
+    return document.getElementById('modal-root')
+  }, [])
   const layout = (
     <AddModalLayout
       mode={mode}
@@ -106,8 +109,12 @@ const AddItemModal = ({
     </AddModalLayout>
   )
 
-  if (mode === 'inline' && portalRoot) {
-    return createPortal(layout, portalRoot)
+  if (mode === 'inline' && inlinePortalRoot) {
+    return createPortal(layout, inlinePortalRoot)
+  }
+
+  if (mode === 'modal' && modalRoot) {
+    return createPortal(layout, modalRoot)
   }
 
   return layout

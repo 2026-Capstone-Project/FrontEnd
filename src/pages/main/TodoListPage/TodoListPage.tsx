@@ -17,7 +17,11 @@ export default function TodoListPage() {
       </S.Title>
       <S.Wrapper>
         <TodoSection />
-        <div css={{ display: 'flex', width: '100%' }} ref={cardAreaRef} id="desktop-card-area">
+        <div
+          css={{ display: 'flex', width: '100%', flexDirection: 'column', position: 'relative' }}
+          ref={cardAreaRef}
+          id="desktop-card-area"
+        >
           <TodoStatus progress={3} total={5} />
         </div>
       </S.Wrapper>

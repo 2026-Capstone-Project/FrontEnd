@@ -20,7 +20,7 @@ export const Wrapper = styled.div`
   ${media.down(theme.breakPoints.desktop)} {
     display: flex;
     gap: 16px;
-    flex-direction: column;
+    flex-direction: column-reverse;
     align-items: center;
     margin-bottom: 40px;
     .mobile-custom-view-button {

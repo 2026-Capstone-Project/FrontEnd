@@ -26,6 +26,8 @@ export const ModalInner = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  position: absolute;
+  top: 0;
 `
 
 export const ModalWrapper = styled.div<{ mode: 'modal' | 'inline' }>`
@@ -44,8 +46,9 @@ export const ModalWrapper = styled.div<{ mode: 'modal' | 'inline' }>`
   position: absolute;
   z-index: 10000;
   top: 0;
+  inset: 0;
   ${media.down(theme.breakPoints.desktop)} {
-    top: auto;
+    position: fixed;
     align-self: center;
     justify-self: center;
   }

@@ -28,7 +28,7 @@ export const CheckboxContainer = styled.div`
   position: relative;
   width: 36px;
   height: 36px;
-  ${media.down(theme.breakPoints.mobile)} {
+  ${media.down(theme.breakPoints.tablet)} {
     width: 20px;
     height: 20px;
   }
