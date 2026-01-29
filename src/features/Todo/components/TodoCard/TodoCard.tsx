@@ -17,6 +17,7 @@ const TodoCard = ({
   repeat,
   repeatInfo,
   onDoubleClick,
+  isEditing,
 }: {
   id: number
   title: string
@@ -27,11 +28,17 @@ const TodoCard = ({
   repeat?: boolean
   repeatInfo?: string
   onDoubleClick?: MouseEventHandler<HTMLDivElement>
+  isEditing?: boolean
 }) => {
   const [selected, setSelected] = useState(false)
 
   return (
-    <S.Wrapper key={id} $isHighlight={isHighlight} onDoubleClick={onDoubleClick}>
+    <S.Wrapper
+      key={id}
+      $isHighlight={isHighlight}
+      $isEditing={isEditing}
+      onDoubleClick={onDoubleClick}
+    >
       <S.TodoLeftWrapper>
         <TodoCheckbox checked={selected} onChange={() => setSelected(!selected)} />
         <S.TodoInfoWrapper>

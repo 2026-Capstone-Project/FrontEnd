@@ -51,6 +51,7 @@ export const ModalWrapper = styled.div<{ mode: 'modal' | 'inline' }>`
     position: fixed;
     align-self: center;
     justify-self: center;
+    gap: 0;
   }
 `
 export const ModalHeader = styled.div`
@@ -78,6 +79,7 @@ export const ModalTitle = styled.h2`
 `
 export const ModalContent = styled.div`
   display: flex;
+  margin: 10px 0;
   flex-direction: column;
   overflow-y: scroll;
   scrollbar-gutter: stable both-edges;

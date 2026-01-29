@@ -30,6 +30,7 @@ const TodoSection = () => {
     isEdit: false,
   })
   const [addTodoDate, setAddTodoDate] = useState(() => getIsoDateWithOffset(0))
+  const editingCardId = isAddTodoOpen.open && isAddTodoOpen.isEdit ? isAddTodoOpen.id : undefined
 
   const createNewEvent = () => {
     console.log('새로운 할 일 생성 로직 처리')
@@ -103,6 +104,7 @@ const TodoSection = () => {
             priority="HIGH"
             time="17:00"
             onDoubleClick={() => handleCardDoubleClick(todayIso, true, 1)}
+            isEditing={editingCardId === 1}
           />
           <TodoCard
             id={2}
@@ -112,6 +114,7 @@ const TodoSection = () => {
             repeat={true}
             repeatInfo="매일"
             onDoubleClick={() => handleCardDoubleClick(tomorrowIso, true, 2)}
+            isEditing={editingCardId === 2}
           />
           <TodoCard
             id={3}
@@ -120,6 +123,7 @@ const TodoSection = () => {
             time="17:00"
             priority="LOW"
             onDoubleClick={() => handleCardDoubleClick(tomorrowIso, true, 3)}
+            isEditing={editingCardId === 3}
           />
           <TodoCard
             id={4}
@@ -130,6 +134,7 @@ const TodoSection = () => {
             time="22:00"
             priority="HIGH"
             onDoubleClick={() => handleCardDoubleClick(tomorrowIso, true, 4)}
+            isEditing={editingCardId === 4}
           />
         </S.CardList>
       </S.Section>
