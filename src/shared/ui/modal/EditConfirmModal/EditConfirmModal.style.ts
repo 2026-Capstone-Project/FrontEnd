@@ -9,7 +9,7 @@ export const ModalWrapper = styled.div`
   border-radius: 20px;
   box-shadow: 0 0 100px 30px rgba(0, 0, 0, 0.1);
   width: fit-content;
-  max-width: 400px;
+  max-width: 420px;
   gap: 28px;
   display: flex;
   flex-direction: column;

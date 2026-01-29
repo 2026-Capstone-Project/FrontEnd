@@ -30,13 +30,15 @@ export const Wrapper = styled.div`
 export const Title = styled.div`
   font-size: 32px;
   width: 100%;
-
   font-weight: 700;
   display: flex;
   gap: 18px;
   align-items: center;
   div {
     color: ${theme.colors.textColor2};
+  }
+  ${media.down(theme.breakPoints.tablet)} {
+    font-size: 24px;
   }
 `
 export const PageWrapper = styled.div`

@@ -10,7 +10,9 @@ import { createPortal } from 'react-dom'
 import { FormProvider } from 'react-hook-form'
 
 import { useAddTodoForm } from '@/shared/hooks/useAddTodoForm'
+import { useRepeatChangeGuard } from '@/shared/hooks/useRepeatChangeGuard'
 import { theme } from '@/shared/styles/theme'
+import { type AddTodoFormValues } from '@/shared/types/event'
 import Checkbox from '@/shared/ui/common/Checkbox/Checkbox'
 import RepeatTypeGroup from '@/shared/ui/common/RepeatTypeGroup/RepeatTypeGroup'
 import TerminationPanel from '@/shared/ui/common/TerminationPanel/TerminationPanel'
@@ -20,6 +22,7 @@ import CustomDatePicker from '@/shared/ui/modal/AddTodo/components/CustomDatePic
 import CustomTimePicker from '@/shared/ui/modal/AddTodo/components/CustomTimePicker/CustomTimePicker'
 import * as S from '@/shared/ui/modal/AddTodo/index.style'
 import DeleteConfirmModal from '@/shared/ui/modal/DeleteConfirmModal/DeleteConfirmModal'
+import EditConfirmModal from '@/shared/ui/modal/EditConfirmModal/EditConfirmModal'
 import { formatDisplayDate } from '@/shared/utils/date'
 
 type AddTodoFormProps = {
@@ -28,6 +31,7 @@ type AddTodoFormProps = {
   mode?: 'modal' | 'inline'
   eventId: number
   onClose: () => void
+  isEditing?: boolean
 }
 
 const AddTodoForm = ({
@@ -36,6 +40,7 @@ const AddTodoForm = ({
   eventId,
   onClose,
   registerDeleteHandler,
+  isEditing = false,
 }: AddTodoFormProps) => {
   const {
     formMethods,
@@ -56,7 +61,7 @@ const AddTodoForm = ({
     todoDate,
     todoTitle,
   } = useAddTodoForm({ date, id: eventId })
-  const { register } = formMethods
+  const { register, setValue } = formMethods
   const [calendarAnchor, setCalendarAnchor] = useState<DOMRect | null>(null)
   const [deleteWarningVisible, setDeleteWarningVisible] = useState(false)
   const [isMobileLayout, setIsMobileLayout] = useState(() => {
@@ -104,10 +109,40 @@ const AddTodoForm = ({
   const isInlineMode = mode === 'inline'
   const shouldShowModalOverlay = !isInlineMode && activeCalendarField
 
+  // 편집 모드에서 반복 변경을 가드해 확인 또는 취소가 가능하도록 합니다.
+  const {
+    isOpen: isEditConfirmOpen,
+    confirmChange,
+    revertChange,
+    requestConfirmation,
+  } = useRepeatChangeGuard({
+    repeatConfig,
+    isEditing,
+    setValue,
+  })
+  const [pendingTodoValues, setPendingTodoValues] = useState<AddTodoFormValues | null>(null)
+
   const handleFormSubmit = handleSubmit((values) => {
+    if (requestConfirmation()) {
+      setPendingTodoValues(values)
+      return
+    }
     onSubmit(values)
     onClose()
   })
+
+  const handleConfirmedSubmit = useCallback(() => {
+    if (!pendingTodoValues) return
+    confirmChange()
+    onSubmit(pendingTodoValues)
+    onClose()
+    setPendingTodoValues(null)
+  }, [confirmChange, onSubmit, onClose, pendingTodoValues])
+
+  const handleCancelRepeat = useCallback(() => {
+    revertChange()
+    setPendingTodoValues(null)
+  }, [revertChange])
 
   const handleDelete = useCallback(() => {
     if (repeatConfig.repeatType !== 'none') {
@@ -202,6 +237,13 @@ const AddTodoForm = ({
         <DeleteConfirmModal
           title={todoTitle || '새로운 이벤트'}
           onClose={() => setDeleteWarningVisible(false)}
+        />
+      )}
+      {isEditConfirmOpen && (
+        <EditConfirmModal
+          title={todoTitle || '할 일'}
+          onCancel={handleCancelRepeat}
+          onConfirm={handleConfirmedSubmit}
         />
       )}
     </>

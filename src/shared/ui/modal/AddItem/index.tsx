@@ -16,6 +16,7 @@ type AddItemModalProps = {
   eventId: number
   defaultType?: ActiveType
   tabsVisible?: boolean
+  isEditing?: boolean
 }
 
 const AddItemModal = ({
@@ -25,6 +26,7 @@ const AddItemModal = ({
   eventId,
   defaultType = 'todo',
   tabsVisible = true,
+  isEditing = false,
 }: AddItemModalProps) => {
   const [activeType, setActiveType] = useState<ActiveType>(defaultType)
   const [footerChildren, setFooterChildren] = useState<ReactNode | null>(null)
@@ -88,6 +90,7 @@ const AddItemModal = ({
           mode={mode}
           onClose={onClose}
           registerDeleteHandler={registerDeleteHandler}
+          isEditing={isEditing}
         />
       ) : (
         <AddScheduleForm
@@ -97,6 +100,7 @@ const AddItemModal = ({
           onClose={onClose}
           registerDeleteHandler={registerDeleteHandler}
           registerFooterChildren={registerFooterChildren}
+          isEditing={isEditing}
         />
       )}
     </AddModalLayout>

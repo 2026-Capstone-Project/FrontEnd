@@ -11,7 +11,9 @@ import { createPortal } from 'react-dom'
 import { FormProvider } from 'react-hook-form'
 
 import { useAddScheduleForm } from '@/shared/hooks/useAddScheduleForm'
+import { useRepeatChangeGuard } from '@/shared/hooks/useRepeatChangeGuard'
 import { theme } from '@/shared/styles/theme'
+import { type AddScheduleFormValues } from '@/shared/types/event'
 import Checkbox from '@/shared/ui/common/Checkbox/Checkbox'
 import RepeatTypeGroup from '@/shared/ui/common/RepeatTypeGroup/RepeatTypeGroup'
 import TerminationPanel from '@/shared/ui/common/TerminationPanel/TerminationPanel'
@@ -23,6 +25,7 @@ import SearchPlace from '@/shared/ui/modal/AddSchedule/components/SearchPlace/Se
 import SelectColor from '@/shared/ui/modal/AddSchedule/components/SelectColor/SelectColor'
 import * as S from '@/shared/ui/modal/AddSchedule/index.style'
 import DeleteConfirmModal from '@/shared/ui/modal/DeleteConfirmModal/DeleteConfirmModal'
+import EditConfirmModal from '@/shared/ui/modal/EditConfirmModal/EditConfirmModal'
 import { formatDisplayDate } from '@/shared/utils/date'
 
 type AddScheduleFormProps = {
@@ -32,6 +35,7 @@ type AddScheduleFormProps = {
   mode?: 'modal' | 'inline'
   eventId: number
   onClose: () => void
+  isEditing?: boolean
 }
 
 const AddScheduleForm = ({
@@ -40,6 +44,7 @@ const AddScheduleForm = ({
   onClose,
   registerDeleteHandler,
   registerFooterChildren,
+  isEditing = false,
 }: AddScheduleFormProps) => {
   const {
     formMethods,
@@ -66,7 +71,7 @@ const AddScheduleForm = ({
     openSearchPlace,
     eventTitle,
   } = useAddScheduleForm({ date })
-  const { register } = formMethods
+  const { register, setValue } = formMethods
 
   const [calendarAnchor, setCalendarAnchor] = useState<DOMRect | null>(null)
   const [deleteWarningVisible, setDeleteWarningVisible] = useState(false)
@@ -143,10 +148,42 @@ const AddScheduleForm = ({
   const isInlineMode = mode === 'inline'
   const shouldShowModalOverlay = !isInlineMode && (activeCalendarField || isSearchPlaceOpen)
 
+  // 반복 변경 시 편집 확인 모달이 뜨도록 guard 훅을 재사용합니다.
+  const {
+    isOpen: isEditConfirmOpen,
+    confirmChange,
+    revertChange,
+    requestConfirmation,
+  } = useRepeatChangeGuard({
+    repeatConfig,
+    isEditing,
+    setValue,
+  })
+  const [pendingScheduleValues, setPendingScheduleValues] = useState<AddScheduleFormValues | null>(
+    null,
+  )
+
   const handleFormSubmit = handleSubmit((values) => {
+    if (requestConfirmation()) {
+      setPendingScheduleValues(values)
+      return
+    }
     onSubmit(values)
     onClose()
   })
+
+  const handleConfirmedSubmit = useCallback(() => {
+    if (!pendingScheduleValues) return
+    confirmChange()
+    onSubmit(pendingScheduleValues)
+    onClose()
+    setPendingScheduleValues(null)
+  }, [confirmChange, onSubmit, onClose, pendingScheduleValues])
+
+  const handleCancelRepeat = useCallback(() => {
+    revertChange()
+    setPendingScheduleValues(null)
+  }, [revertChange])
 
   const handleDelete = useCallback(() => {
     if (repeatConfig.repeatType !== 'none') {
@@ -277,6 +314,13 @@ const AddScheduleForm = ({
         <DeleteConfirmModal
           title={eventTitle || '새로운 이벤트'}
           onClose={() => setDeleteWarningVisible(false)}
+        />
+      )}
+      {isEditConfirmOpen && (
+        <EditConfirmModal
+          title={eventTitle || '일정'}
+          onCancel={handleCancelRepeat}
+          onConfirm={handleConfirmedSubmit}
         />
       )}
     </>
