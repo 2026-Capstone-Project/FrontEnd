@@ -1,3 +1,4 @@
+/** @JSXImportSource @emotion/react */
 import Check from '@/shared/assets/icons/check.svg?react'
 import Close from '@/shared/assets/icons/close.svg?react'
 import Trash from '@/shared/assets/icons/trash-2.svg?react'
@@ -10,8 +11,9 @@ const AddModalLayout = ({
   type,
   footerChildren,
   submitFormId,
-  embedded,
   handleDelete,
+  headerExtras,
+  mode,
 }: {
   title?: string
   onClose: () => void
@@ -19,9 +21,9 @@ const AddModalLayout = ({
   type: 'todo' | 'schedule'
   footerChildren?: React.ReactNode
   submitFormId?: string
-  embedded?: boolean
-
+  mode: 'modal' | 'inline'
   handleDelete?: () => void
+  headerExtras?: React.ReactNode
 }) => {
   // TODO: Button -> 추후 공용 컴포넌트로 분리 필요
   const modalTitle = title ? title : type === 'todo' ? '새로운 할 일' : '새로운 일정'
@@ -31,25 +33,28 @@ const AddModalLayout = ({
         event.stopPropagation()
       }}
     >
-      <S.ModalWrapper>
+      <S.ModalWrapper mode={mode}>
         <S.ModalHeader>
-          <S.ModalTitle>{modalTitle}</S.ModalTitle>
+          <S.ModalHeaderTitle>
+            <S.ModalTitle>{modalTitle}</S.ModalTitle>
+            {headerExtras && <S.HeaderExtras>{headerExtras}</S.HeaderExtras>}
+          </S.ModalHeaderTitle>
           <Close onClick={onClose} />
         </S.ModalHeader>
         <S.ModalContent>{children}</S.ModalContent>
         <S.ModalFooter>
           <S.FooterLeft>{type === 'schedule' && footerChildren}</S.FooterLeft>
           <S.FooterRight>
-            <Trash onClick={handleDelete} />
+            <Trash onClick={handleDelete} css={{ cursor: 'pointer' }} />
             <S.Button type="submit" form={submitFormId}>
-              <Check />
+              <Check color="#ffffff" />
             </S.Button>
           </S.FooterRight>
         </S.ModalFooter>
       </S.ModalWrapper>
     </S.ModalInner>
   )
-  return embedded ? (
+  return mode === 'inline' ? (
     <S.InlineWrapper>{layoutContent}</S.InlineWrapper>
   ) : (
     <S.ModalOverlay onClick={onClose}>{layoutContent}</S.ModalOverlay>

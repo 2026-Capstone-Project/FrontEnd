@@ -44,7 +44,6 @@ export const useScheduleFormFields = ({
       eventStartTime: '09:00',
       eventEndTime: '10:00',
       isAllday,
-      rotate: null,
       eventColor: 'sky',
       repeatConfig: defaultRepeatConfig as RepeatConfigSchema,
     },

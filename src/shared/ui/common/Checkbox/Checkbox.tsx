@@ -25,7 +25,7 @@ const Checkbox = ({
           onChange={onChange}
         />
         <S.CheckIcon isVisible={checked}>
-          <Check width={12} height={12} />
+          <Check color="#ffffff" width={12} height={12} />
         </S.CheckIcon>
       </S.CheckboxContainer>
       {label && <label htmlFor={id}>{label}</label>}
