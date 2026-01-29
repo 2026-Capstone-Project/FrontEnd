@@ -19,6 +19,9 @@ export const Checkbox = styled.input<CheckboxColorProps>`
     isChecked ? (activeColor ?? theme.colors.primary2) : (inactiveColor ?? '#e8e8e8')};
   cursor: pointer;
   transition: background-color 150ms ease;
+  ${media.down(theme.breakPoints.tablet)} {
+    border-radius: 6px;
+  }
 `
 
 export const CheckboxContainer = styled.div`
@@ -26,8 +29,8 @@ export const CheckboxContainer = styled.div`
   width: 36px;
   height: 36px;
   ${media.down(theme.breakPoints.mobile)} {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
   }
 `
 
@@ -39,15 +42,14 @@ export const CheckIcon = styled.div`
   justify-content: center;
   transition: opacity 150ms ease;
   pointer-events: none;
+  svg {
+    width: 50%;
+    height: 50%;
+  }
 `
 
 export const CheckboxWrapper = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px;
-  font-weight: 400;
-  ${media.down(theme.breakPoints.mobile)} {
-    font-size: 14px;
-  }
 `

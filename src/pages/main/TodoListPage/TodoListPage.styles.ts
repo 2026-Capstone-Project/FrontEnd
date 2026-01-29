@@ -22,6 +22,7 @@ export const Wrapper = styled.div`
     gap: 16px;
     flex-direction: column;
     align-items: center;
+    margin-bottom: 40px;
     .mobile-custom-view-button {
       display: block;
     }

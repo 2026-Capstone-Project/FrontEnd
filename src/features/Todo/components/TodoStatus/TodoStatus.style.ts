@@ -1,5 +1,6 @@
 import styled from '@emotion/styled'
 
+import { media } from '@/shared/styles/media'
 import { theme } from '@/shared/styles/theme'
 export const Wrapper = styled.div`
   display: flex;
@@ -15,6 +16,9 @@ export const Wrapper = styled.div`
   background:
     linear-gradient(0deg, #f5f5f5 0%, #f5f5f5 100%),
     linear-gradient(270deg, rgba(189, 210, 211, 0.4) 0%, rgba(238, 238, 238, 0.5) 100%), #fdfdfd;
+  ${media.down(theme.breakPoints.desktop)} {
+    width: 100%;
+  }
 `
 export const StatusBar = styled.div`
   width: 100%;

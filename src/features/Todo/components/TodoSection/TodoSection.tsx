@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+import Plus from '@/shared/assets/icons/plus.svg?react'
 import { theme } from '@/shared/styles/theme'
 import AddTodoModal from '@/shared/ui/modal/AddTodo'
 
@@ -90,7 +91,7 @@ const TodoSection = () => {
             type="button"
             onClick={() => handleCardDoubleClick(todayIso, false, undefined)}
           >
-            할 일 추가 +
+            <label>할 일 추가</label> <Plus color="white" width={15} height={15} />
           </button>
         </S.Header>
         <S.CardList>
@@ -138,6 +139,7 @@ const TodoSection = () => {
           onClose={closeAddTodoModal}
           eventId={isAddTodoOpen.id}
           tabsVisible={!isAddTodoOpen.isEdit}
+          isEditing={isAddTodoOpen.isEdit}
           mode={isDesktop ? 'inline' : 'modal'}
         />
       )}

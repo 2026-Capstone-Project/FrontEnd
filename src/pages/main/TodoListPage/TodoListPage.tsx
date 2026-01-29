@@ -1,3 +1,4 @@
+/** @JsxImportSource @emotion/react */
 import { useRef } from 'react'
 
 import TodoSection from '@/features/Todo/components/TodoSection/TodoSection'
@@ -16,7 +17,7 @@ export default function TodoListPage() {
       </S.Title>
       <S.Wrapper>
         <TodoSection />
-        <div ref={cardAreaRef} id="desktop-card-area">
+        <div css={{ display: 'flex', width: '100%' }} ref={cardAreaRef} id="desktop-card-area">
           <TodoStatus progress={3} total={5} />
         </div>
       </S.Wrapper>

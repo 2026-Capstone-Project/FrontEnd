@@ -32,7 +32,7 @@ const TodoCheckbox = ({
           onChange={onChange}
         />
         <S.CheckIcon>
-          <Check width={20} height={20} color={checkColor} />
+          <Check color={checkColor} />
         </S.CheckIcon>
       </S.CheckboxContainer>
       {label && <label htmlFor={id}>{label}</label>}

@@ -47,7 +47,7 @@ const TodoCard = ({
                   color: theme.colors.textColor3,
                 }}
               >
-                <Repeat width={20} height={20} /> {repeatInfo}
+                <Repeat width={20} height={20} /> <div className="repeat-info">{repeatInfo}</div>
               </div>
             )}
           </S.Info>
