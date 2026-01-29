@@ -22,11 +22,13 @@ import CustomDatePicker from '@/shared/ui/modal/AddTodo/components/CustomDatePic
 import CustomTimePicker from '@/shared/ui/modal/AddTodo/components/CustomTimePicker/CustomTimePicker'
 import * as S from '@/shared/ui/modal/AddTodo/index.style'
 import DeleteConfirmModal from '@/shared/ui/modal/DeleteConfirmModal/DeleteConfirmModal'
-import EditConfirmModal from '@/shared/ui/modal/EditConfirmModal/EditConfirmModal'
+import EditConfirmModal, {
+  type EditConfirmOption,
+} from '@/shared/ui/modal/EditConfirmModal/EditConfirmModal'
 import { formatDisplayDate } from '@/shared/utils/date'
 
 type AddTodoFormProps = {
-  registerDeleteHandler?: (handler: () => void) => void
+  registerDeleteHandler?: (handler?: () => void) => void
   date: string
   mode?: 'modal' | 'inline'
   eventId: number
@@ -131,13 +133,17 @@ const AddTodoForm = ({
     onClose()
   })
 
-  const handleConfirmedSubmit = useCallback(() => {
-    if (!pendingTodoValues) return
-    confirmChange()
-    onSubmit(pendingTodoValues)
-    onClose()
-    setPendingTodoValues(null)
-  }, [confirmChange, onSubmit, onClose, pendingTodoValues])
+  const handleConfirmedSubmit = useCallback(
+    (option: EditConfirmOption) => {
+      void option
+      if (!pendingTodoValues) return
+      confirmChange()
+      onSubmit(pendingTodoValues)
+      onClose()
+      setPendingTodoValues(null)
+    },
+    [confirmChange, onSubmit, onClose, pendingTodoValues],
+  )
 
   const handleCancelRepeat = useCallback(() => {
     revertChange()
@@ -155,7 +161,7 @@ const AddTodoForm = ({
 
   useEffect(() => {
     registerDeleteHandler?.(handleDelete)
-    return () => registerDeleteHandler?.(() => undefined)
+    return () => registerDeleteHandler?.()
   }, [handleDelete, registerDeleteHandler])
 
   return (

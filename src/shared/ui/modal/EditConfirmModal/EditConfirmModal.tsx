@@ -4,6 +4,9 @@ import { createPortal } from 'react-dom'
 import Modal from '../../common/Modal/Modal'
 import * as S from './EditConfirmModal.style'
 
+const optionValues = ['single', 'future', 'all'] as const
+export type EditConfirmOption = (typeof optionValues)[number]
+
 const EditConfirmModal = ({
   title,
   onCancel,
@@ -11,38 +14,38 @@ const EditConfirmModal = ({
 }: {
   title: string
   onCancel?: () => void
-  onConfirm?: () => void
+  onConfirm?: (option: EditConfirmOption) => void
 }) => {
   const radioName = useId()
-  const [selectedOption, setSelectedOption] = useState<'single' | 'future' | 'all'>('single')
-
-  const options = [
-    { value: 'single', label: '이 이벤트에 대해서만 적용' },
-    { value: 'future', label: '이 이벤트부터 이후 이벤트' },
-    { value: 'all', label: `모든 "${title}" 이벤트에 대해 적용` },
-  ] as const
+  const [selectedOption, setSelectedOption] = useState<EditConfirmOption>('single')
 
   return createPortal(
     <Modal onClick={onCancel}>
       <S.ModalWrapper>
         <S.Title>이 변경사항을 어떻게 적용할까요?</S.Title>
         <S.OptionsContainer>
-          {options.map((option) => {
-            const optionId = `${radioName}-${option.value}`
-            const isChecked = selectedOption === option.value
+          {optionValues.map((value) => {
+            const optionId = `${radioName}-${value}`
+            const isChecked = selectedOption === value
+            const label =
+              value === 'single'
+                ? '이 이벤트에 대해서만 적용'
+                : value === 'future'
+                  ? '이 이벤트부터 이후 이벤트'
+                  : `모든 "${title}" 이벤트에 대해 적용`
             return (
-              <S.OptionWrapper key={option.value}>
+              <S.OptionWrapper key={value}>
                 <S.HiddenRadio
                   id={optionId}
                   name={radioName}
                   type="radio"
-                  value={option.value}
+                  value={value}
                   checked={isChecked}
-                  onChange={() => setSelectedOption(option.value)}
+                  onChange={() => setSelectedOption(value)}
                 />
                 <S.OptionLabel htmlFor={optionId}>
                   <S.RadioIndicator $checked={isChecked} />
-                  {option.label}
+                  {label}
                 </S.OptionLabel>
               </S.OptionWrapper>
             )
@@ -52,7 +55,7 @@ const EditConfirmModal = ({
           <S.CancelButton onClick={onCancel}>취소</S.CancelButton>
           <S.EditButton
             onClick={() => {
-              onConfirm?.()
+              onConfirm?.(selectedOption)
             }}
           >
             이벤트 수정

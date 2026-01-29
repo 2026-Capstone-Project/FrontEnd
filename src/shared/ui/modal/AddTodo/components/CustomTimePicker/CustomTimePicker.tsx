@@ -1,42 +1,63 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 import type { TimePickerRenderProps } from '@/shared/types/event'
 
 import * as S from './CustomTimePicker.style'
 
-const CustomTimePicker = ({ value, onChange }: TimePickerRenderProps) => {
-  const [hour, setHour] = useState(value?.split(':')[0] || '09')
-  const [minute, setMinute] = useState(value?.split(':')[1] || '00')
+const getTimeParts = (time?: string) => {
+  const [nextHour = '09', nextMinute = '00'] = (time ?? '09:00').split(':')
+  return { nextHour, nextMinute }
+}
+
+const CustomTimePicker = ({ value = '09:00', onChange }: TimePickerRenderProps) => {
+  const hourRef = useRef<HTMLInputElement | null>(null)
+  const minuteRef = useRef<HTMLInputElement | null>(null)
+  const { nextHour: initialHour, nextMinute: initialMinute } = getTimeParts(value)
 
   useEffect(() => {
-    if (!value) return
-    const [nextHour = '00', nextMinute = '00'] = value.split(':')
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setHour(nextHour)
-    setMinute(nextMinute)
+    const { nextHour, nextMinute } = getTimeParts(value)
+    if (hourRef.current && hourRef.current.value !== nextHour) {
+      hourRef.current.value = nextHour
+    }
+    if (minuteRef.current && minuteRef.current.value !== nextMinute) {
+      minuteRef.current.value = nextMinute
+    }
   }, [value])
 
   // 입력값 검증 및 업데이트 (시: 0-23, 분: 0-59)
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'hour' | 'minute') => {
-    let val = e.target.value.replace(/[^0-9]/g, '').slice(0, 2) // 숫자만 2자리까지
+  const sanitizeDigits = (value: string) => value.replace(/[^0-9]/g, '').slice(0, 2)
+  const formatTwoDigits = (value?: string) => value?.padStart(2, '0') ?? '00'
 
-    if (type === 'hour') {
-      if (parseInt(val) > 23) val = '23'
-      setHour(val)
-      if (val.length === 2) onChange(`${val}:${minute}`)
-    } else {
-      if (parseInt(val) > 59) val = '59'
-      setMinute(val)
-      if (val.length === 2) onChange(`${hour}:${val}`)
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'hour' | 'minute') => {
+    const max = type === 'hour' ? 23 : 59
+    const digits = sanitizeDigits(e.target.value)
+    let val = digits
+    if (digits.length > 0) {
+      const numeric = Number(digits)
+      if (!Number.isNaN(numeric)) {
+        const clamped = Math.min(Math.max(numeric, 0), max)
+        val = clamped.toString().padStart(digits.length, '0')
+      }
+    }
+    e.target.value = val
+
+    if (type === 'hour' && val.length === 2) {
+      const currentMinute = minuteRef.current?.value ?? initialMinute
+      onChange(`${val}:${formatTwoDigits(currentMinute)}`)
+    }
+
+    if (type === 'minute' && val.length === 2) {
+      const currentHour = hourRef.current?.value ?? initialHour
+      onChange(`${formatTwoDigits(currentHour)}:${val}`)
     }
   }
 
   // 포커스 아웃 시 1자리 숫자를 2자리로 보정 (예: '9' -> '09')
   const handleBlur = () => {
-    const formattedHour = hour.padStart(2, '0')
-    const formattedMin = minute.padStart(2, '0')
-    setHour(formattedHour)
-    setMinute(formattedMin)
+    const formattedHour = formatTwoDigits(hourRef.current?.value ?? initialHour)
+    const formattedMin = formatTwoDigits(minuteRef.current?.value ?? initialMinute)
+    if (hourRef.current) hourRef.current.value = formattedHour
+    if (minuteRef.current) minuteRef.current.value = formattedMin
     onChange(`${formattedHour}:${formattedMin}`)
   }
 
@@ -47,7 +68,8 @@ const CustomTimePicker = ({ value, onChange }: TimePickerRenderProps) => {
           type="text"
           inputMode="numeric"
           pattern="[0-9]*"
-          value={hour}
+          defaultValue={initialHour}
+          ref={hourRef}
           onChange={(e) => handleInputChange(e, 'hour')}
           onBlur={handleBlur}
           placeholder="HH"
@@ -57,7 +79,8 @@ const CustomTimePicker = ({ value, onChange }: TimePickerRenderProps) => {
           type="text"
           inputMode="numeric"
           pattern="[0-9]*"
-          value={minute}
+          defaultValue={initialMinute}
+          ref={minuteRef}
           onChange={(e) => handleInputChange(e, 'minute')}
           onBlur={handleBlur}
           placeholder="mm"

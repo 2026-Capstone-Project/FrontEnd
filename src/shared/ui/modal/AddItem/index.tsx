@@ -31,10 +31,14 @@ const AddItemModal = ({
   const [activeType, setActiveType] = useState<ActiveType>(defaultType)
   const [footerChildren, setFooterChildren] = useState<ReactNode | null>(null)
   const [deleteHandler, setDeleteHandler] = useState<() => void>(() => () => undefined)
+  const noopDeleteHandler = useCallback(() => undefined, [])
 
-  const registerDeleteHandler = useCallback((handler: () => void) => {
-    setDeleteHandler(() => handler)
-  }, [])
+  const registerDeleteHandler = useCallback(
+    (handler?: (() => void) | null) => {
+      setDeleteHandler(() => handler ?? noopDeleteHandler)
+    },
+    [noopDeleteHandler],
+  )
 
   const registerFooterChildren = useCallback((node: React.ReactNode | null) => {
     setFooterChildren(node)

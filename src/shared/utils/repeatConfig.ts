@@ -1,12 +1,6 @@
 import { type RepeatConfigSchema } from '@/shared/types/event'
 
-const serializeRepeatConfig = (config: RepeatConfigSchema) => {
-  try {
-    return JSON.stringify(config)
-  } catch {
-    return
-  }
-}
+const serializeRepeatConfig = (config: RepeatConfigSchema) => JSON.stringify(config)
 
 export const areRepeatConfigsEqual = (
   left: RepeatConfigSchema,

@@ -25,11 +25,13 @@ import SearchPlace from '@/shared/ui/modal/AddSchedule/components/SearchPlace/Se
 import SelectColor from '@/shared/ui/modal/AddSchedule/components/SelectColor/SelectColor'
 import * as S from '@/shared/ui/modal/AddSchedule/index.style'
 import DeleteConfirmModal from '@/shared/ui/modal/DeleteConfirmModal/DeleteConfirmModal'
-import EditConfirmModal from '@/shared/ui/modal/EditConfirmModal/EditConfirmModal'
+import EditConfirmModal, {
+  type EditConfirmOption,
+} from '@/shared/ui/modal/EditConfirmModal/EditConfirmModal'
 import { formatDisplayDate } from '@/shared/utils/date'
 
 type AddScheduleFormProps = {
-  registerDeleteHandler?: (handler: () => void) => void
+  registerDeleteHandler?: (handler?: () => void) => void
   registerFooterChildren?: (node: ReactNode | null) => void
   date: string
   mode?: 'modal' | 'inline'
@@ -172,13 +174,17 @@ const AddScheduleForm = ({
     onClose()
   })
 
-  const handleConfirmedSubmit = useCallback(() => {
-    if (!pendingScheduleValues) return
-    confirmChange()
-    onSubmit(pendingScheduleValues)
-    onClose()
-    setPendingScheduleValues(null)
-  }, [confirmChange, onSubmit, onClose, pendingScheduleValues])
+  const handleConfirmedSubmit = useCallback(
+    (option: EditConfirmOption) => {
+      void option
+      if (!pendingScheduleValues) return
+      confirmChange()
+      onSubmit(pendingScheduleValues)
+      onClose()
+      setPendingScheduleValues(null)
+    },
+    [confirmChange, onSubmit, onClose, pendingScheduleValues],
+  )
 
   const handleCancelRepeat = useCallback(() => {
     revertChange()
@@ -195,7 +201,7 @@ const AddScheduleForm = ({
 
   useEffect(() => {
     registerDeleteHandler?.(handleDelete)
-    return () => registerDeleteHandler?.(() => undefined)
+    return () => registerDeleteHandler?.()
   }, [handleDelete, registerDeleteHandler])
 
   useEffect(() => {
