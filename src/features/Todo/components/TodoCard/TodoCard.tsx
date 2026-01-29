@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { type MouseEventHandler, useState } from 'react'
 
 import Repeat from '@/shared/assets/icons/rotate.svg?react'
 import Trash from '@/shared/assets/icons/trash-2.svg?react'
@@ -8,6 +8,7 @@ import PriorityBadge from '../ImportantBadge/PriorityBadge'
 import TodoCheckbox from '../TodoCheckbox/TodoCheckbox'
 import * as S from './TodoCard.style'
 const TodoCard = ({
+  id,
   title,
   date,
   isHighlight,
@@ -15,7 +16,9 @@ const TodoCard = ({
   priority,
   repeat,
   repeatInfo,
+  onDoubleClick,
 }: {
+  id: number
   title: string
   date: string
   time?: string
@@ -23,11 +26,12 @@ const TodoCard = ({
   priority: 'HIGH' | 'MEDIUM' | 'LOW'
   repeat?: boolean
   repeatInfo?: string
+  onDoubleClick?: MouseEventHandler<HTMLDivElement>
 }) => {
   const [selected, setSelected] = useState(false)
 
   return (
-    <S.Wrapper $isHighlight={isHighlight}>
+    <S.Wrapper key={id} $isHighlight={isHighlight} onDoubleClick={onDoubleClick}>
       <S.TodoLeftWrapper>
         <TodoCheckbox checked={selected} onChange={() => setSelected(!selected)} />
         <S.TodoInfoWrapper>

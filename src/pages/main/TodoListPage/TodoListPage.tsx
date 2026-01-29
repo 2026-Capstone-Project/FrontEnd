@@ -11,13 +11,14 @@ export default function TodoListPage() {
   return (
     <S.PageWrapper>
       <S.Title>
-        Todo Section Component
+        2025년 12월 4주차
         <div>TO DO</div>
       </S.Title>
       <S.Wrapper>
         <TodoSection />
-        <TodoStatus progress={3} total={5} />
-        <div ref={cardAreaRef} id="desktop-card-area" />
+        <div ref={cardAreaRef} id="desktop-card-area">
+          <TodoStatus progress={3} total={5} />
+        </div>
       </S.Wrapper>
     </S.PageWrapper>
   )

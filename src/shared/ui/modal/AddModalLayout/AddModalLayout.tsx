@@ -10,8 +10,9 @@ const AddModalLayout = ({
   type,
   footerChildren,
   submitFormId,
-  embedded,
   handleDelete,
+  headerExtras,
+  mode,
 }: {
   title?: string
   onClose: () => void
@@ -19,9 +20,11 @@ const AddModalLayout = ({
   type: 'todo' | 'schedule'
   footerChildren?: React.ReactNode
   submitFormId?: string
-  embedded?: boolean
+
+  mode: 'modal' | 'inline'
 
   handleDelete?: () => void
+  headerExtras?: React.ReactNode
 }) => {
   // TODO: Button -> 추후 공용 컴포넌트로 분리 필요
   const modalTitle = title ? title : type === 'todo' ? '새로운 할 일' : '새로운 일정'
@@ -31,9 +34,12 @@ const AddModalLayout = ({
         event.stopPropagation()
       }}
     >
-      <S.ModalWrapper>
+      <S.ModalWrapper mode={mode}>
         <S.ModalHeader>
-          <S.ModalTitle>{modalTitle}</S.ModalTitle>
+          <S.ModalHeaderTitle>
+            <S.ModalTitle>{modalTitle}</S.ModalTitle>
+            {headerExtras && <S.HeaderExtras>{headerExtras}</S.HeaderExtras>}
+          </S.ModalHeaderTitle>
           <Close onClick={onClose} />
         </S.ModalHeader>
         <S.ModalContent>{children}</S.ModalContent>
@@ -42,14 +48,14 @@ const AddModalLayout = ({
           <S.FooterRight>
             <Trash onClick={handleDelete} />
             <S.Button type="submit" form={submitFormId}>
-              <Check />
+              <Check color="#ffffff" />
             </S.Button>
           </S.FooterRight>
         </S.ModalFooter>
       </S.ModalWrapper>
     </S.ModalInner>
   )
-  return embedded ? (
+  return mode === 'inline' ? (
     <S.InlineWrapper>{layoutContent}</S.InlineWrapper>
   ) : (
     <S.ModalOverlay onClick={onClose}>{layoutContent}</S.ModalOverlay>

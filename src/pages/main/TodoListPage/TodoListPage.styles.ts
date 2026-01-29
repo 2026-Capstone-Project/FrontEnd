@@ -10,6 +10,7 @@ export const Wrapper = styled.div`
   justify-self: center;
   gap: 32px;
   width: 100%;
+  height: 100%;
   flex: 1;
   max-width: 1440px;
   position: relative;

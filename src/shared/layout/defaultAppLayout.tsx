@@ -16,15 +16,14 @@ const ContentWrapper = styled.div`
   flex-direction: row;
   justify-self: center;
   align-self: flex-start;
-  height: fit-content;
+  height: 100%;
   min-height: 100%;
   display: flex;
   overflow-x: hidden;
   justify-content: center;
   align-items: flex-start;
-  padding: 24px 48px;
+  padding: 24px 48px 0 48px;
   gap: 32px;
-
   max-width: 1440px;
   width: 100%;
   ${media.down(theme.breakPoints.tablet)} {
