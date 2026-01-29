@@ -3,7 +3,7 @@ import * as yup from 'yup'
 import { EVENT_COLORS } from '@/shared/constants/event'
 import type { EventColorType } from '@/shared/types/event'
 
-import { DateSchema, description, isAllday, repeatConfigSchema, rotate, title } from './common'
+import { DateSchema, description, isAllday, repeatConfigSchema, title } from './common'
 
 // 날짜/시간/색상 입력은 필수로 받으며, 종료 시간은 시작 시간 이후여야 합니다.
 const eventStartTime = yup.string().required('시작 시간은 필수 입력 사항입니다.')
@@ -31,7 +31,6 @@ export const addScheduleSchema = yup.object().shape({
   eventStartTime,
   eventEndTime,
   isAllday,
-  rotate,
   eventColor,
   repeatConfig: repeatConfigSchema,
 })

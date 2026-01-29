@@ -35,7 +35,6 @@ export const useTodoFormFields = ({
       todoDate: new Date(date),
       todoEndTime: '10:00',
       isAllday,
-      rotate: null,
       repeatConfig: defaultRepeatConfig as RepeatConfigSchema,
     },
   })

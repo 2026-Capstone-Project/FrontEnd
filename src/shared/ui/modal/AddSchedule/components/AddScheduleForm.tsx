@@ -37,12 +37,10 @@ type AddScheduleFormProps = {
 const AddScheduleForm = ({
   date,
   mode = 'modal',
-  eventId,
   onClose,
   registerDeleteHandler,
   registerFooterChildren,
 }: AddScheduleFormProps) => {
-  console.log('편집할 이벤트 ID:', eventId)
   const {
     formMethods,
     activeCalendarField,

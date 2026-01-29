@@ -7,7 +7,7 @@ export const colors = {
   textColor2: '#505050', // --Text-Color-2
   textColor3: '#757575', // --Text-Color-3
   inputColor: '#F7F7F7',
-  red: '#080505', // --Red
+  red: '#E94B43', // --Red
 
   white: '#FDFDFD', // 메뉴 탭
   background: '#FAFAFA', // 전체 바탕

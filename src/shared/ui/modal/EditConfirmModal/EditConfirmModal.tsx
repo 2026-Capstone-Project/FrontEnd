@@ -2,22 +2,22 @@ import { useId, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import Modal from '../../common/Modal/Modal'
-import * as S from './DeleteConfirmModal.style'
+import * as S from './EditConfirmModal.style'
 
-const DeleteConfirmModal = ({ onClose, title }: { onClose: () => void; title: string }) => {
+const EditConfirmModal = ({ onClose, title }: { onClose: () => void; title: string }) => {
   const radioName = useId()
   const [selectedOption, setSelectedOption] = useState<'single' | 'future' | 'all'>('single')
 
   const options = [
-    { value: 'single', label: '이 이벤트' },
+    { value: 'single', label: '이 이벤트에 대해서만 적용' },
     { value: 'future', label: '이 이벤트부터 이후 이벤트' },
-    { value: 'all', label: '모든 이벤트' },
+    { value: 'all', label: `모든 ${title} 이벤트에 대해 적용` },
   ] as const
 
   return createPortal(
     <Modal onClick={onClose}>
       <S.ModalWrapper>
-        <S.Title>반복 일정 "{title}" 삭제</S.Title>
+        <S.Title>이 변경사항을 어떻게 적용할까요?</S.Title>
         <S.OptionsContainer>
           {options.map((option) => {
             const optionId = `${radioName}-${option.value}`
@@ -42,7 +42,7 @@ const DeleteConfirmModal = ({ onClose, title }: { onClose: () => void; title: st
         </S.OptionsContainer>
         <S.ButtonsContainer>
           <S.CancelButton>취소</S.CancelButton>
-          <S.DeleteButton>이벤트 삭제</S.DeleteButton>
+          <S.EditButton>이벤트 수정</S.EditButton>
         </S.ButtonsContainer>
       </S.ModalWrapper>
     </Modal>,
@@ -50,4 +50,4 @@ const DeleteConfirmModal = ({ onClose, title }: { onClose: () => void; title: st
   )
 }
 
-export default DeleteConfirmModal
+export default EditConfirmModal

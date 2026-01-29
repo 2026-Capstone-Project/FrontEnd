@@ -1,3 +1,4 @@
+/** @JSXImportSource @emotion/react */
 import Check from '@/shared/assets/icons/check.svg?react'
 import Close from '@/shared/assets/icons/close.svg?react'
 import Trash from '@/shared/assets/icons/trash-2.svg?react'
@@ -20,9 +21,7 @@ const AddModalLayout = ({
   type: 'todo' | 'schedule'
   footerChildren?: React.ReactNode
   submitFormId?: string
-
   mode: 'modal' | 'inline'
-
   handleDelete?: () => void
   headerExtras?: React.ReactNode
 }) => {
@@ -46,7 +45,7 @@ const AddModalLayout = ({
         <S.ModalFooter>
           <S.FooterLeft>{type === 'schedule' && footerChildren}</S.FooterLeft>
           <S.FooterRight>
-            <Trash onClick={handleDelete} />
+            <Trash onClick={handleDelete} css={{ cursor: 'pointer' }} />
             <S.Button type="submit" form={submitFormId}>
               <Check color="#ffffff" />
             </S.Button>

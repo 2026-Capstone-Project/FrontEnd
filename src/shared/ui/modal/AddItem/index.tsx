@@ -88,7 +88,6 @@ const AddItemModal = ({
           mode={mode}
           onClose={onClose}
           registerDeleteHandler={registerDeleteHandler}
-          registerFooterChildren={registerFooterChildren}
         />
       ) : (
         <AddScheduleForm

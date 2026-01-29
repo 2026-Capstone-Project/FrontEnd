@@ -14,6 +14,7 @@ import { useTodoFormFields } from './useTodoFormFields'
 
 type UseAddTodoProps = {
   date: string
+  id: number
 }
 
 export type UseAddTodoFormResult = {

@@ -19,7 +19,6 @@ export type TimePickerRenderProps = {
 
 export type AddScheduleFormValues = InferType<typeof addScheduleSchema>
 export type RepeatConfigSchema = AddScheduleFormValues['repeatConfig']
-export type RotateType = AddScheduleFormValues['rotate']
 
 export type EventColorType = 'pink' | 'mint' | 'sky' | 'violet' | 'yellow' | 'gray'
 export type WeekDaysSingleChar = 'S' | 'M' | 'T' | 'W' | 'T' | 'F'

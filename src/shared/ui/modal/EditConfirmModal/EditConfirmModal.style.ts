@@ -114,7 +114,7 @@ export const CancelButton = styled.button`
   cursor: pointer;
 `
 
-export const DeleteButton = styled.button`
+export const EditButton = styled.button`
   border: 1px solid ${theme.colors.red};
   border-radius: 16px;
   color: ${theme.colors.red};

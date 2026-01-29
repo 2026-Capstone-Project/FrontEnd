@@ -1,6 +1,6 @@
+/** @jsxImportSource @emotion/react */
 import {
   type MouseEvent as ReactMouseEvent,
-  type ReactNode,
   useCallback,
   useEffect,
   useMemo,
@@ -24,7 +24,6 @@ import { formatDisplayDate } from '@/shared/utils/date'
 
 type AddTodoFormProps = {
   registerDeleteHandler?: (handler: () => void) => void
-  registerFooterChildren?: (node: ReactNode | null) => void
   date: string
   mode?: 'modal' | 'inline'
   eventId: number
@@ -37,7 +36,6 @@ const AddTodoForm = ({
   eventId,
   onClose,
   registerDeleteHandler,
-  registerFooterChildren,
 }: AddTodoFormProps) => {
   const {
     formMethods,
@@ -57,10 +55,8 @@ const AddTodoForm = ({
     todoEndTime,
     todoDate,
     todoTitle,
-  } = useAddTodoForm({ date })
+  } = useAddTodoForm({ date, id: eventId })
   const { register } = formMethods
-
-  console.log('편집할 이벤트 ID:', eventId)
   const [calendarAnchor, setCalendarAnchor] = useState<DOMRect | null>(null)
   const [deleteWarningVisible, setDeleteWarningVisible] = useState(false)
   const [isMobileLayout, setIsMobileLayout] = useState(() => {
@@ -116,8 +112,9 @@ const AddTodoForm = ({
   const handleDelete = useCallback(() => {
     if (repeatConfig.repeatType !== 'none') {
       setDeleteWarningVisible(true)
+      console.log('반복 할 일 삭제 로직 처리')
     } else {
-      console.log('일정 삭제 로직 처리')
+      console.log('할 일 삭제 로직 처리')
     }
   }, [repeatConfig])
 
@@ -125,10 +122,6 @@ const AddTodoForm = ({
     registerDeleteHandler?.(handleDelete)
     return () => registerDeleteHandler?.(() => undefined)
   }, [handleDelete, registerDeleteHandler])
-
-  useEffect(() => {
-    registerFooterChildren?.(null)
-  }, [registerFooterChildren])
 
   return (
     <>
