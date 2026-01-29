@@ -15,6 +15,7 @@ export const ModalWrapper = styled.div`
   flex-direction: column;
   ${media.down(theme.breakPoints.mobile)} {
     max-width: 90vw;
+    padding: 30px;
   }
 `
 
@@ -23,6 +24,9 @@ export const Title = styled.h2`
   margin-bottom: 16px;
   font-size: 24px;
   font-weight: 600;
+  ${media.down(theme.breakPoints.tablet)} {
+    font-size: 20px;
+  }
 `
 
 export const OptionsContainer = styled.div`
@@ -58,6 +62,9 @@ export const OptionLabel = styled.label`
   color: ${theme.colors.textColor2};
   width: 100%;
   cursor: pointer;
+  ${media.down(theme.breakPoints.tablet)} {
+    font-size: 16px;
+  }
 `
 
 export const RadioIndicator = styled.span<{ $checked: boolean }>`
@@ -112,6 +119,10 @@ export const CancelButton = styled.button`
   padding: 12px 20px;
   font-weight: 600;
   cursor: pointer;
+  ${media.down(theme.breakPoints.tablet)} {
+    font-size: 12px;
+    padding: 10px 16px;
+  }
 `
 
 export const EditButton = styled.button`
@@ -122,4 +133,8 @@ export const EditButton = styled.button`
   padding: 12px 20px;
   font-weight: 600;
   cursor: pointer;
+  ${media.down(theme.breakPoints.tablet)} {
+    font-size: 12px;
+    padding: 10px 16px;
+  }
 `
