@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import { type UseFormReturn } from 'react-hook-form'
 
 import { type AddScheduleFormValues, type EventColorType } from '@/shared/types/event'
@@ -60,9 +61,12 @@ export const useRepeatConfigController = ({
   const updateConfig = (changes: Partial<RepeatConfig>) =>
     handleRepeatConfigChange({ ...repeatConfig, ...changes })
 
-  const setEventColor = (value: EventColorType) => {
-    setValue('eventColor', value, { shouldValidate: true })
-  }
+  const setEventColor = useCallback(
+    (value: EventColorType) => {
+      setValue('eventColor', value, { shouldValidate: true })
+    },
+    [setValue],
+  )
 
   return {
     handleRepeatType,

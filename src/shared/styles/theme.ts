@@ -21,6 +21,21 @@ export const colors = {
   violet: { base: '#f1ebf9', point: '#c9b0f0' },
   yellow: { base: '#fff0b3', point: '#f4d144' },
   gray: { base: '#e9e9e9', point: '#757575' },
+
+  priority: {
+    red: {
+      base: '#fbe2e1',
+      point: '#bd3730',
+    },
+    green: {
+      base: '#dcf2ec',
+      point: '#089b43',
+    },
+    yellow: {
+      base: '#fff0b3',
+      point: '#8e7d02',
+    },
+  },
 }
 
 /* 그라데이션 등록 */
