@@ -21,7 +21,8 @@ export const Container = styled.div`
 `
 
 export const Left = styled.div`
-  width: 540px;
+  width: 100%;
+  max-width: 540px;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -231,7 +232,7 @@ export const PrimaryButton = styled.button`
 `
 
 export const IconWrapper = styled.div`
-  display: absolute;
+  position: absolute;
   width: 56px;
   height: 56px;
 

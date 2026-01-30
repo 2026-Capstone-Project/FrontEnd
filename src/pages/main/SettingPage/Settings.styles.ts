@@ -13,7 +13,7 @@ export const Container = styled.div`
 
 export const HeaderWrapper = styled.div`
   width: 100%;
-  display: fixed;
+  display: flex;
   background-color: #fafafa;
   justify-content: center;
   border-bottom: 1px solid #f1f3f5;

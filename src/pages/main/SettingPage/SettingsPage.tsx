@@ -44,7 +44,7 @@ export default function SettingsPage() {
           <S.Row>
             <S.ProfileWrapper>
               <S.TextGroup>
-                <S.Name>김컴과</S.Name>
+                <S.Name>{user.name}</S.Name>
                 <S.InfoRow>
                   <S.ProviderIconWrapper>
                     {IconComponent && <IconComponent width={30} height={30} />}
