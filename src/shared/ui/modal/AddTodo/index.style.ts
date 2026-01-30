@@ -84,7 +84,7 @@ export const CalendarPortal = styled.div`
   padding: 14px;
   height: fit-content;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
-  z-index: 3000;
+  z-index: 10200;
   ${media.down(theme.breakPoints.desktop)} {
     background: rgba(245, 245, 245, 0.8);
   }
@@ -106,7 +106,7 @@ export const SearchPlacePortal = styled.div`
   padding: 24px;
   height: fit-content;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
-  z-index: 3000;
+  z-index: 10100;
   ${media.down(theme.breakPoints.tablet)} {
     width: min(90vw, 360px);
     top: 50%;
@@ -169,5 +169,5 @@ export const PortalDarkLayer = styled.div`
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.2);
-  z-index: 2995;
+  z-index: 10050;
 `

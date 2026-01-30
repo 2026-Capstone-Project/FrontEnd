@@ -13,6 +13,7 @@ import type { RepeatConfigSchema } from '@/shared/types/event'
 import type { RepeatConfig } from '@/shared/types/repeat'
 import Checkbox from '@/shared/ui/common/Checkbox/Checkbox'
 import CustomDatePicker from '@/shared/ui/modal/AddSchedule/components/CustomDatePicker/CustomDatePicker'
+import { formatIsoDate } from '@/shared/utils/date'
 
 import * as S from './TerminationPanel.style'
 
@@ -29,12 +30,19 @@ const formatDateLabel = (value?: string) => {
   return date.toLocaleDateString('ko-KR')
 }
 
+const parseDateOnlyString = (value?: string) => {
+  if (!value) return null
+  const [year, month, day] = value.split('-').map(Number)
+  if (!year || !month || !day) return null
+  return new Date(year, month - 1, day)
+}
+
 const TerminationPanel = ({ config, updateConfig, minDate }: Props) => {
   const terminationType = config.customEndType ?? 'until'
   const baseDate = useMemo(() => {
     const fallback = new Date()
     if (!config.customEndDate) return fallback
-    const parsed = new Date(config.customEndDate)
+    const parsed = parseDateOnlyString(config.customEndDate) ?? new Date(config.customEndDate)
     return Number.isNaN(parsed.getTime()) ? fallback : parsed
   }, [config.customEndDate])
   const normalizedMinDate = useMemo(() => {
@@ -86,7 +94,7 @@ const TerminationPanel = ({ config, updateConfig, minDate }: Props) => {
 
   const handleDateSelect = (date: Date) => {
     if (normalizedMinDate && date < normalizedMinDate) return
-    updateConfig({ customEndDate: date.toISOString().split('T')[0] })
+    updateConfig({ customEndDate: formatIsoDate(date) })
     closeCalendar()
   }
 

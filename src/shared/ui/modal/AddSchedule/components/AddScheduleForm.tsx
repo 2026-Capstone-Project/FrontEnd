@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 import { createPortal } from 'react-dom'
@@ -83,6 +84,7 @@ const AddScheduleForm = ({
   const [calendarAnchor, setCalendarAnchor] = useState<DOMRect | null>(null)
   const [deleteWarningVisible, setDeleteWarningVisible] = useState(false)
   const [mapAnchor, setMapAnchor] = useState<DOMRect | null>(null)
+  const mapButtonRef = useRef<HTMLButtonElement | null>(null)
   const [isMobileLayout, setIsMobileLayout] = useState(() => {
     if (typeof window === 'undefined') return false
     return window.matchMedia(`(max-width: ${theme.breakPoints.tablet})`).matches
@@ -102,6 +104,22 @@ const AddScheduleForm = ({
     const target = event.currentTarget
     setMapAnchor(target.getBoundingClientRect())
   }
+
+  useEffect(() => {
+    if (!isSearchPlaceOpen) return undefined
+    const updateAnchor = () => {
+      const target = mapButtonRef.current
+      if (!target) return
+      setMapAnchor(target.getBoundingClientRect())
+    }
+    updateAnchor()
+    window.addEventListener('scroll', updateAnchor, true)
+    window.addEventListener('resize', updateAnchor)
+    return () => {
+      window.removeEventListener('scroll', updateAnchor, true)
+      window.removeEventListener('resize', updateAnchor)
+    }
+  }, [isSearchPlaceOpen])
 
   const portalPosition = useMemo(() => {
     if (!calendarAnchor) return null
@@ -292,7 +310,7 @@ const AddScheduleForm = ({
             </S.TextareaWrapper>
             <S.FieldRow>
               <S.FieldLabel>위치</S.FieldLabel>
-              <S.FieldMap type="button" onClick={handleMapButtonClick}>
+              <S.FieldMap ref={mapButtonRef} type="button" onClick={handleMapButtonClick}>
                 장소 추가
               </S.FieldMap>
               {isSearchPlaceOpen &&

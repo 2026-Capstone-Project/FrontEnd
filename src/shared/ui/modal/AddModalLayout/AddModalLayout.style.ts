@@ -34,10 +34,9 @@ export const ModalInner = styled.div`
 export const ModalWrapper = styled.div<{ mode: 'modal' | 'inline' }>`
   width: 100%;
   max-width: 90vw;
-  width: 420px;
+  width: 400px;
   height: fit-content;
   max-height: 80vh;
-  overflow: hidden;
   background-color: ${theme.colors.white};
   border-radius: 20px;
   box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);

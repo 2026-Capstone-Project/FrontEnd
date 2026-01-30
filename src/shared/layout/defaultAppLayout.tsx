@@ -26,6 +26,7 @@ const ContentWrapper = styled.div`
   gap: 32px;
   max-width: 1440px;
   width: 100%;
+  padding: 20px;
   ${media.down(theme.breakPoints.tablet)} {
     padding: 16px 24px;
   }
