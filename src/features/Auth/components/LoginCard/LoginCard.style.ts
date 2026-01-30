@@ -95,9 +95,20 @@ export const Footer = styled.div`
   text-align: center;
 `
 
-export const LinkText = styled.span`
-  margin-left: 6px;
-  font-weight: 600;
+export const LinkText = styled.button`
+  background: none;
+  border: 0;
+  padding: 0;
+
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+
   text-decoration: underline;
   cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
 `
