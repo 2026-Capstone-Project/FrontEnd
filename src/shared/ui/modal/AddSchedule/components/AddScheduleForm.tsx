@@ -226,7 +226,12 @@ const AddScheduleForm = ({
         <form id="add-schedule-form" onSubmit={handleFormSubmit}>
           <S.FormContent>
             {!headerTitlePortalTarget && (
-              <TitleSuggestionInput fieldName="eventTitle" placeholder="새로운 일정" autoFocus />
+              <TitleSuggestionInput
+                fieldName="eventTitle"
+                placeholder="새로운 일정"
+                autoFocus
+                formController={formMethods}
+              />
             )}
             <S.Selection>
               <S.SelectionColumn>
@@ -324,7 +329,12 @@ const AddScheduleForm = ({
         </form>
         {headerTitlePortalTarget &&
           createPortal(
-            <TitleSuggestionInput fieldName="eventTitle" placeholder="새로운 일정" autoFocus />,
+            <TitleSuggestionInput
+              fieldName="eventTitle"
+              placeholder="새로운 일정"
+              autoFocus
+              formController={formMethods}
+            />,
             headerTitlePortalTarget,
           )}
       </FormProvider>

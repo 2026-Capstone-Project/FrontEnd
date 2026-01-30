@@ -6,7 +6,14 @@ import {
   useRef,
   useState,
 } from 'react'
-import type { FieldValues, Path, PathValue, UseFormRegisterReturn } from 'react-hook-form'
+import type {
+  FieldValues,
+  Path,
+  PathValue,
+  UseFormRegister,
+  UseFormSetValue,
+  UseFormWatch,
+} from 'react-hook-form'
 import { useFormContext } from 'react-hook-form'
 
 import * as S from './TitleSuggestionInput.style'
@@ -48,11 +55,18 @@ const getHighlightedSegments = (text: string, query: string) => {
   return segments
 }
 
+type TitleSuggestionInputFormController<TFieldValues extends FieldValues> = {
+  register: UseFormRegister<TFieldValues>
+  watch: UseFormWatch<TFieldValues>
+  setValue: UseFormSetValue<TFieldValues>
+}
+
 type TitleSuggestionInputProps<TFieldValues extends FieldValues> = {
   fieldName: Path<TFieldValues>
   placeholder?: string
   suggestions?: string[]
   autoFocus?: boolean
+  formController?: TitleSuggestionInputFormController<TFieldValues>
 }
 
 const TitleSuggestionInput = <TFieldValues extends FieldValues>({
@@ -60,9 +74,18 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
   placeholder = '새로운 일정',
   suggestions = defaultSuggestions,
   autoFocus = false,
+  formController,
 }: TitleSuggestionInputProps<TFieldValues>) => {
-  const { register, watch, setValue } = useFormContext<TFieldValues>()
-  const rawTitle = watch(fieldName) as PathValue<TFieldValues, typeof fieldName>
+  const context = useFormContext<TFieldValues>()
+  const registerFn = formController?.register ?? context?.register
+  const watchFn = formController?.watch ?? context?.watch
+  const setValueFn = formController?.setValue ?? context?.setValue
+
+  if (!registerFn || !watchFn || !setValueFn) {
+    throw new Error('TitleSuggestionInput requires react-hook-form context or controller props')
+  }
+
+  const rawTitle = watchFn(fieldName) as PathValue<TFieldValues, typeof fieldName>
   const normalizedTitleQuery = typeof rawTitle === 'string' ? rawTitle.trim() : ''
   const filteredSuggestions = useMemo(() => {
     if (!normalizedTitleQuery) return []
@@ -73,7 +96,7 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
   const [suggestionsVisible, setSuggestionsVisible] = useState(false)
   const [dismissedTitleQuery, setDismissedTitleQuery] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
-  const { ref: registerRef, ...registerProps } = register(fieldName) as UseFormRegisterReturn
+  const { ref: registerRef, ...registerProps } = registerFn(fieldName)
   const handleInputRef: RefCallback<HTMLInputElement | null> = (element) => {
     registerRef(element)
     inputRef.current = element
@@ -113,7 +136,7 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
   }, [autoFocus])
 
   const handleSelectSuggestion = (value: string) => {
-    setValue(fieldName, value as PathValue<TFieldValues, typeof fieldName>, {
+    setValueFn(fieldName, value as PathValue<TFieldValues, typeof fieldName>, {
       shouldValidate: true,
     })
     setSuggestionsVisible(false)

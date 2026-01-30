@@ -12,19 +12,21 @@ import {
   type SlotInfo,
   type View,
   Views,
-  type ViewStatic,
 } from 'react-big-calendar'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 import { createPortal } from 'react-dom'
 
 import CustomToolbar from '@/features/Calendar/components/CalendarToolbar/CalendarToolbar'
-import CustomMonthEvent from '@/features/Calendar/components/CustomEvent/CustomMonthEvent'
-import CustomWeekEvent from '@/features/Calendar/components/CustomEvent/CustomWeekEvent'
-import CustomDayView, {
-  type CalendarEvent,
-} from '@/features/Calendar/components/CustomView/CustomDayView'
 import CustomWeekView from '@/features/Calendar/components/CustomView/CustomWeekView'
+import type { CalendarEvent } from '@/features/Calendar/domain/types'
+import {
+  useCalendarModal,
+  useCalendarPortals,
+  useCalendarProps,
+  useCalendarResponsive,
+} from '@/features/Calendar/hooks'
 import { useCalendarEvents } from '@/features/Calendar/hooks/useCalendarEvents'
+import { useDayViewHandlers } from '@/features/Calendar/hooks/useDayViewHandlers'
 import { getDayPropStyle } from '@/features/Calendar/utils/helpers/calendarPageHelpers'
 import { getViewConfig } from '@/features/Calendar/utils/viewConfig'
 import Plus from '@/shared/assets/icons/plus.svg?react'
@@ -32,6 +34,7 @@ import { theme } from '@/shared/styles/theme'
 import AddSchedule from '@/shared/ui/modal/AddSchedule'
 
 import CalendarHeader from '../CalendarDateHeader/CalendarDateHeader'
+import { CustomMonthEvent, CustomWeekEvent } from '../CustomEvent'
 import { CustomViewButton } from '../CustomViewButton/CustomViewButton'
 import EventsCard from '../EventsCard/EventsCard'
 import * as S from './CustomCalendar.style'
@@ -45,18 +48,7 @@ export type SelectDateSource = 'date-cell' | 'slot' | 'header' | 'date-header'
 const CustomCalendar = () => {
   const [view, setView] = useState<View>(Views.MONTH)
   const [date, setDate] = useState<Date>(new Date())
-  const [isDesktop, setIsDesktop] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return window.matchMedia(`(min-width: ${theme.breakPoints.desktop})`).matches
-  })
-  const [modalDate, setModalDate] = useState<string>(() => new Date().toISOString())
-  const [cardPortalRoot, setCardPortalRoot] = useState<HTMLElement | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const [modal, setModal] = useState<{ isOpen: boolean; eventId: CalendarEvent['id'] | null }>({
-    isOpen: false,
-    eventId: null,
-  })
-  const [isModalEditing, setIsModalEditing] = useState(false)
   const {
     events,
     addEvent: enqueueEvent,
@@ -65,51 +57,16 @@ const CustomCalendar = () => {
     updateEventTime,
     removeEvent,
   } = useCalendarEvents()
-
-  const modalPortalRoot = useMemo(() => {
-    if (typeof document === 'undefined') return null
-    return document.getElementById('modal-root')
-  }, [])
+  const isDesktop = useCalendarResponsive()
+  const { modalPortalRoot, cardPortalRoot } = useCalendarPortals()
+  const { modal, modalDate, isModalEditing, handleAddEvent, handleEventClick, handleCloseModal } =
+    useCalendarModal({
+      currentDate: date,
+      removeEvent,
+    })
 
   const onView = useCallback((newView: View) => setView(newView), [])
   const onNavigate = useCallback((newDate: Date) => setDate(newDate), [])
-
-  const handleEventClick = useCallback(
-    (event: CalendarEvent) => {
-      const start = event.start instanceof Date ? event.start : new Date(event.start ?? Date.now())
-      setModalDate(start.toISOString())
-      setIsModalEditing(true)
-      setModal({ isOpen: true, eventId: event.id ?? null })
-    },
-    [setModal, setModalDate],
-  )
-
-  const normalizeDate = useCallback((value?: Date | string | null): Date => {
-    if (!value) return new Date()
-    return value instanceof Date ? value : new Date(value)
-  }, [])
-
-  const handleAddEvent = useCallback(
-    (referenceDate?: Date | string) => {
-      const targetDate = referenceDate
-        ? normalizeDate(referenceDate)
-        : normalizeDate(date ?? new Date())
-      const safeIso =
-        targetDate && typeof targetDate.toISOString === 'function'
-          ? targetDate.toISOString()
-          : new Date().toISOString()
-      const eventId = 1
-      setModalDate(safeIso)
-      setIsModalEditing(false)
-      setModal({ isOpen: true, eventId })
-    },
-    [date, normalizeDate, setModal, setModalDate],
-  )
-
-  const handleCloseModal = useCallback(() => {
-    setModal({ isOpen: false, eventId: null })
-    setIsModalEditing(false)
-  }, [setModal, setIsModalEditing])
 
   const handleSelectSlot = useCallback(
     (slotInfo: SlotInfo) => {
@@ -146,53 +103,12 @@ const CustomCalendar = () => {
       }),
     [view, handleSelectDate],
   )
-
-  const handleDayViewSlotDoubleClick = useCallback(
-    (slotDate: Date) => {
-      setSelectedDate(null)
-      handleAddEvent(slotDate)
-      enqueueEvent(slotDate, false)
-    },
-    [enqueueEvent, handleAddEvent],
-  )
-
-  const formatLogDateTime = useCallback(
-    (value: Date) => moment(value).format('YYYY-MM-DD HH:mm'),
-    [],
-  )
-
-  const handleDayViewEventDrag = useCallback(
-    (event: CalendarEvent, start: Date, end: Date) => {
-      console.log('[Calendar] event time changed', {
-        id: event.id,
-        title: event.title,
-        start: formatLogDateTime(start),
-        end: formatLogDateTime(end),
-        allDay: event.allDay ?? false,
-      })
-      updateEventTime(event.id, start, end)
-    },
-    [formatLogDateTime, updateEventTime],
-  )
-
-  const dayViewWithHandlers = useMemo<
-    React.FC<Parameters<typeof CustomDayView>[0]> & ViewStatic
-  >(() => {
-    const BaseDayView = Object.assign(
-      (props: Parameters<typeof CustomDayView>[0]) => (
-        <CustomDayView
-          onSlotDoubleClick={handleDayViewSlotDoubleClick}
-          onEventDrag={handleDayViewEventDrag}
-          {...props}
-        />
-      ),
-      {
-        title: CustomDayView.title,
-        navigate: CustomDayView.navigate,
-      },
-    ) as React.FC<Parameters<typeof CustomDayView>[0]> & ViewStatic
-    return BaseDayView
-  }, [handleDayViewSlotDoubleClick, handleDayViewEventDrag])
+  const dayViewWithHandlers = useDayViewHandlers({
+    clearSelectedDate: () => setSelectedDate(null),
+    enqueueEvent,
+    handleAddEvent,
+    updateEventTime,
+  })
 
   const isInlineMode = isDesktop
 
@@ -242,6 +158,32 @@ const CustomCalendar = () => {
     [view, viewConfig.components, viewEventComponent, DateCellWrapper],
   )
 
+  const calendarViews = useMemo(
+    () => ({
+      month: true,
+      week: CustomWeekView,
+      day: dayViewWithHandlers,
+    }),
+    [dayViewWithHandlers],
+  )
+
+  const calendarProps = useCalendarProps({
+    localizer,
+    views: calendarViews,
+    view,
+    date,
+    events,
+    onView,
+    onNavigate,
+    onSelectEvent: handleSelectEvent,
+    onEventDrop: moveEvent,
+    onEventResize: resizeEvent,
+    onSelectSlot: handleSelectSlot,
+    dayPropGetter,
+    components: mergedComponents,
+    viewConfig,
+  })
+
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isInlineMode) {
@@ -251,39 +193,6 @@ const CustomCalendar = () => {
     setSelectedDate(null)
   }, [isInlineMode])
   /* eslint-enable react-hooks/set-state-in-effect */
-
-  /* eslint-disable react-hooks/set-state-in-effect */
-  useEffect(() => {
-    if (typeof document === 'undefined') {
-      setCardPortalRoot(null)
-      return
-    }
-    setCardPortalRoot(document.getElementById('desktop-card-area'))
-  }, [])
-  /* eslint-enable react-hooks/set-state-in-effect */
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return undefined
-    const mediaQuery = window.matchMedia(`(min-width: ${theme.breakPoints.desktop})`)
-    const handler = (event: MediaQueryListEvent) => {
-      setIsDesktop(event.matches)
-    }
-    mediaQuery.addEventListener('change', handler)
-    return () => mediaQuery.removeEventListener('change', handler)
-  }, [])
-
-  useEffect(() => {
-    if (!modal.isOpen || modal.eventId == null) return undefined
-    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
-      if (event.key !== 'Backspace') return
-      event.preventDefault()
-      removeEvent(modal.eventId)
-      setModal({ isOpen: false, eventId: null })
-      setIsModalEditing(false)
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [modal.eventId, modal.isOpen, removeEvent])
 
   const modalEvent = useMemo(
     () =>
@@ -296,45 +205,17 @@ const CustomCalendar = () => {
     <div css={{ position: 'relative', height: 'fit-content', width: '100%' }}>
       <S.MobileButtons>
         <CustomViewButton view={view} onView={onView} className="mobile-custom-view-button" />
-        <button className="add-button" onClick={handleAddEvent} type="button">
+        <button className="add-button" onClick={() => handleAddEvent()} type="button">
           <Plus height={20} width={20} color={theme.colors.primary} />
         </button>
       </S.MobileButtons>
       <S.CalendarWrapper view={view}>
-        <DragAndDropCalendar
-          localizer={localizer}
-          culture="ko"
-          views={{
-            month: true,
-            week: CustomWeekView,
-            day: dayViewWithHandlers,
-          }}
-          defaultView={Views.MONTH}
-          view={view}
-          date={date}
-          events={events}
-          onView={onView}
-          onNavigate={onNavigate}
-          onSelectEvent={handleSelectEvent}
-          onEventDrop={moveEvent}
-          onEventResize={resizeEvent}
-          draggableAccessor={() => true}
-          onSelectSlot={handleSelectSlot}
-          dayPropGetter={dayPropGetter}
-          components={mergedComponents}
-          formats={view === Views.DAY ? {} : viewConfig.formats}
-          {...(viewConfig.allDayAccessor ? { allDayAccessor: viewConfig.allDayAccessor } : {})}
-          drilldownView={null}
-          style={{ height: '100%', width: '100%' }}
-          selectable
-          popup
-          resizable
-        />
+        <DragAndDropCalendar {...calendarProps} />
       </S.CalendarWrapper>
       {modal &&
         modalPortalRoot &&
         !isInlineMode &&
-        modal.eventId &&
+        modal.eventId != null &&
         createPortal(
           <AddSchedule
             date={modalDate}
@@ -350,7 +231,7 @@ const CustomCalendar = () => {
         modalPortalRoot &&
         isInlineMode &&
         cardPortalRoot &&
-        modal.eventId &&
+        modal.eventId != null &&
         createPortal(
           <AddSchedule
             date={modalDate}
@@ -369,7 +250,7 @@ const CustomCalendar = () => {
         selectedDate &&
         modalPortalRoot &&
         createPortal(
-          <EventsCard onClose={() => setSelectedDate(null)} selectedDate={date} />,
+          <EventsCard onClose={() => setSelectedDate(null)} selectedDate={date} mode={modalMode} />,
           modalPortalRoot,
         )}
 
@@ -379,7 +260,11 @@ const CustomCalendar = () => {
         selectedDate &&
         cardPortalRoot &&
         createPortal(
-          <EventsCard onClose={() => setSelectedDate(null)} selectedDate={selectedDate} />,
+          <EventsCard
+            onClose={() => setSelectedDate(null)}
+            selectedDate={selectedDate}
+            mode={modalMode}
+          />,
           cardPortalRoot,
         )}
     </div>
