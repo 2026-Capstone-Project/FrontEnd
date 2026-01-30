@@ -1,7 +1,8 @@
 import type { RouteObject } from 'react-router-dom'
 
 import CalendarPage from '@/pages/main/CalendarPage/CalendarPage'
-import HomePage from '@/pages/main/HomePage/HomePage'
+import Home from '@/pages/main/HomePage/HomePage'
+import SettingsPage from '@/pages/main/SettingPage/SettingsPage'
 import TodoListPage from '@/pages/main/TodoListPage/TodoListPage'
 import MainLayout from '@/shared/layout/MainLayout'
 
@@ -10,7 +11,7 @@ const MainRoutes: RouteObject = {
   children: [
     {
       path: '/',
-      element: <HomePage />,
+      element: <Home />,
     },
     {
       path: '/calendar',
@@ -19,6 +20,10 @@ const MainRoutes: RouteObject = {
     {
       path: '/todo',
       element: <TodoListPage />,
+    },
+    {
+      path: '/settings',
+      element: <SettingsPage />,
     },
   ],
 }

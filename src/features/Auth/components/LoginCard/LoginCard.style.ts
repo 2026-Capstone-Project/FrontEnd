@@ -5,15 +5,19 @@ import { theme } from '@/shared/styles/theme'
 
 export const Right = styled.div`
   flex: 1;
-  padding: 30px;
+  padding: 50px;
   display: flex;
   justify-content: center;
   align-items: center;
+  ${media.down(theme.breakPoints.tablet)} {
+    padding: 20px;
+    width: 100%;
+  }
 `
 
 export const InnerCard = styled.div`
   width: 100%;
-  max-width: 800px;
+  max-width: 900px;
   padding: 32px;
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.5);
@@ -25,7 +29,7 @@ export const InnerCard = styled.div`
   flex-direction: column;
   align-items: center;
   ${media.down(theme.breakPoints.tablet)} {
-    width: 90%;
+    width: 100%;
   }
 `
 
@@ -91,9 +95,20 @@ export const Footer = styled.div`
   text-align: center;
 `
 
-export const LinkText = styled.span`
-  margin-left: 6px;
-  font-weight: 600;
+export const LinkText = styled.button`
+  background: none;
+  border: 0;
+  padding: 0;
+
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+
   text-decoration: underline;
   cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
 `
