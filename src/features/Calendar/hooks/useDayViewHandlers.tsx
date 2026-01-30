@@ -10,6 +10,7 @@ type UseDayViewHandlersArgs = {
   enqueueEvent: (date: Date, allDay: boolean) => void
   handleAddEvent: (referenceDate?: Date | string) => void
   updateEventTime: (eventId: CalendarEvent['id'], start: Date, end: Date) => void
+  onToggleTodo?: (eventId: CalendarEvent['id']) => void
 }
 
 export const useDayViewHandlers = ({
@@ -17,6 +18,7 @@ export const useDayViewHandlers = ({
   enqueueEvent,
   handleAddEvent,
   updateEventTime,
+  onToggleTodo,
 }: UseDayViewHandlersArgs) => {
   const handleDayViewSlotDoubleClick = useCallback(
     (slotDate: Date) => {
@@ -54,6 +56,7 @@ export const useDayViewHandlers = ({
         <CustomDayView
           onSlotDoubleClick={handleDayViewSlotDoubleClick}
           onEventDrag={handleDayViewEventDrag}
+          onToggleTodo={onToggleTodo}
           {...props}
         />
       ),
@@ -63,7 +66,7 @@ export const useDayViewHandlers = ({
       },
     ) as React.FC<Parameters<typeof CustomDayView>[0]> & ViewStatic
     return BaseDayView
-  }, [handleDayViewSlotDoubleClick, handleDayViewEventDrag])
+  }, [handleDayViewSlotDoubleClick, handleDayViewEventDrag, onToggleTodo])
 
   return dayViewWithHandlers
 }

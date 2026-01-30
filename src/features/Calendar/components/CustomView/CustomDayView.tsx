@@ -21,6 +21,7 @@ interface CustomDayViewProps {
   date?: Date
   onSlotDoubleClick?: (slotDate: Date) => void
   onEventDrag?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
+  onToggleTodo?: (eventId: CalendarEvent['id']) => void
 }
 
 //TODO: 이벤트가 차지하는 높이가 작을 때 텍스트가 넘치는 문제 해결
@@ -36,6 +37,7 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
   date = new Date(),
   onSlotDoubleClick,
   onEventDrag,
+  onToggleTodo,
 }) => {
   const currentDate = moment(date)
   const isToday = currentDate.isSame(moment(), 'day')
@@ -91,7 +93,7 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
       </S.DateInfo>
 
       <S.CalendarWrapper>
-        <S.AllDaySection>{renderAllDayEventBadges(allDayEvents)}</S.AllDaySection>
+        <S.AllDaySection>{renderAllDayEventBadges(allDayEvents, onToggleTodo)}</S.AllDaySection>
 
         <S.GridContainer>
           {TIME_COLUMN_START_HOURS.map((startHour, columnIndex) =>
@@ -105,6 +107,7 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
               dragStateRef,
               handleEventPointerDown,
               handleResizePointerDown,
+              onToggleTodo,
             }),
           )}
         </S.GridContainer>

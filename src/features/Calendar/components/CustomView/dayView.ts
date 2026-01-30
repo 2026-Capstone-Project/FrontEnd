@@ -137,6 +137,53 @@ export const EventResizer = styled.div`
   border-bottom-right-radius: 12px;
 `
 
+export const TodoCheckbox = styled.input`
+  width: 12px;
+  height: 12px;
+  appearance: none;
+  border: 1.5px solid ${theme.colors.gray};
+  border-radius: 4px;
+  background-color: ${theme.colors.white};
+  cursor: pointer;
+  position: relative;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.05s ease;
+
+  &:hover {
+    border-color: ${theme.colors.primary2};
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(79, 124, 255, 0.25);
+  }
+
+  &:checked {
+    border-color: ${theme.colors.primary2};
+    background-color: ${theme.colors.primary2};
+  }
+
+  &:checked::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 3px;
+    border: 1.5px solid ${theme.colors.white};
+    border-top: 0;
+    border-right: 0;
+    transform: rotate(-45deg);
+    left: 2px;
+    top: 3px;
+  }
+`
+
 export const DateInfo = styled.div`
   position: relative;
   padding: 10px 12px;

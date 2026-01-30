@@ -254,7 +254,6 @@ const AddScheduleForm = ({
             <S.Selection>
               <S.SelectionColumn>
                 <S.FieldRow>
-                  <S.FieldLabel>시작:</S.FieldLabel>
                   <S.DateFieldButton type="button" onClick={handleCalendarButtonClick('start')}>
                     {startDate}
                   </S.DateFieldButton>
@@ -267,7 +266,6 @@ const AddScheduleForm = ({
                   )}
                 </S.FieldRow>
                 <S.FieldRow>
-                  <S.FieldLabel>종료:</S.FieldLabel>
                   <S.DateFieldButton type="button" onClick={handleCalendarButtonClick('end')}>
                     {endDate}
                   </S.DateFieldButton>
@@ -304,24 +302,25 @@ const AddScheduleForm = ({
               onChange={() => setIsAllday((prev) => !prev)}
               label="종일"
             />
-            <S.TextareaWrapper>
-              <S.TextareaHeader>메모</S.TextareaHeader>
-              <S.Textarea {...register('eventDescription')} />
-            </S.TextareaWrapper>
-            <S.FieldRow>
-              <S.FieldLabel>위치</S.FieldLabel>
-              <S.FieldMap ref={mapButtonRef} type="button" onClick={handleMapButtonClick}>
-                장소 추가
-              </S.FieldMap>
-              {isSearchPlaceOpen &&
-                searchPortalPosition &&
-                createPortal(
-                  <S.SearchPlacePortal ref={mapRef} style={searchPortalStyle}>
-                    <SearchPlace />
-                  </S.SearchPlacePortal>,
-                  document.getElementById('modal-root')!,
-                )}
-            </S.FieldRow>
+            <S.BottomSection>
+              <S.TextareaWrapper>
+                <S.TextareaHeader>메모</S.TextareaHeader>
+                <S.Textarea {...register('eventDescription')} />
+              </S.TextareaWrapper>
+              <S.FieldRow>
+                <S.FieldMap ref={mapButtonRef} type="button" onClick={handleMapButtonClick}>
+                  장소 추가
+                </S.FieldMap>
+                {isSearchPlaceOpen &&
+                  searchPortalPosition &&
+                  createPortal(
+                    <S.SearchPlacePortal ref={mapRef} style={searchPortalStyle}>
+                      <SearchPlace />
+                    </S.SearchPlacePortal>,
+                    document.getElementById('modal-root')!,
+                  )}
+              </S.FieldRow>
+            </S.BottomSection>
             <RepeatTypeGroup
               repeatType={repeatConfig.repeatType}
               customBasis={repeatConfig.customBasis}

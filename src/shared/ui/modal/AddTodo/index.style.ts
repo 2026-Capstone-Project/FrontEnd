@@ -32,7 +32,7 @@ export const Textarea = styled.textarea`
   height: 80px;
   border: none;
   border-radius: 8px;
-  padding: 12px;
+  padding: 0 12px;
   font-size: 14px;
   font-weight: 400;
   resize: none;

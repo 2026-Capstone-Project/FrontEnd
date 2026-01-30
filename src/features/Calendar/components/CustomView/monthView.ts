@@ -79,4 +79,14 @@ export const monthViewStyles = css`
   .rbc-header:last-child {
     color: #4784c1;
   }
+  .rbc-addons-dnd-row-body {
+    margin-top: auto;
+    align-self: stretch;
+    margin-bottom: 3px;
+  }
+  .rbc-row-content {
+    height: 100% !important;
+    display: flex;
+    flex-direction: column;
+  }
 `

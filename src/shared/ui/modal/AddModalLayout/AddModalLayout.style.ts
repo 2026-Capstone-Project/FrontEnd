@@ -40,7 +40,7 @@ export const ModalWrapper = styled.div<{ mode: 'modal' | 'inline' }>`
   background-color: ${theme.colors.white};
   border-radius: 20px;
   box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);
-  gap: 26px;
+  gap: 16px;
   display: flex;
   flex-direction: column;
   position: absolute;
@@ -60,11 +60,12 @@ export const ModalHeader = styled.div`
   flex-direction: column;
   justify-content: space-between;
   height: fit-content;
-  padding: 34px 24px 0px 24px;
+  padding: 24px 24px 0px 24px;
 `
 export const TitleWrapper = styled.div`
   display: flex;
   width: 100%;
+  align-items: center;
 `
 export const ModalHeaderTitle = styled.div`
   display: flex;

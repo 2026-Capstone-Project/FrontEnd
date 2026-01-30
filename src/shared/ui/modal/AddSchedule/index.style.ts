@@ -171,3 +171,8 @@ export const PortalDarkLayer = styled.div`
   background-color: rgba(0, 0, 0, 0.2);
   z-index: 10050;
 `
+export const BottomSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`

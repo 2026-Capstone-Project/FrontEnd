@@ -34,7 +34,7 @@ import { theme } from '@/shared/styles/theme'
 import AddSchedule from '@/shared/ui/modal/AddSchedule'
 
 import CalendarHeader from '../CalendarDateHeader/CalendarDateHeader'
-import { CustomMonthEvent, CustomWeekEvent } from '../CustomEvent'
+import { CustomMonthEvent, CustomMonthShowMore, CustomWeekEvent } from '../CustomEvent'
 import { CustomViewButton } from '../CustomViewButton/CustomViewButton'
 import EventsCard from '../EventsCard/EventsCard'
 import * as S from './CustomCalendar.style'
@@ -55,6 +55,7 @@ const CustomCalendar = () => {
     moveEvent,
     resizeEvent,
     updateEventTime,
+    toggleEventDone,
     removeEvent,
   } = useCalendarEvents()
   const isDesktop = useCalendarResponsive()
@@ -108,6 +109,7 @@ const CustomCalendar = () => {
     enqueueEvent,
     handleAddEvent,
     updateEventTime,
+    onToggleTodo: toggleEventDone,
   })
 
   const isInlineMode = isDesktop
@@ -130,19 +132,27 @@ const CustomCalendar = () => {
     if (view === Views.MONTH) {
       return {
         event: (props: EventProps<CalendarEvent>) => (
-          <CustomMonthEvent {...props} onEventClick={handleEventClick} />
+          <CustomMonthEvent
+            {...props}
+            onEventClick={handleEventClick}
+            onToggleTodo={toggleEventDone}
+          />
         ),
       }
     }
     if (view === Views.WEEK) {
       return {
         event: (props: EventProps<CalendarEvent>) => (
-          <CustomWeekEvent event={props.event} onEventClick={handleEventClick} />
+          <CustomWeekEvent
+            event={props.event}
+            onEventClick={handleEventClick}
+            onToggleTodo={toggleEventDone}
+          />
         ),
       }
     }
     return {}
-  }, [view, handleEventClick])
+  }, [view, handleEventClick, toggleEventDone])
 
   const mergedComponents = useMemo(
     () => ({
@@ -154,6 +164,7 @@ const CustomCalendar = () => {
       dateHeader: ({ label, date }: { label: string; date: Date }) => (
         <CalendarHeader label={label} date={date} onClick={() => setSelectedDate(date)} />
       ),
+      showMore: CustomMonthShowMore,
     }),
     [view, viewConfig.components, viewEventComponent, DateCellWrapper],
   )

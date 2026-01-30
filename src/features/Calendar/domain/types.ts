@@ -8,6 +8,8 @@ export interface CalendarEvent {
   start: stringOrDate
   end: stringOrDate
   allDay?: boolean
+  type: 'todo' | 'schedule'
+  isDone?: boolean
   color: EventColorType
   location?: string
   memo?: string

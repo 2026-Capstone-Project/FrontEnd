@@ -40,12 +40,27 @@ export const renderTimeSlotRows = (
   })
 }
 
-export const renderAllDayEventBadges = (events: CalendarEvent[]) =>
+export const renderAllDayEventBadges = (
+  events: CalendarEvent[],
+  onToggleTodo?: (eventId: CalendarEvent['id']) => void,
+) =>
   events.map((event) => {
     const palette = getColorPalette(event.color)
     return (
       <S.EventBadgeWrapper key={event.id} color={palette.base}>
-        <S.Circle backgroundColor={palette.point} />
+        {event.type === 'todo' ? (
+          <S.TodoCheckbox
+            type="checkbox"
+            checked={!!event.isDone}
+            onClick={(eventClick) => eventClick.stopPropagation()}
+            onChange={(eventChange) => {
+              eventChange.stopPropagation()
+              onToggleTodo?.(event.id)
+            }}
+          />
+        ) : (
+          <S.Circle backgroundColor={palette.point} />
+        )}
         {event.title}
       </S.EventBadgeWrapper>
     )
@@ -61,6 +76,7 @@ export const renderTimeOverlayColumn = ({
   dragStateRef,
   handleEventPointerDown,
   handleResizePointerDown,
+  onToggleTodo,
 }: {
   startHour: number
   columnEvents: TimedSlotEvent[]
@@ -71,6 +87,7 @@ export const renderTimeOverlayColumn = ({
   dragStateRef: MutableRefObject<DragState | null>
   handleEventPointerDown: EventPointerDownHandler
   handleResizePointerDown: EventPointerDownHandler
+  onToggleTodo?: (eventId: CalendarEvent['id']) => void
 }) => {
   const rowHeightForCalc = rowHeight || TIMED_SLOT_CONFIG.SLOT_HEIGHT
   return (
@@ -101,7 +118,19 @@ export const renderTimeOverlayColumn = ({
               }
             >
               <S.EventRow>
-                <S.Circle backgroundColor={palette.point} />
+                {event.type === 'todo' ? (
+                  <S.TodoCheckbox
+                    type="checkbox"
+                    checked={!!event.isDone}
+                    onClick={(eventClick) => eventClick.stopPropagation()}
+                    onChange={(eventChange) => {
+                      eventChange.stopPropagation()
+                      onToggleTodo?.(event.id)
+                    }}
+                  />
+                ) : (
+                  <S.Circle backgroundColor={palette.point} />
+                )}
                 <S.EventTitle>{event.title}</S.EventTitle>
               </S.EventRow>
               {event.location && <S.EventLocation>{event.location}</S.EventLocation>}

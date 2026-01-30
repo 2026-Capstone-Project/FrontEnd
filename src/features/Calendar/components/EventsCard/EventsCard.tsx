@@ -42,7 +42,7 @@ const EventsCard = ({
           {data.length > 0 ? (
             <S.EventCards>
               {data.map((event) => (
-                <EventDetailCard key={event.id} event={event} />
+                <EventDetailCard key={event.id} event={event} type={event.type} />
               ))}
             </S.EventCards>
           ) : (

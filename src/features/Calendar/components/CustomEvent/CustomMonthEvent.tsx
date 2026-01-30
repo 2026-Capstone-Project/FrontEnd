@@ -16,9 +16,10 @@ const formatTimeRange = (event: CalendarEvent) => {
 
 type CustomMonthEventProps = EventProps<CalendarEvent> & {
   onEventClick: (event: CalendarEvent) => void
+  onToggleTodo?: (eventId: CalendarEvent['id']) => void
 }
 
-const CustomMonthEvent = ({ event, onEventClick }: CustomMonthEventProps) => {
+const CustomMonthEvent = ({ event, onEventClick, onToggleTodo }: CustomMonthEventProps) => {
   const palette = getColorPalette(event.color)
   const baseColor = palette?.base
   const pointColor = palette?.point
@@ -26,7 +27,19 @@ const CustomMonthEvent = ({ event, onEventClick }: CustomMonthEventProps) => {
   return (
     <S.MonthEventContainer backgroundColor={baseColor} onClick={() => onEventClick(event)}>
       <S.EventRow>
-        <S.Circle backgroundColor={pointColor} />
+        {event.type === 'todo' ? (
+          <S.TodoCheckbox
+            type="checkbox"
+            checked={!!event.isDone}
+            onClick={(eventClick) => eventClick.stopPropagation()}
+            onChange={(eventChange) => {
+              eventChange.stopPropagation()
+              onToggleTodo?.(event.id)
+            }}
+          />
+        ) : (
+          <S.Circle backgroundColor={pointColor} />
+        )}
         <S.EventTitle>{event.title}</S.EventTitle>
       </S.EventRow>
       <S.EventMeta>{formatTimeRange(event)}</S.EventMeta>
