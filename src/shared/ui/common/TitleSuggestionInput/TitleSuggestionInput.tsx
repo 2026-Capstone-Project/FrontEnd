@@ -1,5 +1,12 @@
-import { type MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from 'react'
-import type { FieldValues, Path, PathValue } from 'react-hook-form'
+import {
+  type MouseEvent as ReactMouseEvent,
+  type RefCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import type { FieldValues, Path, PathValue, UseFormRegisterReturn } from 'react-hook-form'
 import { useFormContext } from 'react-hook-form'
 
 import * as S from './TitleSuggestionInput.style'
@@ -45,12 +52,14 @@ type TitleSuggestionInputProps<TFieldValues extends FieldValues> = {
   fieldName: Path<TFieldValues>
   placeholder?: string
   suggestions?: string[]
+  autoFocus?: boolean
 }
 
 const TitleSuggestionInput = <TFieldValues extends FieldValues>({
   fieldName,
   placeholder = '새로운 일정',
   suggestions = defaultSuggestions,
+  autoFocus = false,
 }: TitleSuggestionInputProps<TFieldValues>) => {
   const { register, watch, setValue } = useFormContext<TFieldValues>()
   const rawTitle = watch(fieldName) as PathValue<TFieldValues, typeof fieldName>
@@ -63,10 +72,16 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
   const wrapperRef = useRef<HTMLDivElement | null>(null)
   const [suggestionsVisible, setSuggestionsVisible] = useState(false)
   const [dismissedTitleQuery, setDismissedTitleQuery] = useState<string | null>(null)
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  const { ref: registerRef, ...registerProps } = register(fieldName) as UseFormRegisterReturn
+  const handleInputRef: RefCallback<HTMLInputElement | null> = (element) => {
+    registerRef(element)
+    inputRef.current = element
+  }
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!normalizedTitleQuery || filteredSuggestions.length === 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSuggestionsVisible(false)
       setDismissedTitleQuery(null)
       return
@@ -76,6 +91,7 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
     }
     setSuggestionsVisible(true)
   }, [filteredSuggestions.length, normalizedTitleQuery, dismissedTitleQuery])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
     if (!suggestionsVisible) return undefined
@@ -89,6 +105,13 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [suggestionsVisible, normalizedTitleQuery])
 
+  useEffect(() => {
+    if (!autoFocus) return
+    const target = inputRef.current
+    if (!target) return
+    target.focus()
+  }, [autoFocus])
+
   const handleSelectSuggestion = (value: string) => {
     setValue(fieldName, value as PathValue<TFieldValues, typeof fieldName>, {
       shouldValidate: true,
@@ -99,7 +122,7 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
 
   return (
     <S.Wrapper ref={wrapperRef}>
-      <S.Input {...register(fieldName)} placeholder={placeholder} />
+      <S.Input {...registerProps} ref={handleInputRef} placeholder={placeholder} />
       {suggestionsVisible && filteredSuggestions.length > 0 && (
         <S.SuggestionList>
           {filteredSuggestions.map((item) => (

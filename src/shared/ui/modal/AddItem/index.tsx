@@ -1,6 +1,7 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 
+import type { CalendarEvent } from '@/features/Calendar/domain/types'
 import AddModalLayout from '@/shared/ui/modal/AddModalLayout/AddModalLayout'
 import AddScheduleForm from '@/shared/ui/modal/AddSchedule/components/AddScheduleForm'
 import AddTodoForm from '@/shared/ui/modal/AddTodo/components/AddTodoForm'
@@ -17,6 +18,7 @@ type AddItemModalProps = {
   defaultType?: ActiveType
   tabsVisible?: boolean
   isEditing?: boolean
+  initialEvent?: CalendarEvent | null
 }
 
 const AddItemModal = ({
@@ -27,6 +29,7 @@ const AddItemModal = ({
   defaultType = 'todo',
   tabsVisible = true,
   isEditing = false,
+  initialEvent = null,
 }: AddItemModalProps) => {
   const [activeType, setActiveType] = useState<ActiveType>(defaultType)
   const [footerChildren, setFooterChildren] = useState<ReactNode | null>(null)
@@ -80,6 +83,10 @@ const AddItemModal = ({
     if (typeof document === 'undefined') return null
     return document.getElementById('modal-root')
   }, [])
+  const [headerTitlePortalTarget, setHeaderTitlePortalTarget] = useState<HTMLElement | null>(null)
+  const handleHeaderTitleRef = useCallback((node: HTMLDivElement | null) => {
+    setHeaderTitlePortalTarget(node)
+  }, [])
   const layout = (
     <AddModalLayout
       mode={mode}
@@ -89,6 +96,7 @@ const AddItemModal = ({
       handleDelete={deleteHandler}
       footerChildren={footerChildren}
       headerExtras={tabsVisible ? tabs : undefined}
+      headerTitleContainerRef={handleHeaderTitleRef}
     >
       {activeType === 'todo' ? (
         <AddTodoForm
@@ -97,6 +105,7 @@ const AddItemModal = ({
           mode={mode}
           onClose={onClose}
           registerDeleteHandler={registerDeleteHandler}
+          headerTitlePortalTarget={headerTitlePortalTarget}
           isEditing={isEditing}
         />
       ) : (
@@ -107,6 +116,8 @@ const AddItemModal = ({
           onClose={onClose}
           registerDeleteHandler={registerDeleteHandler}
           registerFooterChildren={registerFooterChildren}
+          headerTitlePortalTarget={headerTitlePortalTarget}
+          initialEvent={initialEvent}
           isEditing={isEditing}
         />
       )}

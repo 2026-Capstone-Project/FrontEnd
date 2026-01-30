@@ -1,7 +1,17 @@
+import { createPortal } from 'react-dom'
+
 import { mockCalendarEvents } from '../../mocks/calendarEvents'
 import EventDetailCard from '../EventDetailCard/EventDetailCard'
 import * as S from './EventsCard.style'
-const EventsCard = ({ selectedDate, onClose }: { selectedDate: Date; onClose: () => void }) => {
+const EventsCard = ({
+  selectedDate,
+  onClose,
+  mode,
+}: {
+  selectedDate: Date
+  onClose: () => void
+  mode: 'inline' | 'modal'
+}) => {
   const startOfSelectedDay = new Date(selectedDate)
   startOfSelectedDay.setHours(0, 0, 0, 0)
   const endOfSelectedDay = new Date(startOfSelectedDay)
@@ -12,8 +22,8 @@ const EventsCard = ({ selectedDate, onClose }: { selectedDate: Date; onClose: ()
     const eventEnd = new Date(event.end)
     return eventStart <= endOfSelectedDay && eventEnd >= startOfSelectedDay
   })
-  return (
-    <S.CardOverlay onClick={onClose}>
+  return createPortal(
+    <S.CardOverlay onClick={mode === 'modal' ? onClose : undefined}>
       <S.CardWrapper
         onClick={(event) => {
           event.stopPropagation()
@@ -40,7 +50,8 @@ const EventsCard = ({ selectedDate, onClose }: { selectedDate: Date; onClose: ()
           )}
         </S.Card>
       </S.CardWrapper>
-    </S.CardOverlay>
+    </S.CardOverlay>,
+    document.getElementById(mode === 'modal' ? 'modal-root' : 'desktop-card-area')!,
   )
 }
 

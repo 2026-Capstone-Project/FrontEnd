@@ -28,6 +28,7 @@ export const ModalInner = styled.div`
   justify-content: center;
   position: absolute;
   top: 0;
+  left: 0;
 `
 
 export const ModalWrapper = styled.div<{ mode: 'modal' | 'inline' }>`
@@ -57,20 +58,34 @@ export const ModalWrapper = styled.div<{ mode: 'modal' | 'inline' }>`
 export const ModalHeader = styled.div`
   display: flex;
   align-items: center;
+  flex-direction: column;
   justify-content: space-between;
-  padding: 30px 24px 0px 24px;
+  height: fit-content;
+  padding: 34px 24px 0px 24px;
 `
-
+export const TitleWrapper = styled.div`
+  display: flex;
+  width: 100%;
+`
 export const ModalHeaderTitle = styled.div`
   display: flex;
   flex-direction: column;
   gap: 6px;
+  width: 100%;
+`
+
+export const HeaderTitleWrapper = styled.div`
+  width: 100%;
 `
 
 export const HeaderExtras = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  height: fit-content;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  width: 100%;
 `
 export const ModalTitle = styled.h2`
   font-size: 20px;

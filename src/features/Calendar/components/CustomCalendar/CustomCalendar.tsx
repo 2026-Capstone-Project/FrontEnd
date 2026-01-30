@@ -12,6 +12,7 @@ import {
   type SlotInfo,
   type View,
   Views,
+  type ViewStatic,
 } from 'react-big-calendar'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 import { createPortal } from 'react-dom'
@@ -41,30 +42,35 @@ const DragAndDropCalendar = withDragAndDrop<CalendarEvent, object>(Calendar)
 
 export type SelectDateSource = 'date-cell' | 'slot' | 'header' | 'date-header'
 
-type CustomCalendarProps = {
-  mode?: 'modal' | 'inline'
-  cardPortalElement?: HTMLElement | null
-}
-
-const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
+const CustomCalendar = () => {
   const [view, setView] = useState<View>(Views.MONTH)
   const [date, setDate] = useState<Date>(new Date())
+  const [isDesktop, setIsDesktop] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.matchMedia(`(min-width: ${theme.breakPoints.desktop})`).matches
+  })
   const [modalDate, setModalDate] = useState<string>(() => new Date().toISOString())
   const [cardPortalRoot, setCardPortalRoot] = useState<HTMLElement | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const [modal, setModal] = useState<{ isOpen: boolean; eventId: number | null }>({
+  const [modal, setModal] = useState<{ isOpen: boolean; eventId: CalendarEvent['id'] | null }>({
     isOpen: false,
     eventId: null,
   })
   const [isModalEditing, setIsModalEditing] = useState(false)
-  const { events, addEvent: enqueueEvent, moveEvent, resizeEvent } = useCalendarEvents()
+  const {
+    events,
+    addEvent: enqueueEvent,
+    moveEvent,
+    resizeEvent,
+    updateEventTime,
+    removeEvent,
+  } = useCalendarEvents()
 
   const modalPortalRoot = useMemo(() => {
     if (typeof document === 'undefined') return null
     return document.getElementById('modal-root')
   }, [])
 
-  const isInlineMode = mode === 'inline'
   const onView = useCallback((newView: View) => setView(newView), [])
   const onNavigate = useCallback((newDate: Date) => setDate(newDate), [])
 
@@ -78,13 +84,27 @@ const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
     [setModal, setModalDate],
   )
 
-  const handleAddEvent = useCallback(() => {
-    const referenceDate = date ?? new Date()
-    const eventId = 1
-    setModalDate(referenceDate.toISOString())
-    setIsModalEditing(false)
-    setModal({ isOpen: true, eventId })
-  }, [date, setModal, setModalDate])
+  const normalizeDate = useCallback((value?: Date | string | null): Date => {
+    if (!value) return new Date()
+    return value instanceof Date ? value : new Date(value)
+  }, [])
+
+  const handleAddEvent = useCallback(
+    (referenceDate?: Date | string) => {
+      const targetDate = referenceDate
+        ? normalizeDate(referenceDate)
+        : normalizeDate(date ?? new Date())
+      const safeIso =
+        targetDate && typeof targetDate.toISOString === 'function'
+          ? targetDate.toISOString()
+          : new Date().toISOString()
+      const eventId = 1
+      setModalDate(safeIso)
+      setIsModalEditing(false)
+      setModal({ isOpen: true, eventId })
+    },
+    [date, normalizeDate, setModal, setModalDate],
+  )
 
   const handleCloseModal = useCallback(() => {
     setModal({ isOpen: false, eventId: null })
@@ -96,7 +116,7 @@ const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
       // 슬롯 선택/더블클릭 처리: 선택 날짜 설정 후 더블클릭이면 새 일정 추가
       if (slotInfo.action === 'doubleClick') {
         setSelectedDate(null)
-        handleAddEvent()
+        handleAddEvent(slotInfo.start)
         const isAllDaySlot = slotInfo.slots.length === 1
         enqueueEvent(slotInfo.start, isAllDaySlot)
       } else {
@@ -126,6 +146,55 @@ const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
       }),
     [view, handleSelectDate],
   )
+
+  const handleDayViewSlotDoubleClick = useCallback(
+    (slotDate: Date) => {
+      setSelectedDate(null)
+      handleAddEvent(slotDate)
+      enqueueEvent(slotDate, false)
+    },
+    [enqueueEvent, handleAddEvent],
+  )
+
+  const formatLogDateTime = useCallback(
+    (value: Date) => moment(value).format('YYYY-MM-DD HH:mm'),
+    [],
+  )
+
+  const handleDayViewEventDrag = useCallback(
+    (event: CalendarEvent, start: Date, end: Date) => {
+      console.log('[Calendar] event time changed', {
+        id: event.id,
+        title: event.title,
+        start: formatLogDateTime(start),
+        end: formatLogDateTime(end),
+        allDay: event.allDay ?? false,
+      })
+      updateEventTime(event.id, start, end)
+    },
+    [formatLogDateTime, updateEventTime],
+  )
+
+  const dayViewWithHandlers = useMemo<
+    React.FC<Parameters<typeof CustomDayView>[0]> & ViewStatic
+  >(() => {
+    const BaseDayView = Object.assign(
+      (props: Parameters<typeof CustomDayView>[0]) => (
+        <CustomDayView
+          onSlotDoubleClick={handleDayViewSlotDoubleClick}
+          onEventDrag={handleDayViewEventDrag}
+          {...props}
+        />
+      ),
+      {
+        title: CustomDayView.title,
+        navigate: CustomDayView.navigate,
+      },
+    ) as React.FC<Parameters<typeof CustomDayView>[0]> & ViewStatic
+    return BaseDayView
+  }, [handleDayViewSlotDoubleClick, handleDayViewEventDrag])
+
+  const isInlineMode = isDesktop
 
   const DateCellWrapper = useCallback(
     ({ value, children }: DateCellWrapperProps) =>
@@ -173,27 +242,55 @@ const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
     [view, viewConfig.components, viewEventComponent, DateCellWrapper],
   )
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
-    if (mode === 'inline') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (isInlineMode) {
       setSelectedDate((prev) => prev ?? new Date())
       return
     }
     setSelectedDate(null)
-  }, [mode])
+  }, [isInlineMode])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
-    if (cardPortalElement) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCardPortalRoot(cardPortalElement)
-      return
-    }
     if (typeof document === 'undefined') {
       setCardPortalRoot(null)
       return
     }
     setCardPortalRoot(document.getElementById('desktop-card-area'))
-  }, [cardPortalElement])
+  }, [])
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined
+    const mediaQuery = window.matchMedia(`(min-width: ${theme.breakPoints.desktop})`)
+    const handler = (event: MediaQueryListEvent) => {
+      setIsDesktop(event.matches)
+    }
+    mediaQuery.addEventListener('change', handler)
+    return () => mediaQuery.removeEventListener('change', handler)
+  }, [])
+
+  useEffect(() => {
+    if (!modal.isOpen || modal.eventId == null) return undefined
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key !== 'Backspace') return
+      event.preventDefault()
+      removeEvent(modal.eventId)
+      setModal({ isOpen: false, eventId: null })
+      setIsModalEditing(false)
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [modal.eventId, modal.isOpen, removeEvent])
+
+  const modalEvent = useMemo(
+    () =>
+      modal.eventId == null ? null : (events.find((item) => item.id === modal.eventId) ?? null),
+    [events, modal.eventId],
+  )
+  const modalMode: 'modal' | 'inline' = isInlineMode ? 'inline' : 'modal'
 
   return (
     <div css={{ position: 'relative', height: 'fit-content', width: '100%' }}>
@@ -210,7 +307,7 @@ const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
           views={{
             month: true,
             week: CustomWeekView,
-            day: CustomDayView,
+            day: dayViewWithHandlers,
           }}
           defaultView={Views.MONTH}
           view={view}
@@ -242,8 +339,9 @@ const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
           <AddSchedule
             date={modalDate}
             onClose={handleCloseModal}
-            mode={mode}
+            mode={modalMode}
             eventId={modal.eventId}
+            event={modalEvent}
             tabsVisible={!isModalEditing}
           />,
           modalPortalRoot,
@@ -257,8 +355,9 @@ const CustomCalendar = ({ mode, cardPortalElement }: CustomCalendarProps) => {
           <AddSchedule
             date={modalDate}
             onClose={handleCloseModal}
-            mode={mode}
+            mode={modalMode}
             eventId={modal.eventId}
+            event={modalEvent}
             tabsVisible={!isModalEditing}
           />,
           cardPortalRoot,

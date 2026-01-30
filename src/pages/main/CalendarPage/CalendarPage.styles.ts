@@ -7,7 +7,6 @@ export const PageWrapper = styled.div`
   display: grid;
   grid-template-columns: 1fr 400px;
   justify-content: center;
-  align-self: center;
   justify-self: center;
   gap: 32px;
   width: 100%;

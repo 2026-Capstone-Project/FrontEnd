@@ -10,6 +10,7 @@ import {
 import { createPortal } from 'react-dom'
 import { FormProvider } from 'react-hook-form'
 
+import type { CalendarEvent } from '@/features/Calendar/domain/types'
 import { useAddScheduleForm } from '@/shared/hooks/useAddScheduleForm'
 import { useRepeatChangeGuard } from '@/shared/hooks/useRepeatChangeGuard'
 import { theme } from '@/shared/styles/theme'
@@ -38,6 +39,8 @@ type AddScheduleFormProps = {
   eventId: number
   onClose: () => void
   isEditing?: boolean
+  headerTitlePortalTarget?: HTMLElement | null
+  initialEvent?: CalendarEvent | null
 }
 
 const AddScheduleForm = ({
@@ -47,6 +50,8 @@ const AddScheduleForm = ({
   registerDeleteHandler,
   registerFooterChildren,
   isEditing = false,
+  headerTitlePortalTarget,
+  initialEvent,
 }: AddScheduleFormProps) => {
   const {
     formMethods,
@@ -72,7 +77,7 @@ const AddScheduleForm = ({
     isSearchPlaceOpen,
     openSearchPlace,
     eventTitle,
-  } = useAddScheduleForm({ date })
+  } = useAddScheduleForm({ date, initialEvent })
   const { register, setValue } = formMethods
 
   const [calendarAnchor, setCalendarAnchor] = useState<DOMRect | null>(null)
@@ -220,7 +225,9 @@ const AddScheduleForm = ({
       <FormProvider {...formMethods}>
         <form id="add-schedule-form" onSubmit={handleFormSubmit}>
           <S.FormContent>
-            <TitleSuggestionInput fieldName="eventTitle" placeholder="새로운 일정" />
+            {!headerTitlePortalTarget && (
+              <TitleSuggestionInput fieldName="eventTitle" placeholder="새로운 일정" autoFocus />
+            )}
             <S.Selection>
               <S.SelectionColumn>
                 <S.FieldRow>
@@ -315,6 +322,11 @@ const AddScheduleForm = ({
             )}
           </div>
         </form>
+        {headerTitlePortalTarget &&
+          createPortal(
+            <TitleSuggestionInput fieldName="eventTitle" placeholder="새로운 일정" autoFocus />,
+            headerTitlePortalTarget,
+          )}
       </FormProvider>
       {deleteWarningVisible && (
         <DeleteConfirmModal

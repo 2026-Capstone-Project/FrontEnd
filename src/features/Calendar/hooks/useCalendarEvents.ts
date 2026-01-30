@@ -26,5 +26,13 @@ export const useCalendarEvents = () => {
     setEvents((prev) => updateEventRange(prev, event.id, normalizedStart, normalizedEnd))
   }, [])
 
-  return { events, addEvent, moveEvent, resizeEvent }
+  const updateEventTime = useCallback((eventId: CalendarEvent['id'], start: Date, end: Date) => {
+    setEvents((prev) => updateEventRange(prev, eventId, start, end))
+  }, [])
+
+  const removeEvent = useCallback((eventId: CalendarEvent['id']) => {
+    setEvents((prev) => prev.filter((event) => event.id !== eventId))
+  }, [])
+
+  return { events, addEvent, moveEvent, resizeEvent, updateEventTime, removeEvent }
 }

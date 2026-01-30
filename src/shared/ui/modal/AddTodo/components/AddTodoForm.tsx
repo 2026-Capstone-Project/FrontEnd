@@ -34,6 +34,7 @@ type AddTodoFormProps = {
   eventId: number
   onClose: () => void
   isEditing?: boolean
+  headerTitlePortalTarget?: HTMLElement | null
 }
 
 const AddTodoForm = ({
@@ -43,6 +44,7 @@ const AddTodoForm = ({
   onClose,
   registerDeleteHandler,
   isEditing = false,
+  headerTitlePortalTarget,
 }: AddTodoFormProps) => {
   const {
     formMethods,
@@ -110,6 +112,9 @@ const AddTodoForm = ({
 
   const isInlineMode = mode === 'inline'
   const shouldShowModalOverlay = !isInlineMode && activeCalendarField
+  const renderTitleInput = () => (
+    <TitleSuggestionInput fieldName="todoTitle" placeholder="새로운 할 일" autoFocus />
+  )
 
   // 편집 모드에서 반복 변경을 가드해 확인 또는 취소가 가능하도록 합니다.
   const {
@@ -173,7 +178,7 @@ const AddTodoForm = ({
       <FormProvider {...formMethods}>
         <form id="add-todo-form" onSubmit={handleFormSubmit}>
           <S.FormContent>
-            <TitleSuggestionInput fieldName="todoTitle" placeholder="새로운 할 일" />
+            {!headerTitlePortalTarget && renderTitleInput()}
             <S.Selection>
               <S.SelectionColumn>
                 <S.FieldRow>
@@ -238,6 +243,11 @@ const AddTodoForm = ({
             )}
           </div>
         </form>
+        {headerTitlePortalTarget &&
+          createPortal(
+            <TitleSuggestionInput fieldName="todoTitle" placeholder="새로운 할 일" autoFocus />,
+            headerTitlePortalTarget,
+          )}
       </FormProvider>
       {deleteWarningVisible && (
         <DeleteConfirmModal

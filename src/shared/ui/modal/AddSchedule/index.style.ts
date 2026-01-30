@@ -32,7 +32,7 @@ export const Textarea = styled.textarea`
   height: 80px;
   border: none;
   border-radius: 8px;
-  padding: 12px;
+  padding: 6px 12px 12px 12px;
   font-size: 14px;
   font-weight: 400;
   resize: none;
@@ -146,7 +146,7 @@ export const TextareaWrapper = styled.div`
 `
 export const TextareaHeader = styled.div`
   color: ${theme.colors.textColor3};
-  padding: 12px 10px;
+  padding: 12px 10px 0 10px;
   width: 100%;
   display: flex;
 `

@@ -119,6 +119,22 @@ export const DayEventBadge = styled(EventBadge)`
   align-items: flex-start;
   flex-direction: column;
   justify-content: flex-start;
+  pointer-events: auto;
+
+  &:hover {
+    z-index: 2;
+  }
+`
+
+export const EventResizer = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 12px;
+  cursor: ns-resize;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
 `
 
 export const DateInfo = styled.div`

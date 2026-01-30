@@ -32,6 +32,7 @@ export const weekViewStyles = css`
     justify-content: center;
     display: flex;
     font-size: 16px;
+    font-weight: 400;
   }
   .rbc-today {
     .day-number {
