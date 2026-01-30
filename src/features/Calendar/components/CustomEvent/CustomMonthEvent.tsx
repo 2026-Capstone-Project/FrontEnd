@@ -31,6 +31,8 @@ const CustomMonthEvent = ({ event, onEventClick, onToggleTodo }: CustomMonthEven
           <S.TodoCheckbox
             type="checkbox"
             checked={!!event.isDone}
+            onPointerDown={(eventPointer) => eventPointer.stopPropagation()}
+            onMouseDown={(eventMouse) => eventMouse.stopPropagation()}
             onClick={(eventClick) => eventClick.stopPropagation()}
             onChange={(eventChange) => {
               eventChange.stopPropagation()
