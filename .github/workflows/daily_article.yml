@@ -2,20 +2,21 @@ name: Calio Daily Article Generator
 
 on:
   schedule:
-    - cron: "0 15 * * *"
-  workflow_dispatch:
+    - cron: "0 15 * * *" # 한국 시간 기준 매일 자정 (UTC 15:00)
+  workflow_dispatch: # 수동 실행 버튼
 
 jobs:
-  build:
+  generate-and-pr:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write # PR을 생성하기 위해 꼭 필요한 권한
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # 모든 브랜치 이력을 가져옴
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -30,17 +31,26 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          REPO_NAME: ${{ github.repository }} # 환경 변수로 유연하게 대처
+          REPO_NAME: ${{ github.repository }}
         run: python scripts/generate_article.py
 
-      - name: Commit and Push
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          commit-message: "docs: 📝 [Calio] 개발 일지 생성"
+          branch: auto-daily-log
+          delete-branch: true # PR이 머지되면 브랜치 자동 삭제
+          title: "📝 [Calio] 오늘의 개발 아티클이 도착했습니다! ($(date +'%Y-%m-%d'))"
+          body: |
+            ## 🤖 Calio AI Daily Report
+            오늘의 작업 내역과 코드 변경점을 분석하여 생성된 리포트입니다.
 
-          # 안전한 파일 추가 방식 (Copilot 추천)
-          git add articles/ || echo "No articles to add"
+            - **브랜치:** 모든 활성 브랜치 스캔
+            - **생성일:** $(date +'%Y-%m-%d %H:%M KST')
 
-          # 타임스탬프 오류 수정: bash date 명령 사용
-          CURRENT_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: 📝 [Calio] 개발 일지 자동 생성 ($CURRENT_TIME)" && git push)
+            내용을 검토하신 후 `develop` 브랜치로 머지해 주세요!
+          base: develop # PR을 보낼 대상 브랜치
+          labels: |
+            documentation
+            ai-generated
