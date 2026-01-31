@@ -29,7 +29,7 @@ jobs:
 
       - name: Run Generator
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           REPO_NAME: ${{ github.repository }}
         run: python scripts/generate_article.py
@@ -37,7 +37,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "docs: 📝 [Calio] 개발 일지 생성"
           branch: auto-daily-log
           delete-branch: true # PR이 머지되면 브랜치 자동 삭제
