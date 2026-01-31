@@ -40,6 +40,7 @@ export const ColorDropdown = styled.div`
   align-items: center;
   background-color: ${(props) => props.theme.colors.inputColor};
   border-radius: 8px;
+  cursor: pointer;
 `
 export const ColorOptions = styled.div`
   position: absolute;

@@ -1,12 +1,10 @@
 import moment from 'moment'
-import React from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import type { NavigateAction, ViewStatic } from 'react-big-calendar'
 
 import { formatWeekday } from '@/features/Calendar/utils/formatters'
 
-import { TIMED_SLOT_CONFIG } from '../../domain/constants'
 import type { CalendarEvent } from '../../domain/types'
-import { getColorPalette } from '../../utils/colorPalette'
 import {
   buildTimedSlots,
   compareByStart,
@@ -14,37 +12,25 @@ import {
   isDateOnlyString,
 } from '../../utils/helpers/dayViewHelpers'
 import * as S from './dayView'
+import { TIME_COLUMN_START_HOURS } from './dayView/constants'
+import { useDayViewDragHandlers } from './dayView/dragHandlers'
+import { renderAllDayEventBadges, renderTimeOverlayColumn } from './dayView/renderers'
 
 interface CustomDayViewProps {
   events?: CalendarEvent[]
   date?: Date
+  onSlotDoubleClick?: (slotDate: Date) => void
+  onEventDrag?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
+  onToggleTodo?: (eventId: CalendarEvent['id']) => void
+  selectedEventId?: CalendarEvent['id'] | null
+  onEventSelect?: (event: CalendarEvent) => void
+  onEventClick?: (event: CalendarEvent) => void
+  onEventDoubleClick?: (event: CalendarEvent) => void
 }
 
-//TODO: 반응형 디자인 추가: 모바일 환경에서는 grid 1
 //TODO: 이벤트가 차지하는 높이가 작을 때 텍스트가 넘치는 문제 해결
-//TODO: 드래그해서 시간 선택, 이벤트 시간 변경 기능 추가
+
 //TODO: 이벤트 겹침 처리 -> 디자인 요청
-
-/** 24시간을 12시간씩 두 컬럼으로 나누어 시간 라인을 렌더링합니다. */
-const renderTimeSlotRows = (startHour: number) => {
-  const TOTAL_SLOTS = TIMED_SLOT_CONFIG.MAX_VISUAL_HOURS
-  return Array.from({ length: TOTAL_SLOTS }, (_, index) => {
-    const hour = startHour + index
-    const hourLabel = `${String(hour).padStart(2, '0')}:00`
-    const isLast = index === TOTAL_SLOTS - 1
-
-    return (
-      <>
-        {!isLast && (
-          <S.TimeSlotRow key={hour}>
-            <S.TimeLabel>{hourLabel}</S.TimeLabel>
-            <S.SlotContent className={hour === startHour + TOTAL_SLOTS - 2 ? 'last-slot' : ''} />
-          </S.TimeSlotRow>
-        )}
-      </>
-    )
-  })
-}
 
 /**
  * 하루 단위로 렌더링하는 커스텀 뷰.
@@ -53,6 +39,13 @@ const renderTimeSlotRows = (startHour: number) => {
 const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
   events = [],
   date = new Date(),
+  onSlotDoubleClick,
+  onEventDrag,
+  onToggleTodo,
+  selectedEventId,
+  onEventSelect,
+  onEventClick,
+  onEventDoubleClick,
 }) => {
   const currentDate = moment(date)
   const isToday = currentDate.isSame(moment(), 'day')
@@ -73,6 +66,34 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
 
   const timedColumns = buildTimedSlots(timedEvents)
 
+  const [rowHeight, setRowHeight] = useState(50)
+  const { dragStateRef, handleEventPointerDown, handleResizePointerDown } =
+    useDayViewDragHandlers(onEventDrag)
+  const slotRowRef = useRef<HTMLDivElement | null>(null)
+  const gridRef = useRef<HTMLDivElement | null>(null)
+
+  const handleSlotRef = useCallback((node: HTMLDivElement | null) => {
+    slotRowRef.current = node
+    if (node) {
+      setRowHeight(node.getBoundingClientRect().height)
+    }
+  }, [])
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (slotRowRef.current) {
+        setRowHeight(slotRowRef.current.getBoundingClientRect().height)
+      }
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  const handleSlotDoubleClick = useCallback(
+    (slotDate: Date) => onSlotDoubleClick?.(slotDate),
+    [onSlotDoubleClick],
+  )
+
   return (
     <S.DayViewContainer>
       <S.DateInfo>
@@ -82,34 +103,37 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
 
       <S.CalendarWrapper>
         <S.AllDaySection>
-          {allDayEvents.map((event) => {
-            const palette = getColorPalette(event?.color)
-            return (
-              <S.EventBadgeWrapper key={event.id} color={palette.base}>
-                <S.Circle backgroundColor={palette.point} />
-                {event.title}
-              </S.EventBadgeWrapper>
-            )
-          })}
+          {renderAllDayEventBadges(
+            allDayEvents,
+            onToggleTodo,
+            selectedEventId,
+            onEventSelect,
+            onEventClick,
+            onEventDoubleClick,
+          )}
         </S.AllDaySection>
 
-        <S.GridContainer>
-          {[0, 12].map((startHour, columnIndex) => (
-            <S.SlotColumn key={startHour}>
-              {renderTimeSlotRows(startHour)}
-              <S.TimeOverlay>
-                {timedColumns[columnIndex].map(({ event, top, height, palette }) => (
-                  <S.DayEventBadge key={event.id} color={palette.base} style={{ top, height }}>
-                    <S.EventRow>
-                      <S.Circle backgroundColor={palette.point} />
-                      <S.EventTitle>{event.title}</S.EventTitle>
-                    </S.EventRow>
-                    {event.location && <S.EventLocation>{event.location}</S.EventLocation>}
-                  </S.DayEventBadge>
-                ))}
-              </S.TimeOverlay>
-            </S.SlotColumn>
-          ))}
+        <S.GridContainer ref={gridRef}>
+          {TIME_COLUMN_START_HOURS.map((startHour, columnIndex) =>
+            renderTimeOverlayColumn({
+              startHour,
+              columnEvents: timedColumns[columnIndex] ?? [],
+              date,
+              rowHeight,
+              slotRef: columnIndex === 0 ? handleSlotRef : undefined,
+              handleSlotDoubleClick,
+              dragStateRef,
+              handleEventPointerDown,
+              handleResizePointerDown,
+              onToggleTodo,
+              selectedEventId,
+              onEventSelect,
+              onEventClick,
+              onEventDoubleClick,
+              gridRef,
+              columnIndex,
+            }),
+          )}
         </S.GridContainer>
       </S.CalendarWrapper>
     </S.DayViewContainer>

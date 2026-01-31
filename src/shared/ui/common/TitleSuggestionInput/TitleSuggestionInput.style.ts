@@ -4,6 +4,7 @@ import { theme } from '@/shared/styles/theme'
 
 export const Wrapper = styled.div`
   position: relative;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -14,10 +15,9 @@ export const Input = styled.input`
   height: 43px;
   border: none;
   border-radius: 8px;
-  padding: 12px;
-  font-size: 16px;
+  padding: 0 12px 0 0;
+  font-size: 20px;
   font-weight: 500;
-  background-color: ${theme.colors.inputColor};
   &:focus {
     outline: none;
     border: none;

@@ -33,6 +33,8 @@ export const GridContainer = styled.div`
   padding-top: 10px;
   max-width: 600px;
   width: 100%;
+  overflow: visible;
+  user-select: none;
   ${media.down(theme.breakPoints.desktop)} {
     padding: 10px 0;
     column-gap: 20px;
@@ -43,6 +45,7 @@ export const GridContainer = styled.div`
 export const SlotColumn = styled.div`
   position: relative;
   width: 100%;
+  overflow: visible;
 `
 
 export const TimeOverlay = styled.div`
@@ -57,6 +60,7 @@ export const TimeOverlay = styled.div`
     left: 33px;
     width: calc(100% - 34px);
   }
+  overflow: visible;
 `
 
 export const TimeSlotRow = styled.div`
@@ -106,19 +110,52 @@ export const EventBadge = styled.div<{ color?: string }>`
   display: flex;
   align-items: center;
   z-index: 1;
+  border-radius: 4px;
 `
 
-export const DayEventBadge = styled(EventBadge)`
+export const DayEventBadge = styled(EventBadge)<{
+  isSelected?: boolean
+  pointColor: string
+  overflowTop?: boolean
+  overflowBottom?: boolean
+}>`
   position: absolute;
   right: 1px;
   left: 0;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border-style: solid;
+  border-color: ${({ isSelected, pointColor }) => (isSelected ? pointColor : 'transparent')};
+  border-width: ${({ isSelected }) => (isSelected ? '2px' : '0')};
+  border-top-width: ${({ isSelected, overflowTop }) =>
+    isSelected ? (overflowTop ? '0' : '2px') : '0'};
+  border-bottom-width: ${({ isSelected, overflowBottom }) =>
+    isSelected ? (overflowBottom ? '0' : '2px') : '0'};
+  border-top-left-radius: ${({ overflowTop }) => (overflowTop ? '0' : '4px')};
+  border-top-right-radius: ${({ overflowTop }) => (overflowTop ? '0' : '4px')};
+  border-bottom-left-radius: ${({ overflowBottom }) => (overflowBottom ? '0' : '4px')};
+  border-bottom-right-radius: ${({ overflowBottom }) => (overflowBottom ? '0' : '4px')};
   display: flex;
   width: 100%;
   padding: 8px;
   align-items: flex-start;
   flex-direction: column;
   justify-content: flex-start;
+  pointer-events: auto;
+  overflow: hidden;
+  &:hover {
+    z-index: 2;
+  }
+`
+
+export const EventResizer = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 12px;
+  cursor: ns-resize;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
 `
 
 export const DateInfo = styled.div`
@@ -151,7 +188,11 @@ export const DateCircle = styled.div<{ highlight?: boolean }>`
   font-size: 16px;
 `
 
-export const EventBadgeWrapper = styled.div<{ color?: string }>`
+export const EventBadgeWrapper = styled.div<{
+  color?: string
+  isSelected?: boolean
+  pointColor: string
+}>`
   background-color: ${(props) => props.color || '#E2F2ED'};
   border-radius: 20px;
   padding: 0px 8px;
@@ -160,6 +201,7 @@ export const EventBadgeWrapper = styled.div<{ color?: string }>`
   align-items: center;
   width: 100%;
   display: flex;
+  box-shadow: ${({ isSelected, pointColor }) => (isSelected ? `0 0 0 2px ${pointColor}` : 'none')};
 
   ${media.down(theme.breakPoints.desktop)} {
     padding: 4px;
@@ -186,6 +228,13 @@ export const EventRow = styled.div`
   display: flex;
   align-items: center;
   gap: 6px;
+  cursor: grab;
+  user-select: none;
+  width: 100%;
+
+  &:active {
+    cursor: grabbing;
+  }
 `
 
 export const PlaceholderLabel = styled.div`

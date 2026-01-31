@@ -32,7 +32,7 @@ export const Textarea = styled.textarea`
   height: 80px;
   border: none;
   border-radius: 8px;
-  padding: 12px;
+  padding: 6px 12px 12px 12px;
   font-size: 14px;
   font-weight: 400;
   resize: none;
@@ -47,18 +47,21 @@ export const Selection = styled.div`
   flex-direction: column;
   gap: 12px;
 `
-export const SelectionColumn = styled.div`
+export const SelectionColumn = styled.div<{ isAllday: boolean }>`
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-  flex-direction: column;
+  flex-direction: ${({ isAllday }) => (isAllday ? 'row' : 'column')};
+  align-items: ${({ isAllday }) => (isAllday ? 'center' : 'flex-start')};
+  color: #a5a5a5;
 `
-export const FieldRow = styled.div`
-  flex: 1;
+export const FieldRow = styled.div<{ isAllday?: boolean }>`
+  flex: ${({ isAllday }) => (isAllday ? 'none' : '1')};
   display: flex;
-  height: 43px;
+  height: 30px;
   gap: 8px;
   align-items: center;
+  width: fit-content;
 `
 export const FieldLabel = styled.span`
   font-size: 14px;
@@ -84,7 +87,7 @@ export const CalendarPortal = styled.div`
   padding: 14px;
   height: fit-content;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
-  z-index: 3000;
+  z-index: 10200;
   ${media.down(theme.breakPoints.desktop)} {
     background: rgba(245, 245, 245, 0.8);
   }
@@ -106,7 +109,7 @@ export const SearchPlacePortal = styled.div`
   padding: 24px;
   height: fit-content;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
-  z-index: 3000;
+  z-index: 10100;
   ${media.down(theme.breakPoints.tablet)} {
     width: min(90vw, 360px);
     top: 50%;
@@ -146,7 +149,7 @@ export const TextareaWrapper = styled.div`
 `
 export const TextareaHeader = styled.div`
   color: ${theme.colors.textColor3};
-  padding: 12px 10px;
+  padding: 12px 10px 0 10px;
   width: 100%;
   display: flex;
 `
@@ -169,5 +172,10 @@ export const PortalDarkLayer = styled.div`
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.2);
-  z-index: 2995;
+  z-index: 10050;
+`
+export const BottomSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 `

@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { type Control, type UseFormReturn } from 'react-hook-form'
 
+import type { CalendarEvent } from '@/features/Calendar/domain/types'
 import { useCalendarFieldPicker } from '@/shared/hooks/useCalendarFieldPicker'
 import { useRepeatConfigController } from '@/shared/hooks/useRepeatConfigController'
 import { useScheduleFormFields } from '@/shared/hooks/useScheduleFormFields'
@@ -17,6 +18,7 @@ import { formatIsoDate } from '@/shared/utils/date'
 
 type UseAddScheduleFormProps = {
   date: string
+  initialEvent?: CalendarEvent | null
 }
 
 export type UseAddScheduleFormResult = {
@@ -47,8 +49,11 @@ export type UseAddScheduleFormResult = {
   eventTitle: string | undefined
 }
 
-export const useAddScheduleForm = ({ date }: UseAddScheduleFormProps): UseAddScheduleFormResult => {
-  const [isAllday, setIsAllday] = useState(false)
+export const useAddScheduleForm = ({
+  date,
+  initialEvent,
+}: UseAddScheduleFormProps): UseAddScheduleFormResult => {
+  const [isAllday, setIsAllday] = useState(initialEvent?.allDay ?? false)
 
   const {
     formMethods,
@@ -62,7 +67,7 @@ export const useAddScheduleForm = ({ date }: UseAddScheduleFormProps): UseAddSch
     repeatConfig,
     eventColor,
     eventTitle,
-  } = useScheduleFormFields({ date, isAllday })
+  } = useScheduleFormFields({ date, isAllday, initialEvent })
 
   const { handleRepeatType, updateConfig, setEventColor } = useRepeatConfigController({
     repeatConfig,
@@ -84,6 +89,12 @@ export const useAddScheduleForm = ({ date }: UseAddScheduleFormProps): UseAddSch
   })
 
   const { mapRef, isSearchPlaceOpen, closeSearchPlace, openSearchPlace } = useSearchPlaceToggle()
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    setIsAllday(initialEvent?.allDay ?? false)
+  }, [initialEvent])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const onSubmit = (values: AddScheduleFormValues) => {
     const payload = {

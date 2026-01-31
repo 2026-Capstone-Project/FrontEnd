@@ -1,11 +1,12 @@
 /** @JSXImportSource @emotion/react */
+import type { Ref } from 'react'
+
 import Check from '@/shared/assets/icons/check.svg?react'
 import Close from '@/shared/assets/icons/close.svg?react'
 import Trash from '@/shared/assets/icons/trash-2.svg?react'
 
 import * as S from './AddModalLayout.style'
 const AddModalLayout = ({
-  title,
   onClose,
   children,
   type,
@@ -14,8 +15,8 @@ const AddModalLayout = ({
   handleDelete,
   headerExtras,
   mode,
+  headerTitleContainerRef,
 }: {
-  title?: string
   onClose: () => void
   children: React.ReactNode
   type: 'todo' | 'schedule'
@@ -24,9 +25,8 @@ const AddModalLayout = ({
   mode: 'modal' | 'inline'
   handleDelete?: () => void
   headerExtras?: React.ReactNode
+  headerTitleContainerRef?: Ref<HTMLDivElement>
 }) => {
-  // TODO: Button -> 추후 공용 컴포넌트로 분리 필요
-  const modalTitle = title ? title : type === 'todo' ? '새로운 할 일' : '새로운 일정'
   const layoutContent = (
     <S.ModalInner
       onClick={(event) => {
@@ -35,17 +35,20 @@ const AddModalLayout = ({
     >
       <S.ModalWrapper mode={mode}>
         <S.ModalHeader>
-          <S.ModalHeaderTitle>
-            <S.ModalTitle>{modalTitle}</S.ModalTitle>
-            {headerExtras && <S.HeaderExtras>{headerExtras}</S.HeaderExtras>}
-          </S.ModalHeaderTitle>
-          <Close onClick={onClose} />
+          <S.TitleWrapper>
+            <S.ModalHeaderTitle>
+              <S.HeaderTitleWrapper ref={headerTitleContainerRef} />
+            </S.ModalHeaderTitle>
+            <Close onClick={onClose} />
+          </S.TitleWrapper>
+          {headerExtras && <S.HeaderExtras>{headerExtras}</S.HeaderExtras>}
         </S.ModalHeader>
+
         <S.ModalContent>{children}</S.ModalContent>
         <S.ModalFooter>
           <S.FooterLeft>{type === 'schedule' && footerChildren}</S.FooterLeft>
           <S.FooterRight>
-            <Trash onClick={handleDelete} css={{ cursor: 'pointer' }} />
+            <Trash onClick={handleDelete} css={{ cursor: 'pointer' }} color="#757575" />
             <S.Button type="submit" form={submitFormId}>
               <Check color="#ffffff" />
             </S.Button>
