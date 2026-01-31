@@ -34,6 +34,11 @@ jobs:
           REPO_NAME: ${{ github.repository }}
         run: python scripts/generate_article.py
 
+      - name: Set Date Environment Variable
+        run: |
+          echo "CURRENT_DATE=$(TZ='Asia/Seoul' date +'%Y-%m-%d')" >> $GITHUB_ENV
+          echo "CURRENT_DATETIME=$(TZ='Asia/Seoul' date +'%Y-%m-%d %H:%M KST')" >> $GITHUB_ENV
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
@@ -41,13 +46,13 @@ jobs:
           commit-message: "docs: 📝 [Calio] 개발 일지 생성"
           branch: auto-daily-log
           delete-branch: true # PR이 머지되면 브랜치 자동 삭제
-          title: "📝 [Calio] 오늘의 개발 아티클이 도착했습니다! ($(date +'%Y-%m-%d'))"
+          title: "📝 [Calio] 오늘의 개발 아티클이 도착했습니다! (${{ env.CURRENT_DATE }})"
           body: |
             ## 🤖 Calio AI Daily Report
             오늘의 작업 내역과 코드 변경점을 분석하여 생성된 리포트입니다.
 
             - **브랜치:** 모든 활성 브랜치 스캔
-            - **생성일:** $(date +'%Y-%m-%d %H:%M KST')
+            - **생성일:** ${{ env.CURRENT_DATETIME }}
 
             내용을 검토하신 후 `develop` 브랜치로 머지해 주세요!
           base: develop # PR을 보낼 대상 브랜치
