@@ -1,0 +1,41 @@
+name: Calio Daily Article Generator
+
+on:
+  schedule:
+    - cron: '0 15 * * *' # 한국 시간 기준 매일 자정 (UTC 15:00)
+  workflow_dispatch: # 직접 실행 버튼
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions: # 저장소에 글을 써야 하므로 권한 필요
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 모든 브랜치와 히스토리를 가져오기 위해 필요
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          pip install PyGithub google-generativeai python-dotenv
+
+      - name: Run Generator
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python scripts/generate_article.py
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add articles/*.md
+          # 변경사항이 있을 때만 커밋
+          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: 📝 [Calio] 개발 일지 자동 생성 (${{ github.event.head_commit.timestamp }})" && git push)
