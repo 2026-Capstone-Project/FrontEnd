@@ -336,8 +336,8 @@ const AddScheduleForm = ({
               />
             )}
             <S.Selection>
-              <S.SelectionColumn>
-                <S.FieldRow>
+              <S.SelectionColumn isAllday={isAllday}>
+                <S.FieldRow isAllday={isAllday}>
                   <S.DateFieldButton type="button" onClick={handleCalendarButtonClick('start')}>
                     {startDate}
                   </S.DateFieldButton>
@@ -349,7 +349,8 @@ const AddScheduleForm = ({
                     />
                   )}
                 </S.FieldRow>
-                <S.FieldRow>
+                {isAllday && '-'}
+                <S.FieldRow isAllday={isAllday}>
                   <S.DateFieldButton type="button" onClick={handleCalendarButtonClick('end')}>
                     {endDate}
                   </S.DateFieldButton>
@@ -391,7 +392,7 @@ const AddScheduleForm = ({
                 <S.TextareaHeader>메모</S.TextareaHeader>
                 <S.Textarea {...register('eventDescription')} />
               </S.TextareaWrapper>
-              <S.FieldRow>
+              <S.FieldRow css={{ width: '100%' }}>
                 <S.FieldMap ref={mapButtonRef} type="button" onClick={handleMapButtonClick}>
                   장소 추가
                 </S.FieldMap>

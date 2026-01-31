@@ -48,7 +48,7 @@ const AddModalLayout = ({
         <S.ModalFooter>
           <S.FooterLeft>{type === 'schedule' && footerChildren}</S.FooterLeft>
           <S.FooterRight>
-            <Trash onClick={handleDelete} css={{ cursor: 'pointer' }} />
+            <Trash onClick={handleDelete} css={{ cursor: 'pointer' }} color="#757575" />
             <S.Button type="submit" form={submitFormId}>
               <Check color="#ffffff" />
             </S.Button>

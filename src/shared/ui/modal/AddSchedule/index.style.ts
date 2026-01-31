@@ -47,18 +47,21 @@ export const Selection = styled.div`
   flex-direction: column;
   gap: 12px;
 `
-export const SelectionColumn = styled.div`
+export const SelectionColumn = styled.div<{ isAllday: boolean }>`
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-  flex-direction: column;
+  flex-direction: ${({ isAllday }) => (isAllday ? 'row' : 'column')};
+  align-items: ${({ isAllday }) => (isAllday ? 'center' : 'flex-start')};
+  color: #a5a5a5;
 `
-export const FieldRow = styled.div`
-  flex: 1;
+export const FieldRow = styled.div<{ isAllday?: boolean }>`
+  flex: ${({ isAllday }) => (isAllday ? 'none' : '1')};
   display: flex;
-  height: 43px;
+  height: 30px;
   gap: 8px;
   align-items: center;
+  width: fit-content;
 `
 export const FieldLabel = styled.span`
   font-size: 14px;
