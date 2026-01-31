@@ -2,25 +2,25 @@ name: Calio Daily Article Generator
 
 on:
   schedule:
-    - cron: '0 15 * * *' # 한국 시간 기준 매일 자정 (UTC 15:00)
-  workflow_dispatch: # 직접 실행 버튼
+    - cron: "0 15 * * *"
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions: # 저장소에 글을 써야 하므로 권한 필요
+    permissions:
       contents: write
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # 모든 브랜치와 히스토리를 가져오기 위해 필요
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: Install Dependencies
         run: |
@@ -30,12 +30,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          REPO_NAME: ${{ github.repository }} # 환경 변수로 유연하게 대처
         run: python scripts/generate_article.py
 
       - name: Commit and Push
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add articles/*.md
-          # 변경사항이 있을 때만 커밋
-          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: 📝 [Calio] 개발 일지 자동 생성 (${{ github.event.head_commit.timestamp }})" && git push)
+
+          # 안전한 파일 추가 방식 (Copilot 추천)
+          git add articles/ || echo "No articles to add"
+
+          # 타임스탬프 오류 수정: bash date 명령 사용
+          CURRENT_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: 📝 [Calio] 개발 일지 자동 생성 ($CURRENT_TIME)" && git push)
