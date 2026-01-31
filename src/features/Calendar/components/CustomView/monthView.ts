@@ -83,6 +83,7 @@ export const monthViewStyles = css`
     margin-top: auto;
     align-self: stretch;
     margin-bottom: 3px;
+    height: 100%;
   }
   .rbc-row-content {
     height: 100% !important;

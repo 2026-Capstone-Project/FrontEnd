@@ -14,7 +14,6 @@ import {
   Views,
 } from 'react-big-calendar'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
-import { createPortal } from 'react-dom'
 
 import CustomToolbar from '@/features/Calendar/components/CalendarToolbar/CalendarToolbar'
 import CustomWeekView from '@/features/Calendar/components/CustomView/CustomWeekView'
@@ -24,6 +23,7 @@ import {
   useCalendarPortals,
   useCalendarProps,
   useCalendarResponsive,
+  useStoredCalendarView,
 } from '@/features/Calendar/hooks'
 import { useCalendarEvents } from '@/features/Calendar/hooks/useCalendarEvents'
 import { useDayViewHandlers } from '@/features/Calendar/hooks/useDayViewHandlers'
@@ -31,30 +31,33 @@ import { getDayPropStyle } from '@/features/Calendar/utils/helpers/calendarPageH
 import { getViewConfig } from '@/features/Calendar/utils/viewConfig'
 import Plus from '@/shared/assets/icons/plus.svg?react'
 import { theme } from '@/shared/styles/theme'
-import AddSchedule from '@/shared/ui/modal/AddSchedule'
 
 import CalendarHeader from '../CalendarDateHeader/CalendarDateHeader'
 import { CustomMonthEvent, CustomMonthShowMore, CustomWeekEvent } from '../CustomEvent'
 import { CustomViewButton } from '../CustomViewButton/CustomViewButton'
-import EventsCard from '../EventsCard/EventsCard'
+import CalendarModals from './CalendarModals'
 import * as S from './CustomCalendar.style'
 
 moment.locale('ko')
 const localizer = momentLocalizer(moment)
 const DragAndDropCalendar = withDragAndDrop<CalendarEvent, object>(Calendar)
-
 export type SelectDateSource = 'date-cell' | 'slot' | 'header' | 'date-header'
 
 const CustomCalendar = () => {
-  const [view, setView] = useState<View>(Views.MONTH)
+  const { view, setView } = useStoredCalendarView()
   const [date, setDate] = useState<Date>(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [selectedEventId, setSelectedEventId] = useState<CalendarEvent['id'] | null>(null)
   const {
     events,
     addEvent: enqueueEvent,
     moveEvent,
     resizeEvent,
     updateEventTime,
+    updateEventColor,
+    updateEventTiming,
+    updateEventType,
+    updateEventTitle,
     toggleEventDone,
     removeEvent,
   } = useCalendarEvents()
@@ -66,17 +69,17 @@ const CustomCalendar = () => {
       removeEvent,
     })
 
-  const onView = useCallback((newView: View) => setView(newView), [])
-  const onNavigate = useCallback((newDate: Date) => setDate(newDate), [])
+  const onView = useCallback((newView: View) => setView(newView), [setView])
+  const onNavigate = useCallback((newDate: Date) => setDate(newDate), [setDate])
 
   const handleSelectSlot = useCallback(
     (slotInfo: SlotInfo) => {
       // 슬롯 선택/더블클릭 처리: 선택 날짜 설정 후 더블클릭이면 새 일정 추가
       if (slotInfo.action === 'doubleClick') {
         setSelectedDate(null)
-        handleAddEvent(slotInfo.start)
         const isAllDaySlot = slotInfo.slots.length === 1
-        enqueueEvent(slotInfo.start, isAllDaySlot)
+        const createdId = enqueueEvent(slotInfo.start, isAllDaySlot)
+        handleAddEvent(slotInfo.start, createdId)
       } else {
         setSelectedDate(slotInfo.start)
       }
@@ -86,10 +89,15 @@ const CustomCalendar = () => {
 
   const handleSelectEvent = useCallback(
     (event: CalendarEvent) => {
+      setSelectedEventId(event.id)
       handleEventClick(event)
     },
     [handleEventClick],
   )
+
+  const handleSelectEventOnly = useCallback((event: CalendarEvent) => {
+    setSelectedEventId(event.id)
+  }, [])
   /** 선택된 날짜에 배경 강조 스타일을 적용하도록 props를 반환합니다. */
   const dayPropGetter = useCallback(
     (calendarDate: Date) => getDayPropStyle(calendarDate, selectedDate),
@@ -106,10 +114,15 @@ const CustomCalendar = () => {
   )
   const dayViewWithHandlers = useDayViewHandlers({
     clearSelectedDate: () => setSelectedDate(null),
+    clearSelectedEvent: () => setSelectedEventId(null),
     enqueueEvent,
     handleAddEvent,
     updateEventTime,
     onToggleTodo: toggleEventDone,
+    selectedEventId,
+    onEventSelect: handleSelectEventOnly,
+    onEventClick: modal.isOpen ? handleSelectEvent : undefined,
+    onEventDoubleClick: handleSelectEvent,
   })
 
   const isInlineMode = isDesktop
@@ -134,7 +147,7 @@ const CustomCalendar = () => {
         event: (props: EventProps<CalendarEvent>) => (
           <CustomMonthEvent
             {...props}
-            onEventClick={handleEventClick}
+            onEventClick={handleSelectEvent}
             onToggleTodo={toggleEventDone}
           />
         ),
@@ -145,14 +158,15 @@ const CustomCalendar = () => {
         event: (props: EventProps<CalendarEvent>) => (
           <CustomWeekEvent
             event={props.event}
-            onEventClick={handleEventClick}
+            onEventClick={handleSelectEvent}
             onToggleTodo={toggleEventDone}
+            isSelected={props.event.id === selectedEventId}
           />
         ),
       }
     }
     return {}
-  }, [view, handleEventClick, toggleEventDone])
+  }, [view, handleSelectEvent, toggleEventDone, selectedEventId])
 
   const mergedComponents = useMemo(
     () => ({
@@ -211,6 +225,7 @@ const CustomCalendar = () => {
     [events, modal.eventId],
   )
   const modalMode: 'modal' | 'inline' = isInlineMode ? 'inline' : 'modal'
+  const eventCardDate = selectedDate ?? date
 
   return (
     <div css={{ position: 'relative', height: 'fit-content', width: '100%' }}>
@@ -223,61 +238,25 @@ const CustomCalendar = () => {
       <S.CalendarWrapper view={view}>
         <DragAndDropCalendar {...calendarProps} />
       </S.CalendarWrapper>
-      {modal &&
-        modalPortalRoot &&
-        !isInlineMode &&
-        modal.eventId != null &&
-        createPortal(
-          <AddSchedule
-            date={modalDate}
-            onClose={handleCloseModal}
-            mode={modalMode}
-            eventId={modal.eventId}
-            event={modalEvent}
-            tabsVisible={!isModalEditing}
-          />,
-          modalPortalRoot,
-        )}
-      {modal &&
-        modalPortalRoot &&
-        isInlineMode &&
-        cardPortalRoot &&
-        modal.eventId != null &&
-        createPortal(
-          <AddSchedule
-            date={modalDate}
-            onClose={handleCloseModal}
-            mode={modalMode}
-            eventId={modal.eventId}
-            event={modalEvent}
-            tabsVisible={!isModalEditing}
-          />,
-          cardPortalRoot,
-        )}
-
-      {date &&
-        !modal.isOpen &&
-        !isInlineMode &&
-        selectedDate &&
-        modalPortalRoot &&
-        createPortal(
-          <EventsCard onClose={() => setSelectedDate(null)} selectedDate={date} mode={modalMode} />,
-          modalPortalRoot,
-        )}
-
-      {date &&
-        !modal.isOpen &&
-        isInlineMode &&
-        selectedDate &&
-        cardPortalRoot &&
-        createPortal(
-          <EventsCard
-            onClose={() => setSelectedDate(null)}
-            selectedDate={selectedDate}
-            mode={modalMode}
-          />,
-          cardPortalRoot,
-        )}
+      <CalendarModals
+        modalDate={modalDate}
+        modalEventId={modal.eventId}
+        modalEvent={modalEvent}
+        isModalEditing={isModalEditing}
+        isModalOpen={modal.isOpen}
+        isInlineMode={isInlineMode}
+        modalMode={modalMode}
+        modalPortalRoot={modalPortalRoot}
+        cardPortalRoot={cardPortalRoot}
+        eventCardDate={eventCardDate}
+        showEventCard={selectedDate != null}
+        onCloseModal={handleCloseModal}
+        onCloseEventCard={() => setSelectedDate(null)}
+        onEventColorChange={updateEventColor}
+        onEventTitleConfirm={updateEventTitle}
+        onEventTypeChange={updateEventType}
+        onEventTimingChange={updateEventTiming}
+      />
     </div>
   )
 }

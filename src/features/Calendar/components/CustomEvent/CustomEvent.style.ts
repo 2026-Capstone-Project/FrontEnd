@@ -68,7 +68,11 @@ export const MonthEventContainer = styled.div<{ backgroundColor?: string }>`
   height: 16px;
 `
 
-export const WeekEventContainer = styled.div<{ backgroundColor?: string }>`
+export const WeekEventContainer = styled.div<{
+  backgroundColor?: string
+  pointColor: string
+  isSelected?: boolean
+}>`
   display: flex;
   flex-direction: column;
   height: fit-content;
@@ -80,6 +84,9 @@ export const WeekEventContainer = styled.div<{ backgroundColor?: string }>`
   background-color: ${({ backgroundColor }) => backgroundColor ?? 'white'};
   padding: 6px 8px;
   border-radius: 4px;
+  outline: ${({ isSelected, pointColor }) => (isSelected ? `2px solid ${pointColor}` : 'none')};
+  outline-offset: -1px;
+  height: 60px;
 `
 
 export const EventTitle = styled.div`

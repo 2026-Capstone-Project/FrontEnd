@@ -18,20 +18,33 @@ type CustomWeekEventProps = {
   event: CalendarEvent
   onEventClick: (event: CalendarEvent) => void
   onToggleTodo?: (eventId: CalendarEvent['id']) => void
+  isSelected?: boolean
 }
 //TODO: 이벤트 클릭 시 해당 이벤트를 수정할 수 있는 모달 띄우기
-const CustomWeekEvent: React.FC<CustomWeekEventProps> = ({ event, onEventClick, onToggleTodo }) => {
+const CustomWeekEvent: React.FC<CustomWeekEventProps> = ({
+  event,
+  onEventClick,
+  onToggleTodo,
+  isSelected,
+}) => {
   const palette = getColorPalette(event.color)
   const baseColor = palette?.base
   const pointColor = palette?.point
 
   return (
-    <S.WeekEventContainer backgroundColor={baseColor} onClick={() => onEventClick(event)}>
+    <S.WeekEventContainer
+      backgroundColor={baseColor}
+      pointColor={pointColor}
+      isSelected={isSelected}
+      onClick={() => onEventClick(event)}
+    >
       <S.WeekEventRow>
         {event.type === 'todo' ? (
           <S.TodoCheckbox
             type="checkbox"
             checked={!!event.isDone}
+            onPointerDown={(eventPointer) => eventPointer.stopPropagation()}
+            onMouseDown={(eventMouse) => eventMouse.stopPropagation()}
             onClick={(eventClick) => eventClick.stopPropagation()}
             onChange={(eventChange) => {
               eventChange.stopPropagation()

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { type Control, type UseFormReturn } from 'react-hook-form'
 
+import type { CalendarEvent } from '@/features/Calendar/domain/types'
 import type {
   AddTodoFormValues,
   DatePickerField,
@@ -14,7 +15,7 @@ import { useTodoFormFields } from './useTodoFormFields'
 
 type UseAddTodoProps = {
   date: string
-  id: number
+  id: CalendarEvent['id']
 }
 
 export type UseAddTodoFormResult = {

@@ -67,6 +67,7 @@ type TitleSuggestionInputProps<TFieldValues extends FieldValues> = {
   suggestions?: string[]
   autoFocus?: boolean
   formController?: TitleSuggestionInputFormController<TFieldValues>
+  onConfirm?: (value: string) => void
 }
 
 const TitleSuggestionInput = <TFieldValues extends FieldValues>({
@@ -75,6 +76,7 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
   suggestions = defaultSuggestions,
   autoFocus = false,
   formController,
+  onConfirm,
 }: TitleSuggestionInputProps<TFieldValues>) => {
   const context = useFormContext<TFieldValues>()
   const registerFn = formController?.register ?? context?.register
@@ -143,9 +145,21 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
     setDismissedTitleQuery(value.trim())
   }
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Enter') return
+    event.preventDefault()
+    const value = (watchFn(fieldName) as string | undefined) ?? ''
+    onConfirm?.(value)
+  }
+
   return (
     <S.Wrapper ref={wrapperRef}>
-      <S.Input {...registerProps} ref={handleInputRef} placeholder={placeholder} />
+      <S.Input
+        {...registerProps}
+        ref={handleInputRef}
+        placeholder={placeholder}
+        onKeyDown={handleKeyDown}
+      />
       {suggestionsVisible && filteredSuggestions.length > 0 && (
         <S.SuggestionList>
           {filteredSuggestions.map((item) => (

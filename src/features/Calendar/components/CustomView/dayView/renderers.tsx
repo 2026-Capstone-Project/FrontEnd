@@ -5,6 +5,7 @@ import { TIMED_SLOT_CONFIG } from '../../../domain/constants'
 import type { CalendarEvent } from '../../../domain/types'
 import { getColorPalette } from '../../../utils/colorPalette'
 import type { TimedSlotEvent } from '../../../utils/helpers/dayViewHelpers'
+import { TodoCheckbox } from '../../CustomEvent/CustomEvent.style'
 import * as S from '../dayView'
 import type { DragState, EventPointerDownHandler } from './dragHandlers'
 import { normalizeDateValue } from './timeHelpers'
@@ -43,16 +44,36 @@ export const renderTimeSlotRows = (
 export const renderAllDayEventBadges = (
   events: CalendarEvent[],
   onToggleTodo?: (eventId: CalendarEvent['id']) => void,
+  selectedEventId?: CalendarEvent['id'] | null,
+  onEventSelect?: (event: CalendarEvent) => void,
+  onEventClick?: (event: CalendarEvent) => void,
+  onEventDoubleClick?: (event: CalendarEvent) => void,
 ) =>
   events.map((event) => {
     const palette = getColorPalette(event.color)
     return (
-      <S.EventBadgeWrapper key={event.id} color={palette.base}>
+      <S.EventBadgeWrapper
+        key={event.id}
+        color={palette.base}
+        pointColor={palette.point}
+        isSelected={selectedEventId === event.id}
+        onClick={() => {
+          onEventSelect?.(event)
+          onEventClick?.(event)
+        }}
+        onDoubleClick={() => {
+          onEventSelect?.(event)
+          onEventDoubleClick?.(event)
+        }}
+      >
         {event.type === 'todo' ? (
-          <S.TodoCheckbox
+          <TodoCheckbox
             type="checkbox"
             checked={!!event.isDone}
+            onPointerDown={(eventPointer) => eventPointer.stopPropagation()}
+            onMouseDown={(eventMouse) => eventMouse.stopPropagation()}
             onClick={(eventClick) => eventClick.stopPropagation()}
+            onDoubleClick={(eventDoubleClick) => eventDoubleClick.stopPropagation()}
             onChange={(eventChange) => {
               eventChange.stopPropagation()
               onToggleTodo?.(event.id)
@@ -77,6 +98,12 @@ export const renderTimeOverlayColumn = ({
   handleEventPointerDown,
   handleResizePointerDown,
   onToggleTodo,
+  selectedEventId,
+  onEventSelect,
+  onEventClick,
+  onEventDoubleClick,
+  gridRef,
+  columnIndex,
 }: {
   startHour: number
   columnEvents: TimedSlotEvent[]
@@ -88,17 +115,35 @@ export const renderTimeOverlayColumn = ({
   handleEventPointerDown: EventPointerDownHandler
   handleResizePointerDown: EventPointerDownHandler
   onToggleTodo?: (eventId: CalendarEvent['id']) => void
+  selectedEventId?: CalendarEvent['id'] | null
+  onEventSelect?: (event: CalendarEvent) => void
+  onEventClick?: (event: CalendarEvent) => void
+  onEventDoubleClick?: (event: CalendarEvent) => void
+  gridRef?: MutableRefObject<HTMLDivElement | null>
+  columnIndex: number
 }) => {
   const rowHeightForCalc = rowHeight || TIMED_SLOT_CONFIG.SLOT_HEIGHT
+  const columnHeight = rowHeightForCalc * (TIMED_SLOT_CONFIG.MAX_VISUAL_HOURS - 1)
+  const minHeight = TIMED_SLOT_CONFIG.MIN_HEIGHT
+  const gridRect = gridRef?.current?.getBoundingClientRect() ?? null
+  const columnGapPx = gridRef?.current
+    ? Number.parseFloat(getComputedStyle(gridRef.current).columnGap || '0')
+    : 0
+  const columnWidth = gridRect ? (gridRect.width - columnGapPx) / 2 : 0
   return (
     <S.SlotColumn key={startHour}>
       {renderTimeSlotRows(startHour, date, handleSlotDoubleClick, slotRef)}
       <S.TimeOverlay>
-        {columnEvents.map(({ event, top, height, palette }) => {
+        {columnEvents.map(({ event, top, height, palette, overflowTop, overflowBottom }) => {
           const eventStart = normalizeDateValue(event.start)
           const eventEnd = normalizeDateValue(event.end)
           const currentDragState = dragStateRef.current
           const isDraggingEvent = currentDragState?.event.id === event.id
+          const columnShift =
+            isDraggingEvent && currentDragState?.mode === 'move'
+              ? (currentDragState?.columnShift ?? 0)
+              : 0
+          const translateX = columnShift ? columnShift * (columnWidth + columnGapPx) : 0
           const moveDeltaMinutes =
             isDraggingEvent && currentDragState?.mode === 'move' ? currentDragState.deltaMinutes : 0
           const resizeDeltaMinutes =
@@ -107,22 +152,59 @@ export const renderTimeOverlayColumn = ({
               : 0
           const moveOffset = (moveDeltaMinutes / 60) * rowHeightForCalc
           const resizeOffset = (resizeDeltaMinutes / 60) * rowHeightForCalc
-          const finalHeight = Math.max(height + resizeOffset, TIMED_SLOT_CONFIG.MIN_HEIGHT)
+          const baseTop = top + moveOffset
+          const clampedTop = Math.min(Math.max(baseTop, 0), columnHeight - minHeight)
+          const baseHeight = Math.max(height + resizeOffset, minHeight)
+          const clampedHeight = Math.min(baseHeight, Math.max(columnHeight - clampedTop, minHeight))
+          const overflowTopResolved = Boolean(overflowTop) || baseTop < 0
+          const overflowBottomResolved =
+            Boolean(overflowBottom) || baseTop + baseHeight > columnHeight
           return (
             <S.DayEventBadge
               key={event.id}
               color={palette.base}
-              style={{ top: top + moveOffset, height: finalHeight }}
-              onPointerDown={(pointerEvent) =>
-                handleEventPointerDown(pointerEvent, event, rowHeightForCalc, eventStart, eventEnd)
-              }
+              pointColor={palette.point}
+              isSelected={selectedEventId === event.id}
+              overflowTop={overflowTopResolved}
+              overflowBottom={overflowBottomResolved}
+              style={{
+                top: clampedTop,
+                height: clampedHeight,
+                transform: translateX ? `translateX(${translateX}px)` : undefined,
+                transition: translateX ? 'transform 120ms ease' : undefined,
+                zIndex: isDraggingEvent ? 4 : undefined,
+              }}
+              onClick={() => {
+                onEventSelect?.(event)
+                onEventClick?.(event)
+              }}
+              onDoubleClick={() => onEventDoubleClick?.(event)}
             >
-              <S.EventRow>
+              <S.EventRow
+                onPointerDown={(pointerEvent) => {
+                  onEventSelect?.(event)
+                  handleEventPointerDown(
+                    pointerEvent,
+                    event,
+                    rowHeightForCalc,
+                    eventStart,
+                    eventEnd,
+                    {
+                      gridRect: gridRef?.current?.getBoundingClientRect() ?? null,
+                      originColumnIndex: columnIndex,
+                      columnGapPx: Number.isNaN(columnGapPx) ? 0 : columnGapPx,
+                    },
+                  )
+                }}
+              >
                 {event.type === 'todo' ? (
-                  <S.TodoCheckbox
+                  <TodoCheckbox
                     type="checkbox"
                     checked={!!event.isDone}
+                    onPointerDown={(eventPointer) => eventPointer.stopPropagation()}
+                    onMouseDown={(eventMouse) => eventMouse.stopPropagation()}
                     onClick={(eventClick) => eventClick.stopPropagation()}
+                    onDoubleClick={(eventDoubleClick) => eventDoubleClick.stopPropagation()}
                     onChange={(eventChange) => {
                       eventChange.stopPropagation()
                       onToggleTodo?.(event.id)

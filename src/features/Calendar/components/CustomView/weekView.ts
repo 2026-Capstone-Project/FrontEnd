@@ -93,7 +93,7 @@ export const weekViewStyles = css`
   .rbc-addons-dnd-row-body {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 6px;
   }
   .rbc-addons-dnd-row-body > div {
     width: 100%;

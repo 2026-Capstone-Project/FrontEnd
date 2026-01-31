@@ -14,11 +14,20 @@ type AddItemModalProps = {
   onClose: () => void
   date: string
   mode?: 'modal' | 'inline'
-  eventId: number
+  eventId: CalendarEvent['id']
   defaultType?: ActiveType
   tabsVisible?: boolean
   isEditing?: boolean
   initialEvent?: CalendarEvent | null
+  onEventColorChange?: (eventId: CalendarEvent['id'], color: CalendarEvent['color']) => void
+  onEventTitleConfirm?: (eventId: CalendarEvent['id'], title: CalendarEvent['title']) => void
+  onEventTypeChange?: (eventId: CalendarEvent['id'], type: CalendarEvent['type']) => void
+  onEventTimingChange?: (
+    eventId: CalendarEvent['id'],
+    start: Date,
+    end: Date,
+    allDay: boolean,
+  ) => void
 }
 
 const AddItemModal = ({
@@ -30,6 +39,10 @@ const AddItemModal = ({
   tabsVisible = true,
   isEditing = false,
   initialEvent = null,
+  onEventColorChange,
+  onEventTitleConfirm,
+  onEventTypeChange,
+  onEventTimingChange,
 }: AddItemModalProps) => {
   const [activeType, setActiveType] = useState<ActiveType>(defaultType)
   const [footerChildren, setFooterChildren] = useState<ReactNode | null>(null)
@@ -50,6 +63,11 @@ const AddItemModal = ({
   useEffect(() => {
     setActiveType(defaultType)
   }, [defaultType])
+
+  useEffect(() => {
+    if (eventId == null || eventId === 0) return
+    onEventTypeChange?.(eventId, activeType)
+  }, [activeType, eventId, onEventTypeChange])
 
   const handleSubmitId = useMemo(
     () => (activeType === 'todo' ? 'add-todo-form' : 'add-schedule-form'),
@@ -107,6 +125,8 @@ const AddItemModal = ({
           registerDeleteHandler={registerDeleteHandler}
           headerTitlePortalTarget={headerTitlePortalTarget}
           isEditing={isEditing}
+          onEventTitleConfirm={onEventTitleConfirm}
+          onEventTimingChange={onEventTimingChange}
         />
       ) : (
         <AddScheduleForm
@@ -119,6 +139,9 @@ const AddItemModal = ({
           headerTitlePortalTarget={headerTitlePortalTarget}
           initialEvent={initialEvent}
           isEditing={isEditing}
+          onEventColorChange={onEventColorChange}
+          onEventTitleConfirm={onEventTitleConfirm}
+          onEventTimingChange={onEventTimingChange}
         />
       )}
     </AddModalLayout>

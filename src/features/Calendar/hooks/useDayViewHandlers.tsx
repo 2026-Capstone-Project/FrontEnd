@@ -7,26 +7,37 @@ import type { CalendarEvent } from '@/features/Calendar/domain/types'
 
 type UseDayViewHandlersArgs = {
   clearSelectedDate: () => void
-  enqueueEvent: (date: Date, allDay: boolean) => void
-  handleAddEvent: (referenceDate?: Date | string) => void
+  clearSelectedEvent?: () => void
+  enqueueEvent: (date: Date, allDay: boolean) => CalendarEvent['id'] | null
+  handleAddEvent: (referenceDate?: Date | string, eventId?: CalendarEvent['id'] | null) => void
   updateEventTime: (eventId: CalendarEvent['id'], start: Date, end: Date) => void
   onToggleTodo?: (eventId: CalendarEvent['id']) => void
+  selectedEventId?: CalendarEvent['id'] | null
+  onEventSelect?: (event: CalendarEvent) => void
+  onEventClick?: (event: CalendarEvent) => void
+  onEventDoubleClick?: (event: CalendarEvent) => void
 }
 
 export const useDayViewHandlers = ({
   clearSelectedDate,
+  clearSelectedEvent,
   enqueueEvent,
   handleAddEvent,
   updateEventTime,
   onToggleTodo,
+  selectedEventId,
+  onEventSelect,
+  onEventClick,
+  onEventDoubleClick,
 }: UseDayViewHandlersArgs) => {
   const handleDayViewSlotDoubleClick = useCallback(
     (slotDate: Date) => {
       clearSelectedDate()
-      handleAddEvent(slotDate)
-      enqueueEvent(slotDate, false)
+      clearSelectedEvent?.()
+      const createdId = enqueueEvent(slotDate, false)
+      handleAddEvent(slotDate, createdId)
     },
-    [clearSelectedDate, enqueueEvent, handleAddEvent],
+    [clearSelectedDate, clearSelectedEvent, enqueueEvent, handleAddEvent],
   )
 
   const formatLogDateTime = useCallback(
@@ -57,6 +68,10 @@ export const useDayViewHandlers = ({
           onSlotDoubleClick={handleDayViewSlotDoubleClick}
           onEventDrag={handleDayViewEventDrag}
           onToggleTodo={onToggleTodo}
+          selectedEventId={selectedEventId}
+          onEventSelect={onEventSelect}
+          onEventClick={onEventClick}
+          onEventDoubleClick={onEventDoubleClick}
           {...props}
         />
       ),
@@ -66,7 +81,15 @@ export const useDayViewHandlers = ({
       },
     ) as React.FC<Parameters<typeof CustomDayView>[0]> & ViewStatic
     return BaseDayView
-  }, [handleDayViewSlotDoubleClick, handleDayViewEventDrag, onToggleTodo])
+  }, [
+    handleDayViewSlotDoubleClick,
+    handleDayViewEventDrag,
+    onToggleTodo,
+    selectedEventId,
+    onEventSelect,
+    onEventClick,
+    onEventDoubleClick,
+  ])
 
   return dayViewWithHandlers
 }

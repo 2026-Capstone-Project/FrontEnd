@@ -23,12 +23,12 @@ export const useCalendarModal = ({ currentDate, removeEvent }: UseCalendarModalA
   const [isModalEditing, setIsModalEditing] = useState(false)
 
   const handleAddEvent = useCallback(
-    (referenceDate?: Date | string) => {
+    (referenceDate?: Date | string, eventId?: CalendarEvent['id'] | null) => {
       const baseDate = referenceDate ?? currentDate ?? new Date()
       const targetDate = normalizeDate(baseDate)
       setModalDate(targetDate.toISOString())
       setIsModalEditing(false)
-      setModal({ isOpen: true, eventId: 0 })
+      setModal({ isOpen: true, eventId: eventId ?? 0 })
     },
     [currentDate],
   )
@@ -50,6 +50,12 @@ export const useCalendarModal = ({ currentDate, removeEvent }: UseCalendarModalA
     const eventId = modal.eventId
     const handleKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key !== 'Backspace') return
+      const target = event.target as HTMLElement | null
+      if (target) {
+        const tagName = target.tagName
+        const isEditable = tagName === 'INPUT' || tagName === 'TEXTAREA' || target.isContentEditable
+        if (isEditable) return
+      }
       event.preventDefault()
       removeEvent(eventId)
       setModal({ isOpen: false, eventId: null })

@@ -22,6 +22,10 @@ interface CustomDayViewProps {
   onSlotDoubleClick?: (slotDate: Date) => void
   onEventDrag?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
   onToggleTodo?: (eventId: CalendarEvent['id']) => void
+  selectedEventId?: CalendarEvent['id'] | null
+  onEventSelect?: (event: CalendarEvent) => void
+  onEventClick?: (event: CalendarEvent) => void
+  onEventDoubleClick?: (event: CalendarEvent) => void
 }
 
 //TODO: 이벤트가 차지하는 높이가 작을 때 텍스트가 넘치는 문제 해결
@@ -38,6 +42,10 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
   onSlotDoubleClick,
   onEventDrag,
   onToggleTodo,
+  selectedEventId,
+  onEventSelect,
+  onEventClick,
+  onEventDoubleClick,
 }) => {
   const currentDate = moment(date)
   const isToday = currentDate.isSame(moment(), 'day')
@@ -62,6 +70,7 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
   const { dragStateRef, handleEventPointerDown, handleResizePointerDown } =
     useDayViewDragHandlers(onEventDrag)
   const slotRowRef = useRef<HTMLDivElement | null>(null)
+  const gridRef = useRef<HTMLDivElement | null>(null)
 
   const handleSlotRef = useCallback((node: HTMLDivElement | null) => {
     slotRowRef.current = node
@@ -93,9 +102,18 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
       </S.DateInfo>
 
       <S.CalendarWrapper>
-        <S.AllDaySection>{renderAllDayEventBadges(allDayEvents, onToggleTodo)}</S.AllDaySection>
+        <S.AllDaySection>
+          {renderAllDayEventBadges(
+            allDayEvents,
+            onToggleTodo,
+            selectedEventId,
+            onEventSelect,
+            onEventClick,
+            onEventDoubleClick,
+          )}
+        </S.AllDaySection>
 
-        <S.GridContainer>
+        <S.GridContainer ref={gridRef}>
           {TIME_COLUMN_START_HOURS.map((startHour, columnIndex) =>
             renderTimeOverlayColumn({
               startHour,
@@ -108,6 +126,12 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
               handleEventPointerDown,
               handleResizePointerDown,
               onToggleTodo,
+              selectedEventId,
+              onEventSelect,
+              onEventClick,
+              onEventDoubleClick,
+              gridRef,
+              columnIndex,
             }),
           )}
         </S.GridContainer>
