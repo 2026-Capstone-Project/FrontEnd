@@ -124,12 +124,12 @@ export const CancelButton = styled.button`
 `
 
 export const EditButton = styled.button`
-  border: 1px solid ${theme.colors.red};
   border-radius: 16px;
-  color: ${theme.colors.red};
+  background-color: ${theme.colors.primary2};
   font-size: 16px;
   padding: 12px 20px;
   font-weight: 600;
+  color: ${theme.colors.white};
   cursor: pointer;
   ${media.down(theme.breakPoints.tablet)} {
     font-size: 12px;

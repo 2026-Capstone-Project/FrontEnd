@@ -9,6 +9,7 @@ import {
 import { createPortal } from 'react-dom'
 import { FormProvider } from 'react-hook-form'
 
+import type { CalendarEvent } from '@/features/Calendar/domain/types'
 import { useAddTodoForm } from '@/shared/hooks/useAddTodoForm'
 import { useRepeatChangeGuard } from '@/shared/hooks/useRepeatChangeGuard'
 import { theme } from '@/shared/styles/theme'
@@ -31,9 +32,17 @@ type AddTodoFormProps = {
   registerDeleteHandler?: (handler?: () => void) => void
   date: string
   mode?: 'modal' | 'inline'
-  eventId: number
+  eventId: CalendarEvent['id']
   onClose: () => void
   isEditing?: boolean
+  headerTitlePortalTarget?: HTMLElement | null
+  onEventTitleConfirm?: (eventId: CalendarEvent['id'], title: string) => void
+  onEventTimingChange?: (
+    eventId: CalendarEvent['id'],
+    start: Date,
+    end: Date,
+    allDay: boolean,
+  ) => void
 }
 
 const AddTodoForm = ({
@@ -43,6 +52,9 @@ const AddTodoForm = ({
   onClose,
   registerDeleteHandler,
   isEditing = false,
+  headerTitlePortalTarget,
+  onEventTitleConfirm,
+  onEventTimingChange,
 }: AddTodoFormProps) => {
   const {
     formMethods,
@@ -110,6 +122,15 @@ const AddTodoForm = ({
 
   const isInlineMode = mode === 'inline'
   const shouldShowModalOverlay = !isInlineMode && activeCalendarField
+  const renderTitleInput = () => (
+    <TitleSuggestionInput
+      fieldName="todoTitle"
+      placeholder="새로운 할 일"
+      autoFocus
+      formController={formMethods}
+      onConfirm={(value) => onEventTitleConfirm?.(eventId, value)}
+    />
+  )
 
   // 편집 모드에서 반복 변경을 가드해 확인 또는 취소가 가능하도록 합니다.
   const {
@@ -124,11 +145,48 @@ const AddTodoForm = ({
   })
   const [pendingTodoValues, setPendingTodoValues] = useState<AddTodoFormValues | null>(null)
 
+  const buildDateTime = useCallback((dateValue: Date | null, timeValue?: string) => {
+    const nextDate = dateValue ? new Date(dateValue) : new Date()
+    if (!timeValue) {
+      nextDate.setHours(0, 0, 0, 0)
+      return nextDate
+    }
+    const [hour, minute] = timeValue.split(':').map((value) => Number.parseInt(value, 10))
+    nextDate.setHours(Number.isNaN(hour) ? 0 : hour, Number.isNaN(minute) ? 0 : minute, 0, 0)
+    return nextDate
+  }, [])
+
+  const syncEventTiming = useCallback(
+    (values: AddTodoFormValues) => {
+      if (eventId == null || eventId === 0) return
+      if (!onEventTimingChange) return
+      const baseDate = values.todoDate ?? new Date(date)
+      if (values.isAllday) {
+        const start = new Date(baseDate)
+        start.setHours(0, 0, 0, 0)
+        const end = new Date(baseDate)
+        end.setHours(23, 59, 59, 999)
+        onEventTimingChange(eventId, start, end, true)
+        return
+      }
+      const start = buildDateTime(baseDate, values.todoEndTime)
+      onEventTimingChange(eventId, start, start, false)
+    },
+    [buildDateTime, date, eventId, onEventTimingChange],
+  )
+
   const handleFormSubmit = handleSubmit((values) => {
     if (requestConfirmation()) {
       setPendingTodoValues(values)
       return
     }
+    if (eventId != null && eventId !== 0) {
+      const nextTitle = values.todoTitle ?? ''
+      if (nextTitle) {
+        onEventTitleConfirm?.(eventId, nextTitle)
+      }
+    }
+    syncEventTiming(values)
     onSubmit(values)
     onClose()
   })
@@ -138,11 +196,26 @@ const AddTodoForm = ({
       void option
       if (!pendingTodoValues) return
       confirmChange()
+      if (eventId != null && eventId !== 0) {
+        const nextTitle = pendingTodoValues.todoTitle ?? ''
+        if (nextTitle) {
+          onEventTitleConfirm?.(eventId, nextTitle)
+        }
+      }
+      syncEventTiming(pendingTodoValues)
       onSubmit(pendingTodoValues)
       onClose()
       setPendingTodoValues(null)
     },
-    [confirmChange, onSubmit, onClose, pendingTodoValues],
+    [
+      confirmChange,
+      eventId,
+      onClose,
+      onEventTitleConfirm,
+      onSubmit,
+      pendingTodoValues,
+      syncEventTiming,
+    ],
   )
 
   const handleCancelRepeat = useCallback(() => {
@@ -173,7 +246,7 @@ const AddTodoForm = ({
       <FormProvider {...formMethods}>
         <form id="add-todo-form" onSubmit={handleFormSubmit}>
           <S.FormContent>
-            <TitleSuggestionInput fieldName="todoTitle" placeholder="새로운 할 일" />
+            {!headerTitlePortalTarget && renderTitleInput()}
             <S.Selection>
               <S.SelectionColumn>
                 <S.FieldRow>
@@ -238,6 +311,17 @@ const AddTodoForm = ({
             )}
           </div>
         </form>
+        {headerTitlePortalTarget &&
+          createPortal(
+            <TitleSuggestionInput
+              fieldName="todoTitle"
+              placeholder="새로운 할 일"
+              autoFocus
+              formController={formMethods}
+              onConfirm={(value) => onEventTitleConfirm?.(eventId, value)}
+            />,
+            headerTitlePortalTarget,
+          )}
       </FormProvider>
       {deleteWarningVisible && (
         <DeleteConfirmModal

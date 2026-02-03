@@ -28,19 +28,19 @@ export const ModalInner = styled.div`
   justify-content: center;
   position: absolute;
   top: 0;
+  left: 0;
 `
 
 export const ModalWrapper = styled.div<{ mode: 'modal' | 'inline' }>`
   width: 100%;
   max-width: 90vw;
-  width: 420px;
+  width: 400px;
   height: fit-content;
   max-height: 80vh;
-  overflow: hidden;
   background-color: ${theme.colors.white};
   border-radius: 20px;
   box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);
-  gap: 26px;
+  gap: 16px;
   display: flex;
   flex-direction: column;
   position: absolute;
@@ -57,20 +57,35 @@ export const ModalWrapper = styled.div<{ mode: 'modal' | 'inline' }>`
 export const ModalHeader = styled.div`
   display: flex;
   align-items: center;
+  flex-direction: column;
   justify-content: space-between;
-  padding: 30px 24px 0px 24px;
+  height: fit-content;
+  padding: 24px 24px 0px 24px;
 `
-
+export const TitleWrapper = styled.div`
+  display: flex;
+  width: 100%;
+  align-items: center;
+`
 export const ModalHeaderTitle = styled.div`
   display: flex;
   flex-direction: column;
   gap: 6px;
+  width: 100%;
+`
+
+export const HeaderTitleWrapper = styled.div`
+  width: 100%;
 `
 
 export const HeaderExtras = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  height: fit-content;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  width: 100%;
 `
 export const ModalTitle = styled.h2`
   font-size: 20px;

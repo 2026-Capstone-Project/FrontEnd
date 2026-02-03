@@ -19,10 +19,11 @@ export const Time = styled.div`
   }
 `
 
-export const Title = styled.div`
+export const Title = styled.div<{ type: 'schedule' | 'todo' }>`
   font-size: 18px;
   font-weight: 500;
   color: ${theme.colors.black};
+  border-bottom: ${(props) => (props.type === 'todo' ? '2px solid' : 'none')};
   ${media.down(theme.breakPoints.desktop)} {
     font-size: 16px;
   }

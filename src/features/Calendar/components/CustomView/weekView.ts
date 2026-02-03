@@ -32,6 +32,7 @@ export const weekViewStyles = css`
     justify-content: center;
     display: flex;
     font-size: 16px;
+    font-weight: 400;
   }
   .rbc-today {
     .day-number {
@@ -92,7 +93,7 @@ export const weekViewStyles = css`
   .rbc-addons-dnd-row-body {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 6px;
   }
   .rbc-addons-dnd-row-body > div {
     width: 100%;

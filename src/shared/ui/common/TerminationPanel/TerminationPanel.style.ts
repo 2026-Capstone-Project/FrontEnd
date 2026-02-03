@@ -53,7 +53,7 @@ export const CalendarPopover = styled.div`
   box-shadow: 0 0 30px 10px rgba(0, 0, 0, 0.1);
   padding: 12px;
   width: min(320px, 100%);
-  z-index: 3000;
+  z-index: 20000;
   ${media.down(theme.breakPoints.tablet)} {
     width: min(90vw, 360px);
     top: 50%;

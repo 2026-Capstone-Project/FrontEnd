@@ -11,6 +11,8 @@ export type TimedSlotEvent = {
   top: number
   height: number
   palette: { base: string; point: string }
+  overflowTop?: boolean
+  overflowBottom?: boolean
 }
 
 export const isDateOnlyString = (value?: stringOrDate) =>
@@ -30,24 +32,47 @@ export const buildTimedSlots = (events: CalendarEvent[]) => {
   const columns: TimedSlotEvent[][] = COLUMNS.map(() => [])
 
   events.forEach((event) => {
-    const start = moment(event.start)
-    const columnIndex = start.hour() < 12 ? 0 : 1
     const palette = getColorPalette(event.color)
-    const minutesSinceColumnStart =
-      (start.hour() % 12) * SLOT_HEIGHT + (start.minute() / 60) * SLOT_HEIGHT
-    const durationMinutes = Math.max(moment(event.end).diff(start, 'minutes'), 15)
-    const calculatedHeight = (durationMinutes / 60) * SLOT_HEIGHT
-    const height = Math.min(
-      calculatedHeight,
-      SLOT_HEIGHT * MAX_VISUAL_HOURS - minutesSinceColumnStart,
-    )
+    const start = moment(event.start)
+    const end = moment(event.end)
+    const dayStart = start.clone().startOf('day')
+    const dayEnd = dayStart.clone().add(24, 'hours')
+    const noon = dayStart.clone().add(12, 'hours')
+    const clampedStart = moment.max(start, dayStart)
+    const clampedEnd = moment.min(end, dayEnd)
 
-    columns[columnIndex].push({
-      event,
-      top: minutesSinceColumnStart,
-      height: Math.max(height, MIN_HEIGHT),
-      palette,
-    })
+    if (!clampedEnd.isAfter(clampedStart)) {
+      return
+    }
+
+    const pushSegment = (segmentStart: moment.Moment, segmentEnd: moment.Moment) => {
+      const columnIndex = segmentStart.hour() < 12 ? 0 : 1
+      const columnStart = dayStart.clone().add(COLUMNS[columnIndex], 'hours')
+      const minutesSinceColumnStart = segmentStart.diff(columnStart, 'minutes')
+      const durationMinutes = Math.max(segmentEnd.diff(segmentStart, 'minutes'), 15)
+      const calculatedHeight = (durationMinutes / 60) * SLOT_HEIGHT
+      const height = Math.min(
+        calculatedHeight,
+        SLOT_HEIGHT * MAX_VISUAL_HOURS - minutesSinceColumnStart,
+      )
+
+      columns[columnIndex].push({
+        event,
+        top: minutesSinceColumnStart,
+        height: Math.max(height, MIN_HEIGHT),
+        palette,
+        overflowTop: segmentStart.isAfter(start),
+        overflowBottom: segmentEnd.isBefore(end),
+      })
+    }
+
+    if (clampedStart.isBefore(noon) && clampedEnd.isAfter(noon)) {
+      pushSegment(clampedStart, noon)
+      pushSegment(noon, clampedEnd)
+      return
+    }
+
+    pushSegment(clampedStart, clampedEnd)
   })
 
   return columns

@@ -27,6 +27,7 @@ export const createEvent = (date: Date, index: number, allDay = false): Calendar
     end: allDay ? date : moment(date).add(eventDurationMs).toDate(),
     color: 'gray',
     allDay,
+    type: 'schedule',
   }
 }
 

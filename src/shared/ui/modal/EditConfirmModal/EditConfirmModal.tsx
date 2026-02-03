@@ -58,7 +58,7 @@ const EditConfirmModal = ({
               onConfirm?.(selectedOption)
             }}
           >
-            이벤트 수정
+            적용
           </S.EditButton>
         </S.ButtonsContainer>
       </S.ModalWrapper>

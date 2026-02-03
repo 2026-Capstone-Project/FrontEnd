@@ -1,7 +1,7 @@
 import type { CalendarEvent } from '../CustomView/CustomDayView'
 import * as S from './EventDetailCard.style'
 
-const EventCard = ({ event }: { event: CalendarEvent }) => {
+const EventCard = ({ event, type }: { event: CalendarEvent; type: 'todo' | 'schedule' }) => {
   const time = event.allDay
     ? '종일'
     : new Date(event.start).toLocaleTimeString('ko-KR', {
@@ -14,7 +14,7 @@ const EventCard = ({ event }: { event: CalendarEvent }) => {
     <S.EventWrapper>
       <S.Time>{time}</S.Time>
       <S.TextWrapper>
-        <S.Title>{event.title}</S.Title>
+        <S.Title type={type}>{event.title}</S.Title>
         <S.Content>{event.memo ?? '-'}</S.Content>
       </S.TextWrapper>
     </S.EventWrapper>

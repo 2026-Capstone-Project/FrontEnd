@@ -5,15 +5,17 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 import { createPortal } from 'react-dom'
 import { FormProvider } from 'react-hook-form'
 
+import type { CalendarEvent } from '@/features/Calendar/domain/types'
 import { useAddScheduleForm } from '@/shared/hooks/useAddScheduleForm'
 import { useRepeatChangeGuard } from '@/shared/hooks/useRepeatChangeGuard'
 import { theme } from '@/shared/styles/theme'
-import { type AddScheduleFormValues } from '@/shared/types/event'
+import { type AddScheduleFormValues, type EventColorType } from '@/shared/types/event'
 import Checkbox from '@/shared/ui/common/Checkbox/Checkbox'
 import RepeatTypeGroup from '@/shared/ui/common/RepeatTypeGroup/RepeatTypeGroup'
 import TerminationPanel from '@/shared/ui/common/TerminationPanel/TerminationPanel'
@@ -35,9 +37,19 @@ type AddScheduleFormProps = {
   registerFooterChildren?: (node: ReactNode | null) => void
   date: string
   mode?: 'modal' | 'inline'
-  eventId: number
+  eventId: CalendarEvent['id']
   onClose: () => void
   isEditing?: boolean
+  headerTitlePortalTarget?: HTMLElement | null
+  initialEvent?: CalendarEvent | null
+  onEventColorChange?: (eventId: CalendarEvent['id'], color: EventColorType) => void
+  onEventTitleConfirm?: (eventId: CalendarEvent['id'], title: string) => void
+  onEventTimingChange?: (
+    eventId: CalendarEvent['id'],
+    start: Date,
+    end: Date,
+    allDay: boolean,
+  ) => void
 }
 
 const AddScheduleForm = ({
@@ -47,6 +59,12 @@ const AddScheduleForm = ({
   registerDeleteHandler,
   registerFooterChildren,
   isEditing = false,
+  headerTitlePortalTarget,
+  initialEvent,
+  eventId,
+  onEventColorChange,
+  onEventTitleConfirm,
+  onEventTimingChange,
 }: AddScheduleFormProps) => {
   const {
     formMethods,
@@ -72,12 +90,13 @@ const AddScheduleForm = ({
     isSearchPlaceOpen,
     openSearchPlace,
     eventTitle,
-  } = useAddScheduleForm({ date })
+  } = useAddScheduleForm({ date, initialEvent })
   const { register, setValue } = formMethods
 
   const [calendarAnchor, setCalendarAnchor] = useState<DOMRect | null>(null)
   const [deleteWarningVisible, setDeleteWarningVisible] = useState(false)
   const [mapAnchor, setMapAnchor] = useState<DOMRect | null>(null)
+  const mapButtonRef = useRef<HTMLButtonElement | null>(null)
   const [isMobileLayout, setIsMobileLayout] = useState(() => {
     if (typeof window === 'undefined') return false
     return window.matchMedia(`(max-width: ${theme.breakPoints.tablet})`).matches
@@ -97,6 +116,22 @@ const AddScheduleForm = ({
     const target = event.currentTarget
     setMapAnchor(target.getBoundingClientRect())
   }
+
+  useEffect(() => {
+    if (!isSearchPlaceOpen) return undefined
+    const updateAnchor = () => {
+      const target = mapButtonRef.current
+      if (!target) return
+      setMapAnchor(target.getBoundingClientRect())
+    }
+    updateAnchor()
+    window.addEventListener('scroll', updateAnchor, true)
+    window.addEventListener('resize', updateAnchor)
+    return () => {
+      window.removeEventListener('scroll', updateAnchor, true)
+      window.removeEventListener('resize', updateAnchor)
+    }
+  }, [isSearchPlaceOpen])
 
   const portalPosition = useMemo(() => {
     if (!calendarAnchor) return null
@@ -165,11 +200,50 @@ const AddScheduleForm = ({
     null,
   )
 
+  const buildDateTime = useCallback((dateValue: Date | null, timeValue?: string) => {
+    const nextDate = dateValue ? new Date(dateValue) : new Date()
+    if (!timeValue) {
+      nextDate.setHours(0, 0, 0, 0)
+      return nextDate
+    }
+    const [hour, minute] = timeValue.split(':').map((value) => Number.parseInt(value, 10))
+    nextDate.setHours(Number.isNaN(hour) ? 0 : hour, Number.isNaN(minute) ? 0 : minute, 0, 0)
+    return nextDate
+  }, [])
+
+  const syncEventTiming = useCallback(
+    (values: AddScheduleFormValues) => {
+      if (eventId == null || eventId === 0) return
+      if (!onEventTimingChange) return
+      const startDate = values.eventStartDate ?? new Date(date)
+      const endDate = values.eventEndDate ?? startDate
+      if (values.isAllday) {
+        const start = new Date(startDate)
+        start.setHours(0, 0, 0, 0)
+        const end = new Date(endDate)
+        end.setHours(23, 59, 59, 999)
+        onEventTimingChange(eventId, start, end, true)
+        return
+      }
+      const start = buildDateTime(startDate, values.eventStartTime)
+      const end = buildDateTime(endDate, values.eventEndTime)
+      onEventTimingChange(eventId, start, end, false)
+    },
+    [buildDateTime, date, eventId, onEventTimingChange],
+  )
+
   const handleFormSubmit = handleSubmit((values) => {
     if (requestConfirmation()) {
       setPendingScheduleValues(values)
       return
     }
+    if (eventId != null && eventId !== 0) {
+      const nextTitle = values.eventTitle ?? ''
+      if (nextTitle) {
+        onEventTitleConfirm?.(eventId, nextTitle)
+      }
+    }
+    syncEventTiming(values)
     onSubmit(values)
     onClose()
   })
@@ -179,11 +253,26 @@ const AddScheduleForm = ({
       void option
       if (!pendingScheduleValues) return
       confirmChange()
+      if (eventId != null && eventId !== 0) {
+        const nextTitle = pendingScheduleValues.eventTitle ?? ''
+        if (nextTitle) {
+          onEventTitleConfirm?.(eventId, nextTitle)
+        }
+      }
+      syncEventTiming(pendingScheduleValues)
       onSubmit(pendingScheduleValues)
       onClose()
       setPendingScheduleValues(null)
     },
-    [confirmChange, onSubmit, onClose, pendingScheduleValues],
+    [
+      confirmChange,
+      eventId,
+      onClose,
+      onEventTitleConfirm,
+      onSubmit,
+      pendingScheduleValues,
+      syncEventTiming,
+    ],
   )
 
   const handleCancelRepeat = useCallback(() => {
@@ -204,12 +293,29 @@ const AddScheduleForm = ({
     return () => registerDeleteHandler?.()
   }, [handleDelete, registerDeleteHandler])
 
+  const handleColorChange = useCallback(
+    (value: EventColorType) => {
+      setEventColor(value)
+      if (eventId != null && eventId !== 0) {
+        onEventColorChange?.(eventId, value)
+      }
+    },
+    [eventId, onEventColorChange, setEventColor],
+  )
+
+  const handleTitleConfirm = useCallback(
+    (value: string) => {
+      if (eventId != null && eventId !== 0) {
+        onEventTitleConfirm?.(eventId, value)
+      }
+    },
+    [eventId, onEventTitleConfirm],
+  )
+
   useEffect(() => {
-    registerFooterChildren?.(
-      <SelectColor value={eventColor} onChange={(value) => setEventColor(value)} />,
-    )
+    registerFooterChildren?.(<SelectColor value={eventColor} onChange={handleColorChange} />)
     return () => registerFooterChildren?.(null)
-  }, [eventColor, registerFooterChildren, setEventColor])
+  }, [eventColor, registerFooterChildren, handleColorChange])
 
   return (
     <>
@@ -220,11 +326,18 @@ const AddScheduleForm = ({
       <FormProvider {...formMethods}>
         <form id="add-schedule-form" onSubmit={handleFormSubmit}>
           <S.FormContent>
-            <TitleSuggestionInput fieldName="eventTitle" placeholder="새로운 일정" />
+            {!headerTitlePortalTarget && (
+              <TitleSuggestionInput
+                fieldName="eventTitle"
+                placeholder="새로운 일정"
+                autoFocus
+                formController={formMethods}
+                onConfirm={handleTitleConfirm}
+              />
+            )}
             <S.Selection>
-              <S.SelectionColumn>
-                <S.FieldRow>
-                  <S.FieldLabel>시작:</S.FieldLabel>
+              <S.SelectionColumn isAllday={isAllday}>
+                <S.FieldRow isAllday={isAllday}>
                   <S.DateFieldButton type="button" onClick={handleCalendarButtonClick('start')}>
                     {startDate}
                   </S.DateFieldButton>
@@ -236,8 +349,8 @@ const AddScheduleForm = ({
                     />
                   )}
                 </S.FieldRow>
-                <S.FieldRow>
-                  <S.FieldLabel>종료:</S.FieldLabel>
+                {isAllday && '-'}
+                <S.FieldRow isAllday={isAllday}>
                   <S.DateFieldButton type="button" onClick={handleCalendarButtonClick('end')}>
                     {endDate}
                   </S.DateFieldButton>
@@ -274,24 +387,25 @@ const AddScheduleForm = ({
               onChange={() => setIsAllday((prev) => !prev)}
               label="종일"
             />
-            <S.TextareaWrapper>
-              <S.TextareaHeader>메모</S.TextareaHeader>
-              <S.Textarea {...register('eventDescription')} />
-            </S.TextareaWrapper>
-            <S.FieldRow>
-              <S.FieldLabel>위치</S.FieldLabel>
-              <S.FieldMap type="button" onClick={handleMapButtonClick}>
-                장소 추가
-              </S.FieldMap>
-              {isSearchPlaceOpen &&
-                searchPortalPosition &&
-                createPortal(
-                  <S.SearchPlacePortal ref={mapRef} style={searchPortalStyle}>
-                    <SearchPlace />
-                  </S.SearchPlacePortal>,
-                  document.getElementById('modal-root')!,
-                )}
-            </S.FieldRow>
+            <S.BottomSection>
+              <S.TextareaWrapper>
+                <S.TextareaHeader>메모</S.TextareaHeader>
+                <S.Textarea {...register('eventDescription')} />
+              </S.TextareaWrapper>
+              <S.FieldRow css={{ width: '100%' }}>
+                <S.FieldMap ref={mapButtonRef} type="button" onClick={handleMapButtonClick}>
+                  장소 추가
+                </S.FieldMap>
+                {isSearchPlaceOpen &&
+                  searchPortalPosition &&
+                  createPortal(
+                    <S.SearchPlacePortal ref={mapRef} style={searchPortalStyle}>
+                      <SearchPlace />
+                    </S.SearchPlacePortal>,
+                    document.getElementById('modal-root')!,
+                  )}
+              </S.FieldRow>
+            </S.BottomSection>
             <RepeatTypeGroup
               repeatType={repeatConfig.repeatType}
               customBasis={repeatConfig.customBasis}
@@ -315,6 +429,17 @@ const AddScheduleForm = ({
             )}
           </div>
         </form>
+        {headerTitlePortalTarget &&
+          createPortal(
+            <TitleSuggestionInput
+              fieldName="eventTitle"
+              placeholder="새로운 일정"
+              autoFocus
+              formController={formMethods}
+              onConfirm={handleTitleConfirm}
+            />,
+            headerTitlePortalTarget,
+          )}
       </FormProvider>
       {deleteWarningVisible && (
         <DeleteConfirmModal

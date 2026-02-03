@@ -21,7 +21,7 @@ export const InlineInput = styled.input`
 `
 export const MultiSelectGrid = styled.div`
   display: grid;
-  gap: 4px;
+  gap: 6px;
   width: fit-content;
   grid-template-columns: repeat(7, 1fr);
 `
@@ -34,11 +34,12 @@ export const MultiSelectMonthGrid = styled.div`
 export const DayChip = styled.button<{ isActive?: boolean }>`
   background: ${(props) => (props.isActive ? '#e9f4f7' : theme.colors.white)};
   color: ${(props) => (props.isActive ? theme.colors.textPrimary : theme.colors.textColor2)};
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  border-radius: 16px;
+  width: 36px;
+  height: 36px;
   font-size: 14px;
   min-width: 32px;
+  box-shadow: 0 0 1.6px 0 rgba(0, 0, 0, 0.16);
   cursor: pointer;
 `
 
