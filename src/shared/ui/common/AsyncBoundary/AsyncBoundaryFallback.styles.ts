@@ -45,4 +45,9 @@ export const Button = styled.button`
   cursor: pointer;
   background: ${theme.colors.primary};
   color: ${theme.colors.white};
+
+  &:focus-visible {
+    outline: 2px solid ${theme.colors.primary};
+    outline-offset: 2px;
+  }
 `

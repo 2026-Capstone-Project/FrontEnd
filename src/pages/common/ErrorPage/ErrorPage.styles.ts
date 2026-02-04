@@ -39,6 +39,11 @@ const BaseButton = styled.button`
   padding: 10px 16px;
   font-size: 14px;
   cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid ${theme.colors.primary2};
+    outline-offset: 2px;
+  }
 `
 
 export const PrimaryButton = styled(BaseButton)`

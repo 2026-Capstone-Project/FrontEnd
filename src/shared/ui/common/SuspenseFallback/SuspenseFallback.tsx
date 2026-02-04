@@ -1,4 +1,5 @@
 import type { CSSProperties, HTMLAttributes, ReactNode } from 'react'
+import { useMemo } from 'react'
 
 type SuspenseFallbackProps = {
   label?: string
@@ -14,17 +15,31 @@ const SuspenseFallback = ({
   style,
   ...rest
 }: SuspenseFallbackProps) => {
-  const combinedStyle: CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap,
-    ...style,
+  const combinedStyle: CSSProperties = useMemo(
+    () => ({
+      display: 'flex',
+      flexDirection: 'column',
+      gap,
+      ...style,
+    }),
+    [gap, style],
+  )
+
+  const spinnerStyle: CSSProperties = {
+    width: 16,
+    height: 16,
+    borderRadius: '50%',
+    border: '2px solid #ccc',
+    borderTopColor: '#555',
   }
 
   return (
-    <div style={combinedStyle} aria-live="polite" {...rest}>
-      <div>{label}</div>
-      <div>{children}</div>
+    <div style={combinedStyle} aria-live="polite" role="status" {...rest}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div aria-hidden="true" style={spinnerStyle} />
+        <p style={{ margin: 0 }}>{label}</p>
+      </div>
+      <section>{children}</section>
     </div>
   )
 }

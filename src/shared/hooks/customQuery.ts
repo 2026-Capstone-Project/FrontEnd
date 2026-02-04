@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type {
   InfiniteData,
   MutationFunction,
@@ -12,7 +13,7 @@ import { useInfiniteQuery, useMutation, useQuery, useSuspenseQuery } from '@tans
 
 type DefaultQueryOptions = {
   staleTime?: number
-  retry?: number | boolean
+  retry?: number
 }
 
 const STALE_TIME = 1000 * 60 * 3
@@ -39,8 +40,13 @@ export const useCustomQuery = <
     options ??
     ({} as Omit<UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>, 'queryKey' | 'queryFn'> &
       DefaultQueryOptions)
-  const { staleTime, retry, refetchOnWindowFocus, ...restOptions } = safeOptions
-  void refetchOnWindowFocus
+
+  const {
+    staleTime,
+    retry,
+    // refetchOnWindowFocus: _refetchOnWindowFocus, // 제거: 사용되지 않음
+    ...restOptions
+  } = safeOptions
 
   return useQuery<TQueryFnData, TError, TData, TQueryKey>({
     queryKey,
@@ -73,8 +79,13 @@ export const useCustomSuspenseQuery = <
       'queryKey' | 'queryFn'
     > &
       DefaultQueryOptions)
-  const { staleTime, retry, refetchOnWindowFocus, ...restOptions } = safeOptions
-  void refetchOnWindowFocus
+
+  const {
+    staleTime,
+    retry,
+    // refetchOnWindowFocus: _refetchOnWindowFocus, // 제거: 사용되지 않음
+    ...restOptions
+  } = safeOptions
 
   return useSuspenseQuery<TQueryFnData, TError, TData, TQueryKey>({
     queryKey,
@@ -102,17 +113,8 @@ export const useCustomInfiniteQuery = <
     infiniteOptions ??
     ({} as UseInfiniteQueryOptions<TQueryFnData, TError, TData, TQueryKey, TPageParam> &
       DefaultQueryOptions)
-  const {
-    staleTime,
-    retry,
-    refetchOnWindowFocus,
-    queryKey: ignoredQueryKey,
-    queryFn: ignoredQueryFn,
-    ...restOptions
-  } = safeOptions
-  void refetchOnWindowFocus
-  void ignoredQueryKey
-  void ignoredQueryFn
+
+  const { staleTime, retry, queryKey: _queryKey, queryFn: _queryFn, ...restOptions } = safeOptions
 
   return useInfiniteQuery<TQueryFnData, TError, TData, TQueryKey, TPageParam>({
     queryKey,
