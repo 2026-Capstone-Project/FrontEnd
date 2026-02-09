@@ -1,7 +1,7 @@
 import { type CalendarProps, type View, Views } from 'react-big-calendar'
 import type { withDragAndDropProps } from 'react-big-calendar/lib/addons/dragAndDrop'
 
-import type { CalendarEvent } from '@/features/Calendar/domain/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 
 type CalendarDndProps = CalendarProps<CalendarEvent, object> &
   withDragAndDropProps<CalendarEvent, object>

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-import type { TimePickerRenderProps } from '@/shared/types/event'
+import type { TimePickerRenderProps } from '@/shared/types/event/event'
 
 import * as S from './CustomTimePicker.style'
 

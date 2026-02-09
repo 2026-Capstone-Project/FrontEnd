@@ -1,6 +1,6 @@
 import type { ShowMoreProps } from 'react-big-calendar'
 
-import type { CalendarEvent } from '@/features/Calendar/domain/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 
 import * as S from './CustomEvent.style'
 

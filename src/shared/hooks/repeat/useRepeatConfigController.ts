@@ -1,13 +1,16 @@
 import { useCallback } from 'react'
 import { type UseFormReturn } from 'react-hook-form'
 
-import { type AddScheduleFormValues, type EventColorType } from '@/shared/types/event'
+import {
+  type AddScheduleFormValues,
+  type EventColorType,
+  type RepeatConfigSchema,
+} from '@/shared/types/event/event'
 import {
   type CustomRepeatBasis,
   type RepeatConfig,
-  type RepeatConfigSchema,
   type RepeatType,
-} from '@/shared/types/repeat'
+} from '@/shared/types/event/recurrence/repeat'
 
 type UseRepeatConfigControllerProps = {
   repeatConfig: RepeatConfigSchema

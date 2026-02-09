@@ -1,6 +1,7 @@
 import { createPortal } from 'react-dom'
 
-import { mockCalendarEvents } from '../../mocks/calendarEvents'
+import { useEventQuery } from '@/shared/hooks/query/useCalendarQueries'
+
 import EventDetailCard from '../EventDetailCard/EventDetailCard'
 import * as S from './EventsCard.style'
 const EventsCard = ({
@@ -12,16 +13,19 @@ const EventsCard = ({
   onClose: () => void
   mode: 'inline' | 'modal'
 }) => {
+  const editDate = new Date(selectedDate)
+  const year = editDate.getFullYear()
+  const month = String(editDate.getMonth() + 1).padStart(2, '0')
+  const day = String(editDate.getDate()).padStart(2, '0')
+  const formattedDate = `${year}-${month}-${day}`
+  const { data } = useEventQuery(formattedDate, formattedDate)
+  const details = data?.result?.details ?? []
+
   const startOfSelectedDay = new Date(selectedDate)
   startOfSelectedDay.setHours(0, 0, 0, 0)
   const endOfSelectedDay = new Date(startOfSelectedDay)
   endOfSelectedDay.setHours(23, 59, 59, 999)
 
-  const data = mockCalendarEvents.filter((event) => {
-    const eventStart = new Date(event.start)
-    const eventEnd = new Date(event.end)
-    return eventStart <= endOfSelectedDay && eventEnd >= startOfSelectedDay
-  })
   return createPortal(
     <S.CardOverlay onClick={mode === 'modal' ? onClose : undefined}>
       <S.CardWrapper
@@ -39,10 +43,10 @@ const EventsCard = ({
             })}
             <S.Dot />
           </S.Header>
-          {data.length > 0 ? (
+          {details.length > 0 ? (
             <S.EventCards>
-              {data.map((event) => (
-                <EventDetailCard key={event.id} event={event} type={event.type} />
+              {details.map((event) => (
+                <EventDetailCard key={event.id} event={event} type={'schedule'} />
               ))}
             </S.EventCards>
           ) : (

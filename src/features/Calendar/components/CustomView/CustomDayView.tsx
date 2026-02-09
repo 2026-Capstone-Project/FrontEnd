@@ -4,7 +4,7 @@ import type { NavigateAction, ViewStatic } from 'react-big-calendar'
 
 import { formatWeekday } from '@/features/Calendar/utils/formatters'
 
-import type { CalendarEvent } from '../../domain/types'
+import type { CalendarEvent } from '../../../../shared/types/calendar/types'
 import {
   buildTimedSlots,
   compareByStart,

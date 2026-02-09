@@ -1,6 +1,6 @@
 import { WEEKDAYS } from '@/shared/constants/event'
-import type { RepeatConfigSchema } from '@/shared/types/event'
-import type { RepeatConfig } from '@/shared/types/repeat'
+import type { RepeatConfigSchema } from '@/shared/types/event/event'
+import type { RepeatConfig } from '@/shared/types/event/recurrence/repeat'
 
 import * as S from './RepeatPanel.style'
 

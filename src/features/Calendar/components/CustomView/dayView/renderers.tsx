@@ -1,8 +1,8 @@
 import moment from 'moment'
 import type { MutableRefObject, Ref } from 'react'
 
+import type { CalendarEvent } from '../../../../../shared/types/calendar/types'
 import { TIMED_SLOT_CONFIG } from '../../../domain/constants'
-import type { CalendarEvent } from '../../../domain/types'
 import { getColorPalette } from '../../../utils/colorPalette'
 import type { TimedSlotEvent } from '../../../utils/helpers/dayViewHelpers'
 import { TodoCheckbox } from '../../CustomEvent/CustomEvent.style'

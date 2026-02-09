@@ -1,15 +1,28 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 
-import type { CalendarEvent } from '../components/CustomView/CustomDayView'
-import { mockCalendarEvents } from '../mocks/calendarEvents'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
+
 import { createEvent, normalizeDate, updateEventRange } from '../utils/helpers/calendarPageHelpers'
 
-export const useCalendarEvents = () => {
-  const [events, setEvents] = useState<CalendarEvent[]>(() => [...mockCalendarEvents])
+type UseCalendarEventsOptions = {
+  initialEvents?: CalendarEvent[]
+}
+
+export const useCalendarEvents = (options: UseCalendarEventsOptions = {}) => {
+  const { initialEvents } = options
+  const [events, setEvents] = useState<CalendarEvent[]>(() =>
+    initialEvents && initialEvents.length > 0 ? initialEvents : [],
+  )
+
+  useEffect(() => {
+    if (!initialEvents) return
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setEvents(initialEvents)
+  }, [initialEvents])
 
   const addEvent = useCallback((date: Date, allDay = false) => {
-    const createdId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    const createdId = Date.now()
     const nextEvent: CalendarEvent = { ...createEvent(date, 0, allDay), id: createdId }
     setEvents((prev) => [...prev, nextEvent])
     return createdId

@@ -1,6 +1,6 @@
 import { type PointerEvent as ReactPointerEvent, useCallback, useRef, useState } from 'react'
 
-import type { CalendarEvent } from '../../../domain/types'
+import type { CalendarEvent } from '../../../../../shared/types/calendar/types'
 import { buildMoveRange, buildResizeRange, getMinutesPerPixel } from './timeHelpers'
 
 export type DragMode = 'move' | 'resize'

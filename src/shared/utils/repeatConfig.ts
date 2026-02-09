@@ -1,4 +1,4 @@
-import { type RepeatConfigSchema } from '@/shared/types/event'
+import { type RepeatConfigSchema } from '@/shared/types/event/event'
 
 const serializeRepeatConfig = (config: RepeatConfigSchema) => JSON.stringify(config)
 

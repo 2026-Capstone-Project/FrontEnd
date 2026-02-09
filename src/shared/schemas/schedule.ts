@@ -1,7 +1,7 @@
 import * as yup from 'yup'
 
 import { EVENT_COLORS } from '@/shared/constants/event'
-import type { EventColorType } from '@/shared/types/event'
+import type { EventColorType } from '@/shared/types/event/event'
 
 import { DateSchema, description, isAllday, repeatConfigSchema, title } from './common'
 

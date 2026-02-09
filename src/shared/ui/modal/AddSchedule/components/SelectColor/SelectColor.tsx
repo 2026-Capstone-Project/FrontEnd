@@ -8,7 +8,7 @@ import { EVENT_COLORS } from '@/shared/constants/event'
 import * as S from './SelectColor.style'
 
 type SelectColorProps = {
-  value: EventColorType
+  value?: EventColorType
   onChange: (value: EventColorType) => void
 }
 
@@ -33,9 +33,14 @@ const SelectColor = ({ value, onChange }: SelectColorProps) => {
       document.removeEventListener('touchstart', handleOutsideClick)
     }
   }, [dropdownOpen])
+  const resolvedValue = EVENT_COLORS.includes(value as EventColorType)
+    ? (value as EventColorType)
+    : EVENT_COLORS[0]
+  const palette = getColorPalette(resolvedValue)
+
   return (
     <S.ColorDropdown ref={dropdownRef} onClick={() => setDropdownOpen((prev) => !prev)}>
-      <S.Circle color={getColorPalette(value).point} />
+      <S.Circle color={palette.point} />
       <Arrow css={{ rotate: '-90deg' }} color="#A5A5A5" />
       {dropdownOpen && (
         <S.ColorOptions>
@@ -43,7 +48,7 @@ const SelectColor = ({ value, onChange }: SelectColorProps) => {
             <S.CircleOption
               key={colorName}
               color={getColorPalette(colorName).point}
-              isSelected={value === colorName}
+              isSelected={resolvedValue === colorName}
               onClick={() => {
                 onChange(colorName)
                 setDropdownOpen(false)

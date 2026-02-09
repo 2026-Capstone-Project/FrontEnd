@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import type { View } from 'react-big-calendar'
 
-import type { CalendarEvent } from '@/features/Calendar/domain/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 
 import { buildCalendarConfig } from '../components/CustomCalendar/config'
 

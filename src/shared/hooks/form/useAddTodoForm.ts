@@ -1,14 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { type Control, type UseFormReturn } from 'react-hook-form'
 
-import type { CalendarEvent } from '@/features/Calendar/domain/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type {
   AddTodoFormValues,
   DatePickerField,
   RepeatConfigSchema,
   TimePickerField,
-} from '@/shared/types/event'
-import type { CustomRepeatBasis, RepeatConfig, RepeatType } from '@/shared/types/repeat'
+} from '@/shared/types/event/event'
+import type {
+  CustomRepeatBasis,
+  RepeatConfig,
+  RepeatType,
+} from '@/shared/types/event/recurrence/repeat'
 import { formatIsoDate } from '@/shared/utils/date'
 
 import { useTodoFormFields } from './useTodoFormFields'

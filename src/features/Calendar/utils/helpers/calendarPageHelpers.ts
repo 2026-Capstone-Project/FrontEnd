@@ -2,8 +2,8 @@ import moment from 'moment'
 import type { stringOrDate } from 'react-big-calendar'
 
 import { theme } from '@/shared/styles/theme'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 
-import type { CalendarEvent } from '../../components/CustomView/CustomDayView'
 import {
   DEFAULT_ALL_DAY_TITLE,
   DEFAULT_EVENT_DURATION_HOURS,
@@ -14,7 +14,7 @@ import {
 export const normalizeDate = (value: stringOrDate): Date =>
   typeof value === 'string' || typeof value === 'number' ? new Date(value) : value
 
-const buildEventId = (prevCount: number, date: Date) => `${prevCount}-${date.valueOf()}`
+const buildEventId = (prevCount: number, date: Date) => date.valueOf() + prevCount
 
 /** 기본 제목/기간을 가지는 새 캘린더 이벤트를 생성합니다. */
 export const createEvent = (date: Date, index: number, allDay = false): CalendarEvent => {
@@ -25,7 +25,7 @@ export const createEvent = (date: Date, index: number, allDay = false): Calendar
     title: allDay ? DEFAULT_ALL_DAY_TITLE : DEFAULT_EVENT_TITLE,
     start,
     end: allDay ? date : moment(date).add(eventDurationMs).toDate(),
-    color: 'gray',
+    color: 'GRAY',
     allDay,
     type: 'schedule',
   }
@@ -40,7 +40,7 @@ export const appendEvent = (events: CalendarEvent[], date: Date, allDay = false)
 /** drag 또는 resize 등으로 시작/종료 시간이 변경될 경우 해당 이벤트를 업데이트합니다. */
 export const updateEventRange = (
   events: CalendarEvent[],
-  eventId: string,
+  eventId: CalendarEvent['id'],
   start: Date,
   end: Date,
 ) =>

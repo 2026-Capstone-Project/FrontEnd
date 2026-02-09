@@ -3,7 +3,7 @@ import { useCallback, useMemo } from 'react'
 import type { ViewStatic } from 'react-big-calendar'
 
 import CustomDayView from '@/features/Calendar/components/CustomView/CustomDayView'
-import type { CalendarEvent } from '@/features/Calendar/domain/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 
 type UseDayViewHandlersArgs = {
   clearSelectedDate: () => void

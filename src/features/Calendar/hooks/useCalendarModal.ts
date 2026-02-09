@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import type { CalendarEvent } from '@/features/Calendar/domain/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 
 type ModalState = {
   isOpen: boolean

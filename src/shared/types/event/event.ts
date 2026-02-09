@@ -2,7 +2,7 @@ import type { InferType } from 'yup'
 
 import { addScheduleSchema } from '@/shared/schemas/schedule'
 
-import type { addTodoSchema } from '../schemas/todo'
+import type { addTodoSchema } from '../../schemas/todo'
 
 export type DatePickerField = 'start' | 'end'
 export type DatePickerRenderProps = {
@@ -20,7 +20,16 @@ export type TimePickerRenderProps = {
 export type AddScheduleFormValues = InferType<typeof addScheduleSchema>
 export type RepeatConfigSchema = AddScheduleFormValues['repeatConfig']
 
-export type EventColorType = 'pink' | 'mint' | 'sky' | 'violet' | 'yellow' | 'gray'
+export type EventColorType = 'PINK' | 'GREEN' | 'BLUE' | 'PURPLE' | 'YELLOW' | 'GRAY'
 export type WeekDaysSingleChar = 'S' | 'M' | 'T' | 'W' | 'T' | 'F'
 
 export type AddTodoFormValues = InferType<typeof addTodoSchema>
+
+export type Week =
+  | 'SUNDAY'
+  | 'MONDAY'
+  | 'TUESDAY'
+  | 'WEDNESDAY'
+  | 'THURSDAY'
+  | 'FRIDAY'
+  | 'SATURDAY'

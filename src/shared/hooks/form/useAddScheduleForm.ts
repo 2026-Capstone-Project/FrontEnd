@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react'
 import { type Control, type UseFormReturn } from 'react-hook-form'
 
-import type { CalendarEvent } from '@/features/Calendar/domain/types'
+import { useScheduleFormFields } from '@/shared/hooks/form/useScheduleFormFields'
+import { useRepeatConfigController } from '@/shared/hooks/repeat/useRepeatConfigController'
 import { useCalendarFieldPicker } from '@/shared/hooks/useCalendarFieldPicker'
-import { useRepeatConfigController } from '@/shared/hooks/useRepeatConfigController'
-import { useScheduleFormFields } from '@/shared/hooks/useScheduleFormFields'
 import { useSearchPlaceToggle } from '@/shared/hooks/useSearchPlaceToggle'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 import {
   type AddScheduleFormValues,
   type DatePickerField,
   type EventColorType,
   type RepeatConfigSchema,
   type TimePickerField,
-} from '@/shared/types/event'
-import { type RepeatConfig, type RepeatType } from '@/shared/types/repeat'
+} from '@/shared/types/event/event'
+import { type RepeatConfig, type RepeatType } from '@/shared/types/event/recurrence/repeat'
 import { formatIsoDate } from '@/shared/utils/date'
 
 type UseAddScheduleFormProps = {

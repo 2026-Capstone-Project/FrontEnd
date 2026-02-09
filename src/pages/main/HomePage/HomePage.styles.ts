@@ -36,7 +36,7 @@ export const DateTitle = styled.h1`
 export const SubTitle = styled.p`
   font-size: 20px;
   margin-top: 4px;
-  color: ${theme.colors.gray.point};
+  color: ${theme.colors.GRAY.point};
 `
 export const CardHeader = styled.div`
   display: flex;

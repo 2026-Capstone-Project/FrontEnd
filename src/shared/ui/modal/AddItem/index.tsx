@@ -1,7 +1,7 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import type { CalendarEvent } from '@/features/Calendar/domain/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 import AddModalLayout from '@/shared/ui/modal/AddModalLayout/AddModalLayout'
 import AddScheduleForm from '@/shared/ui/modal/AddSchedule/components/AddScheduleForm'
 import AddTodoForm from '@/shared/ui/modal/AddTodo/components/AddTodoForm'

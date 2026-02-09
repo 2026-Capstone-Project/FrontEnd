@@ -1,7 +1,7 @@
 import moment from 'moment'
 import type { stringOrDate } from 'react-big-calendar'
 
-import type { CalendarEvent } from '@/features/Calendar/domain/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 
 import { TIMED_SLOT_CONFIG } from '../../domain/constants'
 import { getColorPalette } from '../colorPalette'
@@ -49,6 +49,7 @@ export const buildTimedSlots = (events: CalendarEvent[]) => {
       const columnIndex = segmentStart.hour() < 12 ? 0 : 1
       const columnStart = dayStart.clone().add(COLUMNS[columnIndex], 'hours')
       const minutesSinceColumnStart = segmentStart.diff(columnStart, 'minutes')
+      const top = (minutesSinceColumnStart / 60) * SLOT_HEIGHT
       const durationMinutes = Math.max(segmentEnd.diff(segmentStart, 'minutes'), 15)
       const calculatedHeight = (durationMinutes / 60) * SLOT_HEIGHT
       const height = Math.min(
@@ -58,7 +59,7 @@ export const buildTimedSlots = (events: CalendarEvent[]) => {
 
       columns[columnIndex].push({
         event,
-        top: minutesSinceColumnStart,
+        top,
         height: Math.max(height, MIN_HEIGHT),
         palette,
         overflowTop: segmentStart.isAfter(start),

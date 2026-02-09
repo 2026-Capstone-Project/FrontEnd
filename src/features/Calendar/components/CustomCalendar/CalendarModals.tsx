@@ -1,8 +1,11 @@
+import moment from 'moment'
+import { useMemo } from 'react'
 import { createPortal } from 'react-dom'
 
-import type { CalendarEvent } from '@/features/Calendar/domain/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 import AddSchedule from '@/shared/ui/modal/AddSchedule'
 
+import { useDetailEventQuery } from '../../../../shared/hooks/query/useCalendarQueries'
 import EventsCard from '../EventsCard/EventsCard'
 
 type CalendarModalsProps = {
@@ -51,7 +54,28 @@ const CalendarModals = ({
 }: CalendarModalsProps) => {
   const shouldRenderModal = modalEventId != null
   const shouldRenderEventCard = !isModalOpen && showEventCard
-
+  const safeDetailEventId = modalEventId
+  const occurrenceDate = useMemo(
+    () => (modalDate ? moment(modalDate).format('YYYY-MM-DDTHH:mm') : ''),
+    [modalDate],
+  )
+  const { data } = useDetailEventQuery(safeDetailEventId, occurrenceDate)
+  const detailEvent = useMemo<CalendarEvent | null>(() => {
+    const result = data?.result
+    if (!result) return null
+    return {
+      id: result.id ?? safeDetailEventId ?? 0,
+      title: result.title ?? '',
+      start: result.start,
+      end: result.end,
+      allDay: result.isAllday ?? false,
+      type: 'schedule',
+      color: result.color ?? 'BLUE',
+      location: result.location ?? undefined,
+      memo: result.content ?? undefined,
+      recurrenceGroup: result.recurrenceGroup ?? null,
+    }
+  }, [data, safeDetailEventId])
   return (
     <>
       {shouldRenderModal &&
@@ -63,7 +87,7 @@ const CalendarModals = ({
             onClose={onCloseModal}
             mode={modalMode}
             eventId={modalEventId}
-            event={modalEvent}
+            event={detailEvent ?? modalEvent}
             tabsVisible={!isModalEditing}
             onEventColorChange={onEventColorChange}
             onEventTitleConfirm={onEventTitleConfirm}
@@ -82,7 +106,7 @@ const CalendarModals = ({
             onClose={onCloseModal}
             mode={modalMode}
             eventId={modalEventId}
-            event={modalEvent}
+            event={detailEvent ?? modalEvent}
             tabsVisible={!isModalEditing}
             onEventColorChange={onEventColorChange}
             onEventTitleConfirm={onEventTitleConfirm}
