@@ -29,10 +29,10 @@ import { useDayViewHandlers } from '@/features/Calendar/hooks/useDayViewHandlers
 import { getDayPropStyle } from '@/features/Calendar/utils/helpers/calendarPageHelpers'
 import { getViewConfig } from '@/features/Calendar/utils/viewConfig'
 import Plus from '@/shared/assets/icons/plus.svg?react'
+import { useEventQuery } from '@/shared/hooks/query/useCalendarQueries'
 import { theme } from '@/shared/styles/theme'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 
-import { useEventQuery } from '../../../../shared/hooks/query/useCalendarQueries'
 import CalendarHeader from '../CalendarDateHeader/CalendarDateHeader'
 import { CustomMonthEvent, CustomMonthShowMore, CustomWeekEvent } from '../CustomEvent'
 import { CustomViewButton } from '../CustomViewButton/CustomViewButton'
