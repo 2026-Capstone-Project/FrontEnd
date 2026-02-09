@@ -8,12 +8,30 @@ export const axiosInstance = axios.create({
   withCredentials: true,
 })
 
-//TODO: @yujin5959 나중에 이부분 해주세용~
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    return Promise.reject(error)
+axiosInstance.interceptors.request.use(
+  async (config) => {
+    if (['post', 'put', 'patch', 'delete'].includes(config.method?.toLowerCase() || '')) {
+      try {
+        const { data } = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/api/v1/security/csrf`,
+          { withCredentials: true },
+        )
+        const resultString = data.result || ''
+        const csrfToken = resultString.replace('CSRF 토큰이 쿠키로 발급되었습니다.', '').trim()
+
+        if (csrfToken) {
+          config.headers['X-XSRF-TOKEN'] = csrfToken
+        } else {
+          console.error('[CSRF] 토큰 추출 실패. 응답 확인:', resultString)
+        }
+      } catch (error) {
+        console.error('CSRF 토큰 갱신 실패:', error)
+        return Promise.reject(error)
+      }
+    }
+    return config
   },
+  (error) => Promise.reject(error),
 )
 
 export default axiosInstance
