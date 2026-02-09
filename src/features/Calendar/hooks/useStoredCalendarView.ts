@@ -1,3 +1,4 @@
+// 캘린더 뷰(월/주/일)를 로컬스토리지에 저장/복원하는 훅
 import { useEffect, useState } from 'react'
 import type { View } from 'react-big-calendar'
 import { Views } from 'react-big-calendar'

@@ -1,3 +1,4 @@
+// 캘린더 이벤트 목록과 편집 동작을 관리하는 훅
 import { useCallback, useEffect, useState } from 'react'
 import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 
@@ -11,9 +12,7 @@ type UseCalendarEventsOptions = {
 
 export const useCalendarEvents = (options: UseCalendarEventsOptions = {}) => {
   const { initialEvents } = options
-  const [events, setEvents] = useState<CalendarEvent[]>(() =>
-    initialEvents && initialEvents.length > 0 ? initialEvents : [],
-  )
+  const [events, setEvents] = useState<CalendarEvent[]>(() => initialEvents ?? [])
 
   useEffect(() => {
     if (!initialEvents) return

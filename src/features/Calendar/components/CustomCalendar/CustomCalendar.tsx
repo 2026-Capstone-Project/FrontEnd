@@ -18,9 +18,10 @@ import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 import CustomToolbar from '@/features/Calendar/components/CalendarToolbar/CalendarToolbar'
 import CustomWeekView from '@/features/Calendar/components/CustomView/CustomWeekView'
 import {
+  useCalendarApiEvents,
+  useCalendarDateRange,
   useCalendarModal,
   useCalendarPortals,
-  useCalendarProps,
   useCalendarResponsive,
   useStoredCalendarView,
 } from '@/features/Calendar/hooks'
@@ -29,7 +30,6 @@ import { useDayViewHandlers } from '@/features/Calendar/hooks/useDayViewHandlers
 import { getDayPropStyle } from '@/features/Calendar/utils/helpers/calendarPageHelpers'
 import { getViewConfig } from '@/features/Calendar/utils/viewConfig'
 import Plus from '@/shared/assets/icons/plus.svg?react'
-import { useEventQuery } from '@/shared/hooks/query/useCalendarQueries'
 import { theme } from '@/shared/styles/theme'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 
@@ -37,6 +37,7 @@ import CalendarHeader from '../CalendarDateHeader/CalendarDateHeader'
 import { CustomMonthEvent, CustomMonthShowMore, CustomWeekEvent } from '../CustomEvent'
 import { CustomViewButton } from '../CustomViewButton/CustomViewButton'
 import CalendarModals from './CalendarModals'
+import { buildCalendarConfig } from './config'
 import * as S from './CustomCalendar.style'
 
 moment.locale('ko')
@@ -47,43 +48,8 @@ export type SelectDateSource = 'date-cell' | 'slot' | 'header' | 'date-header'
 const CustomCalendar = () => {
   const { view, setView } = useStoredCalendarView()
   const [date, setDate] = useState<Date>(new Date())
-  const { startDate, endDate } = useMemo(() => {
-    const base = moment(date)
-    if (view === Views.MONTH) {
-      return {
-        startDate: base.clone().startOf('month').format('YYYY-MM-DD'),
-        endDate: base.clone().endOf('month').format('YYYY-MM-DD'),
-      }
-    }
-    if (view === Views.WEEK) {
-      const weekStart = base.clone().day(0).startOf('day') // Sunday
-      const weekEnd = weekStart.clone().add(6, 'days').endOf('day') // Saturday
-      return {
-        startDate: weekStart.format('YYYY-MM-DD'),
-        endDate: weekEnd.format('YYYY-MM-DD'),
-      }
-    }
-    return {
-      startDate: base.clone().startOf('day').format('YYYY-MM-DD'),
-      endDate: base.clone().endOf('day').format('YYYY-MM-DD'),
-    }
-  }, [date, view])
-  const { data } = useEventQuery(startDate, endDate)
-  const apiEvents = useMemo<CalendarEvent[]>(() => {
-    const details = data?.result?.details ?? []
-    return details.map((item) => ({
-      id: item.id,
-      title: item.title,
-      start: item.start,
-      end: item.end,
-      allDay: item.isAllday,
-      type: 'schedule',
-      color: item.color,
-      location: item.location ?? undefined,
-      memo: item.content ?? undefined,
-      recurrenceGroup: item.recurrenceGroup ?? null,
-    }))
-  }, [data])
+  const { startDate, endDate } = useCalendarDateRange(view, date)
+  const { events: apiEvents } = useCalendarApiEvents(startDate, endDate)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedEventId, setSelectedEventId] = useState<CalendarEvent['id'] | null>(null)
   const {
@@ -231,22 +197,40 @@ const CustomCalendar = () => {
     [dayViewWithHandlers],
   )
 
-  const calendarProps = useCalendarProps({
-    localizer,
-    views: calendarViews,
-    view,
-    date,
-    events,
-    onView,
-    onNavigate,
-    onSelectEvent: handleSelectEvent,
-    onEventDrop: moveEvent,
-    onEventResize: resizeEvent,
-    onSelectSlot: handleSelectSlot,
-    dayPropGetter,
-    components: mergedComponents,
-    viewConfig,
-  })
+  const calendarProps = useMemo(
+    () =>
+      buildCalendarConfig({
+        localizer,
+        views: calendarViews,
+        view,
+        date,
+        events,
+        onView,
+        onNavigate,
+        onSelectEvent: handleSelectEvent,
+        onEventDrop: moveEvent,
+        onEventResize: resizeEvent,
+        onSelectSlot: handleSelectSlot,
+        dayPropGetter,
+        components: mergedComponents,
+        viewConfig,
+      }),
+    [
+      calendarViews,
+      view,
+      date,
+      events,
+      onView,
+      onNavigate,
+      handleSelectEvent,
+      moveEvent,
+      resizeEvent,
+      handleSelectSlot,
+      dayPropGetter,
+      mergedComponents,
+      viewConfig,
+    ],
+  )
 
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
@@ -264,6 +248,15 @@ const CustomCalendar = () => {
     [events, modal.eventId],
   )
   const modalMode: 'modal' | 'inline' = isInlineMode ? 'inline' : 'modal'
+  const eventActions = useMemo(
+    () => ({
+      onEventColorChange: updateEventColor,
+      onEventTitleConfirm: updateEventTitle,
+      onEventTypeChange: updateEventType,
+      onEventTimingChange: updateEventTiming,
+    }),
+    [updateEventColor, updateEventTitle, updateEventType, updateEventTiming],
+  )
   const eventCardDate = selectedDate ?? date
 
   return (
@@ -291,10 +284,7 @@ const CustomCalendar = () => {
         showEventCard={selectedDate != null}
         onCloseModal={handleCloseModal}
         onCloseEventCard={() => setSelectedDate(null)}
-        onEventColorChange={updateEventColor}
-        onEventTitleConfirm={updateEventTitle}
-        onEventTypeChange={updateEventType}
-        onEventTimingChange={updateEventTiming}
+        eventActions={eventActions}
       />
     </div>
   )

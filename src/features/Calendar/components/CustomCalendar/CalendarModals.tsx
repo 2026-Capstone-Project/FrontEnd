@@ -22,15 +22,17 @@ type CalendarModalsProps = {
   showEventCard: boolean
   onCloseModal: () => void
   onCloseEventCard: () => void
-  onEventColorChange: (eventId: CalendarEvent['id'], color: CalendarEvent['color']) => void
-  onEventTitleConfirm: (eventId: CalendarEvent['id'], title: CalendarEvent['title']) => void
-  onEventTypeChange: (eventId: CalendarEvent['id'], type: CalendarEvent['type']) => void
-  onEventTimingChange: (
-    eventId: CalendarEvent['id'],
-    start: Date,
-    end: Date,
-    allDay: boolean,
-  ) => void
+  eventActions: {
+    onEventColorChange: (eventId: CalendarEvent['id'], color: CalendarEvent['color']) => void
+    onEventTitleConfirm: (eventId: CalendarEvent['id'], title: CalendarEvent['title']) => void
+    onEventTypeChange: (eventId: CalendarEvent['id'], type: CalendarEvent['type']) => void
+    onEventTimingChange: (
+      eventId: CalendarEvent['id'],
+      start: Date,
+      end: Date,
+      allDay: boolean,
+    ) => void
+  }
 }
 
 const CalendarModals = ({
@@ -47,10 +49,7 @@ const CalendarModals = ({
   showEventCard,
   onCloseModal,
   onCloseEventCard,
-  onEventColorChange,
-  onEventTitleConfirm,
-  onEventTypeChange,
-  onEventTimingChange,
+  eventActions,
 }: CalendarModalsProps) => {
   const shouldRenderModal = modalEventId != null
   const shouldRenderEventCard = !isModalOpen && showEventCard
@@ -89,10 +88,10 @@ const CalendarModals = ({
             eventId={modalEventId}
             event={detailEvent ?? modalEvent}
             tabsVisible={!isModalEditing}
-            onEventColorChange={onEventColorChange}
-            onEventTitleConfirm={onEventTitleConfirm}
-            onEventTypeChange={onEventTypeChange}
-            onEventTimingChange={onEventTimingChange}
+            onEventColorChange={eventActions.onEventColorChange}
+            onEventTitleConfirm={eventActions.onEventTitleConfirm}
+            onEventTypeChange={eventActions.onEventTypeChange}
+            onEventTimingChange={eventActions.onEventTimingChange}
           />,
           modalPortalRoot,
         )}
@@ -108,10 +107,10 @@ const CalendarModals = ({
             eventId={modalEventId}
             event={detailEvent ?? modalEvent}
             tabsVisible={!isModalEditing}
-            onEventColorChange={onEventColorChange}
-            onEventTitleConfirm={onEventTitleConfirm}
-            onEventTypeChange={onEventTypeChange}
-            onEventTimingChange={onEventTimingChange}
+            onEventColorChange={eventActions.onEventColorChange}
+            onEventTitleConfirm={eventActions.onEventTitleConfirm}
+            onEventTypeChange={eventActions.onEventTypeChange}
+            onEventTimingChange={eventActions.onEventTimingChange}
           />,
           cardPortalRoot,
         )}

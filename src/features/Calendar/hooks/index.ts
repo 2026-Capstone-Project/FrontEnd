@@ -1,5 +1,6 @@
+export { useCalendarApiEvents } from './useCalendarApiEvents'
+export { useCalendarDateRange } from './useCalendarDateRange'
 export { useCalendarModal } from './useCalendarModal'
 export { useCalendarPortals } from './useCalendarPortals'
-export { useCalendarProps } from './useCalendarProps'
 export { useCalendarResponsive } from './useCalendarResponsive'
 export { useStoredCalendarView } from './useStoredCalendarView'

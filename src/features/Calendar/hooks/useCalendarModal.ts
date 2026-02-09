@@ -1,3 +1,4 @@
+// 캘린더 모달의 열림/편집 상태와 삭제 단축키를 관리하는 훅
 import { useCallback, useEffect, useState } from 'react'
 
 import type { CalendarEvent } from '@/shared/types/calendar/types'

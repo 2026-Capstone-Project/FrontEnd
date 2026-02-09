@@ -1,3 +1,4 @@
+// 일간 뷰 전용 핸들러를 구성하는 훅
 import moment from 'moment'
 import { useCallback, useMemo } from 'react'
 import type { ViewStatic } from 'react-big-calendar'
