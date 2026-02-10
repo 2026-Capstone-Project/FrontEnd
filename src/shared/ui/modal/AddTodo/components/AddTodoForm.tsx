@@ -18,14 +18,11 @@ import Checkbox from '@/shared/ui/common/Checkbox/Checkbox'
 import RepeatTypeGroup from '@/shared/ui/common/RepeatTypeGroup/RepeatTypeGroup'
 import TerminationPanel from '@/shared/ui/common/TerminationPanel/TerminationPanel'
 import TitleSuggestionInput from '@/shared/ui/common/TitleSuggestionInput/TitleSuggestionInput'
+import { DeleteConfirmModal, EditConfirmModal, type EditConfirmOption } from '@/shared/ui/modal'
 import CustomBasisPanel from '@/shared/ui/modal/AddTodo/components/CustomBasisPanel/CustomBasisPanel'
 import CustomDatePicker from '@/shared/ui/modal/AddTodo/components/CustomDatePicker/CustomDatePicker'
 import CustomTimePicker from '@/shared/ui/modal/AddTodo/components/CustomTimePicker/CustomTimePicker'
 import * as S from '@/shared/ui/modal/AddTodo/index.style'
-import DeleteConfirmModal from '@/shared/ui/modal/DeleteConfirmModal/DeleteConfirmModal'
-import EditConfirmModal, {
-  type EditConfirmOption,
-} from '@/shared/ui/modal/EditConfirmModal/EditConfirmModal'
 import { formatDisplayDate } from '@/shared/utils/date'
 
 type AddTodoFormProps = {
@@ -175,21 +172,26 @@ const AddTodoForm = ({
     [buildDateTime, date, eventId, onEventTimingChange],
   )
 
-  const handleFormSubmit = handleSubmit((values) => {
-    if (requestConfirmation()) {
-      setPendingTodoValues(values)
-      return
-    }
-    if (eventId != null && eventId !== 0) {
-      const nextTitle = values.todoTitle ?? ''
-      if (nextTitle) {
-        onEventTitleConfirm?.(eventId, nextTitle)
+  const handleFormSubmit = handleSubmit(
+    (values) => {
+      if (requestConfirmation()) {
+        setPendingTodoValues(values)
+        return
       }
-    }
-    syncEventTiming(values)
-    onSubmit(values)
-    onClose()
-  })
+      if (eventId != null && eventId !== 0) {
+        const nextTitle = values.todoTitle ?? ''
+        if (nextTitle) {
+          onEventTitleConfirm?.(eventId, nextTitle)
+        }
+      }
+      syncEventTiming(values)
+      onSubmit(values)
+      onClose()
+    },
+    (errors) => {
+      console.log('[AddTodoForm] submit errors', errors)
+    },
+  )
 
   const handleConfirmedSubmit = useCallback(
     (option: EditConfirmOption) => {

@@ -53,7 +53,7 @@ export const useDayViewHandlers = ({
         title: event.title,
         start: formatLogDateTime(start),
         end: formatLogDateTime(end),
-        allDay: event.allDay ?? false,
+        allDay: event.isAllDay ?? false,
       })
       updateEventTime(event.id, start, end)
     },

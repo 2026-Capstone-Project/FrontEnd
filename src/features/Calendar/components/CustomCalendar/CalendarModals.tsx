@@ -2,16 +2,16 @@ import moment from 'moment'
 import { useMemo } from 'react'
 import { createPortal } from 'react-dom'
 
-import type { CalendarEvent } from '@/shared/types/calendar/types'
+import { useDetailEventQuery } from '@/shared/hooks/query/useCalendarQueries'
+import type { Event } from '@/shared/types/calendar/types'
 import AddSchedule from '@/shared/ui/modal/AddSchedule'
 
-import { useDetailEventQuery } from '../../../../shared/hooks/query/useCalendarQueries'
 import EventsCard from '../EventsCard/EventsCard'
 
 type CalendarModalsProps = {
   modalDate: string
-  modalEventId: CalendarEvent['id'] | null
-  modalEvent: CalendarEvent | null
+  modalEventId: Event['id'] | null
+  modalEvent: Event | null
   isModalEditing: boolean
   isModalOpen: boolean
   isInlineMode: boolean
@@ -23,15 +23,10 @@ type CalendarModalsProps = {
   onCloseModal: () => void
   onCloseEventCard: () => void
   eventActions: {
-    onEventColorChange: (eventId: CalendarEvent['id'], color: CalendarEvent['color']) => void
-    onEventTitleConfirm: (eventId: CalendarEvent['id'], title: CalendarEvent['title']) => void
-    onEventTypeChange: (eventId: CalendarEvent['id'], type: CalendarEvent['type']) => void
-    onEventTimingChange: (
-      eventId: CalendarEvent['id'],
-      start: Date,
-      end: Date,
-      allDay: boolean,
-    ) => void
+    onEventColorChange: (eventId: Event['id'], color: Event['color']) => void
+    onEventTitleConfirm: (eventId: Event['id'], title: Event['title']) => void
+    onEventTypeChange: (eventId: Event['id'], type: 'todo' | 'schedule') => void
+    onEventTimingChange: (eventId: Event['id'], start: Date, end: Date, allDay: boolean) => void
   }
 }
 
@@ -59,20 +54,12 @@ const CalendarModals = ({
     [modalDate],
   )
   const { data } = useDetailEventQuery(safeDetailEventId, occurrenceDate)
-  const detailEvent = useMemo<CalendarEvent | null>(() => {
+  const detailEvent = useMemo<Event | null>(() => {
     const result = data?.result
     if (!result) return null
     return {
+      ...result,
       id: result.id ?? safeDetailEventId ?? 0,
-      title: result.title ?? '',
-      start: result.start,
-      end: result.end,
-      allDay: result.isAllday ?? false,
-      type: 'schedule',
-      color: result.color ?? 'BLUE',
-      location: result.location ?? undefined,
-      memo: result.content ?? undefined,
-      recurrenceGroup: result.recurrenceGroup ?? null,
     }
   }, [data, safeDetailEventId])
   return (

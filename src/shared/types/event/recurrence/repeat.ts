@@ -3,7 +3,7 @@ export type CustomRepeatBasis = 'daily' | 'weekly' | 'monthly' | 'yearly'
 export type WeekdayName = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
 export type MonthlyPatternWeek = '1' | '2' | '3' | '4' | '5' | 'last'
 export type MonthlyPatternDay = WeekdayName | 'weekday' | 'weekend' | 'allweek'
-export type RepeatTermination = 'until' | 'count'
+export type RepeatTermination = 'until' | 'count' | 'never'
 
 export interface RepeatConfig {
   repeatType: RepeatType
@@ -59,4 +59,4 @@ export const MONTHLY_DAY_OPTIONS: MonthlyPatternDay[] = [
   'weekend',
   'allweek',
 ]
-export const TERMINATION_TYPES: RepeatTermination[] = ['until', 'count']
+export const TERMINATION_TYPES: RepeatTermination[] = ['until', 'count', 'never']

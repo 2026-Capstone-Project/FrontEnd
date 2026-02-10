@@ -5,7 +5,7 @@ import { useScheduleFormFields } from '@/shared/hooks/form/useScheduleFormFields
 import { useRepeatConfigController } from '@/shared/hooks/repeat/useRepeatConfigController'
 import { useCalendarFieldPicker } from '@/shared/hooks/useCalendarFieldPicker'
 import { useSearchPlaceToggle } from '@/shared/hooks/useSearchPlaceToggle'
-import type { CalendarEvent } from '@/shared/types/calendar/types'
+import type { Event } from '@/shared/types/calendar/types'
 import {
   type AddScheduleFormValues,
   type DatePickerField,
@@ -18,7 +18,7 @@ import { formatIsoDate } from '@/shared/utils/date'
 
 type UseAddScheduleFormProps = {
   date: string
-  initialEvent?: CalendarEvent | null
+  initialEvent?: Event | null
 }
 
 export type UseAddScheduleFormResult = {
@@ -53,7 +53,7 @@ export const useAddScheduleForm = ({
   date,
   initialEvent,
 }: UseAddScheduleFormProps): UseAddScheduleFormResult => {
-  const [isAllday, setIsAllday] = useState(initialEvent?.allDay ?? false)
+  const [isAllday, setIsAllday] = useState(initialEvent?.isAllDay ?? false)
 
   const {
     formMethods,
@@ -92,7 +92,7 @@ export const useAddScheduleForm = ({
 
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
-    setIsAllday(initialEvent?.allDay ?? false)
+    setIsAllday(initialEvent?.isAllDay ?? false)
   }, [initialEvent])
   /* eslint-enable react-hooks/set-state-in-effect */
 

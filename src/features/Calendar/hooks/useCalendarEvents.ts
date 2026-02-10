@@ -1,4 +1,5 @@
 // 캘린더 이벤트 목록과 편집 동작을 관리하는 훅
+import moment from 'moment'
 import { useCallback, useEffect, useState } from 'react'
 import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 
@@ -55,7 +56,16 @@ export const useCalendarEvents = (options: UseCalendarEventsOptions = {}) => {
   const updateEventTiming = useCallback(
     (eventId: CalendarEvent['id'], start: Date, end: Date, allDay: boolean) => {
       setEvents((prev) =>
-        prev.map((event) => (event.id === eventId ? { ...event, start, end, allDay } : event)),
+        prev.map((event) =>
+          event.id === eventId
+            ? {
+                ...event,
+                start: moment(start).format('YYYY-MM-DDTHH:mm'),
+                end: moment(end).format('YYYY-MM-DDTHH:mm'),
+                isAllDay: allDay,
+              }
+            : event,
+        ),
       )
     },
     [],
@@ -81,6 +91,12 @@ export const useCalendarEvents = (options: UseCalendarEventsOptions = {}) => {
     [],
   )
 
+  const updateEventId = useCallback((tempId: CalendarEvent['id'], nextId: CalendarEvent['id']) => {
+    setEvents((prev) =>
+      prev.map((event) => (event.id === tempId ? { ...event, id: nextId } : event)),
+    )
+  }, [])
+
   const toggleEventDone = useCallback((eventId: CalendarEvent['id']) => {
     setEvents((prev) =>
       prev.map((event) => (event.id === eventId ? { ...event, isDone: !event.isDone } : event)),
@@ -101,6 +117,7 @@ export const useCalendarEvents = (options: UseCalendarEventsOptions = {}) => {
     updateEventTiming,
     updateEventType,
     updateEventTitle,
+    updateEventId,
     toggleEventDone,
     removeEvent,
   }

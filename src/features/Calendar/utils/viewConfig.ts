@@ -39,6 +39,7 @@ const viewConfigMap: Partial<Record<View, ViewConfig>> = {
       weekdayFormat,
       dateFormat: formatDayNumber,
     },
+    allDayAccessor: (event) => event.isAllDay,
   },
   week: {
     formats: {
@@ -49,7 +50,7 @@ const viewConfigMap: Partial<Record<View, ViewConfig>> = {
     components: {
       header: CustomHeader,
     },
-    allDayAccessor: () => true,
+    allDayAccessor: (event) => event.isAllDay,
   },
   day: {
     formats: {
@@ -59,6 +60,7 @@ const viewConfigMap: Partial<Record<View, ViewConfig>> = {
     components: {
       header: CustomHeader,
     },
+    allDayAccessor: (event) => event.isAllDay,
   },
 }
 

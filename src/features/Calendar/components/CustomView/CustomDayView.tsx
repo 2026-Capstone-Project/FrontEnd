@@ -53,14 +53,14 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
   // 날짜 전체를 차지하는 이벤트만 추려서 위쪽 배너에서 보여줍니다.
   const allDayEvents = events
     .filter(
-      (event) => (event.allDay || isDateOnlyString(event.start)) && eventCoversDate(event, date),
+      (event) => (event.isAllDay || isDateOnlyString(event.start)) && eventCoversDate(event, date),
     )
     .sort(compareByStart)
 
   // 특정 시간에 시작하는 이벤트는 타임라인에 배치합니다.
   const timedEvents = events
     .filter(
-      (event) => !event.allDay && !isDateOnlyString(event.start) && eventCoversDate(event, date),
+      (event) => !event.isAllDay && !isDateOnlyString(event.start) && eventCoversDate(event, date),
     )
     .sort(compareByStart)
 

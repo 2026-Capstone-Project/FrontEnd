@@ -1,5 +1,4 @@
 import moment from 'moment'
-import type { stringOrDate } from 'react-big-calendar'
 
 import { theme } from '@/shared/styles/theme'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
@@ -11,22 +10,27 @@ import {
 } from '../../domain/constants'
 
 /** 문자열 또는 숫자/Date 혼합 값을 Date로 정규화합니다. */
-export const normalizeDate = (value: stringOrDate): Date =>
-  typeof value === 'string' || typeof value === 'number' ? new Date(value) : value
+export const normalizeDate = (value: Date | string): Date =>
+  typeof value === 'string' ? new Date(value) : value
 
 const buildEventId = (prevCount: number, date: Date) => date.valueOf() + prevCount
 
 /** 기본 제목/기간을 가지는 새 캘린더 이벤트를 생성합니다. */
 export const createEvent = (date: Date, index: number, allDay = false): CalendarEvent => {
-  const start = date
+  const start = moment(date)
   const eventDurationMs = moment.duration(DEFAULT_EVENT_DURATION_HOURS, 'hours')
+  const end = allDay ? start.clone().endOf('day') : start.clone().add(eventDurationMs)
   return {
     id: buildEventId(index, date),
     title: allDay ? DEFAULT_ALL_DAY_TITLE : DEFAULT_EVENT_TITLE,
-    start,
-    end: allDay ? date : moment(date).add(eventDurationMs).toDate(),
+    content: null,
+    start: start.format('YYYY-MM-DDTHH:mm'),
+    end: end.format('YYYY-MM-DDTHH:mm'),
+    calculated: false,
+    location: null,
+    isAllDay: allDay,
     color: 'GRAY',
-    allDay,
+    recurrenceGroup: null,
     type: 'schedule',
   }
 }
@@ -48,8 +52,8 @@ export const updateEventRange = (
     item.id === eventId
       ? {
           ...item,
-          start,
-          end,
+          start: moment(start).format('YYYY-MM-DDTHH:mm'),
+          end: moment(end).format('YYYY-MM-DDTHH:mm'),
         }
       : item,
   )

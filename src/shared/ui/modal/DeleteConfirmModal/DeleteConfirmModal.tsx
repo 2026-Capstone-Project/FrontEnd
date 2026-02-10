@@ -1,18 +1,50 @@
 import { useId, useState } from 'react'
 import { createPortal } from 'react-dom'
 
+import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
+
 import Modal from '../../common/Modal/Modal'
 import * as S from './DeleteConfirmModal.style'
 
-const DeleteConfirmModal = ({ onClose, title }: { onClose: () => void; title: string }) => {
+const DeleteConfirmModal = ({
+  onClose,
+  title,
+  eventId,
+  occurrenceDate,
+}: {
+  onClose: () => void
+  title: string
+  eventId: number
+  occurrenceDate: string
+}) => {
   const radioName = useId()
   const [selectedOption, setSelectedOption] = useState<'single' | 'future' | 'all'>('single')
-
+  const { useDeleteEvent } = useCalendarMutation()
+  const { mutate: deleteEventMutate } = useDeleteEvent()
+  type DeleteScope = 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS' | 'ALL_EVENTS'
   const options = [
     { value: 'single', label: '이 이벤트' },
     { value: 'future', label: '이 이벤트부터 이후 이벤트' },
     { value: 'all', label: '모든 이벤트' },
   ] as const
+
+  const handleDelete = () => {
+    const scope: DeleteScope =
+      selectedOption === 'single'
+        ? 'THIS_EVENT'
+        : selectedOption === 'future'
+          ? 'THIS_AND_FOLLOWING_EVENTS'
+          : 'ALL_EVENTS'
+    const params = { scope, occurrenceDate }
+    deleteEventMutate(
+      { eventId, params },
+      {
+        onSuccess: () => {
+          onClose()
+        },
+      },
+    )
+  }
 
   return createPortal(
     <Modal onClick={onClose}>
@@ -41,8 +73,8 @@ const DeleteConfirmModal = ({ onClose, title }: { onClose: () => void; title: st
           })}
         </S.OptionsContainer>
         <S.ButtonsContainer>
-          <S.CancelButton>취소</S.CancelButton>
-          <S.DeleteButton>이벤트 삭제</S.DeleteButton>
+          <S.CancelButton onClick={onClose}>취소</S.CancelButton>
+          <S.DeleteButton onClick={handleDelete}>이벤트 삭제</S.DeleteButton>
         </S.ButtonsContainer>
       </S.ModalWrapper>
     </Modal>,

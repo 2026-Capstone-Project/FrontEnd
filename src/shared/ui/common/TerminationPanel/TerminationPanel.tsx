@@ -123,10 +123,15 @@ const TerminationPanel = ({ config, updateConfig, minDate }: Props) => {
           onChange={() => updateConfig({ customEndType: 'until' })}
         />
         <S.CalendarWrapper>
-          <S.CalendarTrigger type="button" onClick={handleCalendarTriggerClick}>
+          <S.CalendarTrigger
+            type="button"
+            onClick={handleCalendarTriggerClick}
+            disabled={terminationType !== 'until'}
+          >
             {formatDateLabel(config.customEndDate)}
           </S.CalendarTrigger>
-          {calendarOpen &&
+          {terminationType === 'until' &&
+            calendarOpen &&
             portalRoot &&
             createPortal(
               <S.CalendarPopover ref={calendarRef} style={calendarPortalStyle}>
@@ -157,6 +162,15 @@ const TerminationPanel = ({ config, updateConfig, minDate }: Props) => {
           }
         />
         번 반복
+      </S.TerminationRow>
+      <S.TerminationRow>
+        <Checkbox
+          checked={terminationType === 'never'}
+          onChange={() =>
+            updateConfig({ customEndType: 'never', customEndDate: '', customEndCount: undefined })
+          }
+        />
+        종료 없음
       </S.TerminationRow>
     </S.RepeatDetail>
   )

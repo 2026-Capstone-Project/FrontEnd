@@ -6,7 +6,7 @@ import type { CalendarEvent } from '../CustomView/CustomDayView'
 import * as S from './CustomEvent.style'
 
 const formatTimeRange = (event: CalendarEvent) => {
-  if (event.allDay) {
+  if (event.isAllDay) {
     return '종일'
   }
 
@@ -23,14 +23,15 @@ const CustomMonthEvent = ({ event, onEventClick, onToggleTodo }: CustomMonthEven
   const palette = getColorPalette(event.color)
   const baseColor = palette?.base
   const pointColor = palette?.point
-
+  const isTodo = 'type' in event && (event as { type?: string }).type === 'todo'
+  const isDone = 'isDone' in event && (event as { isDone?: boolean }).isDone
   return (
     <S.MonthEventContainer backgroundColor={baseColor} onClick={() => onEventClick(event)}>
       <S.EventRow>
-        {event.type === 'todo' ? (
+        {isTodo ? (
           <S.TodoCheckbox
             type="checkbox"
-            checked={!!event.isDone}
+            checked={!!isDone}
             onPointerDown={(eventPointer) => eventPointer.stopPropagation()}
             onMouseDown={(eventMouse) => eventMouse.stopPropagation()}
             onClick={(eventClick) => eventClick.stopPropagation()}

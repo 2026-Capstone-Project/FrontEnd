@@ -11,7 +11,7 @@ const AddModalLayout = ({
   children,
   type,
   footerChildren,
-  submitFormId,
+  onSubmit,
   handleDelete,
   headerExtras,
   mode,
@@ -21,7 +21,7 @@ const AddModalLayout = ({
   children: React.ReactNode
   type: 'todo' | 'schedule'
   footerChildren?: React.ReactNode
-  submitFormId?: string
+  onSubmit: () => void
   mode: 'modal' | 'inline'
   handleDelete?: () => void
   headerExtras?: React.ReactNode
@@ -49,7 +49,7 @@ const AddModalLayout = ({
           <S.FooterLeft>{type === 'schedule' && footerChildren}</S.FooterLeft>
           <S.FooterRight>
             <Trash onClick={handleDelete} css={{ cursor: 'pointer' }} color="#757575" />
-            <S.Button type="submit" form={submitFormId}>
+            <S.Button type="button" onClick={onSubmit}>
               <Check color="#ffffff" />
             </S.Button>
           </S.FooterRight>

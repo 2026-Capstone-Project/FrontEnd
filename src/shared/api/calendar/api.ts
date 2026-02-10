@@ -1,9 +1,8 @@
+import type { EventColorType } from '@/features/Calendar/utils/colorPalette'
 import axiosInstance from '@/shared/api/axios'
+import type { GetEventDetailResponseDTO, GetEventsResponseDTO } from '@/shared/types/calendar/types'
 import type { TCommonResponse } from '@/shared/types/common/common'
 import type { recurrenceGroup } from '@/shared/types/event/recurrence/recurrence'
-
-import type { EventColorType } from '../../../features/Calendar/utils/colorPalette'
-import type { GetEventDetailResponseDTO, GetEventsResponseDTO } from '../../types/calendar/types'
 
 export const getEvents = async ({
   startDate,
@@ -31,11 +30,11 @@ export const getDetailEvent = async (
 export const postEvents = async (eventData: {
   title: string
   content?: string
-  startDate: string
-  endDate: string
+  startTime: string
+  endTime: string
   location?: string
   color?: EventColorType
-  isAllday?: boolean
+  isAllDay?: boolean
   recurrenceGroup?: recurrenceGroup
 }) => {
   const { data } = await axiosInstance.post('/api/v1/events', eventData)
@@ -45,12 +44,28 @@ export const postEvents = async (eventData: {
 export const patchEvent = async (
   eventId: number,
   eventData: {
-    title: string
-    content: string
-    startDate: string
-    endDate: string
+    title?: string
+    content?: string
+    startTime?: string
+    endTime?: string
+    color?: EventColorType
+    isAllDay?: boolean
+    recurrenceUpdateScope?: 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS' | 'ALL_EVENTS'
+    occurrenceDate?: string
+    recurrenceGroup?: recurrenceGroup | null
   },
 ) => {
-  const { data } = await axiosInstance.put(`/api/v1/events/${eventId}`, eventData)
+  const { data } = await axiosInstance.patch(`/api/v1/events/${eventId}`, eventData)
+  return data
+}
+
+export const deleteEvent = async (
+  eventId: number,
+  params: {
+    occurrenceDate?: string
+    scope?: 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS' | 'ALL_EVENTS'
+  },
+) => {
+  const { data } = await axiosInstance.delete(`/api/v1/events/${eventId}`, { params })
   return data
 }

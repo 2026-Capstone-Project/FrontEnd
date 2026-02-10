@@ -28,9 +28,6 @@ export const monthViewStyles = css`
     ${media.down(theme.breakPoints.desktop)} {
       min-height: 100px;
     }
-    ${media.down(theme.breakPoints.tablet)} {
-      min-height: 80px;
-    }
   }
 
   .rbc-day-bg {

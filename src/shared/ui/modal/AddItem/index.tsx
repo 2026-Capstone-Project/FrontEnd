@@ -1,7 +1,7 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import type { CalendarEvent } from '@/shared/types/calendar/types'
+import type { Event } from '@/shared/types/calendar/types'
 import AddModalLayout from '@/shared/ui/modal/AddModalLayout/AddModalLayout'
 import AddScheduleForm from '@/shared/ui/modal/AddSchedule/components/AddScheduleForm'
 import AddTodoForm from '@/shared/ui/modal/AddTodo/components/AddTodoForm'
@@ -14,20 +14,15 @@ type AddItemModalProps = {
   onClose: () => void
   date: string
   mode?: 'modal' | 'inline'
-  eventId: CalendarEvent['id']
+  eventId: Event['id']
   defaultType?: ActiveType
   tabsVisible?: boolean
   isEditing?: boolean
-  initialEvent?: CalendarEvent | null
-  onEventColorChange?: (eventId: CalendarEvent['id'], color: CalendarEvent['color']) => void
-  onEventTitleConfirm?: (eventId: CalendarEvent['id'], title: CalendarEvent['title']) => void
-  onEventTypeChange?: (eventId: CalendarEvent['id'], type: CalendarEvent['type']) => void
-  onEventTimingChange?: (
-    eventId: CalendarEvent['id'],
-    start: Date,
-    end: Date,
-    allDay: boolean,
-  ) => void
+  initialEvent?: Event | null
+  onEventColorChange?: (eventId: Event['id'], color: Event['color']) => void
+  onEventTitleConfirm?: (eventId: Event['id'], title: Event['title']) => void
+  onEventTypeChange?: (eventId: Event['id'], type: ActiveType) => void
+  onEventTimingChange?: (eventId: Event['id'], start: Date, end: Date, allDay: boolean) => void
 }
 
 const AddItemModal = ({
@@ -69,10 +64,13 @@ const AddItemModal = ({
     onEventTypeChange?.(eventId, activeType)
   }, [activeType, eventId, onEventTypeChange])
 
-  const handleSubmitId = useMemo(
-    () => (activeType === 'todo' ? 'add-todo-form' : 'add-schedule-form'),
-    [activeType],
-  )
+  const handleSubmit = useCallback(() => {
+    const submitFormId = activeType === 'todo' ? 'add-todo-form' : 'add-schedule-form'
+    const target = document.getElementById(submitFormId) as HTMLFormElement | null
+    console.log('[AddItem] submit', { submitFormId, target })
+    if (!target) return
+    target.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+  }, [activeType])
 
   const tabs = (
     <S.TabControls>
@@ -110,7 +108,7 @@ const AddItemModal = ({
       mode={mode}
       type={activeType}
       onClose={onClose}
-      submitFormId={handleSubmitId}
+      onSubmit={handleSubmit}
       handleDelete={deleteHandler}
       footerChildren={footerChildren}
       headerExtras={tabsVisible ? tabs : undefined}

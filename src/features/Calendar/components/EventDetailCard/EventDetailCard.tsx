@@ -3,7 +3,7 @@ import type { Event } from '@/shared/types/calendar/types'
 import * as S from './EventDetailCard.style'
 
 const EventCard = ({ event, type }: { event: Event; type: 'todo' | 'schedule' }) => {
-  const time = event.isAllday
+  const time = event.isAllDay
     ? '종일'
     : new Date(event.start).toLocaleTimeString('ko-KR', {
         hour: '2-digit',

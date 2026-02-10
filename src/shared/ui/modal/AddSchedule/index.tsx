@@ -1,8 +1,8 @@
-import type { CalendarEvent } from '@/shared/types/calendar/types'
+import type { Event } from '@/shared/types/calendar/types'
 import AddItemModal from '@/shared/ui/modal/AddItem'
 
 type AddScheduleModalProps = Parameters<typeof AddItemModal>[0] & {
-  event?: CalendarEvent | null
+  event?: Event | null
 }
 
 const AddScheduleModal = ({ event, ...props }: AddScheduleModalProps) => (

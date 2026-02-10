@@ -30,6 +30,7 @@ import { useDayViewHandlers } from '@/features/Calendar/hooks/useDayViewHandlers
 import { getDayPropStyle } from '@/features/Calendar/utils/helpers/calendarPageHelpers'
 import { getViewConfig } from '@/features/Calendar/utils/viewConfig'
 import Plus from '@/shared/assets/icons/plus.svg?react'
+import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
 import { theme } from '@/shared/styles/theme'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 
@@ -50,6 +51,8 @@ const CustomCalendar = () => {
   const [date, setDate] = useState<Date>(new Date())
   const { startDate, endDate } = useCalendarDateRange(view, date)
   const { events: apiEvents } = useCalendarApiEvents(startDate, endDate)
+  const { usePostEvent } = useCalendarMutation()
+  const { mutate: postEventMutate } = usePostEvent()
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedEventId, setSelectedEventId] = useState<CalendarEvent['id'] | null>(null)
   const {
@@ -62,6 +65,7 @@ const CustomCalendar = () => {
     updateEventTiming,
     updateEventType,
     updateEventTitle,
+    updateEventId,
     toggleEventDone,
     removeEvent,
   } = useCalendarEvents({ initialEvents: apiEvents })
@@ -83,13 +87,32 @@ const CustomCalendar = () => {
       if (slotInfo.action === 'doubleClick') {
         setSelectedDate(null)
         const isAllDaySlot = slotInfo.slots.length === 1
+        const start = slotInfo.start
+        const end = slotInfo.end ?? slotInfo.start
         const createdId = enqueueEvent(slotInfo.start, isAllDaySlot)
-        handleAddEvent(slotInfo.start, createdId)
+        postEventMutate(
+          {
+            title: '새 일정',
+            content: '',
+            startTime: moment(start).format('YYYY-MM-DDTHH:mm'),
+            endTime: moment(end).format('YYYY-MM-DDTHH:mm'),
+            isAllDay: isAllDaySlot,
+          },
+          {
+            onSuccess: (response) => {
+              const nextId = response?.result?.id ?? response?.id
+              if (typeof nextId === 'number') {
+                updateEventId(createdId, nextId)
+                handleAddEvent(slotInfo.start, nextId)
+              }
+            },
+          },
+        )
       } else {
         setSelectedDate(slotInfo.start)
       }
     },
-    [enqueueEvent, handleAddEvent],
+    [enqueueEvent, handleAddEvent, postEventMutate, updateEventId],
   )
 
   const handleSelectEvent = useCallback(
@@ -232,7 +255,6 @@ const CustomCalendar = () => {
     ],
   )
 
-  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isInlineMode) {
       setSelectedDate((prev) => prev ?? new Date())
@@ -240,7 +262,6 @@ const CustomCalendar = () => {
     }
     setSelectedDate(null)
   }, [isInlineMode])
-  /* eslint-enable react-hooks/set-state-in-effect */
 
   const modalEvent = useMemo(
     () =>

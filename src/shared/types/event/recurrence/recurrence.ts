@@ -7,9 +7,10 @@ export interface recurrenceGroup {
   occurrenceCount?: number
   intervalValue?: number
   dayOfWeek?: Array<Week>
+  daysOfWeek?: Array<Week>
   monthlyType?: 'DAY_OF_MONTH' | 'DAY_OF_WEEK'
   daysOfMonth?: Array<number>
   weekOfMonth?: number
-  dayOfWeekInMonth?: Week
+  dayOfWeekInMonth?: Array<Week>
   monthOfYear?: number
 }
