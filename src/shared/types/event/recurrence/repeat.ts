@@ -9,6 +9,7 @@ export interface RepeatConfig {
   repeatType: RepeatType
   customBasis?: CustomRepeatBasis | null
   customDailyInterval?: number
+  customWeeklyInterval?: number
   customWeeklyDays?: (WeekdayName | undefined)[]
   customMonthlyInterval?: number
   customMonthlyMode?: 'dates' | 'pattern'
@@ -29,6 +30,7 @@ export const defaultRepeatConfig: RepeatConfig = {
   repeatType: 'none',
   customBasis: null,
   customDailyInterval: 1,
+  customWeeklyInterval: 1,
   customWeeklyDays: [],
   customMonthlyInterval: 1,
   customMonthlyMode: 'dates',

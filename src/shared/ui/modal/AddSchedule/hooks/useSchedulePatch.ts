@@ -1,7 +1,7 @@
 // 일정 수정 payload를 생성하고 patch 요청을 보내는 훅
 import { useCallback } from 'react'
 
-import type { Event } from '@/shared/types/calendar/types'
+import type { CalendarEvent, Event } from '@/shared/types/calendar/types'
 import type { AddScheduleFormValues, RepeatConfigSchema } from '@/shared/types/event/event'
 import { mapRepeatConfigToRecurrenceGroup } from '@/shared/utils/recurrenceGroup'
 import { areRepeatConfigsEqual } from '@/shared/utils/repeatConfig'
@@ -26,7 +26,7 @@ type PatchEventMutate = (params: {
 type UseSchedulePatchArgs = {
   eventId: number | null
   date: string
-  initialEvent?: Event | null
+  initialEvent?: CalendarEvent | null
   initialRepeatConfig: RepeatConfigSchema
   patchEventMutation: PatchEventMutate
   formatDateTime: (value: Date) => string

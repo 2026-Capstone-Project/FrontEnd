@@ -117,6 +117,16 @@ const TerminationPanel = ({ config, updateConfig, minDate }: Props) => {
   return (
     <S.RepeatDetail>
       <S.Label>종료</S.Label>
+
+      <S.TerminationRow>
+        <Checkbox
+          checked={terminationType === 'never'}
+          onChange={() =>
+            updateConfig({ customEndType: 'never', customEndDate: '', customEndCount: undefined })
+          }
+        />
+        종료 없음
+      </S.TerminationRow>
       <S.TerminationRow>
         <Checkbox
           checked={terminationType === 'until'}
@@ -162,15 +172,6 @@ const TerminationPanel = ({ config, updateConfig, minDate }: Props) => {
           }
         />
         번 반복
-      </S.TerminationRow>
-      <S.TerminationRow>
-        <Checkbox
-          checked={terminationType === 'never'}
-          onChange={() =>
-            updateConfig({ customEndType: 'never', customEndDate: '', customEndCount: undefined })
-          }
-        />
-        종료 없음
       </S.TerminationRow>
     </S.RepeatDetail>
   )

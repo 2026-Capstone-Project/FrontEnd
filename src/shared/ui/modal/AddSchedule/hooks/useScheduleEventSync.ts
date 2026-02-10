@@ -1,13 +1,18 @@
 import { useCallback } from 'react'
 
-import type { Event } from '@/shared/types/calendar/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { AddScheduleFormValues } from '@/shared/types/event/event'
 
 type UseScheduleEventSyncProps = {
-  eventId: Event['id']
+  eventId: CalendarEvent['id']
   date: string
-  onEventTimingChange?: (eventId: Event['id'], start: Date, end: Date, allDay: boolean) => void
-  onEventTitleConfirm?: (eventId: Event['id'], title: string) => void
+  onEventTimingChange?: (
+    eventId: CalendarEvent['id'],
+    start: Date,
+    end: Date,
+    allDay: boolean,
+  ) => void
+  onEventTitleConfirm?: (eventId: CalendarEvent['id'], title: string) => void
   buildDateTime: (dateValue: Date | null, timeValue?: string) => Date
 }
 

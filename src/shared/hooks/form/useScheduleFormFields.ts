@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import { type Control, type Resolver, useForm, type UseFormReturn, useWatch } from 'react-hook-form'
 
 import { addScheduleSchema } from '@/shared/schemas/schedule'
-import type { Event } from '@/shared/types/calendar/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 import {
   type AddScheduleFormValues,
   type EventColorType,
@@ -15,7 +15,7 @@ import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/recurrenceGroup
 type UseScheduleFormFieldsProps = {
   date: string
   isAllday: boolean
-  initialEvent?: Event | null
+  initialEvent?: CalendarEvent | null
 }
 
 export type UseScheduleFormFieldsResult = {

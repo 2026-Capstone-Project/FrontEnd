@@ -5,7 +5,7 @@ import { useScheduleFormFields } from '@/shared/hooks/form/useScheduleFormFields
 import { useRepeatConfigController } from '@/shared/hooks/repeat/useRepeatConfigController'
 import { useCalendarFieldPicker } from '@/shared/hooks/useCalendarFieldPicker'
 import { useSearchPlaceToggle } from '@/shared/hooks/useSearchPlaceToggle'
-import type { Event } from '@/shared/types/calendar/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 import {
   type AddScheduleFormValues,
   type DatePickerField,
@@ -18,7 +18,7 @@ import { formatIsoDate } from '@/shared/utils/date'
 
 type UseAddScheduleFormProps = {
   date: string
-  initialEvent?: Event | null
+  initialEvent?: CalendarEvent | null
 }
 
 export type UseAddScheduleFormResult = {

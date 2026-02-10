@@ -1,6 +1,6 @@
 import moment from 'moment'
 
-import type { Event } from '@/shared/types/calendar/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { EditConfirmOption } from '@/shared/ui/modal'
 import { ScheduleConfirmModals } from '@/shared/ui/modal/AddSchedule/components'
 
@@ -8,7 +8,7 @@ type AddScheduleFormConfirmModalsProps = {
   deleteWarningVisible: boolean
   eventTitle?: string
   eventStartDate: Date | null
-  eventId: Event['id']
+  eventId: CalendarEvent['id']
   isEditConfirmOpen: boolean
   isApplyConfirmOpen: boolean
   onCloseDelete: () => void

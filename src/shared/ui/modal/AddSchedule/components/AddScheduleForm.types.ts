@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import type { Event } from '@/shared/types/calendar/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { EventColorType } from '@/shared/types/event/event'
 
 export type AddScheduleFormProps = {
@@ -8,12 +8,17 @@ export type AddScheduleFormProps = {
   registerFooterChildren?: (node: ReactNode | null) => void
   date: string
   mode?: 'modal' | 'inline'
-  eventId: Event['id']
+  eventId: CalendarEvent['id']
   onClose: () => void
   isEditing?: boolean
   headerTitlePortalTarget?: HTMLElement | null
-  initialEvent?: Event | null
-  onEventColorChange?: (eventId: Event['id'], color: EventColorType) => void
-  onEventTitleConfirm?: (eventId: Event['id'], title: string) => void
-  onEventTimingChange?: (eventId: Event['id'], start: Date, end: Date, allDay: boolean) => void
+  initialEvent?: CalendarEvent | null
+  onEventColorChange?: (eventId: CalendarEvent['id'], color: EventColorType) => void
+  onEventTitleConfirm?: (eventId: CalendarEvent['id'], title: string) => void
+  onEventTimingChange?: (
+    eventId: CalendarEvent['id'],
+    start: Date,
+    end: Date,
+    allDay: boolean,
+  ) => void
 }

@@ -1,7 +1,7 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import type { Event } from '@/shared/types/calendar/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 import AddModalLayout from '@/shared/ui/modal/AddModalLayout/AddModalLayout'
 import AddScheduleForm from '@/shared/ui/modal/AddSchedule/components/AddScheduleForm'
 import AddTodoForm from '@/shared/ui/modal/AddTodo/components/AddTodoForm'
@@ -14,15 +14,20 @@ type AddItemModalProps = {
   onClose: () => void
   date: string
   mode?: 'modal' | 'inline'
-  eventId: Event['id']
+  eventId: CalendarEvent['id']
   defaultType?: ActiveType
   tabsVisible?: boolean
   isEditing?: boolean
-  initialEvent?: Event | null
-  onEventColorChange?: (eventId: Event['id'], color: Event['color']) => void
-  onEventTitleConfirm?: (eventId: Event['id'], title: Event['title']) => void
-  onEventTypeChange?: (eventId: Event['id'], type: ActiveType) => void
-  onEventTimingChange?: (eventId: Event['id'], start: Date, end: Date, allDay: boolean) => void
+  initialEvent?: CalendarEvent | null
+  onEventColorChange?: (eventId: CalendarEvent['id'], color: CalendarEvent['color']) => void
+  onEventTitleConfirm?: (eventId: CalendarEvent['id'], title: CalendarEvent['title']) => void
+  onEventTypeChange?: (eventId: CalendarEvent['id'], type: ActiveType) => void
+  onEventTimingChange?: (
+    eventId: CalendarEvent['id'],
+    start: Date,
+    end: Date,
+    allDay: boolean,
+  ) => void
 }
 
 const AddItemModal = ({

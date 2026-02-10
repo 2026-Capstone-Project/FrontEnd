@@ -2,15 +2,15 @@ import type { ReactNode } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import type { UseFormGetValues } from 'react-hook-form'
 
-import type { Event } from '@/shared/types/calendar/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { AddScheduleFormValues, EventColorType } from '@/shared/types/event/event'
 import type { RepeatConfig } from '@/shared/types/event/recurrence/repeat'
 import SelectColor from '@/shared/ui/modal/AddSchedule/components/SelectColor/SelectColor'
 
 type UseScheduleFooterProps = {
   repeatConfig: RepeatConfig
-  eventId: Event['id']
-  initialEvent?: Event | null
+  eventId: CalendarEvent['id']
+  initialEvent?: CalendarEvent | null
   getValues: UseFormGetValues<AddScheduleFormValues>
   setEventColor: (value: EventColorType) => void
   patchSchedule: (
@@ -18,7 +18,7 @@ type UseScheduleFooterProps = {
     scope?: 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS' | 'ALL_EVENTS',
     occurrenceDate?: string,
   ) => void
-  onEventColorChange?: (eventId: Event['id'], color: EventColorType) => void
+  onEventColorChange?: (eventId: CalendarEvent['id'], color: EventColorType) => void
   registerFooterChildren?: (node: ReactNode | null) => void
   registerDeleteHandler?: (handler?: () => void) => void
   openApplyConfirm: (values: AddScheduleFormValues) => void
@@ -61,9 +61,8 @@ export const useScheduleFooter = ({
       if (eventId != null && eventId !== 0) {
         onEventColorChange?.(eventId, value)
         const nextValues = { ...getValues(), eventColor: value }
-        const isRecurringEvent =
-          nextValues.repeatConfig.repeatType !== 'none' || initialEvent?.recurrenceGroup != null
-        if (isRecurringEvent) {
+        const isExistingRecurring = initialEvent?.recurrenceGroup != null
+        if (isExistingRecurring) {
           openApplyConfirm(nextValues)
         } else {
           patchSchedule(nextValues)

@@ -3,15 +3,15 @@ import { useMemo } from 'react'
 import { createPortal } from 'react-dom'
 
 import { useDetailEventQuery } from '@/shared/hooks/query/useCalendarQueries'
-import type { Event } from '@/shared/types/calendar/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 import AddSchedule from '@/shared/ui/modal/AddSchedule'
 
 import EventsCard from '../EventsCard/EventsCard'
 
 type CalendarModalsProps = {
   modalDate: string
-  modalEventId: Event['id'] | null
-  modalEvent: Event | null
+  modalEventId: CalendarEvent['id'] | null
+  modalEvent: CalendarEvent | null
   isModalEditing: boolean
   isModalOpen: boolean
   isInlineMode: boolean
@@ -23,10 +23,15 @@ type CalendarModalsProps = {
   onCloseModal: () => void
   onCloseEventCard: () => void
   eventActions: {
-    onEventColorChange: (eventId: Event['id'], color: Event['color']) => void
-    onEventTitleConfirm: (eventId: Event['id'], title: Event['title']) => void
-    onEventTypeChange: (eventId: Event['id'], type: 'todo' | 'schedule') => void
-    onEventTimingChange: (eventId: Event['id'], start: Date, end: Date, allDay: boolean) => void
+    onEventColorChange: (eventId: CalendarEvent['id'], color: CalendarEvent['color']) => void
+    onEventTitleConfirm: (eventId: CalendarEvent['id'], title: CalendarEvent['title']) => void
+    onEventTypeChange: (eventId: CalendarEvent['id'], type: 'todo' | 'schedule') => void
+    onEventTimingChange: (
+      eventId: CalendarEvent['id'],
+      start: Date,
+      end: Date,
+      allDay: boolean,
+    ) => void
   }
 }
 
@@ -54,7 +59,7 @@ const CalendarModals = ({
     [modalDate],
   )
   const { data } = useDetailEventQuery(safeDetailEventId, occurrenceDate)
-  const detailEvent = useMemo<Event | null>(() => {
+  const detailEvent = useMemo<CalendarEvent | null>(() => {
     const result = data?.result
     if (!result) return null
     return {
@@ -73,7 +78,7 @@ const CalendarModals = ({
             onClose={onCloseModal}
             mode={modalMode}
             eventId={modalEventId}
-            event={detailEvent ?? modalEvent}
+            event={detailEvent}
             tabsVisible={!isModalEditing}
             onEventColorChange={eventActions.onEventColorChange}
             onEventTitleConfirm={eventActions.onEventTitleConfirm}

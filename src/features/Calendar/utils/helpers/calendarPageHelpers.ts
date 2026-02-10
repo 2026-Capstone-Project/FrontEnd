@@ -29,17 +29,11 @@ export const createEvent = (date: Date, index: number, allDay = false): Calendar
     calculated: false,
     location: null,
     isAllDay: allDay,
-    color: 'GRAY',
+    color: 'BLUE',
     recurrenceGroup: null,
     type: 'schedule',
   }
 }
-
-/** 기존 이벤트 배열의 끝에 새 이벤트를 추가합니다. */
-export const appendEvent = (events: CalendarEvent[], date: Date, allDay = false) => [
-  ...events,
-  createEvent(date, events.length, allDay),
-]
 
 /** drag 또는 resize 등으로 시작/종료 시간이 변경될 경우 해당 이벤트를 업데이트합니다. */
 export const updateEventRange = (

@@ -1,6 +1,7 @@
 import { type CalendarProps, type View, Views } from 'react-big-calendar'
 import type { withDragAndDropProps } from 'react-big-calendar/lib/addons/dragAndDrop'
 
+import { normalizeDate } from '@/features/Calendar/utils/helpers/calendarPageHelpers'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 
 type CalendarDndProps = CalendarProps<CalendarEvent, object> &
@@ -54,6 +55,8 @@ export const buildCalendarConfig = ({
     view,
     date,
     events,
+    startAccessor: (event) => normalizeDate(event.start),
+    endAccessor: (event) => normalizeDate(event.end),
     onView,
     onNavigate,
     onSelectEvent,

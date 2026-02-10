@@ -5,9 +5,9 @@ import { useEventQuery } from '@/shared/hooks/query/useCalendarQueries'
 import type { Event } from '@/shared/types/calendar/types'
 
 export const useCalendarApiEvents = (startDate: string, endDate: string) => {
-  const { data } = useEventQuery(startDate, endDate)
+  const { data, refetch, isFetching } = useEventQuery(startDate, endDate)
 
   const events = useMemo<Event[]>(() => data?.result?.details ?? [], [data])
 
-  return { events }
+  return { events, refetch, isFetching }
 }

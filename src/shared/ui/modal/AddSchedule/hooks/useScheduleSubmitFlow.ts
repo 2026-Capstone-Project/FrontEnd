@@ -2,14 +2,14 @@ import { useCallback, useState } from 'react'
 import type { UseFormHandleSubmit, UseFormSetValue } from 'react-hook-form'
 
 import { useRepeatChangeGuard } from '@/shared/hooks/repeat/useRepeatChangeGuard'
-import type { Event } from '@/shared/types/calendar/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { AddScheduleFormValues } from '@/shared/types/event/event'
 import type { EditConfirmOption } from '@/shared/ui/modal'
 
 type UseScheduleSubmitFlowProps = {
   date: string
-  eventId: Event['id']
-  initialEvent?: Event | null
+  eventId: CalendarEvent['id']
+  initialEvent?: CalendarEvent | null
   isEditing: boolean
   handleSubmit: UseFormHandleSubmit<AddScheduleFormValues>
   onClose: () => void
@@ -59,6 +59,7 @@ export const useScheduleSubmitFlow = ({
     null,
   )
   const [isApplyConfirmOpen, setIsApplyConfirmOpen] = useState(false)
+  const isExistingRecurring = initialEvent?.recurrenceGroup != null
 
   // 반복 일정 적용 범위 모달 열기
   const openApplyConfirm = useCallback((values: AddScheduleFormValues) => {
@@ -75,13 +76,11 @@ export const useScheduleSubmitFlow = ({
   // 폼 제출 처리(일반/반복 분기)
   const handleFormSubmit = handleSubmit(
     (values) => {
-      if (requestConfirmation()) {
+      if (isExistingRecurring && requestConfirmation()) {
         setPendingScheduleValues(values)
         return
       }
-      const isRecurringEvent =
-        values.repeatConfig.repeatType !== 'none' || initialEvent?.recurrenceGroup != null
-      if (isRecurringEvent) {
+      if (isExistingRecurring) {
         openApplyConfirm(values)
         return
       }

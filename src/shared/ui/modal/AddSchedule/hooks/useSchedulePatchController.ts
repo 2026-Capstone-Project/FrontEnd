@@ -2,16 +2,16 @@ import moment from 'moment'
 import { useCallback, useMemo } from 'react'
 
 import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
-import type { Event } from '@/shared/types/calendar/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { RepeatConfigSchema } from '@/shared/types/event/event'
 import { defaultRepeatConfig } from '@/shared/types/event/recurrence/repeat'
 import { useSchedulePatch } from '@/shared/ui/modal/AddSchedule/hooks/useSchedulePatch'
 import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/recurrenceGroup'
 
 type UseSchedulePatchControllerProps = {
-  eventId: Event['id']
+  eventId: CalendarEvent['id']
   date: string
-  initialEvent?: Event | null
+  initialEvent?: CalendarEvent | null
 }
 
 export const useSchedulePatchController = ({
