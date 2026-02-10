@@ -149,6 +149,8 @@ const AddScheduleFormContent = ({
     registerDeleteHandler,
     openApplyConfirm,
     eventColor,
+    closeModal: onClose,
+    occurrenceDate: date,
   })
 
   const contextValue = useAddScheduleFormContextValue({

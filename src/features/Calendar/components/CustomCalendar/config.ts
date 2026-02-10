@@ -16,6 +16,7 @@ type CalendarConfigArgs = {
   onView: (view: View) => void
   onNavigate: (date: Date) => void
   onSelectEvent: CalendarDndProps['onSelectEvent']
+  onDoubleClickEvent: CalendarDndProps['onDoubleClickEvent']
   onEventDrop: CalendarDndProps['onEventDrop']
   onEventResize: CalendarDndProps['onEventResize']
   onSelectSlot: CalendarDndProps['onSelectSlot']
@@ -36,6 +37,7 @@ export const buildCalendarConfig = ({
   onView,
   onNavigate,
   onSelectEvent,
+  onDoubleClickEvent,
   onEventDrop,
   onEventResize,
   onSelectSlot,
@@ -60,6 +62,7 @@ export const buildCalendarConfig = ({
     onView,
     onNavigate,
     onSelectEvent,
+    onDoubleClickEvent,
     onEventDrop,
     onEventResize,
     draggableAccessor: () => true,

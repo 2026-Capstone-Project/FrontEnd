@@ -1,7 +1,10 @@
+import { useQueryClient } from '@tanstack/react-query'
+import moment from 'moment'
 import type { ReactNode } from 'react'
 import { useCallback, useEffect, useState } from 'react'
-import type { UseFormGetValues } from 'react-hook-form'
+import { type UseFormGetValues } from 'react-hook-form'
 
+import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { AddScheduleFormValues, EventColorType } from '@/shared/types/event/event'
 import type { RepeatConfig } from '@/shared/types/event/recurrence/repeat'
@@ -23,6 +26,8 @@ type UseScheduleFooterProps = {
   registerDeleteHandler?: (handler?: () => void) => void
   openApplyConfirm: (values: AddScheduleFormValues) => void
   eventColor: EventColorType
+  closeModal: () => void
+  occurrenceDate: string
 }
 
 export const useScheduleFooter = ({
@@ -37,17 +42,34 @@ export const useScheduleFooter = ({
   registerDeleteHandler,
   openApplyConfirm,
   eventColor,
+  closeModal,
+  occurrenceDate,
 }: UseScheduleFooterProps) => {
   const [deleteWarningVisible, setDeleteWarningVisible] = useState(false)
-
-  // 삭제 버튼 동작 처리
+  const { useDeleteEvent } = useCalendarMutation()
+  const { mutate: deleteEventMutate } = useDeleteEvent()
+  const queryClient = useQueryClient()
   const handleDelete = useCallback(() => {
     if (repeatConfig.repeatType !== 'none') {
       setDeleteWarningVisible(true)
     } else {
-      console.log('일정 삭제 로직 처리')
+      deleteEventMutate(
+        {
+          eventId,
+          params: {
+            occurrenceDate: moment(occurrenceDate).format('YYYY-MM-DD'),
+          },
+        },
+        {
+          onSuccess: () => {
+            setDeleteWarningVisible(false)
+            closeModal()
+            queryClient.invalidateQueries({ queryKey: ['calendar', 'events'] })
+          },
+        },
+      )
     }
-  }, [repeatConfig])
+  }, [repeatConfig, closeModal, deleteEventMutate, eventId, occurrenceDate, queryClient])
 
   useEffect(() => {
     registerDeleteHandler?.(handleDelete)

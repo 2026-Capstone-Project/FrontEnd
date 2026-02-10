@@ -21,7 +21,7 @@ export function useCalendarMutation() {
         eventId: number
         params: {
           scope?: 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS' | 'ALL_EVENTS'
-          occurrenceDate?: string
+          occurrenceDate: string
         }
       }) => deleteEvent(eventId, params),
     )

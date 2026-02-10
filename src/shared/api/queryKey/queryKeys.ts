@@ -4,11 +4,11 @@ import { getDetailEvent, getEvents } from '../calendar/api'
 
 export const calendarKeys = createQueryKeys('calendar', {
   events: (startDate: string, endDate: string) => ({
-    queryKey: ['events', { startDate, endDate }],
+    queryKey: [{ startDate, endDate }],
     queryFn: () => getEvents({ startDate, endDate }),
   }),
   detail: (eventId: number, occurrenceDate: string) => ({
-    queryKey: ['eventDetail', { eventId, occurrenceDate }],
+    queryKey: ['event', { eventId, occurrenceDate }],
     queryFn: () => getDetailEvent(eventId, occurrenceDate),
   }),
 })

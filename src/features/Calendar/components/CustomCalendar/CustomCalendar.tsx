@@ -59,8 +59,9 @@ const CustomCalendar = () => {
   const { startDate, endDate } = useCalendarDateRange(view, date)
   // 서버 일정 목록 조회
   const { events: apiEvents, refetch: refetchEvents } = useCalendarApiEvents(startDate, endDate)
-  const { usePatchEvent } = useCalendarMutation()
+  const { usePatchEvent, useDeleteEvent } = useCalendarMutation()
   const { mutate: patchEventMutate } = usePatchEvent()
+  const { mutate: deleteEventMutate } = useDeleteEvent()
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedEventId, setSelectedEventId] = useState<CalendarEvent['id'] | null>(null)
   const {
@@ -74,17 +75,44 @@ const CustomCalendar = () => {
     updateEventType,
     updateEventTitle,
     toggleEventDone,
-    removeEvent,
   } = useCalendarEvents({ initialEvents: apiEvents })
 
   // 반응형 레이아웃 판단
   const isDesktop = useCalendarResponsive()
   const isInlineMode = isDesktop
   const { modalPortalRoot, cardPortalRoot } = useCalendarPortals()
+  const handleRemoveEvent = useCallback(
+    (eventId: CalendarEvent['id'], occurrenceDate: string, isRecurring: boolean) => {
+      const params = {
+        ...(isRecurring ? { scope: 'THIS_EVENT' as const } : {}),
+        occurrenceDate: moment(occurrenceDate).format('YYYY-MM-DD'),
+      }
+      deleteEventMutate(
+        {
+          eventId,
+          params,
+        },
+        {
+          onSuccess: () => {
+            refetchEvents()
+          },
+        },
+      )
+    },
+    [deleteEventMutate, refetchEvents],
+  )
+
+  const isRecurring = useCallback(
+    (eventId: CalendarEvent['id']) =>
+      events.find((eventItem) => eventItem.id === eventId)?.recurrenceGroup != null,
+    [events],
+  )
+
   const { modal, modalDate, isModalEditing, handleAddEvent, handleEventClick, handleCloseModal } =
     useCalendarModal({
       currentDate: date,
-      removeEvent,
+      removeEvent: handleRemoveEvent,
+      isRecurring,
     })
 
   // 뷰 변경/이동 핸들러
@@ -116,6 +144,7 @@ const CustomCalendar = () => {
   const handleSelectEvent = useCallback(
     (event: CalendarEvent) => {
       setSelectedEventId(event.id)
+      setSelectedDate(normalizeDate(event.start))
       handleEventClick(event)
     },
     [handleEventClick],
@@ -124,7 +153,22 @@ const CustomCalendar = () => {
   // 선택 표시만 하고 모달은 열지 않기
   const handleSelectEventOnly = useCallback((event: CalendarEvent) => {
     setSelectedEventId(event.id)
+    setSelectedDate(normalizeDate(event.start))
   }, [])
+
+  const handleRbcSelectEvent = useCallback(
+    (event: CalendarEvent) => {
+      handleSelectEventOnly(event)
+    },
+    [handleSelectEventOnly],
+  )
+
+  const handleRbcDoubleClickEvent = useCallback(
+    (event: CalendarEvent) => {
+      handleSelectEvent(event)
+    },
+    [handleSelectEvent],
+  )
   /** 선택된 날짜에 배경 강조 스타일을 적용하도록 props를 반환합니다. */
   const effectiveSelectedDate = useMemo(
     () => (isInlineMode ? (selectedDate ?? date) : selectedDate),
@@ -154,7 +198,7 @@ const CustomCalendar = () => {
     onToggleTodo: toggleEventDone,
     selectedEventId,
     onEventSelect: handleSelectEventOnly,
-    onEventClick: modal.isOpen ? handleSelectEvent : undefined,
+    onEventClick: undefined,
     onEventDoubleClick: handleSelectEvent,
   })
 
@@ -180,8 +224,10 @@ const CustomCalendar = () => {
         event: (props: EventProps<CalendarEvent>) => (
           <CustomMonthEvent
             {...props}
-            onEventClick={handleSelectEvent}
+            onEventClick={handleSelectEventOnly}
+            onEventDoubleClick={handleSelectEvent}
             onToggleTodo={toggleEventDone}
+            isSelected={props.event.id === selectedEventId}
           />
         ),
       }
@@ -191,7 +237,8 @@ const CustomCalendar = () => {
         event: (props: EventProps<CalendarEvent>) => (
           <CustomWeekEvent
             event={props.event}
-            onEventClick={handleSelectEvent}
+            onEventClick={handleSelectEventOnly}
+            onEventDoubleClick={handleSelectEvent}
             onToggleTodo={toggleEventDone}
             isSelected={props.event.id === selectedEventId}
           />
@@ -199,7 +246,7 @@ const CustomCalendar = () => {
       }
     }
     return {}
-  }, [view, handleSelectEvent, toggleEventDone, selectedEventId])
+  }, [view, handleSelectEvent, toggleEventDone, selectedEventId, handleSelectEventOnly])
 
   // 캘린더 컴포넌트/헤더/더보기 구성
   const mergedComponents = useMemo(
@@ -269,7 +316,8 @@ const CustomCalendar = () => {
         events: calendarEvents,
         onView,
         onNavigate,
-        onSelectEvent: handleSelectEvent,
+        onSelectEvent: view === Views.MONTH ? undefined : handleRbcSelectEvent,
+        onDoubleClickEvent: view === Views.MONTH ? undefined : handleRbcDoubleClickEvent,
         onEventDrop: handleEventDrop,
         onEventResize: resizeEvent,
         onSelectSlot: handleSelectSlotWrapper,
@@ -284,13 +332,14 @@ const CustomCalendar = () => {
       calendarEvents,
       onView,
       onNavigate,
-      handleSelectEvent,
+      handleRbcSelectEvent,
+      handleRbcDoubleClickEvent,
       handleEventDrop,
       resizeEvent,
-      handleSelectSlotWrapper,
       dayPropGetter,
       mergedComponents,
       viewConfig,
+      handleSelectSlotWrapper,
     ],
   )
 

@@ -17,6 +17,7 @@ const formatTimeRange = (event: CalendarEvent) => {
 type CustomWeekEventProps = {
   event: CalendarEvent
   onEventClick: (event: CalendarEvent) => void
+  onEventDoubleClick: (event: CalendarEvent) => void
   onToggleTodo?: (eventId: CalendarEvent['id']) => void
   isSelected?: boolean
 }
@@ -24,6 +25,7 @@ type CustomWeekEventProps = {
 const CustomWeekEvent: React.FC<CustomWeekEventProps> = ({
   event,
   onEventClick,
+  onEventDoubleClick,
   onToggleTodo,
   isSelected,
 }) => {
@@ -38,7 +40,14 @@ const CustomWeekEvent: React.FC<CustomWeekEventProps> = ({
       backgroundColor={baseColor}
       pointColor={pointColor}
       isSelected={isSelected}
-      onClick={() => onEventClick(event)}
+      onClick={(eventMouse) => {
+        eventMouse.stopPropagation()
+        onEventClick(event)
+      }}
+      onDoubleClick={(eventMouse) => {
+        eventMouse.stopPropagation()
+        onEventDoubleClick(event)
+      }}
     >
       <S.WeekEventRow>
         {isTodo ? (

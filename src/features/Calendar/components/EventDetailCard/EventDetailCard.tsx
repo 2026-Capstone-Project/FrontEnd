@@ -16,7 +16,7 @@ const EventCard = ({ event, type }: { event: Event; type: 'todo' | 'schedule' })
       <S.Time>{time}</S.Time>
       <S.TextWrapper>
         <S.Title type={type}>{event.title}</S.Title>
-        <S.Content>{event.content ?? '-'}</S.Content>
+        <S.Content>{event.content !== '' ? event.content : '-'}</S.Content>
       </S.TextWrapper>
     </S.EventWrapper>
   )
