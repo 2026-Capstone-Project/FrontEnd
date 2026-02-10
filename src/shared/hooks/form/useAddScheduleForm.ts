@@ -14,7 +14,6 @@ import {
   type TimePickerField,
 } from '@/shared/types/event/event'
 import { type RepeatConfig, type RepeatType } from '@/shared/types/event/recurrence/repeat'
-import { formatIsoDate } from '@/shared/utils/date'
 
 type UseAddScheduleFormProps = {
   date: string
@@ -39,7 +38,6 @@ export type UseAddScheduleFormResult = {
   handleRepeatType: (value: RepeatType) => void
   updateConfig: (changes: Partial<RepeatConfig>) => void
   handleSubmit: UseFormReturn<AddScheduleFormValues>['handleSubmit']
-  onSubmit: (values: AddScheduleFormValues) => void
   setIsAllday: React.Dispatch<React.SetStateAction<boolean>>
   setEventColor: (value: EventColorType) => void
   mapRef: React.RefObject<HTMLDivElement | null>
@@ -96,15 +94,6 @@ export const useAddScheduleForm = ({
   }, [initialEvent])
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  const onSubmit = (values: AddScheduleFormValues) => {
-    const payload = {
-      ...values,
-      eventStartDate: formatIsoDate(values.eventStartDate),
-      eventEndDate: formatIsoDate(values.eventEndDate),
-    }
-    console.log('일정 저장', payload)
-  }
-
   return {
     formMethods,
     control,
@@ -123,7 +112,6 @@ export const useAddScheduleForm = ({
     handleDateSelect,
     handleTimeChange,
     handleSubmit,
-    onSubmit,
     setIsAllday,
     setEventColor,
     mapRef,

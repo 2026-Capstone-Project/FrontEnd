@@ -1,5 +1,4 @@
 // 일간 뷰 전용 핸들러를 구성하는 훅
-import moment from 'moment'
 import { useCallback, useMemo } from 'react'
 import type { ViewStatic } from 'react-big-calendar'
 
@@ -12,11 +11,13 @@ type UseDayViewHandlersArgs = {
   enqueueEvent: (date: Date, allDay: boolean) => CalendarEvent['id'] | null
   handleAddEvent: (referenceDate?: Date | string, eventId?: CalendarEvent['id'] | null) => void
   updateEventTime: (eventId: CalendarEvent['id'], start: Date, end: Date) => void
+  updateEventTimePreview?: (eventId: CalendarEvent['id'], start: Date, end: Date) => void
+  onCreateEvent?: (slotDate: Date) => void
   onToggleTodo?: (eventId: CalendarEvent['id']) => void
   selectedEventId?: CalendarEvent['id'] | null
-  onEventSelect?: (event: CalendarEvent) => void
-  onEventClick?: (event: CalendarEvent) => void
-  onEventDoubleClick?: (event: CalendarEvent) => void
+  onEventSelect?: (event: CalendarEvent, clickedDate?: Date) => void
+  onEventClick?: (event: CalendarEvent, clickedDate?: Date) => void
+  onEventDoubleClick?: (event: CalendarEvent, clickedDate?: Date) => void
 }
 
 export const useDayViewHandlers = ({
@@ -25,6 +26,8 @@ export const useDayViewHandlers = ({
   enqueueEvent,
   handleAddEvent,
   updateEventTime,
+  updateEventTimePreview,
+  onCreateEvent,
   onToggleTodo,
   selectedEventId,
   onEventSelect,
@@ -35,29 +38,28 @@ export const useDayViewHandlers = ({
     (slotDate: Date) => {
       clearSelectedDate()
       clearSelectedEvent?.()
+      if (onCreateEvent) {
+        onCreateEvent(slotDate)
+        return
+      }
       const createdId = enqueueEvent(slotDate, false)
       handleAddEvent(slotDate, createdId)
     },
-    [clearSelectedDate, clearSelectedEvent, enqueueEvent, handleAddEvent],
-  )
-
-  const formatLogDateTime = useCallback(
-    (value: Date) => moment(value).format('YYYY-MM-DD HH:mm'),
-    [],
+    [clearSelectedDate, clearSelectedEvent, enqueueEvent, handleAddEvent, onCreateEvent],
   )
 
   const handleDayViewEventDrag = useCallback(
     (event: CalendarEvent, start: Date, end: Date) => {
-      console.log('[Calendar] event time changed', {
-        id: event.id,
-        title: event.title,
-        start: formatLogDateTime(start),
-        end: formatLogDateTime(end),
-        allDay: event.isAllDay ?? false,
-      })
       updateEventTime(event.id, start, end)
     },
-    [formatLogDateTime, updateEventTime],
+    [updateEventTime],
+  )
+
+  const handleDayViewEventDragPreview = useCallback(
+    (event: CalendarEvent, start: Date, end: Date) => {
+      updateEventTimePreview?.(event.id, start, end)
+    },
+    [updateEventTimePreview],
   )
 
   const dayViewWithHandlers = useMemo<
@@ -68,6 +70,7 @@ export const useDayViewHandlers = ({
         <CustomDayView
           onSlotDoubleClick={handleDayViewSlotDoubleClick}
           onEventDrag={handleDayViewEventDrag}
+          onEventDragPreview={handleDayViewEventDragPreview}
           onToggleTodo={onToggleTodo}
           selectedEventId={selectedEventId}
           onEventSelect={onEventSelect}
@@ -85,6 +88,7 @@ export const useDayViewHandlers = ({
   }, [
     handleDayViewSlotDoubleClick,
     handleDayViewEventDrag,
+    handleDayViewEventDragPreview,
     onToggleTodo,
     selectedEventId,
     onEventSelect,

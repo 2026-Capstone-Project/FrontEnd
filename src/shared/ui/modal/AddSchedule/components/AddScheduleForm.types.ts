@@ -5,6 +5,7 @@ import type { EventColorType } from '@/shared/types/event/event'
 
 export type AddScheduleFormProps = {
   registerDeleteHandler?: (handler?: () => void) => void
+  registerCloseGuard?: (guard?: (() => boolean) | null) => void
   registerFooterChildren?: (node: ReactNode | null) => void
   date: string
   mode?: 'modal' | 'inline'

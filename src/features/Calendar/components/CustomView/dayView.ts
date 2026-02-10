@@ -142,6 +142,10 @@ export const DayEventBadge = styled(EventBadge)<{
   justify-content: flex-start;
   pointer-events: auto;
   overflow: hidden;
+  cursor: grab;
+  &:active {
+    cursor: grabbing;
+  }
   &:hover {
     z-index: 2;
   }
@@ -156,6 +160,17 @@ export const EventResizer = styled.div`
   cursor: ns-resize;
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
+`
+
+export const EventResizerTop = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 12px;
+  cursor: ns-resize;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
 `
 
 export const DateInfo = styled.div`

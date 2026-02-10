@@ -3,7 +3,7 @@ import 'moment/locale/ko'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 
 import moment from 'moment'
-import { cloneElement, type MouseEvent, useCallback, useMemo, useState } from 'react'
+import { cloneElement, type MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Calendar,
   type DateCellWrapperProps,
@@ -38,6 +38,7 @@ import Plus from '@/shared/assets/icons/plus.svg?react'
 import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
 import { theme } from '@/shared/styles/theme'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import DeleteConfirmModal from '@/shared/ui/modal/DeleteConfirmModal/DeleteConfirmModal'
 
 import CalendarHeader from '../CalendarDateHeader/CalendarDateHeader'
 import { CustomMonthEvent, CustomMonthShowMore, CustomWeekEvent } from '../CustomEvent'
@@ -59,17 +60,24 @@ const CustomCalendar = () => {
   const { startDate, endDate } = useCalendarDateRange(view, date)
   // 서버 일정 목록 조회
   const { events: apiEvents, refetch: refetchEvents } = useCalendarApiEvents(startDate, endDate)
-  const { usePatchEvent, useDeleteEvent } = useCalendarMutation()
+  const { usePatchEvent, useDeleteEvent, usePostEvent } = useCalendarMutation()
   const { mutate: patchEventMutate } = usePatchEvent()
   const { mutate: deleteEventMutate } = useDeleteEvent()
+  const { mutate: postEventMutate } = usePostEvent()
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedEventId, setSelectedEventId] = useState<CalendarEvent['id'] | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean
+    eventId: CalendarEvent['id'] | null
+    title: string
+    occurrenceDate: string
+  }>({ isOpen: false, eventId: null, title: '', occurrenceDate: '' })
   const {
     events,
     addEvent: enqueueEvent,
     moveEvent,
     resizeEvent,
-    updateEventTime,
+    updateEventTime: updateLocalEventTime,
     updateEventColor,
     updateEventTiming,
     updateEventType,
@@ -115,6 +123,69 @@ const CustomCalendar = () => {
       isRecurring,
     })
 
+  const handleCloseDeleteConfirm = useCallback(() => {
+    setDeleteConfirm({ isOpen: false, eventId: null, title: '', occurrenceDate: '' })
+  }, [])
+
+  const handleDayViewEventTimeChange = useCallback(
+    (eventId: CalendarEvent['id'], start: Date, end: Date) => {
+      updateLocalEventTime(eventId, start, end)
+      const nextStart = moment(start).format('YYYY-MM-DDTHH:mm')
+      const nextEnd = moment(end).format('YYYY-MM-DDTHH:mm')
+      patchEventMutate({
+        eventId,
+        eventData: {
+          startTime: nextStart,
+          endTime: nextEnd,
+          isAllDay: false,
+          occurrenceDate: nextStart,
+        },
+      })
+    },
+    [patchEventMutate, updateLocalEventTime],
+  )
+
+  const handleDayViewEventTimePreview = useCallback(
+    (eventId: CalendarEvent['id'], start: Date, end: Date) => {
+      updateLocalEventTime(eventId, start, end)
+    },
+    [updateLocalEventTime],
+  )
+
+  useEffect(() => {
+    if (modal.isOpen) return undefined
+    if (selectedEventId == null) return undefined
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key !== 'Backspace') return
+      const target = event.target as HTMLElement | null
+      if (target) {
+        const tagName = target.tagName
+        const isEditable = tagName === 'INPUT' || tagName === 'TEXTAREA' || target.isContentEditable
+        if (isEditable) return
+      }
+      const selectedEvent = events.find((item) => item.id === selectedEventId)
+      if (!selectedEvent) return
+      const baseDate =
+        selectedDate ?? (selectedEvent.start ? normalizeDate(selectedEvent.start) : new Date(date))
+      const isRecurringEvent = selectedEvent.recurrenceGroup != null
+      event.preventDefault()
+      if (isRecurringEvent) {
+        setDeleteConfirm({
+          isOpen: true,
+          eventId: selectedEventId,
+          title: selectedEvent.title ?? '',
+          occurrenceDate: moment(baseDate).format('YYYY-MM-DD'),
+        })
+        return
+      }
+      handleRemoveEvent(selectedEventId, baseDate.toISOString(), false)
+      setSelectedEventId(null)
+      setSelectedDate(null)
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [date, events, handleRemoveEvent, modal.isOpen, selectedDate, selectedEventId])
+
   // 뷰 변경/이동 핸들러
   const onView = useCallback((newView: View) => setView(newView), [setView])
   const onNavigate = useCallback((newDate: Date) => setDate(newDate), [setDate])
@@ -127,14 +198,43 @@ const CustomCalendar = () => {
     },
   })
 
+  const handleDayViewCreateEvent = useCallback(
+    (slotDate: Date) => {
+      const startBase = moment(slotDate).set({ second: 0, millisecond: 0 })
+      const snappedMinute = startBase.minute() < 30 ? 0 : 30
+      const start = startBase.set({ minute: snappedMinute }).toDate()
+      const end = moment(start).add(1, 'hour').toDate()
+      postEventMutate(
+        {
+          title: '새 일정',
+          content: '',
+          startTime: moment(start).format('YYYY-MM-DDTHH:mm'),
+          endTime: moment(end).format('YYYY-MM-DDTHH:mm'),
+          isAllDay: false,
+        },
+        {
+          onSuccess: (response) => {
+            const nextId = response?.result?.id ?? response?.id
+            if (typeof nextId === 'number') {
+              refetchEvents()
+              handleAddEvent(slotDate, nextId)
+            }
+          },
+        },
+      )
+    },
+    [handleAddEvent, postEventMutate, refetchEvents],
+  )
+
   const handleSelectSlotWrapper = useCallback(
     (slotInfo: SlotInfo) => {
       // 슬롯 선택/더블클릭 처리: 더블클릭이면 기본 일정 생성
       const handled = handleSelectSlot(slotInfo)
       if (!handled) {
+        setSelectedEventId(null)
         setSelectedDate(slotInfo.start)
       } else {
-        setSelectedDate(null)
+        setSelectedDate(slotInfo.start)
       }
     },
     [handleSelectSlot],
@@ -180,7 +280,10 @@ const CustomCalendar = () => {
   )
 
   // 헤더 날짜 클릭 시 달력 날짜 이동
-  const handleSelectDate = useCallback((next: Date) => setDate(next), [])
+  const handleSelectDate = useCallback((next: Date) => {
+    setSelectedEventId(null)
+    setDate(next)
+  }, [])
   const viewConfig = useMemo(
     () =>
       getViewConfig(view, {
@@ -194,7 +297,9 @@ const CustomCalendar = () => {
     clearSelectedEvent: () => setSelectedEventId(null),
     enqueueEvent,
     handleAddEvent,
-    updateEventTime,
+    updateEventTime: handleDayViewEventTimeChange,
+    updateEventTimePreview: handleDayViewEventTimePreview,
+    onCreateEvent: handleDayViewCreateEvent,
     onToggleTodo: toggleEventDone,
     selectedEventId,
     onEventSelect: handleSelectEventOnly,
@@ -208,6 +313,7 @@ const CustomCalendar = () => {
       cloneElement(children, {
         onClick: (event: MouseEvent<HTMLElement>) => {
           event.stopPropagation()
+          setSelectedEventId(null)
           setDate(value)
           if (typeof children.props.onClick === 'function') {
             children.props.onClick(event)
@@ -390,6 +496,14 @@ const CustomCalendar = () => {
         onCloseEventCard={() => setSelectedDate(null)}
         eventActions={eventActions}
       />
+      {deleteConfirm.isOpen && deleteConfirm.eventId != null && (
+        <DeleteConfirmModal
+          onClose={handleCloseDeleteConfirm}
+          title={deleteConfirm.title}
+          eventId={deleteConfirm.eventId}
+          occurrenceDate={deleteConfirm.occurrenceDate}
+        />
+      )}
     </div>
   )
 }

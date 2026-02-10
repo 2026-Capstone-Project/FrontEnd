@@ -46,7 +46,7 @@ export const useCalendarCreateEvent = ({
             const nextId = response?.result?.id ?? response?.id
             if (typeof nextId === 'number') {
               refetchEvents()
-              onCreated(slotInfo.start, nextId)
+              onCreated(start, nextId)
             }
           },
         },

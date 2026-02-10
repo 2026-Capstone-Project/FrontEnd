@@ -1,9 +1,47 @@
 import { type PointerEvent as ReactPointerEvent, useCallback, useRef, useState } from 'react'
 
 import type { CalendarEvent } from '../../../../../shared/types/calendar/types'
-import { buildMoveRange, buildResizeRange, getMinutesPerPixel } from './timeHelpers'
+import { MIN_EVENT_DURATION_MINUTES } from './constants'
+import {
+  buildMoveRange,
+  buildResizeRange,
+  buildResizeStartRange,
+  getMinutesPerPixel,
+  shiftMinutesBy,
+  snapDateToMinutes,
+} from './timeHelpers'
 
-export type DragMode = 'move' | 'resize'
+const SNAP_MINUTES = 30
+const snapMinutes = (value: number) => Math.round(value / SNAP_MINUTES) * SNAP_MINUTES
+
+const snapMoveRange = (range: { nextStart: Date; nextEnd: Date }) => {
+  const snappedStart = snapDateToMinutes(range.nextStart, SNAP_MINUTES)
+  const snappedEnd = snapDateToMinutes(range.nextEnd, SNAP_MINUTES)
+  if (snappedEnd <= snappedStart) {
+    return { nextStart: snappedStart, nextEnd: shiftMinutesBy(snappedStart, SNAP_MINUTES) }
+  }
+  return { nextStart: snappedStart, nextEnd: snappedEnd }
+}
+
+const snapResizeRange = (range: { nextStart: Date; nextEnd: Date }, start: Date) => {
+  const snappedEnd = snapDateToMinutes(range.nextEnd, SNAP_MINUTES)
+  const minEnd = shiftMinutesBy(start, MIN_EVENT_DURATION_MINUTES)
+  return {
+    nextStart: range.nextStart,
+    nextEnd: snappedEnd <= start ? minEnd : snappedEnd,
+  }
+}
+
+const snapResizeStartRange = (range: { nextStart: Date; nextEnd: Date }, end: Date) => {
+  const snappedStart = snapDateToMinutes(range.nextStart, SNAP_MINUTES)
+  const maxStart = shiftMinutesBy(end, -MIN_EVENT_DURATION_MINUTES)
+  return {
+    nextStart: snappedStart >= end ? maxStart : snappedStart,
+    nextEnd: range.nextEnd,
+  }
+}
+
+export type DragMode = 'move' | 'resize' | 'resize-start'
 export type DragState = {
   event: CalendarEvent
   startClientY: number
@@ -16,6 +54,7 @@ export type DragState = {
   originColumnIndex?: number
   lastClientX?: number
   columnShift?: number
+  preview?: boolean
 }
 
 type DragStartOptions = {
@@ -35,10 +74,15 @@ export type EventPointerDownHandler = (
 
 type OnEventDrag = (event: CalendarEvent, newStart: Date, newEnd: Date) => void
 
-export const useDayViewDragHandlers = (onEventDrag?: OnEventDrag) => {
+export const useDayViewDragHandlers = (
+  onEventDrag?: OnEventDrag,
+  onEventDragPreview?: OnEventDrag,
+) => {
   const [, setDragRenderTrigger] = useState(0)
   const dragStateRef = useRef<DragState | null>(null)
   const cleanupRef = useRef<undefined | (() => void)>(undefined)
+  const previewFrameRef = useRef<number | null>(null)
+  const pendingPreviewRef = useRef<{ event: CalendarEvent; start: Date; end: Date } | null>(null)
 
   const triggerRender = useCallback(() => {
     setDragRenderTrigger((prev) => prev + 1)
@@ -54,6 +98,11 @@ export const useDayViewDragHandlers = (onEventDrag?: OnEventDrag) => {
         window.removeEventListener('pointermove', handlePointerMove)
         window.removeEventListener('pointerup', handlePointerUp)
         window.removeEventListener('pointercancel', handleCancel)
+        if (previewFrameRef.current != null) {
+          window.cancelAnimationFrame(previewFrameRef.current)
+          previewFrameRef.current = null
+        }
+        pendingPreviewRef.current = null
         dragStateRef.current = null
         triggerRender()
         cleanupRef.current = undefined
@@ -81,7 +130,8 @@ export const useDayViewDragHandlers = (onEventDrag?: OnEventDrag) => {
 
       const handlePointerMove = (moveEvent: PointerEvent) => {
         const deltaY = moveEvent.clientY - pointerStartY
-        const deltaMinutes = Math.round(deltaY * minutesPerPixel)
+        const rawDeltaMinutes = deltaY * minutesPerPixel
+        const deltaMinutes = snapMinutes(rawDeltaMinutes)
         let columnShift = 0
         if (gridRect && typeof originColumnIndex === 'number') {
           const gap = Math.max(columnGapPx, 0)
@@ -110,6 +160,32 @@ export const useDayViewDragHandlers = (onEventDrag?: OnEventDrag) => {
           originColumnIndex,
           lastClientX: moveEvent.clientX,
           columnShift,
+          preview: Boolean(onEventDragPreview),
+        }
+        if (onEventDragPreview) {
+          const totalMinutes = mode === 'move' ? deltaMinutes + columnShift * 12 * 60 : deltaMinutes
+          const snappedTotalMinutes = snapMinutes(totalMinutes)
+          const nextRange =
+            mode === 'move'
+              ? snapMoveRange(buildMoveRange(start, end, snappedTotalMinutes))
+              : mode === 'resize'
+                ? snapResizeRange(buildResizeRange(start, end, snappedTotalMinutes), start)
+                : snapResizeStartRange(buildResizeStartRange(start, end, snappedTotalMinutes), end)
+          pendingPreviewRef.current = {
+            event: calendarEvent,
+            start: nextRange.nextStart,
+            end: nextRange.nextEnd,
+          }
+          if (previewFrameRef.current == null) {
+            previewFrameRef.current = window.requestAnimationFrame(() => {
+              const pending = pendingPreviewRef.current
+              previewFrameRef.current = null
+              pendingPreviewRef.current = null
+              if (pending) {
+                onEventDragPreview(pending.event, pending.start, pending.end)
+              }
+            })
+          }
         }
         triggerRender()
       }
@@ -119,7 +195,8 @@ export const useDayViewDragHandlers = (onEventDrag?: OnEventDrag) => {
         const deltaMinutes = currentState?.deltaMinutes ?? 0
         const columnShift = currentState?.columnShift ?? 0
         const totalMinutes = mode === 'move' ? deltaMinutes + columnShift * 12 * 60 : deltaMinutes
-        if (totalMinutes === 0) {
+        const snappedTotalMinutes = snapMinutes(totalMinutes)
+        if (snappedTotalMinutes === 0) {
           if (pointerEvent.currentTarget instanceof HTMLElement) {
             pointerEvent.currentTarget.releasePointerCapture(pointerEvent.pointerId)
           }
@@ -128,8 +205,10 @@ export const useDayViewDragHandlers = (onEventDrag?: OnEventDrag) => {
         }
         const nextRange =
           mode === 'move'
-            ? buildMoveRange(start, end, totalMinutes)
-            : buildResizeRange(start, end, totalMinutes)
+            ? snapMoveRange(buildMoveRange(start, end, snappedTotalMinutes))
+            : mode === 'resize'
+              ? snapResizeRange(buildResizeRange(start, end, snappedTotalMinutes), start)
+              : snapResizeStartRange(buildResizeStartRange(start, end, snappedTotalMinutes), end)
         if (pointerEvent.currentTarget instanceof HTMLElement) {
           pointerEvent.currentTarget.releasePointerCapture(pointerEvent.pointerId)
         }
@@ -159,9 +238,10 @@ export const useDayViewDragHandlers = (onEventDrag?: OnEventDrag) => {
         pointerId: pointerEvent.pointerId,
         target: pointerEvent.target,
         mode,
+        preview: Boolean(onEventDragPreview),
       }
     },
-    [createCleanup, onEventDrag, triggerRender],
+    [createCleanup, onEventDrag, onEventDragPreview, triggerRender],
   )
 
   const handleEventPointerDown: EventPointerDownHandler = useCallback(
@@ -176,9 +256,16 @@ export const useDayViewDragHandlers = (onEventDrag?: OnEventDrag) => {
     [startDragSession],
   )
 
+  const handleResizeStartPointerDown: EventPointerDownHandler = useCallback(
+    (pointerEvent, calendarEvent, rowHeight, start, end) =>
+      startDragSession(pointerEvent, calendarEvent, rowHeight, start, end, 'resize-start'),
+    [startDragSession],
+  )
+
   return {
     dragStateRef,
     handleEventPointerDown,
     handleResizePointerDown,
+    handleResizeStartPointerDown,
   }
 }

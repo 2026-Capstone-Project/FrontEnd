@@ -47,6 +47,7 @@ const AddItemModal = ({
   const [activeType, setActiveType] = useState<ActiveType>(defaultType)
   const [footerChildren, setFooterChildren] = useState<ReactNode | null>(null)
   const [deleteHandler, setDeleteHandler] = useState<() => void>(() => () => undefined)
+  const [closeGuard, setCloseGuard] = useState<null | (() => boolean)>(null)
   const noopDeleteHandler = useCallback(() => undefined, [])
 
   const registerDeleteHandler = useCallback(
@@ -57,8 +58,20 @@ const AddItemModal = ({
   )
 
   const registerFooterChildren = useCallback((node: React.ReactNode | null) => {
-    setFooterChildren(node)
+    setFooterChildren((prev) => (prev === node ? prev : node))
   }, [])
+
+  const registerCloseGuard = useCallback((guard?: (() => boolean) | null) => {
+    setCloseGuard((prev) => {
+      const next = guard ?? null
+      return prev === next ? prev : next
+    })
+  }, [])
+
+  const handleClose = useCallback(() => {
+    if (closeGuard && !closeGuard()) return
+    onClose()
+  }, [closeGuard, onClose])
 
   useEffect(() => {
     setActiveType(defaultType)
@@ -72,7 +85,6 @@ const AddItemModal = ({
   const handleSubmit = useCallback(() => {
     const submitFormId = activeType === 'todo' ? 'add-todo-form' : 'add-schedule-form'
     const target = document.getElementById(submitFormId) as HTMLFormElement | null
-    console.log('[AddItem] submit', { submitFormId, target })
     if (!target) return
     target.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
   }, [activeType])
@@ -112,7 +124,7 @@ const AddItemModal = ({
     <AddModalLayout
       mode={mode}
       type={activeType}
-      onClose={onClose}
+      onClose={handleClose}
       onSubmit={handleSubmit}
       handleDelete={deleteHandler}
       footerChildren={footerChildren}
@@ -124,7 +136,7 @@ const AddItemModal = ({
           date={date}
           eventId={eventId}
           mode={mode}
-          onClose={onClose}
+          onClose={handleClose}
           registerDeleteHandler={registerDeleteHandler}
           headerTitlePortalTarget={headerTitlePortalTarget}
           isEditing={isEditing}
@@ -136,9 +148,10 @@ const AddItemModal = ({
           date={date}
           eventId={eventId}
           mode={mode}
-          onClose={onClose}
+          onClose={handleClose}
           registerDeleteHandler={registerDeleteHandler}
           registerFooterChildren={registerFooterChildren}
+          registerCloseGuard={registerCloseGuard}
           headerTitlePortalTarget={headerTitlePortalTarget}
           initialEvent={initialEvent}
           isEditing={isEditing}

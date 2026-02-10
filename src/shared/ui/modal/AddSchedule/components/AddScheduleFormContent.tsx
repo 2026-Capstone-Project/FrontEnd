@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react  */
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useFormContext } from 'react-hook-form'
 
@@ -29,6 +29,7 @@ const AddScheduleFormContent = ({
   mode = 'modal',
   onClose,
   registerDeleteHandler,
+  registerCloseGuard,
   registerFooterChildren,
   isEditing = false,
   headerTitlePortalTarget,
@@ -50,14 +51,40 @@ const AddScheduleFormContent = ({
     handleDateSelect,
     handleTimeChange,
     handleSubmit,
-    onSubmit,
     setIsAllday,
     setEventColor,
     isSearchPlaceOpen,
     openSearchPlace,
     eventTitle,
   } = schedule
-  const { setValue, getValues } = useFormContext<AddScheduleFormValues>()
+  const { setValue, getValues, formState } = useFormContext<AddScheduleFormValues>()
+  const { isDirty } = formState
+  const allowCloseRef = useRef(false)
+
+  const requestClose = useCallback(
+    (force?: boolean) => {
+      if (force) {
+        allowCloseRef.current = true
+      }
+      onClose()
+    },
+    [onClose],
+  )
+
+  const closeGuard = useCallback(() => {
+    if (allowCloseRef.current) {
+      allowCloseRef.current = false
+      return true
+    }
+    if (!isDirty) return true
+    return window.confirm('저장하지 않은 변경사항이 있습니다. 닫을까요?')
+  }, [isDirty])
+
+  useEffect(() => {
+    if (!registerCloseGuard) return
+    registerCloseGuard(closeGuard)
+    return () => registerCloseGuard()
+  }, [closeGuard, registerCloseGuard])
 
   // 패치 요청에 필요한 포맷/빌더/함수 묶음
   const { formatDateTime, buildDateTime, patchSchedule } = useSchedulePatchController({
@@ -125,8 +152,7 @@ const AddScheduleFormContent = ({
     initialEvent,
     isEditing,
     handleSubmit,
-    onClose,
-    onSubmit,
+    onClose: () => requestClose(true),
     repeatConfig,
     setValue,
     patchSchedule,
@@ -149,7 +175,7 @@ const AddScheduleFormContent = ({
     registerDeleteHandler,
     openApplyConfirm,
     eventColor,
-    closeModal: onClose,
+    closeModal: () => requestClose(true),
     occurrenceDate: date,
   })
 
@@ -193,7 +219,7 @@ const AddScheduleFormContent = ({
         isApplyConfirmOpen={isApplyConfirmOpen}
         onCloseDelete={() => {
           setDeleteWarningVisible(false)
-          onClose()
+          requestClose(true)
         }}
         onCancelEdit={handleCancelRepeat}
         onConfirmEdit={handleConfirmedSubmit}

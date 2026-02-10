@@ -52,10 +52,7 @@ export const buildTimedSlots = (events: CalendarEvent[]) => {
       const top = (minutesSinceColumnStart / 60) * SLOT_HEIGHT
       const durationMinutes = Math.max(segmentEnd.diff(segmentStart, 'minutes'), 15)
       const calculatedHeight = (durationMinutes / 60) * SLOT_HEIGHT
-      const height = Math.min(
-        calculatedHeight,
-        SLOT_HEIGHT * MAX_VISUAL_HOURS - minutesSinceColumnStart,
-      )
+      const height = Math.min(calculatedHeight, SLOT_HEIGHT * (MAX_VISUAL_HOURS - 1) - top)
 
       columns[columnIndex].push({
         event,

@@ -1,4 +1,5 @@
 /** @jsxImportSource @emotion/react */
+import moment from 'moment'
 import {
   type MouseEvent as ReactMouseEvent,
   useCallback,
@@ -328,6 +329,8 @@ const AddTodoForm = ({
       {deleteWarningVisible && (
         <DeleteConfirmModal
           title={todoTitle || '새로운 이벤트'}
+          eventId={eventId}
+          occurrenceDate={moment(todoDate).format('YYYY-MM-DD')}
           onClose={() => setDeleteWarningVisible(false)}
         />
       )}

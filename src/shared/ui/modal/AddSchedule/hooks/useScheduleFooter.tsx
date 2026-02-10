@@ -1,7 +1,6 @@
-import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import type { ReactNode } from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { type UseFormGetValues } from 'react-hook-form'
 
 import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
@@ -48,28 +47,48 @@ export const useScheduleFooter = ({
   const [deleteWarningVisible, setDeleteWarningVisible] = useState(false)
   const { useDeleteEvent } = useCalendarMutation()
   const { mutate: deleteEventMutate } = useDeleteEvent()
-  const queryClient = useQueryClient()
+  const repeatConfigRef = useRef(repeatConfig)
+  const eventIdRef = useRef(eventId)
+  const occurrenceDateRef = useRef(occurrenceDate)
+  const closeModalRef = useRef(closeModal)
+  const deleteEventMutateRef = useRef(deleteEventMutate)
+
+  useEffect(() => {
+    repeatConfigRef.current = repeatConfig
+  }, [repeatConfig])
+  useEffect(() => {
+    eventIdRef.current = eventId
+  }, [eventId])
+  useEffect(() => {
+    occurrenceDateRef.current = occurrenceDate
+  }, [occurrenceDate])
+  useEffect(() => {
+    closeModalRef.current = closeModal
+  }, [closeModal])
+  useEffect(() => {
+    deleteEventMutateRef.current = deleteEventMutate
+  }, [deleteEventMutate])
+
   const handleDelete = useCallback(() => {
-    if (repeatConfig.repeatType !== 'none') {
+    if (repeatConfigRef.current.repeatType !== 'none') {
       setDeleteWarningVisible(true)
-    } else {
-      deleteEventMutate(
-        {
-          eventId,
-          params: {
-            occurrenceDate: moment(occurrenceDate).format('YYYY-MM-DD'),
-          },
-        },
-        {
-          onSuccess: () => {
-            setDeleteWarningVisible(false)
-            closeModal()
-            queryClient.invalidateQueries({ queryKey: ['calendar', 'events'] })
-          },
-        },
-      )
+      return
     }
-  }, [repeatConfig, closeModal, deleteEventMutate, eventId, occurrenceDate, queryClient])
+    deleteEventMutateRef.current(
+      {
+        eventId: eventIdRef.current,
+        params: {
+          occurrenceDate: moment(occurrenceDateRef.current).format('YYYY-MM-DD'),
+        },
+      },
+      {
+        onSuccess: () => {
+          setDeleteWarningVisible(false)
+          closeModalRef.current()
+        },
+      },
+    )
+  }, [])
 
   useEffect(() => {
     registerDeleteHandler?.(handleDelete)
@@ -77,13 +96,17 @@ export const useScheduleFooter = ({
   }, [handleDelete, registerDeleteHandler])
 
   // 색상 변경 처리(반복 일정이면 확인 모달)
+  const isExistingRecurring = useMemo(
+    () => initialEvent?.recurrenceGroup != null,
+    [initialEvent?.recurrenceGroup],
+  )
+
   const handleColorChange = useCallback(
     (value: EventColorType) => {
       setEventColor(value)
       if (eventId != null && eventId !== 0) {
         onEventColorChange?.(eventId, value)
         const nextValues = { ...getValues(), eventColor: value }
-        const isExistingRecurring = initialEvent?.recurrenceGroup != null
         if (isExistingRecurring) {
           openApplyConfirm(nextValues)
         } else {
@@ -94,7 +117,7 @@ export const useScheduleFooter = ({
     [
       eventId,
       getValues,
-      initialEvent,
+      isExistingRecurring,
       onEventColorChange,
       openApplyConfirm,
       patchSchedule,
@@ -102,11 +125,16 @@ export const useScheduleFooter = ({
     ],
   )
 
+  const footerNode = useMemo(
+    () => <SelectColor value={eventColor} onChange={handleColorChange} />,
+    [eventColor, handleColorChange],
+  )
+
   // 하단 컬러 선택기를 footer에 등록
   useEffect(() => {
-    registerFooterChildren?.(<SelectColor value={eventColor} onChange={handleColorChange} />)
+    registerFooterChildren?.(footerNode)
     return () => registerFooterChildren?.(null)
-  }, [eventColor, registerFooterChildren, handleColorChange])
+  }, [footerNode, registerFooterChildren])
 
   return { deleteWarningVisible, setDeleteWarningVisible }
 }

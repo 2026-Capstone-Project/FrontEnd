@@ -13,7 +13,6 @@ type UseScheduleSubmitFlowProps = {
   isEditing: boolean
   handleSubmit: UseFormHandleSubmit<AddScheduleFormValues>
   onClose: () => void
-  onSubmit: (values: AddScheduleFormValues) => void
   setValue: UseFormSetValue<AddScheduleFormValues>
   patchSchedule: (
     values: AddScheduleFormValues,
@@ -34,7 +33,6 @@ export const useScheduleSubmitFlow = ({
   isEditing,
   handleSubmit,
   onClose,
-  onSubmit,
   setValue,
   patchSchedule,
   syncEventTiming,
@@ -92,7 +90,6 @@ export const useScheduleSubmitFlow = ({
       }
       syncEventTiming(values)
       patchSchedule(values)
-      onSubmit(values)
       onClose()
     },
     (errors) => {
@@ -126,7 +123,6 @@ export const useScheduleSubmitFlow = ({
             : 'ALL_EVENTS'
       syncEventTiming(pendingScheduleValues)
       patchSchedule(pendingScheduleValues, scope, occurrenceDate)
-      onSubmit(pendingScheduleValues)
       onClose()
       clearApplyConfirm()
     },
@@ -140,7 +136,6 @@ export const useScheduleSubmitFlow = ({
       handleTitleConfirm,
       isEditConfirmOpen,
       onClose,
-      onSubmit,
       patchSchedule,
       pendingScheduleValues,
       syncEventTiming,

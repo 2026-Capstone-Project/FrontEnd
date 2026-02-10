@@ -54,10 +54,15 @@ const CalendarModals = ({
   const shouldRenderModal = modalEventId != null
   const shouldRenderEventCard = !isModalOpen && showEventCard
   const safeDetailEventId = modalEventId
-  const occurrenceDate = useMemo(
-    () => (modalDate ? moment(modalDate).format('YYYY-MM-DDTHH:mm') : ''),
-    [modalDate],
-  )
+  const occurrenceDate = useMemo(() => {
+    const base =
+      modalEvent?.start instanceof Date
+        ? modalEvent.start
+        : modalEvent?.start
+          ? new Date(modalEvent.start)
+          : modalDate
+    return base ? moment(base).format('YYYY-MM-DDTHH:mm') : ''
+  }, [modalDate, modalEvent])
   const { data } = useDetailEventQuery(safeDetailEventId, occurrenceDate)
   const detailEvent = useMemo<CalendarEvent | null>(() => {
     const result = data?.result
