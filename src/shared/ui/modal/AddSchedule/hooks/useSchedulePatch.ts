@@ -3,10 +3,9 @@ import { useCallback } from 'react'
 
 import type { CalendarEvent, Event } from '@/shared/types/calendar/types'
 import type { AddScheduleFormValues, RepeatConfigSchema } from '@/shared/types/event/event'
+import type { RecurrenceEventScope } from '@/shared/types/recurrence/recurrence'
 import { mapRepeatConfigToRecurrenceGroup } from '@/shared/utils/recurrenceGroup'
 import { areRepeatConfigsEqual } from '@/shared/utils/repeatConfig'
-
-type PatchScope = 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS' | 'ALL_EVENTS'
 
 type PatchEventMutate = (params: {
   eventId: number
@@ -17,7 +16,7 @@ type PatchEventMutate = (params: {
     endTime?: string
     color?: Event['color']
     isAllDay?: boolean
-    recurrenceUpdateScope?: PatchScope
+    recurrenceUpdateScope?: RecurrenceEventScope
     occurrenceDate?: string
     recurrenceGroup?: Event['recurrenceGroup'] | null
   }
@@ -43,7 +42,7 @@ export const useSchedulePatch = ({
   buildDateTime,
 }: UseSchedulePatchArgs) =>
   useCallback(
-    (values: AddScheduleFormValues, scope?: PatchScope, occurrenceDate?: string) => {
+    (values: AddScheduleFormValues, scope?: RecurrenceEventScope, occurrenceDate?: string) => {
       if (eventId == null || eventId === 0) return
       const startDate = values.eventStartDate ?? new Date(date)
       const endDate = values.eventEndDate ?? startDate

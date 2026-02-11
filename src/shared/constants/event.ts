@@ -4,7 +4,7 @@ import type {
   MonthlyPatternWeek,
   RepeatType,
   WeekdayName,
-} from '@/shared/types/event/recurrence/repeat'
+} from '@/shared/types/recurrence/repeat'
 
 import type { EventColorType } from '../types/event/event'
 

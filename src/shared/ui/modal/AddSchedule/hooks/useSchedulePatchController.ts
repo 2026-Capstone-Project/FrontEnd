@@ -4,7 +4,7 @@ import { useCallback, useMemo } from 'react'
 import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { RepeatConfigSchema } from '@/shared/types/event/event'
-import { defaultRepeatConfig } from '@/shared/types/event/recurrence/repeat'
+import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 import { useSchedulePatch } from '@/shared/ui/modal/AddSchedule/hooks/useSchedulePatch'
 import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/recurrenceGroup'
 

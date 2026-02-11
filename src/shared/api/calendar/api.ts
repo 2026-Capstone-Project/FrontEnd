@@ -2,7 +2,8 @@ import axiosInstance from '@/shared/api/axios'
 import type { GetEventDetailResponseDTO, GetEventsResponseDTO } from '@/shared/types/calendar/types'
 import type { TCommonResponse } from '@/shared/types/common/common'
 import type { EventColorType } from '@/shared/types/event/event'
-import type { RecurrenceGroup } from '@/shared/types/event/recurrence/recurrence'
+import type { RecurrenceEventScope, RecurrenceGroup } from '@/shared/types/recurrence/recurrence'
+import type { GetTodoForCalendarResponseDTO } from '@/shared/types/todo/types'
 
 export const getEvents = async ({
   startDate,
@@ -50,7 +51,7 @@ export const patchEvent = async (
     endTime?: string
     color?: EventColorType
     isAllDay?: boolean
-    recurrenceUpdateScope?: 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS' | 'ALL_EVENTS'
+    recurrenceUpdateScope?: RecurrenceEventScope
     occurrenceDate?: string
     recurrenceGroup?: RecurrenceGroup | null
   },
@@ -63,9 +64,19 @@ export const deleteEvent = async (
   eventId: number,
   params: {
     occurrenceDate?: string
-    scope?: 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS' | 'ALL_EVENTS'
+    scope?: RecurrenceEventScope
   },
 ) => {
   const { data } = await axiosInstance.delete(`/api/v1/events/${eventId}`, { params })
+  return data
+}
+
+export const getTodoForCalendar = async (
+  startDate: string,
+  endDate: string,
+): Promise<TCommonResponse<GetTodoForCalendarResponseDTO>> => {
+  const { data } = await axiosInstance.get(`/todos/calendar`, {
+    params: { startDate, endDate },
+  })
   return data
 }

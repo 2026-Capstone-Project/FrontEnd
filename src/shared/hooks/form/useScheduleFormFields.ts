@@ -9,7 +9,7 @@ import {
   type EventColorType,
   type RepeatConfigSchema,
 } from '@/shared/types/event/event'
-import { defaultRepeatConfig } from '@/shared/types/event/recurrence/repeat'
+import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/recurrenceGroup'
 
 type UseScheduleFormFieldsProps = {

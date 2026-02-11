@@ -2,6 +2,7 @@ import { useId, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
+import type { RecurrenceEventScope } from '@/shared/types/recurrence/recurrence'
 
 import Modal from '../../common/Modal/Modal'
 import * as S from './DeleteConfirmModal.style'
@@ -21,14 +22,14 @@ const DeleteConfirmModal = ({
   const [selectedOption, setSelectedOption] = useState<'single' | 'future' | 'all'>('single')
   const { useDeleteEvent } = useCalendarMutation()
   const { mutate: deleteEventMutate } = useDeleteEvent()
-  type DeleteScope = 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS' | 'ALL_EVENTS'
+
   const options = [
     { value: 'single', label: '이 이벤트' },
     { value: 'future', label: '이 이벤트부터 이후 이벤트' },
   ] as const
 
   const handleDelete = () => {
-    const scope: DeleteScope =
+    const scope: RecurrenceEventScope =
       selectedOption === 'single' ? 'THIS_EVENT' : 'THIS_AND_FOLLOWING_EVENTS'
     const params = { scope, occurrenceDate }
     deleteEventMutate(

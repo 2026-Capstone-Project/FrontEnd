@@ -12,7 +12,7 @@ import {
   TERMINATION_TYPES,
   WEEKDAY_NAMES,
   type WeekdayName,
-} from '../types/event/recurrence/repeat'
+} from '../types/recurrence/repeat'
 export const title = yup
   .string()
   .required('제목은 필수 입력 사항입니다.')

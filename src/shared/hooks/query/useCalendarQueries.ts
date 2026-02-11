@@ -1,6 +1,5 @@
+import { calendarKeys } from '@/shared/api/queryKey'
 import { useCustomQuery } from '@/shared/hooks/common/customQuery'
-
-import { calendarKeys } from '../../api/queryKey/queryKeys'
 
 export function useEventQuery(startDate: string, endDate: string) {
   const query = calendarKeys.events(startDate, endDate)
@@ -13,7 +12,7 @@ export function useDetailEventQuery(eventId?: number | null, occurrenceDate?: st
   const query = calendarKeys.detail(safeEventId, safeOccurrenceDate)
   return useCustomQuery(query.queryKey, query.queryFn, {
     enabled: Boolean(eventId) && Boolean(occurrenceDate),
-    retry: (failureCount, error) => {
+    retry: (failureCount: number, error: unknown) => {
       const status = (error as { response?: { status?: number } })?.response?.status
       if (status === 404) {
         return failureCount < 3
@@ -22,4 +21,9 @@ export function useDetailEventQuery(eventId?: number | null, occurrenceDate?: st
     },
     retryDelay: (attempt) => Math.min(500 * attempt, 1500),
   })
+}
+
+export function useTodoForCalendarQuery(startDate: string, endDate: string) {
+  const query = calendarKeys.todos(startDate, endDate)
+  return useCustomQuery(query.queryKey, query.queryFn)
 }

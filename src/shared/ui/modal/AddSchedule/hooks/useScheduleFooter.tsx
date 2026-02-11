@@ -6,7 +6,8 @@ import { type UseFormGetValues } from 'react-hook-form'
 import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { AddScheduleFormValues, EventColorType } from '@/shared/types/event/event'
-import type { RepeatConfig } from '@/shared/types/event/recurrence/repeat'
+import type { RecurrenceEventScope } from '@/shared/types/recurrence/recurrence'
+import type { RepeatConfig } from '@/shared/types/recurrence/repeat'
 import SelectColor from '@/shared/ui/modal/AddSchedule/components/SelectColor/SelectColor'
 
 type UseScheduleFooterProps = {
@@ -17,7 +18,7 @@ type UseScheduleFooterProps = {
   setEventColor: (value: EventColorType) => void
   patchSchedule: (
     values: AddScheduleFormValues,
-    scope?: 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS' | 'ALL_EVENTS',
+    scope?: RecurrenceEventScope,
     occurrenceDate?: string,
   ) => void
   onEventColorChange?: (eventId: CalendarEvent['id'], color: EventColorType) => void

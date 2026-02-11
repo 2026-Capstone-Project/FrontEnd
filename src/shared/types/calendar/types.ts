@@ -1,5 +1,7 @@
 import type { EventColorType } from '@/shared/types/event/event'
-import type { RecurrenceGroup } from '@/shared/types/event/recurrence/recurrence'
+import type { RecurrenceGroup } from '@/shared/types/recurrence/recurrence'
+
+import type { TodoType } from '../todo/types'
 
 export type Event = {
   id: number
@@ -14,9 +16,6 @@ export type Event = {
   recurrenceGroup: RecurrenceGroup | null
 }
 
-// 서버 스펙(Event)과 동일한 타입을 캘린더에서도 사용합니다.
-// UI에서 필요한 경우에만 사용하는 확장 필드(type/isDone)를 옵션으로 둡니다.
-// 캘린더 렌더링을 위해 start/end는 Date도 허용합니다.
 export type CalendarEvent = Omit<Event, 'start' | 'end'> & {
   start: string | Date
   end: string | Date
@@ -29,3 +28,7 @@ export type GetEventsResponseDTO = {
 }
 
 export type GetEventDetailResponseDTO = Event
+
+export type GetTodoForCalendarResponseDTO = {
+  todos: Array<TodoType>
+}

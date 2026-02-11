@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import { WEEKDAYS } from '@/shared/constants/event'
 import type { RepeatConfigSchema } from '@/shared/types/event/event'
-import type { RepeatConfig } from '@/shared/types/event/recurrence/repeat'
+import type { RepeatConfig, WeekdayName } from '@/shared/types/recurrence/repeat'
 
 import * as S from './RepeatPanel.style'
 
@@ -45,7 +45,7 @@ const WeeklyRepeatPanel = ({ config, updateConfig }: Props) => {
           const toggleDay = () => {
             const current = config.customWeeklyDays ?? []
             const next = isActive
-              ? current.filter((value) => value !== day.key)
+              ? current.filter((value: WeekdayName | undefined) => value !== day.key)
               : [...current, day.key]
             updateConfig({ customWeeklyDays: next })
           }

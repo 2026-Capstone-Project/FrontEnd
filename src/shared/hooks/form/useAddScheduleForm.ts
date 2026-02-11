@@ -13,7 +13,7 @@ import {
   type RepeatConfigSchema,
   type TimePickerField,
 } from '@/shared/types/event/event'
-import { type RepeatConfig, type RepeatType } from '@/shared/types/event/recurrence/repeat'
+import { type RepeatConfig, type RepeatType } from '@/shared/types/recurrence/repeat'
 
 type UseAddScheduleFormProps = {
   date: string

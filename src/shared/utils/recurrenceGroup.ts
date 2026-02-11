@@ -1,14 +1,14 @@
 import { formatIsoDate } from '@/shared/utils/date'
 
 import type { Week } from '../types/event/event'
-import type { RecurrenceGroup } from '../types/event/recurrence/recurrence'
+import type { RecurrenceGroup } from '../types/recurrence/recurrence'
 import {
   defaultRepeatConfig,
   type MonthlyPatternDay,
   type MonthlyPatternWeek,
   type RepeatConfig,
   type WeekdayName,
-} from '../types/event/recurrence/repeat'
+} from '../types/recurrence/repeat'
 
 type RecurrenceLike = RecurrenceGroup & {
   interval?: number
@@ -103,7 +103,7 @@ export const mapRecurrenceGroupToRepeatConfig = (group?: RecurrenceGroup | null)
   }
 
   if (frequency === 'WEEKLY') {
-    const weeklyDays = toWeekdays(source.daysOfWeek ?? source.dayOfWeek)
+    const weeklyDays = toWeekdays(source.daysOfWeek)
     base.customWeeklyDays = weeklyDays.length > 0 ? weeklyDays : []
   }
 
@@ -177,7 +177,7 @@ export const mapRepeatConfigToRecurrenceGroup = (
 
   if (basis === 'weekly') {
     base.intervalValue = 1
-    base.dayOfWeek = toWeeks(config.customWeeklyDays)
+    base.daysOfWeek = toWeeks(config.customWeeklyDays)
   }
 
   if (basis === 'monthly') {

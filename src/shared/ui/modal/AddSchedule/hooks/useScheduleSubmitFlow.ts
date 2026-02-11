@@ -4,6 +4,7 @@ import type { UseFormHandleSubmit, UseFormSetValue } from 'react-hook-form'
 import { useRepeatChangeGuard } from '@/shared/hooks/repeat/useRepeatChangeGuard'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { AddScheduleFormValues } from '@/shared/types/event/event'
+import type { RecurrenceEventScope } from '@/shared/types/recurrence/recurrence'
 import type { EditConfirmOption } from '@/shared/ui/modal'
 
 type UseScheduleSubmitFlowProps = {
@@ -16,7 +17,7 @@ type UseScheduleSubmitFlowProps = {
   setValue: UseFormSetValue<AddScheduleFormValues>
   patchSchedule: (
     values: AddScheduleFormValues,
-    scope?: 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS' | 'ALL_EVENTS',
+    scope?: RecurrenceEventScope,
     occurrenceDate?: string,
   ) => void
   syncEventTiming: (values: AddScheduleFormValues) => void
