@@ -21,11 +21,6 @@ const EventsCard = ({
   const { data } = useEventQuery(formattedDate, formattedDate)
   const details = data?.result?.details ?? []
 
-  const startOfSelectedDay = new Date(selectedDate)
-  startOfSelectedDay.setHours(0, 0, 0, 0)
-  const endOfSelectedDay = new Date(startOfSelectedDay)
-  endOfSelectedDay.setHours(23, 59, 59, 999)
-
   return createPortal(
     <S.CardOverlay onClick={mode === 'modal' ? onClose : undefined}>
       <S.CardWrapper

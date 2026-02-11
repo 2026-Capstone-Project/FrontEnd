@@ -1,9 +1,10 @@
 /** @jsxImportSource @emotion/react */
 import { useEffect, useRef, useState } from 'react'
 
-import { type EventColorType, getColorPalette } from '@/features/Calendar/utils/colorPalette'
 import Arrow from '@/shared/assets/icons/chevron.svg?react'
 import { EVENT_COLORS } from '@/shared/constants/event'
+import { theme } from '@/shared/styles/theme'
+import type { EventColorType } from '@/shared/types/event/event'
 
 import * as S from './SelectColor.style'
 
@@ -36,7 +37,7 @@ const SelectColor = ({ value, onChange }: SelectColorProps) => {
   const resolvedValue = EVENT_COLORS.includes(value as EventColorType)
     ? (value as EventColorType)
     : EVENT_COLORS[0]
-  const palette = getColorPalette(resolvedValue)
+  const palette = theme.colors[resolvedValue]
 
   return (
     <S.ColorDropdown ref={dropdownRef} onClick={() => setDropdownOpen((prev) => !prev)}>
@@ -47,7 +48,7 @@ const SelectColor = ({ value, onChange }: SelectColorProps) => {
           {EVENT_COLORS.map((colorName) => (
             <S.CircleOption
               key={colorName}
-              color={getColorPalette(colorName).point}
+              color={theme.colors[colorName].point}
               isSelected={resolvedValue === colorName}
               onClick={() => {
                 onChange(colorName)

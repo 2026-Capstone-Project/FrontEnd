@@ -11,12 +11,14 @@ const EventCard = ({ event, type }: { event: Event; type: 'todo' | 'schedule' })
         hour12: false,
       })
 
+  const content = event.content?.trim()
+
   return (
     <S.EventWrapper>
       <S.Time>{time}</S.Time>
       <S.TextWrapper>
         <S.Title type={type}>{event.title}</S.Title>
-        <S.Content>{event.content !== '' ? event.content : '-'}</S.Content>
+        <S.Content>{content ? content : '-'}</S.Content>
       </S.TextWrapper>
     </S.EventWrapper>
   )

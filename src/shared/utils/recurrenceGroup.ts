@@ -1,7 +1,7 @@
 import { formatIsoDate } from '@/shared/utils/date'
 
 import type { Week } from '../types/event/event'
-import type { recurrenceGroup } from '../types/event/recurrence/recurrence'
+import type { RecurrenceGroup } from '../types/event/recurrence/recurrence'
 import {
   defaultRepeatConfig,
   type MonthlyPatternDay,
@@ -10,7 +10,7 @@ import {
   type WeekdayName,
 } from '../types/event/recurrence/repeat'
 
-type RecurrenceLike = recurrenceGroup & {
+type RecurrenceLike = RecurrenceGroup & {
   interval?: number
   intervalValue?: number
   daysOfWeek?: Week[]
@@ -68,7 +68,7 @@ const toWeekFromPatternDay = (value?: MonthlyPatternDay | null): Week | undefine
 const toWeeks = (values?: (WeekdayName | undefined)[] | null) =>
   values?.filter(Boolean).map((value) => WEEKDAY_REVERSE_MAP[value as WeekdayName]) ?? []
 
-export const mapRecurrenceGroupToRepeatConfig = (group?: recurrenceGroup | null): RepeatConfig => {
+export const mapRecurrenceGroupToRepeatConfig = (group?: RecurrenceGroup | null): RepeatConfig => {
   if (!group) {
     return {
       ...defaultRepeatConfig,
@@ -151,7 +151,7 @@ export const mapRecurrenceGroupToRepeatConfig = (group?: recurrenceGroup | null)
 
 export const mapRepeatConfigToRecurrenceGroup = (
   config?: RepeatConfig | null,
-): recurrenceGroup | null => {
+): RecurrenceGroup | null => {
   if (!config || config.repeatType === 'none') return null
 
   const basis = config.repeatType === 'custom' ? config.customBasis : config.repeatType
@@ -165,7 +165,7 @@ export const mapRepeatConfigToRecurrenceGroup = (
           ? 'MONTHLY'
           : 'YEARLY'
 
-  const base: recurrenceGroup = {
+  const base: RecurrenceGroup = {
     frequency,
     endType: 'NEVER',
     intervalValue: 1,

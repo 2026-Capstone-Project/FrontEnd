@@ -1,6 +1,6 @@
 import type { Week } from '../event'
 
-export interface recurrenceGroup {
+export interface RecurrenceGroup {
   frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY'
   endType: 'NEVER' | 'END_BY_DATE' | 'END_BY_COUNT'
   endDate?: string

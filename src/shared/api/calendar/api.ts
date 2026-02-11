@@ -1,8 +1,8 @@
-import type { EventColorType } from '@/features/Calendar/utils/colorPalette'
 import axiosInstance from '@/shared/api/axios'
 import type { GetEventDetailResponseDTO, GetEventsResponseDTO } from '@/shared/types/calendar/types'
 import type { TCommonResponse } from '@/shared/types/common/common'
-import type { recurrenceGroup } from '@/shared/types/event/recurrence/recurrence'
+import type { EventColorType } from '@/shared/types/event/event'
+import type { RecurrenceGroup } from '@/shared/types/event/recurrence/recurrence'
 
 export const getEvents = async ({
   startDate,
@@ -35,7 +35,7 @@ export const postEvents = async (eventData: {
   location?: string
   color?: EventColorType
   isAllDay?: boolean
-  recurrenceGroup?: recurrenceGroup
+  recurrenceGroup?: RecurrenceGroup
 }) => {
   const { data } = await axiosInstance.post('/api/v1/events', eventData)
   return data
@@ -52,7 +52,7 @@ export const patchEvent = async (
     isAllDay?: boolean
     recurrenceUpdateScope?: 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS' | 'ALL_EVENTS'
     occurrenceDate?: string
-    recurrenceGroup?: recurrenceGroup | null
+    recurrenceGroup?: RecurrenceGroup | null
   },
 ) => {
   const { data } = await axiosInstance.patch(`/api/v1/events/${eventId}`, eventData)

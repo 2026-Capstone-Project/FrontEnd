@@ -1,5 +1,5 @@
 import type { EventColorType } from '@/shared/types/event/event'
-import type { recurrenceGroup } from '@/shared/types/event/recurrence/recurrence'
+import type { RecurrenceGroup } from '@/shared/types/event/recurrence/recurrence'
 
 export type Event = {
   id: number
@@ -11,7 +11,7 @@ export type Event = {
   location: string | null
   isAllDay: boolean
   color: EventColorType
-  recurrenceGroup: recurrenceGroup | null
+  recurrenceGroup: RecurrenceGroup | null
 }
 
 // 서버 스펙(Event)과 동일한 타입을 캘린더에서도 사용합니다.
