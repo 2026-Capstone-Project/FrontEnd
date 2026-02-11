@@ -1,6 +1,6 @@
 import { createPortal } from 'react-dom'
 
-import { useEventQuery } from '@/shared/hooks/query/useCalendarQueries'
+import { useEventQuery, useTodoForCalendarQuery } from '@/shared/hooks/query/useCalendarQueries'
 
 import EventDetailCard from '../EventDetailCard/EventDetailCard'
 import * as S from './EventsCard.style'
@@ -18,8 +18,9 @@ const EventsCard = ({
   const month = String(editDate.getMonth() + 1).padStart(2, '0')
   const day = String(editDate.getDate()).padStart(2, '0')
   const formattedDate = `${year}-${month}-${day}`
-  const { data } = useEventQuery(formattedDate, formattedDate)
-  const details = data?.result?.details ?? []
+  const { data: eventData } = useEventQuery(formattedDate, formattedDate)
+  const { data: todoData } = useTodoForCalendarQuery(formattedDate, formattedDate)
+  const details = eventData?.result?.details ?? []
 
   return createPortal(
     <S.CardOverlay onClick={mode === 'modal' ? onClose : undefined}>
@@ -38,10 +39,13 @@ const EventsCard = ({
             })}
             <S.Dot />
           </S.Header>
-          {details.length > 0 ? (
+          {details.length > 0 || (todoData?.result?.todos.length ?? 0) > 0 ? (
             <S.EventCards>
               {details.map((event) => (
                 <EventDetailCard key={event.id} event={event} type={'schedule'} />
+              ))}
+              {todoData?.result?.todos.map((todo) => (
+                <EventDetailCard key={todo.todoId} event={todo} type={'todo'} />
               ))}
             </S.EventCards>
           ) : (
