@@ -1,12 +1,11 @@
 // 캘린더 API 응답을 화면용 이벤트로 변환하는 훅
-import moment from 'moment'
 import { useMemo } from 'react'
 
 import { useEventQuery, useTodoForCalendarQuery } from '@/shared/hooks/query/useCalendarQueries'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { TodoType } from '@/shared/types/todo/types'
 
-const parseDueTime = (value: TodoType['dueTime']) => {
+const parseDueTime = (value?: TodoType['dueTime']) => {
   if (!value) {
     return { hour: 0, minute: 0 }
   }
@@ -23,14 +22,18 @@ const parseDueTime = (value: TodoType['dueTime']) => {
   }
 }
 
+const buildLocalDateTime = (dateValue: string, timeValue?: TodoType['dueTime']) => {
+  const [year, month, day] = dateValue.split('-').map((item) => Number.parseInt(item, 10))
+  const { hour, minute } = parseDueTime(timeValue)
+  return new Date(year, (month || 1) - 1, day || 1, hour, minute, 0, 0)
+}
+
 const toTodoEvent = (todo: TodoType): CalendarEvent => {
-  const baseDate = moment(todo.occurrenceDate, 'YYYY-MM-DD').toDate()
-  const { hour, minute } = parseDueTime(todo.dueTime)
-  const startBase = new Date(baseDate)
-  const start = todo.isAllDay ? startBase : new Date(startBase.setHours(hour, minute, 0, 0))
-  const endBase = new Date(baseDate)
+  const start = todo.isAllDay
+    ? buildLocalDateTime(todo.occurrenceDate)
+    : buildLocalDateTime(todo.occurrenceDate, todo.dueTime)
   const end = todo.isAllDay
-    ? new Date(endBase.setHours(23, 59, 0, 0))
+    ? new Date(start.getFullYear(), start.getMonth(), start.getDate(), 23, 59, 0, 0)
     : new Date(start.getTime() + 30 * 60 * 1000)
   return {
     id: todo.todoId,

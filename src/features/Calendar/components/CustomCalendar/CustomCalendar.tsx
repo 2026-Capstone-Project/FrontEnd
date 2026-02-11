@@ -67,9 +67,10 @@ const CustomCalendar = () => {
   const { usePatchEvent, useDeleteEvent } = useCalendarMutation()
   const { mutate: patchEventMutate } = usePatchEvent()
   const { mutate: deleteEventMutate } = useDeleteEvent()
-  const { usePatchCompleteTodo, usePatchTodo } = useTodoMutations()
+  const { usePatchCompleteTodo, usePatchTodo, useDeleteTodo } = useTodoMutations()
   const { mutate: patchCompleteTodoMutate } = usePatchCompleteTodo()
   const { mutate: patchTodoMutate } = usePatchTodo()
+  const { mutate: deleteTodoMutate } = useDeleteTodo()
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedEventId, setSelectedEventId] = useState<CalendarEvent['id'] | null>(null)
   const [selectedEventKey, setSelectedEventKey] = useState<string | null>(null)
@@ -224,12 +225,26 @@ const CustomCalendar = () => {
         const isEditable = tagName === 'INPUT' || tagName === 'TEXTAREA' || target.isContentEditable
         if (isEditable) return
       }
-      const selectedEvent = events.find((item) => item.id === selectedEventId)
+      const selectedEvent =
+        selectedEventKey != null
+          ? events.find((item) => getEventOccurrenceKey(item) === selectedEventKey)
+          : events.find((item) => item.id === selectedEventId)
       if (!selectedEvent) return
       const baseDate =
         selectedDate ?? (selectedEvent.start ? normalizeDate(selectedEvent.start) : new Date(date))
       const isRecurringEvent = selectedEvent.recurrenceGroup != null
       event.preventDefault()
+      if (selectedEvent.type === 'todo') {
+        deleteTodoMutate({
+          todoId: selectedEvent.id,
+          occurrenceDate: moment(baseDate).format('YYYY-MM-DD'),
+          scope: isRecurringEvent ? 'THIS_TODO' : undefined,
+        })
+        setSelectedEventId(null)
+        setSelectedEventKey(null)
+        setSelectedDate(null)
+        return
+      }
       if (isRecurringEvent) {
         setDeleteConfirm({
           isOpen: true,
@@ -246,7 +261,16 @@ const CustomCalendar = () => {
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [date, events, handleRemoveEvent, modal.isOpen, selectedDate, selectedEventId])
+  }, [
+    date,
+    deleteTodoMutate,
+    events,
+    handleRemoveEvent,
+    modal.isOpen,
+    selectedDate,
+    selectedEventId,
+    selectedEventKey,
+  ])
 
   // 뷰 변경/이동 핸들러
   const getViewStartDate = useCallback((baseDate: Date, baseView: View) => {
@@ -263,21 +287,21 @@ const CustomCalendar = () => {
   const onView = useCallback(
     (newView: View) => {
       setView(newView)
-      setSelectedDate(getViewStartDate(date, newView))
+      setSelectedDate(isDesktop ? getViewStartDate(date, newView) : null)
       setSelectedEventId(null)
       setSelectedEventKey(null)
     },
-    [date, getViewStartDate, setView],
+    [date, getViewStartDate, isDesktop, setView],
   )
 
   const onNavigate = useCallback(
     (newDate: Date) => {
       setDate(newDate)
-      setSelectedDate(getViewStartDate(newDate, view))
+      setSelectedDate(isDesktop ? getViewStartDate(newDate, view) : null)
       setSelectedEventId(null)
       setSelectedEventKey(null)
     },
-    [getViewStartDate, view],
+    [getViewStartDate, isDesktop, view],
   )
 
   const { handleSelectSlot } = useCalendarCreateEvent({
