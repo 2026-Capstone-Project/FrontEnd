@@ -1,8 +1,11 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { type MouseEventHandler, useState } from 'react'
 
 import Repeat from '@/shared/assets/icons/rotate.svg?react'
 import Trash from '@/shared/assets/icons/trash-2.svg?react'
+import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
 import { theme } from '@/shared/styles/theme'
+import { DeleteConfirmModal } from '@/shared/ui/modal'
 
 import PriorityBadge from '../ImportantBadge/PriorityBadge'
 import TodoCheckbox from '../TodoCheckbox/TodoCheckbox'
@@ -11,31 +14,55 @@ const TodoCard = ({
   id,
   title,
   date,
+  occurrenceDate,
   isHighlight,
+  isOverdue,
   time,
   priority,
-  repeat,
+  isRecurring,
   repeatInfo,
   onDoubleClick,
   isEditing,
+  isCompleted,
 }: {
   id: number
   title: string
   date: string
+  occurrenceDate: string
   time?: string
   isHighlight?: boolean
+  isOverdue?: boolean
   priority: 'HIGH' | 'MEDIUM' | 'LOW'
-  repeat?: boolean
+  isRecurring?: boolean
   repeatInfo?: string
   onDoubleClick?: MouseEventHandler<HTMLDivElement>
   isEditing?: boolean
+  isCompleted?: boolean
 }) => {
-  const [selected, setSelected] = useState(false)
-
+  const [selected, setSelected] = useState(isCompleted ?? false)
+  const [openModal, setOpenModal] = useState(false)
+  const queryClient = useQueryClient()
+  const { useDeleteTodo } = useTodoMutations()
+  const { mutate: deleteTodoMutate } = useDeleteTodo()
+  const handleDelete = () => {
+    if (isRecurring) {
+      setOpenModal(true)
+      return
+    }
+    deleteTodoMutate(
+      { todoId: id },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['todo', 'list'] })
+        },
+      },
+    )
+  }
   return (
     <S.Wrapper
       key={id}
       $isHighlight={isHighlight}
+      $isOverdue={isOverdue}
       $isEditing={isEditing}
       onDoubleClick={onDoubleClick}
     >
@@ -45,7 +72,7 @@ const TodoCard = ({
           <S.Title>{title}</S.Title>
           <S.Info $isHighlight={isHighlight}>
             {date} {time}{' '}
-            {repeat && (
+            {isRecurring && (
               <div
                 style={{
                   display: 'flex',
@@ -62,8 +89,16 @@ const TodoCard = ({
       </S.TodoLeftWrapper>
       <S.ButtonWrapper>
         <PriorityBadge priority={priority} />
-        <Trash color="#c5c5c5" />
+        <Trash color="#c5c5c5" onClick={handleDelete} />
       </S.ButtonWrapper>
+      {openModal && (
+        <DeleteConfirmModal
+          onClose={() => setOpenModal(false)}
+          title={title}
+          target={{ type: 'todo', id, occurrenceDate }}
+          mutate={deleteTodoMutate}
+        />
+      )}
     </S.Wrapper>
   )
 }

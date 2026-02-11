@@ -1,27 +1,57 @@
+import type { UseMutateFunction } from '@tanstack/react-query'
 import { useId, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
-import type { RecurrenceEventScope } from '@/shared/types/recurrence/recurrence'
+import type {
+  RecurrenceEventScope,
+  RecurrenceTodoScope,
+} from '@/shared/types/recurrence/recurrence'
 
 import Modal from '../../common/Modal/Modal'
 import * as S from './DeleteConfirmModal.style'
 
-const DeleteConfirmModal = ({
-  onClose,
-  title,
-  eventId,
-  occurrenceDate,
-}: {
+type EventDeleteVariables = {
+  eventId: number
+  params: {
+    scope?: RecurrenceEventScope
+    occurrenceDate: string
+  }
+}
+
+type TodoDeleteVariables = {
+  todoId: number
+  occurrenceDate?: string
+  scope?: RecurrenceTodoScope
+}
+
+type DeleteConfirmTarget =
+  | { type: 'event'; id: number; occurrenceDate: string }
+  | { type: 'todo'; id: number; occurrenceDate?: string }
+
+type DeleteConfirmModalBaseProps = {
   onClose: () => void
   title: string
-  eventId: number
-  occurrenceDate: string
-}) => {
+}
+
+type DeleteConfirmModalProps =
+  | (DeleteConfirmModalBaseProps & {
+      target: Extract<DeleteConfirmTarget, { type: 'event' }>
+      mutate: UseMutateFunction<unknown, unknown, EventDeleteVariables, unknown>
+    })
+  | (DeleteConfirmModalBaseProps & {
+      target: Extract<DeleteConfirmTarget, { type: 'todo' }>
+      mutate: UseMutateFunction<unknown, unknown, TodoDeleteVariables, unknown>
+    })
+
+const isEventDeleteProps = (
+  props: DeleteConfirmModalProps,
+): props is Extract<DeleteConfirmModalProps, { target: { type: 'event' } }> =>
+  props.target.type === 'event'
+
+const DeleteConfirmModal = (props: DeleteConfirmModalProps) => {
+  const { onClose, title } = props
   const radioName = useId()
-  const [selectedOption, setSelectedOption] = useState<'single' | 'future' | 'all'>('single')
-  const { useDeleteEvent } = useCalendarMutation()
-  const { mutate: deleteEventMutate } = useDeleteEvent()
+  const [selectedOption, setSelectedOption] = useState<'single' | 'future'>('single')
 
   const options = [
     { value: 'single', label: '이 이벤트' },
@@ -29,11 +59,24 @@ const DeleteConfirmModal = ({
   ] as const
 
   const handleDelete = () => {
-    const scope: RecurrenceEventScope =
-      selectedOption === 'single' ? 'THIS_EVENT' : 'THIS_AND_FOLLOWING_EVENTS'
-    const params = { scope, occurrenceDate }
-    deleteEventMutate(
-      { eventId, params },
+    if (isEventDeleteProps(props)) {
+      const scope: RecurrenceEventScope =
+        selectedOption === 'single' ? 'THIS_EVENT' : 'THIS_AND_FOLLOWING_EVENTS'
+      const params = { scope, occurrenceDate: props.target.occurrenceDate }
+      props.mutate(
+        { eventId: props.target.id, params },
+        {
+          onSuccess: () => {
+            onClose()
+          },
+        },
+      )
+      return
+    }
+    const scope: RecurrenceTodoScope =
+      selectedOption === 'single' ? 'THIS_TODO' : 'THIS_AND_FOLLOWING'
+    props.mutate(
+      { todoId: props.target.id, occurrenceDate: props.target.occurrenceDate, scope },
       {
         onSuccess: () => {
           onClose()

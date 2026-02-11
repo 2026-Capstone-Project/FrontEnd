@@ -645,8 +645,12 @@ const CustomCalendar = () => {
         <DeleteConfirmModal
           onClose={handleCloseDeleteConfirm}
           title={deleteConfirm.title}
-          eventId={deleteConfirm.eventId}
-          occurrenceDate={deleteConfirm.occurrenceDate}
+          target={{
+            type: 'event',
+            id: deleteConfirm.eventId,
+            occurrenceDate: deleteConfirm.occurrenceDate,
+          }}
+          mutate={deleteEventMutate}
         />
       )}
     </div>

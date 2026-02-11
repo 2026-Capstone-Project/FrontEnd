@@ -11,6 +11,7 @@ import { createPortal } from 'react-dom'
 import { FormProvider } from 'react-hook-form'
 
 import { useAddTodoForm } from '@/shared/hooks/form/useAddTodoForm'
+import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
 import { useGetDetailTodoQuery } from '@/shared/hooks/query/useTodoQueries'
 import { useRepeatChangeGuard } from '@/shared/hooks/repeat/useRepeatChangeGuard'
 import { theme } from '@/shared/styles/theme'
@@ -80,6 +81,8 @@ const AddTodoForm = ({
   const occurrenceDate = useMemo(() => moment(date).format('YYYY-MM-DD'), [date])
   const shouldFetchDetail = isEditing && eventId != null && eventId !== 0
   const { data: detailData } = useGetDetailTodoQuery(eventId, occurrenceDate, shouldFetchDetail)
+  const { useDeleteTodo } = useTodoMutations()
+  const { mutate: deleteTodoMutate } = useDeleteTodo()
   const [calendarAnchor, setCalendarAnchor] = useState<DOMRect | null>(null)
   const [deleteWarningVisible, setDeleteWarningVisible] = useState(false)
   const [isMobileLayout, setIsMobileLayout] = useState(() => {
@@ -369,9 +372,13 @@ const AddTodoForm = ({
       {deleteWarningVisible && (
         <DeleteConfirmModal
           title={todoTitle || '새로운 이벤트'}
-          eventId={eventId}
-          occurrenceDate={moment(todoDate).format('YYYY-MM-DD')}
           onClose={() => setDeleteWarningVisible(false)}
+          target={{
+            type: 'todo',
+            id: eventId,
+            occurrenceDate: moment(todoDate).format('YYYY-MM-DD'),
+          }}
+          mutate={deleteTodoMutate}
         />
       )}
       {isEditConfirmOpen && (
