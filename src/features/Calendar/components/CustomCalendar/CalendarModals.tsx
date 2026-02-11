@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import { useDetailEventQuery } from '@/shared/hooks/query/useCalendarQueries'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import AddSchedule from '@/shared/ui/modal/AddSchedule'
+import AddTodo from '@/shared/ui/modal/AddTodo'
 
 import EventsCard from '../EventsCard/EventsCard'
 
@@ -53,7 +54,8 @@ const CalendarModals = ({
 }: CalendarModalsProps) => {
   const shouldRenderModal = modalEventId != null
   const shouldRenderEventCard = !isModalOpen && showEventCard
-  const safeDetailEventId = modalEventId
+  const isTodoModal = modalEvent?.type === 'todo'
+  const safeDetailEventId = isModalEditing && !isTodoModal ? modalEventId : null
   const occurrenceDate = useMemo(() => {
     const base =
       modalEvent?.start instanceof Date
@@ -75,6 +77,42 @@ const CalendarModals = ({
   return (
     <>
       {shouldRenderModal &&
+        isTodoModal &&
+        modalPortalRoot &&
+        !isInlineMode &&
+        createPortal(
+          <AddTodo
+            date={modalDate}
+            onClose={onCloseModal}
+            mode={modalMode}
+            eventId={modalEventId}
+            tabsVisible={!isModalEditing}
+            onEventTitleConfirm={eventActions.onEventTitleConfirm}
+            onEventTimingChange={eventActions.onEventTimingChange}
+            isEditing={isModalEditing}
+          />,
+          modalPortalRoot,
+        )}
+      {shouldRenderModal &&
+        isTodoModal &&
+        modalPortalRoot &&
+        isInlineMode &&
+        cardPortalRoot &&
+        createPortal(
+          <AddTodo
+            date={modalDate}
+            onClose={onCloseModal}
+            mode={modalMode}
+            eventId={modalEventId}
+            tabsVisible={!isModalEditing}
+            onEventTitleConfirm={eventActions.onEventTitleConfirm}
+            onEventTimingChange={eventActions.onEventTimingChange}
+            isEditing={isModalEditing}
+          />,
+          cardPortalRoot,
+        )}
+      {shouldRenderModal &&
+        !isTodoModal &&
         modalPortalRoot &&
         !isInlineMode &&
         createPortal(
@@ -93,6 +131,7 @@ const CalendarModals = ({
           modalPortalRoot,
         )}
       {shouldRenderModal &&
+        !isTodoModal &&
         modalPortalRoot &&
         isInlineMode &&
         cardPortalRoot &&

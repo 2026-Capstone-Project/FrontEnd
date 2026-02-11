@@ -10,8 +10,18 @@ type UseDayViewHandlersArgs = {
   clearSelectedEvent?: () => void
   enqueueEvent: (date: Date, allDay: boolean) => CalendarEvent['id'] | null
   handleAddEvent: (referenceDate?: Date | string, eventId?: CalendarEvent['id'] | null) => void
-  updateEventTime: (eventId: CalendarEvent['id'], start: Date, end: Date) => void
-  updateEventTimePreview?: (eventId: CalendarEvent['id'], start: Date, end: Date) => void
+  updateEventTime: (
+    eventId: CalendarEvent['id'],
+    start: Date,
+    end: Date,
+    type?: CalendarEvent['type'],
+  ) => void
+  updateEventTimePreview?: (
+    eventId: CalendarEvent['id'],
+    start: Date,
+    end: Date,
+    type?: CalendarEvent['type'],
+  ) => void
   onCreateEvent?: (slotDate: Date) => void
   onToggleTodo?: (eventId: CalendarEvent['id']) => void
   selectedEventKey?: string | null
@@ -50,14 +60,14 @@ export const useDayViewHandlers = ({
 
   const handleDayViewEventDrag = useCallback(
     (event: CalendarEvent, start: Date, end: Date) => {
-      updateEventTime(event.id, start, end)
+      updateEventTime(event.id, start, end, event.type)
     },
     [updateEventTime],
   )
 
   const handleDayViewEventDragPreview = useCallback(
     (event: CalendarEvent, start: Date, end: Date) => {
-      updateEventTimePreview?.(event.id, start, end)
+      updateEventTimePreview?.(event.id, start, end, event.type)
     },
     [updateEventTimePreview],
   )

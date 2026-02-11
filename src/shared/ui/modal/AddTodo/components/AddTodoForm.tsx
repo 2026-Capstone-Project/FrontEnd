@@ -11,10 +11,12 @@ import { createPortal } from 'react-dom'
 import { FormProvider } from 'react-hook-form'
 
 import { useAddTodoForm } from '@/shared/hooks/form/useAddTodoForm'
+import { useGetDetailTodoQuery } from '@/shared/hooks/query/useTodoQueries'
 import { useRepeatChangeGuard } from '@/shared/hooks/repeat/useRepeatChangeGuard'
 import { theme } from '@/shared/styles/theme'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import { type AddTodoFormValues } from '@/shared/types/event/event'
+import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 import Checkbox from '@/shared/ui/common/Checkbox/Checkbox'
 import RepeatTypeGroup from '@/shared/ui/common/RepeatTypeGroup/RepeatTypeGroup'
 import TerminationPanel from '@/shared/ui/common/TerminationPanel/TerminationPanel'
@@ -25,6 +27,7 @@ import CustomDatePicker from '@/shared/ui/modal/AddTodo/components/CustomDatePic
 import CustomTimePicker from '@/shared/ui/modal/AddTodo/components/CustomTimePicker/CustomTimePicker'
 import * as S from '@/shared/ui/modal/AddTodo/index.style'
 import { formatDisplayDate } from '@/shared/utils/date'
+import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/recurrenceGroup'
 
 type AddTodoFormProps = {
   registerDeleteHandler?: (handler?: () => void) => void
@@ -74,6 +77,8 @@ const AddTodoForm = ({
     todoTitle,
   } = useAddTodoForm({ date, id: eventId })
   const { register, setValue } = formMethods
+  const occurrenceDate = useMemo(() => moment(date).format('YYYY-MM-DD'), [date])
+  const { data: detailData } = useGetDetailTodoQuery(eventId, occurrenceDate)
   const [calendarAnchor, setCalendarAnchor] = useState<DOMRect | null>(null)
   const [deleteWarningVisible, setDeleteWarningVisible] = useState(false)
   const [isMobileLayout, setIsMobileLayout] = useState(() => {
@@ -81,6 +86,38 @@ const AddTodoForm = ({
     return window.matchMedia(`(max-width: ${theme.breakPoints.tablet})`).matches
   })
   const startDate = formatDisplayDate(todoDate)
+
+  useEffect(() => {
+    if (!isEditing) return
+    const detail = detailData?.result
+    if (!detail) return
+
+    const baseDate = detail.occurrenceDate ? new Date(detail.occurrenceDate) : new Date(date)
+    const dueTime = detail.dueTime
+    const parsedTime =
+      typeof dueTime === 'string'
+        ? dueTime.slice(0, 5)
+        : `${String(dueTime?.hour ?? 0).padStart(2, '0')}:${String(dueTime?.minute ?? 0).padStart(
+            2,
+            '0',
+          )}`
+
+    setValue('todoTitle', detail.title ?? '', { shouldValidate: true })
+    setValue('todoDescription', detail.memo ?? '', { shouldValidate: true })
+    setValue('todoDate', baseDate, { shouldValidate: true })
+    setValue('todoEndTime', parsedTime, { shouldValidate: true })
+    setIsAllday(detail.isAllDay)
+
+    const mappedRepeatConfig = mapRecurrenceGroupToRepeatConfig(detail.recurrenceGroup)
+    const nextRepeatConfig = {
+      ...defaultRepeatConfig,
+      ...mappedRepeatConfig,
+      customWeeklyDays: mappedRepeatConfig.customWeeklyDays ?? [],
+      customMonthlyDates: mappedRepeatConfig.customMonthlyDates ?? [],
+      customYearlyMonths: mappedRepeatConfig.customYearlyMonths ?? [],
+    }
+    setValue('repeatConfig', nextRepeatConfig, { shouldValidate: true })
+  }, [date, detailData, isEditing, setIsAllday, setValue])
 
   const handleCalendarButtonClick =
     (field: 'start' | 'end') => (event: ReactMouseEvent<HTMLButtonElement>) => {

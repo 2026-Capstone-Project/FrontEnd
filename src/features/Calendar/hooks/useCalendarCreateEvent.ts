@@ -3,23 +3,20 @@ import { useCallback } from 'react'
 import type { SlotInfo, View } from 'react-big-calendar'
 import { Views } from 'react-big-calendar'
 
-import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 
 type UseCalendarCreateEventArgs = {
   view: View
-  onCreated: (start: Date, nextId: number) => void
-  refetchEvents: () => void
+  onCreated: (start: Date, nextId: CalendarEvent['id']) => void
+  enqueueEvent: (date: Date, allDay: boolean) => CalendarEvent['id'] | null
 }
 
-// 슬롯 더블클릭 시 기본 일정 생성 + 서버 요청을 담당하는 훅
+// 슬롯 더블클릭 시 임시 일정 생성 후 모달 오픈을 담당하는 훅
 export const useCalendarCreateEvent = ({
   view,
   onCreated,
-  refetchEvents,
+  enqueueEvent,
 }: UseCalendarCreateEventArgs) => {
-  const { usePostEvent } = useCalendarMutation()
-  const { mutate: postEventMutate } = usePostEvent()
-
   const handleSelectSlot = useCallback(
     (slotInfo: SlotInfo) => {
       const isWeekSingleClick =
@@ -29,32 +26,14 @@ export const useCalendarCreateEvent = ({
       const start = moment(slotInfo.start)
         .set({ hour: 9, minute: 0, second: 0, millisecond: 0 })
         .toDate()
-      const end = moment(slotInfo.start)
-        .set({ hour: 10, minute: 0, second: 0, millisecond: 0 })
-        .toDate()
-
-      postEventMutate(
-        {
-          title: '새 일정',
-          content: '',
-          startTime: moment(start).format('YYYY-MM-DDTHH:mm'),
-          endTime: moment(end).format('YYYY-MM-DDTHH:mm'),
-          isAllDay: false,
-        },
-        {
-          onSuccess: (response) => {
-            const nextId = response?.result?.id ?? response?.id
-            if (typeof nextId === 'number') {
-              refetchEvents()
-              onCreated(start, nextId)
-            }
-          },
-        },
-      )
+      const createdId = enqueueEvent(start, false)
+      if (createdId != null) {
+        onCreated(start, createdId)
+      }
 
       return true
     },
-    [onCreated, postEventMutate, refetchEvents, view],
+    [enqueueEvent, onCreated, view],
   )
 
   return { handleSelectSlot }

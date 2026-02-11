@@ -20,6 +20,7 @@ type UseScheduleSubmitFlowProps = {
     scope?: RecurrenceEventScope,
     occurrenceDate?: string,
   ) => void
+  createSchedule: (values: AddScheduleFormValues) => void
   syncEventTiming: (values: AddScheduleFormValues) => void
   handleTitleConfirm: (value: string) => void
   buildDateTime: (dateValue: Date | null, timeValue?: string) => Date
@@ -36,6 +37,7 @@ export const useScheduleSubmitFlow = ({
   onClose,
   setValue,
   patchSchedule,
+  createSchedule,
   syncEventTiming,
   handleTitleConfirm,
   buildDateTime,
@@ -90,7 +92,11 @@ export const useScheduleSubmitFlow = ({
         }
       }
       syncEventTiming(values)
-      patchSchedule(values)
+      if (isEditing) {
+        patchSchedule(values)
+      } else {
+        createSchedule(values)
+      }
       onClose()
     },
     (errors) => {

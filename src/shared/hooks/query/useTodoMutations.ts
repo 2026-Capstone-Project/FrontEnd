@@ -61,8 +61,8 @@ export function useTodoMutations() {
         isCompleted,
       }: {
         todoId: number
-        occurrenceDate?: string
-        isCompleted?: boolean
+        occurrenceDate: string
+        isCompleted: boolean
       }) => patchTodoComplete(todoId, occurrenceDate, isCompleted),
       {
         onSuccess: invalidateCalendarQueries,

@@ -3,10 +3,13 @@ import { useCallback, useMemo } from 'react'
 
 import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
-import type { RepeatConfigSchema } from '@/shared/types/event/event'
+import type { AddScheduleFormValues, RepeatConfigSchema } from '@/shared/types/event/event'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 import { useSchedulePatch } from '@/shared/ui/modal/AddSchedule/hooks/useSchedulePatch'
-import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/recurrenceGroup'
+import {
+  mapRecurrenceGroupToRepeatConfig,
+  mapRepeatConfigToRecurrenceGroup,
+} from '@/shared/utils/recurrenceGroup'
 
 type UseSchedulePatchControllerProps = {
   eventId: CalendarEvent['id']
@@ -22,8 +25,9 @@ export const useSchedulePatchController = ({
   // API 전송용 날짜/시간 포맷팅
   const formatDateTime = useCallback((value: Date) => moment(value).format('YYYY-MM-DDTHH:mm'), [])
 
-  const { usePatchEvent } = useCalendarMutation()
+  const { usePatchEvent, usePostEvent } = useCalendarMutation()
   const { mutate: patchEventMutation } = usePatchEvent()
+  const { mutate: postEventMutation } = usePostEvent()
 
   // 서버 반복 규칙을 폼 기본값으로 매핑
   const initialRepeatConfig = useMemo<RepeatConfigSchema>(() => {
@@ -60,10 +64,43 @@ export const useSchedulePatchController = ({
     buildDateTime,
   })
 
+  const createSchedule = useCallback(
+    (values: AddScheduleFormValues) => {
+      const startDate = values.eventStartDate ?? new Date(date)
+      const endDate = values.eventEndDate ?? startDate
+      const [start, end] = values.isAllday
+        ? [
+            new Date(new Date(startDate).setHours(0, 0, 0, 0)),
+            new Date(new Date(endDate).setHours(23, 59, 59, 0)),
+          ]
+        : [
+            buildDateTime(startDate, values.eventStartTime),
+            buildDateTime(endDate, values.eventEndTime),
+          ]
+
+      const recurrenceGroup =
+        values.repeatConfig.repeatType === 'none'
+          ? undefined
+          : (mapRepeatConfigToRecurrenceGroup(values.repeatConfig) ?? undefined)
+
+      postEventMutation({
+        title: values.eventTitle?.trim() || '새 일정',
+        content: values.eventDescription ?? '',
+        startTime: formatDateTime(start),
+        endTime: formatDateTime(end),
+        isAllDay: values.isAllday,
+        color: values.eventColor,
+        recurrenceGroup,
+      })
+    },
+    [buildDateTime, date, formatDateTime, postEventMutation],
+  )
+
   return {
     formatDateTime,
     buildDateTime,
     initialRepeatConfig,
     patchSchedule,
+    createSchedule,
   }
 }

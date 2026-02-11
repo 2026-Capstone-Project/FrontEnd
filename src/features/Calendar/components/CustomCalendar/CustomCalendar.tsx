@@ -38,6 +38,7 @@ import { getEventOccurrenceKey } from '@/features/Calendar/utils/helpers/dayView
 import { getViewConfig } from '@/features/Calendar/utils/viewConfig'
 import Plus from '@/shared/assets/icons/plus.svg?react'
 import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
+import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
 import { theme } from '@/shared/styles/theme'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import DeleteConfirmModal from '@/shared/ui/modal/DeleteConfirmModal/DeleteConfirmModal'
@@ -62,10 +63,13 @@ const CustomCalendar = () => {
   const { startDate, endDate } = useCalendarDateRange(view, date)
   // 서버 일정 목록 조회
   const { events: apiEvents, refetch: refetchEvents } = useCalendarApiEvents(startDate, endDate)
-  const { usePatchEvent, useDeleteEvent, usePostEvent } = useCalendarMutation()
+
+  const { usePatchEvent, useDeleteEvent } = useCalendarMutation()
   const { mutate: patchEventMutate } = usePatchEvent()
   const { mutate: deleteEventMutate } = useDeleteEvent()
-  const { mutate: postEventMutate } = usePostEvent()
+  const { usePatchCompleteTodo, usePatchTodo } = useTodoMutations()
+  const { mutate: patchCompleteTodoMutate } = usePatchCompleteTodo()
+  const { mutate: patchTodoMutate } = usePatchTodo()
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedEventId, setSelectedEventId] = useState<CalendarEvent['id'] | null>(null)
   const [selectedEventKey, setSelectedEventKey] = useState<string | null>(null)
@@ -86,7 +90,45 @@ const CustomCalendar = () => {
     updateEventType,
     updateEventTitle,
     toggleEventDone,
+    removeEvent,
   } = useCalendarEvents({ initialEvents: apiEvents })
+
+  const handleToggleTodo = useCallback(
+    (eventId: CalendarEvent['id']) => {
+      const target = events.find(
+        (eventItem) => eventItem.id === eventId && eventItem.type === 'todo',
+      )
+      if (!target || target.type !== 'todo') {
+        return
+      }
+      const nextCompleted = !target.isDone
+      toggleEventDone(eventId, 'todo')
+      const occurrenceDate = moment(target.start).format('YYYY-MM-DD')
+      patchCompleteTodoMutate({
+        todoId: eventId,
+        occurrenceDate,
+        isCompleted: nextCompleted,
+      })
+    },
+    [events, patchCompleteTodoMutate, toggleEventDone],
+  )
+
+  const patchTodoTiming = useCallback(
+    (todoEvent: CalendarEvent, start: Date) => {
+      const startDate = moment(start).format('YYYY-MM-DD')
+      const dueTime = todoEvent.isAllDay ? undefined : moment(start).format('HH:mm')
+      patchTodoMutate({
+        todoId: todoEvent.id,
+        occurrenceDate: startDate,
+        requestBody: {
+          startDate,
+          dueTime,
+          isAllDay: todoEvent.isAllDay,
+        },
+      })
+    },
+    [patchTodoMutate],
+  )
 
   // 반응형 레이아웃 판단
   const isDesktop = useCalendarResponsive()
@@ -126,13 +168,29 @@ const CustomCalendar = () => {
       isRecurring,
     })
 
+  const handleCloseModalWithCleanup = useCallback(() => {
+    if (!isModalEditing && modal.eventId != null) {
+      removeEvent(modal.eventId)
+    }
+    handleCloseModal()
+  }, [handleCloseModal, isModalEditing, modal.eventId, removeEvent])
+
   const handleCloseDeleteConfirm = useCallback(() => {
     setDeleteConfirm({ isOpen: false, eventId: null, title: '', occurrenceDate: '' })
   }, [])
 
   const handleDayViewEventTimeChange = useCallback(
-    (eventId: CalendarEvent['id'], start: Date, end: Date) => {
-      updateLocalEventTime(eventId, start, end)
+    (eventId: CalendarEvent['id'], start: Date, end: Date, type?: CalendarEvent['type']) => {
+      updateLocalEventTime(eventId, start, end, type)
+      if (type === 'todo') {
+        const todoEvent = events.find(
+          (eventItem) => eventItem.id === eventId && eventItem.type === 'todo',
+        )
+        if (todoEvent) {
+          patchTodoTiming(todoEvent, start)
+        }
+        return
+      }
       const nextStart = moment(start).format('YYYY-MM-DDTHH:mm')
       const nextEnd = moment(end).format('YYYY-MM-DDTHH:mm')
       patchEventMutate({
@@ -145,12 +203,12 @@ const CustomCalendar = () => {
         },
       })
     },
-    [patchEventMutate, updateLocalEventTime],
+    [events, patchEventMutate, patchTodoTiming, updateLocalEventTime],
   )
 
   const handleDayViewEventTimePreview = useCallback(
-    (eventId: CalendarEvent['id'], start: Date, end: Date) => {
-      updateLocalEventTime(eventId, start, end)
+    (eventId: CalendarEvent['id'], start: Date, end: Date, type?: CalendarEvent['type']) => {
+      updateLocalEventTime(eventId, start, end, type)
     },
     [updateLocalEventTime],
   )
@@ -224,7 +282,7 @@ const CustomCalendar = () => {
 
   const { handleSelectSlot } = useCalendarCreateEvent({
     view,
-    refetchEvents,
+    enqueueEvent,
     onCreated: (start, nextId) => {
       handleAddEvent(start, nextId)
     },
@@ -235,27 +293,12 @@ const CustomCalendar = () => {
       const startBase = moment(slotDate).set({ second: 0, millisecond: 0 })
       const snappedMinute = startBase.minute() < 30 ? 0 : 30
       const start = startBase.set({ minute: snappedMinute }).toDate()
-      const end = moment(start).add(1, 'hour').toDate()
-      postEventMutate(
-        {
-          title: '새 일정',
-          content: '',
-          startTime: moment(start).format('YYYY-MM-DDTHH:mm'),
-          endTime: moment(end).format('YYYY-MM-DDTHH:mm'),
-          isAllDay: false,
-        },
-        {
-          onSuccess: (response) => {
-            const nextId = response?.result?.id ?? response?.id
-            if (typeof nextId === 'number') {
-              refetchEvents()
-              handleAddEvent(slotDate, nextId)
-            }
-          },
-        },
-      )
+      const createdId = enqueueEvent(start, false)
+      if (createdId != null) {
+        handleAddEvent(start, createdId)
+      }
     },
-    [handleAddEvent, postEventMutate, refetchEvents],
+    [enqueueEvent, handleAddEvent],
   )
 
   const handleSelectSlotWrapper = useCallback(
@@ -339,7 +382,7 @@ const CustomCalendar = () => {
     updateEventTime: handleDayViewEventTimeChange,
     updateEventTimePreview: handleDayViewEventTimePreview,
     onCreateEvent: handleDayViewCreateEvent,
-    onToggleTodo: toggleEventDone,
+    onToggleTodo: handleToggleTodo,
     selectedEventKey,
     onEventSelect: handleSelectEventOnly,
     onEventClick: undefined,
@@ -372,7 +415,7 @@ const CustomCalendar = () => {
             {...props}
             onEventClick={handleSelectEventOnly}
             onEventDoubleClick={handleSelectEvent}
-            onToggleTodo={toggleEventDone}
+            onToggleTodo={handleToggleTodo}
             isSelected={getEventOccurrenceKey(props.event) === selectedEventKey}
           />
         ),
@@ -385,14 +428,14 @@ const CustomCalendar = () => {
             event={props.event}
             onEventClick={handleSelectEventOnly}
             onEventDoubleClick={handleSelectEvent}
-            onToggleTodo={toggleEventDone}
+            onToggleTodo={handleToggleTodo}
             isSelected={getEventOccurrenceKey(props.event) === selectedEventKey}
           />
         ),
       }
     }
     return {}
-  }, [view, handleSelectEvent, toggleEventDone, selectedEventKey, handleSelectEventOnly])
+  }, [view, handleSelectEvent, handleToggleTodo, selectedEventKey, handleSelectEventOnly])
 
   // 캘린더 컴포넌트/헤더/더보기 구성
   const mergedComponents = useMemo(
@@ -426,6 +469,10 @@ const CustomCalendar = () => {
       moveEvent(args)
       if (view !== Views.MONTH && view !== Views.WEEK) return
       const { event, start, end } = args
+      if (event.type === 'todo') {
+        patchTodoTiming(event, start as Date)
+        return
+      }
       const nextStart = moment(start).format('YYYY-MM-DDTHH:mm')
       const nextEnd = moment(end).format('YYYY-MM-DDTHH:mm')
       patchEventMutate({
@@ -438,7 +485,7 @@ const CustomCalendar = () => {
         },
       })
     },
-    [moveEvent, patchEventMutate, view],
+    [moveEvent, patchEventMutate, patchTodoTiming, view],
   )
 
   // react-big-calendar 렌더링용으로 Date 타입을 보장한 이벤트 목록
@@ -485,7 +532,7 @@ const CustomCalendar = () => {
         onSelectEvent: view === Views.MONTH ? undefined : handleRbcSelectEvent,
         onDoubleClickEvent: view === Views.MONTH ? undefined : handleRbcDoubleClickEvent,
         onEventDrop: handleEventDrop,
-        onEventResize: resizeEvent,
+        onEventResize: view === Views.DAY ? undefined : resizeEvent,
         onSelectSlot: handleSelectSlotWrapper,
         dayPropGetter,
         eventPropGetter:
@@ -524,11 +571,12 @@ const CustomCalendar = () => {
 
   // 인라인 모드에서는 선택 날짜 유지
   // 모달에 넘길 이벤트 조회
-  const modalEvent = useMemo(
-    () =>
-      modal.eventId == null ? null : (events.find((item) => item.id === modal.eventId) ?? null),
-    [events, modal.eventId],
-  )
+  const modalEvent = useMemo(() => {
+    if (selectedEventKey) {
+      return events.find((item) => getEventOccurrenceKey(item) === selectedEventKey) ?? null
+    }
+    return modal.eventId == null ? null : (events.find((item) => item.id === modal.eventId) ?? null)
+  }, [events, modal.eventId, selectedEventKey])
   const modalMode: 'modal' | 'inline' = isInlineMode ? 'inline' : 'modal'
   // 이벤트 수정 핸들러 묶음
   const eventActions = useMemo(
@@ -565,7 +613,7 @@ const CustomCalendar = () => {
         cardPortalRoot={cardPortalRoot}
         eventCardDate={eventCardDate}
         showEventCard={isInlineMode ? true : selectedDate != null}
-        onCloseModal={handleCloseModal}
+        onCloseModal={handleCloseModalWithCleanup}
         onCloseEventCard={() => setSelectedDate(null)}
         eventActions={eventActions}
       />

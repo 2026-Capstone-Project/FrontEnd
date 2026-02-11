@@ -32,19 +32,26 @@ export const useCalendarEvents = (options: UseCalendarEventsOptions = {}) => {
     const { event, start, end } = args
     const normalizedStart = normalizeDate(start)
     const normalizedEnd = normalizeDate(end)
-    setEvents((prev) => updateEventRange(prev, event.id, normalizedStart, normalizedEnd))
+    setEvents((prev) =>
+      updateEventRange(prev, event.id, normalizedStart, normalizedEnd, event.type),
+    )
   }, [])
 
   const resizeEvent = useCallback((args: EventInteractionArgs<CalendarEvent>) => {
     const { event, start, end } = args
     const normalizedStart = normalizeDate(start)
     const normalizedEnd = normalizeDate(end)
-    setEvents((prev) => updateEventRange(prev, event.id, normalizedStart, normalizedEnd))
+    setEvents((prev) =>
+      updateEventRange(prev, event.id, normalizedStart, normalizedEnd, event.type),
+    )
   }, [])
 
-  const updateEventTime = useCallback((eventId: CalendarEvent['id'], start: Date, end: Date) => {
-    setEvents((prev) => updateEventRange(prev, eventId, start, end))
-  }, [])
+  const updateEventTime = useCallback(
+    (eventId: CalendarEvent['id'], start: Date, end: Date, type?: CalendarEvent['type']) => {
+      setEvents((prev) => updateEventRange(prev, eventId, start, end, type))
+    },
+    [],
+  )
 
   const updateEventColor = useCallback(
     (eventId: CalendarEvent['id'], color: CalendarEvent['color']) => {
@@ -97,11 +104,18 @@ export const useCalendarEvents = (options: UseCalendarEventsOptions = {}) => {
     )
   }, [])
 
-  const toggleEventDone = useCallback((eventId: CalendarEvent['id']) => {
-    setEvents((prev) =>
-      prev.map((event) => (event.id === eventId ? { ...event, isDone: !event.isDone } : event)),
-    )
-  }, [])
+  const toggleEventDone = useCallback(
+    (eventId: CalendarEvent['id'], type?: CalendarEvent['type']) => {
+      setEvents((prev) =>
+        prev.map((event) =>
+          event.id === eventId && (type ? event.type === type : true)
+            ? { ...event, isDone: !event.isDone }
+            : event,
+        ),
+      )
+    },
+    [],
+  )
 
   const removeEvent = useCallback((eventId: CalendarEvent['id']) => {
     setEvents((prev) => prev.filter((event) => event.id !== eventId))

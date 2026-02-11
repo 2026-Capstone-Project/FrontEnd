@@ -75,7 +75,7 @@ export const getTodoForCalendar = async (
   startDate: string,
   endDate: string,
 ): Promise<TCommonResponse<GetTodoForCalendarResponseDTO>> => {
-  const { data } = await axiosInstance.get(`/todos/calendar`, {
+  const { data } = await axiosInstance.get(`/api/v1/todos/calendar`, {
     params: { startDate, endDate },
   })
   return data

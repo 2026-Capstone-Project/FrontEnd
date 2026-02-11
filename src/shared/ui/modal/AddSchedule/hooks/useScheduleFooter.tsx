@@ -14,6 +14,7 @@ type UseScheduleFooterProps = {
   repeatConfig: RepeatConfig
   eventId: CalendarEvent['id']
   initialEvent?: CalendarEvent | null
+  isEditing: boolean
   getValues: UseFormGetValues<AddScheduleFormValues>
   setEventColor: (value: EventColorType) => void
   patchSchedule: (
@@ -34,6 +35,7 @@ export const useScheduleFooter = ({
   repeatConfig,
   eventId,
   initialEvent,
+  isEditing,
   getValues,
   setEventColor,
   patchSchedule,
@@ -107,17 +109,21 @@ export const useScheduleFooter = ({
       setEventColor(value)
       if (eventId != null && eventId !== 0) {
         onEventColorChange?.(eventId, value)
-        const nextValues = { ...getValues(), eventColor: value }
-        if (isExistingRecurring) {
-          openApplyConfirm(nextValues)
-        } else {
-          patchSchedule(nextValues)
-        }
+      }
+      if (!isEditing) {
+        return
+      }
+      const nextValues = { ...getValues(), eventColor: value }
+      if (isExistingRecurring) {
+        openApplyConfirm(nextValues)
+      } else {
+        patchSchedule(nextValues)
       }
     },
     [
       eventId,
       getValues,
+      isEditing,
       isExistingRecurring,
       onEventColorChange,
       openApplyConfirm,

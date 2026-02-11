@@ -15,7 +15,7 @@ import axiosInstance from '../axios'
 export const getTodos = async (
   filter: TodoFilter,
 ): Promise<TCommonResponse<GetTodoResponseDTO>> => {
-  const { data } = await axiosInstance.get('/todos', {
+  const { data } = await axiosInstance.get('/api/v1/todos', {
     params: { filter },
   })
   return data
@@ -24,7 +24,7 @@ export const getTodos = async (
 export const postTodo = async (
   requestBody: PostTodoRequestDTO,
 ): Promise<TCommonResponse<PostTodoResponseDTO>> => {
-  const { data } = await axiosInstance.post('/todos', { requestBody })
+  const { data } = await axiosInstance.post('/api/v1/todos', requestBody)
   return data
 }
 
@@ -32,7 +32,7 @@ export const getDetailTodo = async (
   todoId: number,
   occurrenceDate: string,
 ): Promise<TCommonResponse<GetDetailTodoResponseDTO>> => {
-  const { data } = await axiosInstance.get(`/todos/${todoId}`, {
+  const { data } = await axiosInstance.get(`/api/v1/todos/${todoId}`, {
     params: { occurrenceDate },
   })
   return data
@@ -43,7 +43,7 @@ export const deleteTodo = async (
   occurrenceDate?: string,
   scope?: RecurrenceTodoScope,
 ) => {
-  const { data } = await axiosInstance.delete(`/todos/${todoId}`, {
+  const { data } = await axiosInstance.delete(`/api/v1/todos/${todoId}`, {
     params: { occurrenceDate, scope },
   })
   return data
@@ -55,9 +55,8 @@ export const patchTodo = async (
   occurrenceDate?: string,
   scope?: RecurrenceTodoScope,
 ) => {
-  const { data } = await axiosInstance.patch(`/todos/${todoId}`, {
+  const { data } = await axiosInstance.patch(`/api/v1/todos/${todoId}`, requestBody, {
     params: { occurrenceDate, scope },
-    requestBody,
   })
   return data
 }
@@ -67,7 +66,7 @@ export const patchTodoComplete = async (
   occurrenceDate?: string,
   isCompleted?: boolean,
 ) => {
-  const { data } = await axiosInstance.patch(`/todos/${todoId}/complete`, {
+  const { data } = await axiosInstance.patch(`/api/v1/todos/${todoId}/complete`, null, {
     params: { occurrenceDate, isCompleted },
   })
   return data
@@ -76,7 +75,7 @@ export const patchTodoComplete = async (
 export const getTodoProgress = async (
   date: string,
 ): Promise<TCommonResponse<GetTodoProgressResponseDTO>> => {
-  const { data } = await axiosInstance.get('/todos/progress', {
+  const { data } = await axiosInstance.get('/api/v1/todos/progress', {
     params: { date },
   })
   return data

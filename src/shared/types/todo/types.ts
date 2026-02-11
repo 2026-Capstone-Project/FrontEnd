@@ -7,12 +7,14 @@ export type TodoType = {
   todoId: number
   occurrenceDate: string
   title: string
-  dueTime: {
-    hour: number
-    minute: number
-    second: number
-    nano: number
-  }
+  dueTime:
+    | string
+    | {
+        hour: number
+        minute: number
+        second: number
+        nano: number
+      }
   isAllDay: boolean
   priority: PriorityType
   memo: string

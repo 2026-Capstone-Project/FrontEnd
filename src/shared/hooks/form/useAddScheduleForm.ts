@@ -18,6 +18,7 @@ import { type RepeatConfig, type RepeatType } from '@/shared/types/recurrence/re
 type UseAddScheduleFormProps = {
   date: string
   initialEvent?: CalendarEvent | null
+  isEditing?: boolean
 }
 
 export type UseAddScheduleFormResult = {
@@ -50,6 +51,7 @@ export type UseAddScheduleFormResult = {
 export const useAddScheduleForm = ({
   date,
   initialEvent,
+  isEditing = false,
 }: UseAddScheduleFormProps): UseAddScheduleFormResult => {
   const [isAllday, setIsAllday] = useState(initialEvent?.isAllDay ?? false)
 
@@ -65,7 +67,7 @@ export const useAddScheduleForm = ({
     repeatConfig,
     eventColor,
     eventTitle,
-  } = useScheduleFormFields({ date, isAllday, initialEvent })
+  } = useScheduleFormFields({ date, isAllday, initialEvent, isEditing })
 
   const { handleRepeatType, updateConfig, setEventColor } = useRepeatConfigController({
     repeatConfig,

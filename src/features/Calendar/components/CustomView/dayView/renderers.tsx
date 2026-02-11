@@ -220,30 +220,34 @@ export const renderTimeOverlayColumn = ({
                 <S.EventTitle>{event.title}</S.EventTitle>
               </S.EventRow>
               {event.location && <S.EventLocation>{event.location}</S.EventLocation>}
-              <S.EventResizerTop
-                onPointerDown={(pointerEvent) => {
-                  pointerEvent.stopPropagation()
-                  handleResizeStartPointerDown(
-                    pointerEvent,
-                    event,
-                    rowHeightForCalc,
-                    eventStart,
-                    eventEnd,
-                  )
-                }}
-              />
-              <S.EventResizer
-                onPointerDown={(pointerEvent) => {
-                  pointerEvent.stopPropagation()
-                  handleResizePointerDown(
-                    pointerEvent,
-                    event,
-                    rowHeightForCalc,
-                    eventStart,
-                    eventEnd,
-                  )
-                }}
-              />
+              {event.type !== 'todo' && (
+                <S.EventResizerTop
+                  onPointerDown={(pointerEvent) => {
+                    pointerEvent.stopPropagation()
+                    handleResizeStartPointerDown(
+                      pointerEvent,
+                      event,
+                      rowHeightForCalc,
+                      eventStart,
+                      eventEnd,
+                    )
+                  }}
+                />
+              )}
+              {event.type !== 'todo' && (
+                <S.EventResizer
+                  onPointerDown={(pointerEvent) => {
+                    pointerEvent.stopPropagation()
+                    handleResizePointerDown(
+                      pointerEvent,
+                      event,
+                      rowHeightForCalc,
+                      eventStart,
+                      eventEnd,
+                    )
+                  }}
+                />
+              )}
             </S.DayEventBadge>
           )
         })}

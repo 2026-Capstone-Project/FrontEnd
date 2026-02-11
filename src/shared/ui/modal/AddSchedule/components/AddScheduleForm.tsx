@@ -4,8 +4,8 @@ import { useAddScheduleForm } from '@/shared/hooks/form/useAddScheduleForm'
 import { type AddScheduleFormProps } from '@/shared/ui/modal/AddSchedule/components/AddScheduleForm.types'
 import AddScheduleFormContent from '@/shared/ui/modal/AddSchedule/components/AddScheduleFormContent'
 
-const AddScheduleForm = ({ date, initialEvent, ...rest }: AddScheduleFormProps) => {
-  const schedule = useAddScheduleForm({ date, initialEvent })
+const AddScheduleForm = ({ date, initialEvent, isEditing, ...rest }: AddScheduleFormProps) => {
+  const schedule = useAddScheduleForm({ date, initialEvent, isEditing })
 
   return (
     <FormProvider {...schedule.formMethods}>

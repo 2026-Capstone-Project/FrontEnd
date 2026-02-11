@@ -30,7 +30,7 @@ export const useTodoFormFields = ({
   const formMethods = useForm<AddTodoFormValues>({
     resolver,
     defaultValues: {
-      todoTitle: '새로운 할 일',
+      todoTitle: '',
       todoDescription: '',
       todoDate: new Date(date),
       todoEndTime: '10:00',
