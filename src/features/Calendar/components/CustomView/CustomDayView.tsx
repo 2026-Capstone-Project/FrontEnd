@@ -23,7 +23,7 @@ interface CustomDayViewProps {
   onEventDrag?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
   onEventDragPreview?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
   onToggleTodo?: (eventId: CalendarEvent['id']) => void
-  selectedEventId?: CalendarEvent['id'] | null
+  selectedEventKey?: string | null
   onEventSelect?: (event: CalendarEvent, clickedDate?: Date) => void
   onEventClick?: (event: CalendarEvent, clickedDate?: Date) => void
   onEventDoubleClick?: (event: CalendarEvent, clickedDate?: Date) => void
@@ -44,7 +44,7 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
   onEventDrag,
   onEventDragPreview,
   onToggleTodo,
-  selectedEventId,
+  selectedEventKey,
   onEventSelect,
   onEventClick,
   onEventDoubleClick,
@@ -112,7 +112,7 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
           {renderAllDayEventBadges(
             allDayEvents,
             onToggleTodo,
-            selectedEventId,
+            selectedEventKey,
             onEventSelect,
             onEventClick,
             onEventDoubleClick,
@@ -133,7 +133,7 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
               handleResizePointerDown,
               handleResizeStartPointerDown,
               onToggleTodo,
-              selectedEventId,
+              selectedEventKey,
               onEventSelect,
               onEventClick,
               onEventDoubleClick,

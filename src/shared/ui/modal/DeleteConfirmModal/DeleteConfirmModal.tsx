@@ -25,16 +25,11 @@ const DeleteConfirmModal = ({
   const options = [
     { value: 'single', label: '이 이벤트' },
     { value: 'future', label: '이 이벤트부터 이후 이벤트' },
-    { value: 'all', label: '모든 이벤트' },
   ] as const
 
   const handleDelete = () => {
     const scope: DeleteScope =
-      selectedOption === 'single'
-        ? 'THIS_EVENT'
-        : selectedOption === 'future'
-          ? 'THIS_AND_FOLLOWING_EVENTS'
-          : 'ALL_EVENTS'
+      selectedOption === 'single' ? 'THIS_EVENT' : 'THIS_AND_FOLLOWING_EVENTS'
     const params = { scope, occurrenceDate }
     deleteEventMutate(
       { eventId, params },
@@ -49,7 +44,7 @@ const DeleteConfirmModal = ({
   return createPortal(
     <Modal onClick={onClose}>
       <S.ModalWrapper>
-        <S.Title>반복 일정 "{title}" 삭제</S.Title>
+        <S.Title>반복 일정 "{title}" 삭제 </S.Title>
         <S.OptionsContainer>
           {options.map((option) => {
             const optionId = `${radioName}-${option.value}`

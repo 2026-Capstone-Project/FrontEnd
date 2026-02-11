@@ -335,11 +335,7 @@ const AddTodoForm = ({
         />
       )}
       {isEditConfirmOpen && (
-        <EditConfirmModal
-          title={todoTitle || '할 일'}
-          onCancel={handleCancelRepeat}
-          onConfirm={handleConfirmedSubmit}
-        />
+        <EditConfirmModal onCancel={handleCancelRepeat} onConfirm={handleConfirmedSubmit} />
       )}
     </>
   )

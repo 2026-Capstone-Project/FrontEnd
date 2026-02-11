@@ -18,6 +18,8 @@ export const monthViewStyles = css`
   }
   .rbc-off-range {
     color: #d2d3d2 !important;
+    visibility: hidden;
+    pointer-events: none;
   }
   .rbc-off-range-bg {
     background-color: transparent;

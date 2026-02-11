@@ -14,7 +14,7 @@ type UseDayViewHandlersArgs = {
   updateEventTimePreview?: (eventId: CalendarEvent['id'], start: Date, end: Date) => void
   onCreateEvent?: (slotDate: Date) => void
   onToggleTodo?: (eventId: CalendarEvent['id']) => void
-  selectedEventId?: CalendarEvent['id'] | null
+  selectedEventKey?: string | null
   onEventSelect?: (event: CalendarEvent, clickedDate?: Date) => void
   onEventClick?: (event: CalendarEvent, clickedDate?: Date) => void
   onEventDoubleClick?: (event: CalendarEvent, clickedDate?: Date) => void
@@ -29,7 +29,7 @@ export const useDayViewHandlers = ({
   updateEventTimePreview,
   onCreateEvent,
   onToggleTodo,
-  selectedEventId,
+  selectedEventKey,
   onEventSelect,
   onEventClick,
   onEventDoubleClick,
@@ -72,7 +72,7 @@ export const useDayViewHandlers = ({
           onEventDrag={handleDayViewEventDrag}
           onEventDragPreview={handleDayViewEventDragPreview}
           onToggleTodo={onToggleTodo}
-          selectedEventId={selectedEventId}
+          selectedEventKey={selectedEventKey}
           onEventSelect={onEventSelect}
           onEventClick={onEventClick}
           onEventDoubleClick={onEventDoubleClick}
@@ -90,7 +90,7 @@ export const useDayViewHandlers = ({
     handleDayViewEventDrag,
     handleDayViewEventDragPreview,
     onToggleTodo,
-    selectedEventId,
+    selectedEventKey,
     onEventSelect,
     onEventClick,
     onEventDoubleClick,

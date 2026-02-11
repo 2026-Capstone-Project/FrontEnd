@@ -34,6 +34,7 @@ import {
   getDayPropStyle,
   normalizeDate,
 } from '@/features/Calendar/utils/helpers/calendarPageHelpers'
+import { getEventOccurrenceKey } from '@/features/Calendar/utils/helpers/dayViewHelpers'
 import { getViewConfig } from '@/features/Calendar/utils/viewConfig'
 import Plus from '@/shared/assets/icons/plus.svg?react'
 import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
@@ -67,6 +68,7 @@ const CustomCalendar = () => {
   const { mutate: postEventMutate } = usePostEvent()
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedEventId, setSelectedEventId] = useState<CalendarEvent['id'] | null>(null)
+  const [selectedEventKey, setSelectedEventKey] = useState<string | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<{
     isOpen: boolean
     eventId: CalendarEvent['id'] | null
@@ -181,6 +183,7 @@ const CustomCalendar = () => {
       }
       handleRemoveEvent(selectedEventId, baseDate.toISOString(), false)
       setSelectedEventId(null)
+      setSelectedEventKey(null)
       setSelectedDate(null)
     }
     window.addEventListener('keydown', handleKeyDown)
@@ -188,8 +191,36 @@ const CustomCalendar = () => {
   }, [date, events, handleRemoveEvent, modal.isOpen, selectedDate, selectedEventId])
 
   // 뷰 변경/이동 핸들러
-  const onView = useCallback((newView: View) => setView(newView), [setView])
-  const onNavigate = useCallback((newDate: Date) => setDate(newDate), [setDate])
+  const getViewStartDate = useCallback((baseDate: Date, baseView: View) => {
+    const base = moment(baseDate)
+    if (baseView === Views.MONTH) {
+      return base.startOf('month').toDate()
+    }
+    if (baseView === Views.WEEK) {
+      return base.day(0).startOf('day').toDate() // Sunday
+    }
+    return base.startOf('day').toDate()
+  }, [])
+
+  const onView = useCallback(
+    (newView: View) => {
+      setView(newView)
+      setSelectedDate(getViewStartDate(date, newView))
+      setSelectedEventId(null)
+      setSelectedEventKey(null)
+    },
+    [date, getViewStartDate, setView],
+  )
+
+  const onNavigate = useCallback(
+    (newDate: Date) => {
+      setDate(newDate)
+      setSelectedDate(getViewStartDate(newDate, view))
+      setSelectedEventId(null)
+      setSelectedEventKey(null)
+    },
+    [getViewStartDate, view],
+  )
 
   const { handleSelectSlot } = useCalendarCreateEvent({
     view,
@@ -233,6 +264,7 @@ const CustomCalendar = () => {
       const handled = handleSelectSlot(slotInfo)
       if (!handled) {
         setSelectedEventId(null)
+        setSelectedEventKey(null)
         setSelectedDate(slotInfo.start)
       } else {
         setSelectedDate(slotInfo.start)
@@ -246,6 +278,7 @@ const CustomCalendar = () => {
     (event: CalendarEvent) => {
       setSelectedEventId(event.id)
       setSelectedDate(normalizeDate(event.start))
+      setSelectedEventKey(getEventOccurrenceKey(event))
       handleEventClick(event)
     },
     [handleEventClick],
@@ -255,6 +288,7 @@ const CustomCalendar = () => {
   const handleSelectEventOnly = useCallback((event: CalendarEvent) => {
     setSelectedEventId(event.id)
     setSelectedDate(normalizeDate(event.start))
+    setSelectedEventKey(getEventOccurrenceKey(event))
   }, [])
 
   const handleRbcSelectEvent = useCallback(
@@ -283,6 +317,7 @@ const CustomCalendar = () => {
   // 헤더 날짜 클릭 시 달력 날짜 이동
   const handleSelectDate = useCallback((next: Date) => {
     setSelectedEventId(null)
+    setSelectedEventKey(null)
     setDate(next)
   }, [])
   const viewConfig = useMemo(
@@ -295,14 +330,17 @@ const CustomCalendar = () => {
   // 일간뷰 전용 핸들러 주입
   const dayViewWithHandlers = useDayViewHandlers({
     clearSelectedDate: () => setSelectedDate(null),
-    clearSelectedEvent: () => setSelectedEventId(null),
+    clearSelectedEvent: () => {
+      setSelectedEventId(null)
+      setSelectedEventKey(null)
+    },
     enqueueEvent,
     handleAddEvent,
     updateEventTime: handleDayViewEventTimeChange,
     updateEventTimePreview: handleDayViewEventTimePreview,
     onCreateEvent: handleDayViewCreateEvent,
     onToggleTodo: toggleEventDone,
-    selectedEventId,
+    selectedEventKey,
     onEventSelect: handleSelectEventOnly,
     onEventClick: undefined,
     onEventDoubleClick: handleSelectEvent,
@@ -315,6 +353,7 @@ const CustomCalendar = () => {
         onClick: (event: MouseEvent<HTMLElement>) => {
           event.stopPropagation()
           setSelectedEventId(null)
+          setSelectedEventKey(null)
           setDate(value)
           if (typeof children.props.onClick === 'function') {
             children.props.onClick(event)
@@ -334,7 +373,7 @@ const CustomCalendar = () => {
             onEventClick={handleSelectEventOnly}
             onEventDoubleClick={handleSelectEvent}
             onToggleTodo={toggleEventDone}
-            isSelected={props.event.id === selectedEventId}
+            isSelected={getEventOccurrenceKey(props.event) === selectedEventKey}
           />
         ),
       }
@@ -347,13 +386,13 @@ const CustomCalendar = () => {
             onEventClick={handleSelectEventOnly}
             onEventDoubleClick={handleSelectEvent}
             onToggleTodo={toggleEventDone}
-            isSelected={props.event.id === selectedEventId}
+            isSelected={getEventOccurrenceKey(props.event) === selectedEventKey}
           />
         ),
       }
     }
     return {}
-  }, [view, handleSelectEvent, toggleEventDone, selectedEventId, handleSelectEventOnly])
+  }, [view, handleSelectEvent, toggleEventDone, selectedEventKey, handleSelectEventOnly])
 
   // 캘린더 컴포넌트/헤더/더보기 구성
   const mergedComponents = useMemo(
@@ -449,6 +488,18 @@ const CustomCalendar = () => {
         onEventResize: resizeEvent,
         onSelectSlot: handleSelectSlotWrapper,
         dayPropGetter,
+        eventPropGetter:
+          view === Views.MONTH
+            ? (event) => {
+                const start = moment(event.start)
+                const end = moment(event.end)
+                const monthStart = moment(date).startOf('month')
+                const monthEnd = moment(date).endOf('month')
+                const overlaps =
+                  end.isSameOrAfter(monthStart, 'day') && start.isSameOrBefore(monthEnd, 'day')
+                return overlaps ? {} : { style: { display: 'none' } }
+              }
+            : undefined,
         components: mergedComponents,
         viewConfig,
       }),

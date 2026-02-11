@@ -4,7 +4,7 @@ import type { MutableRefObject, Ref } from 'react'
 import type { CalendarEvent } from '../../../../../shared/types/calendar/types'
 import { TIMED_SLOT_CONFIG } from '../../../domain/constants'
 import { getColorPalette } from '../../../utils/colorPalette'
-import type { TimedSlotEvent } from '../../../utils/helpers/dayViewHelpers'
+import { getEventOccurrenceKey, type TimedSlotEvent } from '../../../utils/helpers/dayViewHelpers'
 import { TodoCheckbox } from '../../CustomEvent/CustomEvent.style'
 import * as S from '../dayView'
 import type { DragState, EventPointerDownHandler } from './dragHandlers'
@@ -44,7 +44,7 @@ export const renderTimeSlotRows = (
 export const renderAllDayEventBadges = (
   events: CalendarEvent[],
   onToggleTodo?: (eventId: CalendarEvent['id']) => void,
-  selectedEventId?: CalendarEvent['id'] | null,
+  selectedEventKey?: string | null,
   onEventSelect?: (event: CalendarEvent) => void,
   onEventClick?: (event: CalendarEvent) => void,
   onEventDoubleClick?: (event: CalendarEvent) => void,
@@ -56,7 +56,7 @@ export const renderAllDayEventBadges = (
         key={event.id}
         color={palette.base}
         pointColor={palette.point}
-        isSelected={selectedEventId === event.id}
+        isSelected={selectedEventKey === getEventOccurrenceKey(event)}
         onClick={() => {
           onEventSelect?.(event)
           onEventClick?.(event)
@@ -99,7 +99,7 @@ export const renderTimeOverlayColumn = ({
   handleResizePointerDown,
   handleResizeStartPointerDown,
   onToggleTodo,
-  selectedEventId,
+  selectedEventKey,
   onEventSelect,
   onEventClick,
   onEventDoubleClick,
@@ -117,7 +117,7 @@ export const renderTimeOverlayColumn = ({
   handleResizePointerDown: EventPointerDownHandler
   handleResizeStartPointerDown: EventPointerDownHandler
   onToggleTodo?: (eventId: CalendarEvent['id']) => void
-  selectedEventId?: CalendarEvent['id'] | null
+  selectedEventKey?: string | null
   onEventSelect?: (event: CalendarEvent) => void
   onEventClick?: (event: CalendarEvent) => void
   onEventDoubleClick?: (event: CalendarEvent) => void
@@ -169,7 +169,7 @@ export const renderTimeOverlayColumn = ({
               key={event.id}
               color={palette.base}
               pointColor={palette.point}
-              isSelected={selectedEventId === event.id}
+              isSelected={selectedEventKey === getEventOccurrenceKey(event)}
               overflowTop={overflowTopResolved}
               overflowBottom={overflowBottomResolved}
               style={{

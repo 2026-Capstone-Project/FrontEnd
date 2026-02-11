@@ -21,6 +21,9 @@ export const isDateOnlyString = (value?: stringOrDate) =>
 export const compareByStart = (a: CalendarEvent, b: CalendarEvent) =>
   moment(a.start).diff(moment(b.start))
 
+export const getEventOccurrenceKey = (event: CalendarEvent) =>
+  `${event.id}_${moment(event.start).format('YYYY-MM-DDTHH:mm')}`
+
 export const eventCoversDate = (event: CalendarEvent, date: Date) => {
   const start = moment(event.start)
   const end = moment(event.end)

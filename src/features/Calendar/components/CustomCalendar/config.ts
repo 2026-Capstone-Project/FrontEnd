@@ -21,6 +21,7 @@ type CalendarConfigArgs = {
   onEventResize: CalendarDndProps['onEventResize']
   onSelectSlot: CalendarDndProps['onSelectSlot']
   dayPropGetter: CalendarDndProps['dayPropGetter']
+  eventPropGetter?: CalendarDndProps['eventPropGetter']
   components: CalendarDndProps['components']
   viewConfig: {
     formats?: CalendarDndProps['formats']
@@ -42,6 +43,7 @@ export const buildCalendarConfig = ({
   onEventResize,
   onSelectSlot,
   dayPropGetter,
+  eventPropGetter,
   components,
   viewConfig,
 }: CalendarConfigArgs): CalendarDndProps => {
@@ -68,6 +70,7 @@ export const buildCalendarConfig = ({
     draggableAccessor: () => true,
     onSelectSlot,
     dayPropGetter,
+    eventPropGetter,
     components,
     formats: view === Views.DAY ? {} : viewConfig.formats,
     ...allDayAccessorProps,
