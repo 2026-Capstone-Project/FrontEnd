@@ -6,11 +6,10 @@ on:
   workflow_dispatch: # 수동 실행 버튼
 
 jobs:
-  generate-and-pr:
+  generate-and-push:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write # PR을 생성하기 위해 꼭 필요한 권한
 
     steps:
       - name: Checkout Code
@@ -39,23 +38,14 @@ jobs:
           echo "CURRENT_DATE=$(TZ='Asia/Seoul' date +'%Y-%m-%d')" >> $GITHUB_ENV
           echo "CURRENT_DATETIME=$(TZ='Asia/Seoul' date +'%Y-%m-%d %H:%M KST')" >> $GITHUB_ENV
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "docs: 📝 [Calio] 개발 일지 생성"
-          branch: auto-daily-log
-          delete-branch: true # PR이 머지되면 브랜치 자동 삭제
-          title: "📝 [Calio] 오늘의 개발 아티클이 도착했습니다! (${{ env.CURRENT_DATE }})"
-          body: |
-            ## 🤖 Calio AI Daily Report
-            오늘의 작업 내역과 코드 변경점을 분석하여 생성된 리포트입니다.
-
-            - **브랜치:** 모든 활성 브랜치 스캔
-            - **생성일:** ${{ env.CURRENT_DATETIME }}
-
-            내용을 검토하신 후 `develop` 브랜치로 머지해 주세요!
-          base: develop # PR을 보낼 대상 브랜치
-          labels: |
-            documentation
-            ai-generated
+      - name: Commit & Push to auto-daily-log
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "docs: 📝 [Calio] 개발 일지 생성 (${{ env.CURRENT_DATE }})"
+          git push origin HEAD:auto-daily-log
