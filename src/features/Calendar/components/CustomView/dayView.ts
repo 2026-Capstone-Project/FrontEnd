@@ -136,10 +136,10 @@ export const DayEventBadge = styled(EventBadge)<{
   border-bottom-right-radius: ${({ overflowBottom }) => (overflowBottom ? '0' : '4px')};
   display: flex;
   width: 100%;
-  padding: 8px;
+  padding: 0 8px;
   align-items: flex-start;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
   pointer-events: auto;
   overflow: hidden;
   cursor: grab;
