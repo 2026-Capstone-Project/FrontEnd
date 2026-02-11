@@ -1,18 +1,18 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { type FC, type SVGProps, useState } from 'react'
 
 import GoogleIcon from '@/assets/social/google.svg?react'
 import KakaoIcon from '@/assets/social/kakao.svg?react'
 import NaverIcon from '@/assets/social/naver.svg?react'
 import Modal from '@/features/Common/Modal'
 import { SettingsAPI } from '@/shared/api/settings/settings'
+import { useCustomSuspenseQuery } from '@/shared/hooks/customQuery'
+import { useSettingsMutation } from '@/shared/hooks/useSettingsMutation'
 import type { CalendarView, ReminderTiming } from '@/shared/types/settings/settings'
 import { useAuthStore } from '@/store/useAuthStore'
 
 import * as S from './Settings.styles'
 
-const PROVIDER_ICONS: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
+const PROVIDER_ICONS: Record<string, FC<SVGProps<SVGSVGElement>>> = {
   google: GoogleIcon,
   kakao: KakaoIcon,
   naver: NaverIcon,
@@ -25,89 +25,19 @@ const User = {
 }
 
 export default function SettingsPage() {
-  const queryClient = useQueryClient()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const isLoggedIn = useAuthStore((state) => state.isLoggedIn)
   const logout = useAuthStore((state) => state.logout)
+
+  const { toggleBriefing, updateTime, updateReminder, toggleSuggestion, updateView, deleteUser } =
+    useSettingsMutation()
+
   const timeOptions = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, '0')}:00`)
 
-  const navigate = useNavigate()
-
-  const { data: settings, isLoading } = useQuery({
-    queryKey: ['settings'],
-    queryFn: async () => {
-      const res = await SettingsAPI.getSettings()
-      if (!res.isSuccess) throw new Error('설정 불러오기 실패')
-      return res.result
-    },
-    enabled: isLoggedIn,
+  const { data: settings } = useCustomSuspenseQuery(['settings'], async () => {
+    const res = await SettingsAPI.getSettings()
+    if (!res.isSuccess) throw new Error('설정 불러오기 실패')
+    return res.result
   })
-
-  const mutationOptions = {
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['settings'] })
-    },
-    onError: () => {
-      alert('업데이트 실패')
-    },
-  }
-
-  const toggleBriefingMutation = useMutation({
-    mutationFn: SettingsAPI.toggleDailyBriefing,
-    ...mutationOptions,
-  })
-
-  const updateTimeMutation = useMutation({
-    mutationFn: SettingsAPI.updateBriefingTime,
-    ...mutationOptions,
-  })
-
-  const updateReminderMutation = useMutation({
-    mutationFn: (timing: ReminderTiming) => SettingsAPI.updateReminderTiming(timing),
-    ...mutationOptions,
-  })
-
-  const toggleSuggestionMutation = useMutation({
-    mutationFn: SettingsAPI.toggleSuggestion,
-    ...mutationOptions,
-  })
-
-  const updateViewMutation = useMutation({
-    mutationFn: (view: CalendarView) => SettingsAPI.updateDefaultView(view),
-    ...mutationOptions,
-  })
-
-  const deleteUserMutation = useMutation({
-    mutationFn: SettingsAPI.deleteUser,
-    onSuccess: (res) => {
-      if (res.isSuccess) {
-        queryClient.clear()
-        logout()
-        alert('회원 탈퇴가 완료되었습니다.')
-        navigate('/', { replace: true })
-      }
-    },
-    onError: () => {
-      alert('탈퇴 처리 중 오류가 발생했습니다.')
-    },
-  })
-
-  function handleConfirmDelete() {
-    deleteUserMutation.mutate()
-    setShowDeleteModal(false)
-  }
-
-  const handleToggleDailyBriefing = () => toggleBriefingMutation.mutate()
-  const handleTimeChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
-    updateTimeMutation.mutate(e.target.value)
-  const handleReminderChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
-    updateReminderMutation.mutate(e.target.value as ReminderTiming)
-  const handleToggleSuggestion = () => toggleSuggestionMutation.mutate()
-  const handleViewChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
-    updateViewMutation.mutate(e.target.value as CalendarView)
-
-  if (isLoading || !settings) return null
-
   const IconComponent = PROVIDER_ICONS[User.provider]
 
   return (
@@ -147,8 +77,8 @@ export default function SettingsPage() {
             <S.Toggle
               type="checkbox"
               checked={settings.dailyBriefingEnabled}
-              onChange={handleToggleDailyBriefing}
-              disabled={toggleBriefingMutation.isPending}
+              onChange={() => toggleBriefing.mutate()}
+              disabled={toggleBriefing.isPending}
             />
           </S.Row>
           <S.Row>
@@ -158,8 +88,8 @@ export default function SettingsPage() {
             </S.InfoGroup>
             <S.Select
               value={settings.dailyBriefingTime}
-              onChange={handleTimeChange}
-              disabled={updateTimeMutation.isPending}
+              onChange={(e) => updateTime.mutate(e.target.value)}
+              disabled={updateTime.isPending}
             >
               {timeOptions.map((time) => (
                 <option key={time} value={time}>
@@ -168,6 +98,7 @@ export default function SettingsPage() {
               ))}
             </S.Select>
           </S.Row>
+
           <S.Row>
             <S.InfoGroup>
               <label>일정 리마인더 타이밍</label>
@@ -175,8 +106,8 @@ export default function SettingsPage() {
             </S.InfoGroup>
             <S.Select
               value={settings.reminderTiming}
-              onChange={handleReminderChange}
-              disabled={updateReminderMutation.isPending}
+              onChange={(e) => updateReminder.mutate(e.target.value as ReminderTiming)}
+              disabled={updateReminder.isPending}
             >
               <option value="FIVE_MINUTES">5분 전</option>
               <option value="FIFTEEN_MINUTES">15분 전</option>
@@ -186,6 +117,7 @@ export default function SettingsPage() {
               <option value="ONE_DAY">1일 전</option>
             </S.Select>
           </S.Row>
+
           <S.Row>
             <S.InfoGroup>
               <label>선제적 제안</label>
@@ -194,8 +126,8 @@ export default function SettingsPage() {
             <S.Toggle
               type="checkbox"
               checked={settings.suggestionEnabled}
-              onChange={handleToggleSuggestion}
-              disabled={toggleSuggestionMutation.isPending}
+              onChange={() => toggleSuggestion.mutate()}
+              disabled={toggleSuggestion.isPending}
             />
           </S.Row>
         </S.Section>
@@ -209,8 +141,8 @@ export default function SettingsPage() {
             </S.InfoGroup>
             <S.Select
               value={settings.defaultView}
-              onChange={handleViewChange}
-              disabled={updateViewMutation.isPending}
+              onChange={(e) => updateView.mutate(e.target.value as CalendarView)}
+              disabled={updateView.isPending}
             >
               <option value="MONTH">월간 뷰</option>
               <option value="WEEK">주간 뷰</option>
@@ -225,7 +157,7 @@ export default function SettingsPage() {
             <S.InfoGroup>
               <label>로그아웃</label>
             </S.InfoGroup>
-            <S.Button>로그아웃</S.Button>
+            <S.Button onClick={logout}>로그아웃</S.Button>
           </S.Row>
           <S.Row>
             <S.InfoGroup>
@@ -242,7 +174,10 @@ export default function SettingsPage() {
       <Modal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
-        onConfirm={handleConfirmDelete}
+        onConfirm={() => {
+          deleteUser.mutate()
+          setShowDeleteModal(false)
+        }}
         title="정말 계정을 삭제할까요?"
         description="이 작업은 되돌릴 수 없습니다."
         confirmText="계정 삭제"
