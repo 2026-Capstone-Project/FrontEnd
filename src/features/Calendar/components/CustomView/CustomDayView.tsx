@@ -66,7 +66,7 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
     )
     .sort(compareByStart)
 
-  const timedColumns = buildTimedSlots(timedEvents)
+  const timedColumns = buildTimedSlots(timedEvents, date)
 
   const [rowHeight, setRowHeight] = useState(50)
   const {

@@ -7,6 +7,7 @@ import { cloneElement, type MouseEvent, useCallback, useEffect, useMemo, useStat
 import {
   Calendar,
   type DateCellWrapperProps,
+  type DateLocalizer,
   type EventProps,
   momentLocalizer,
   type SlotInfo,
@@ -412,10 +413,30 @@ const CustomCalendar = () => {
     [events],
   )
 
+  const resolvedLocalizer = useMemo(() => {
+    if (view !== Views.WEEK) {
+      return localizer
+    }
+    const nextLocalizer = Object.assign(
+      Object.create(Object.getPrototypeOf(localizer)),
+      localizer,
+    ) as DateLocalizer & {
+      daySpan?: (start: Date, end: Date) => number
+    }
+    // 주간뷰에서 2일 이상 걸치는 일정(날짜가 바뀌는 일정)을 멀티데이로 분류
+    nextLocalizer.daySpan = (start: Date, end: Date) => {
+      const startDay = moment(start).startOf('day')
+      const endDay = moment(end).startOf('day')
+      const diff = endDay.diff(startDay, 'days')
+      return diff + 1
+    }
+    return nextLocalizer
+  }, [view])
+
   const calendarProps = useMemo(
     () =>
       buildCalendarConfig({
-        localizer,
+        localizer: resolvedLocalizer,
         views: calendarViews,
         view,
         date,
@@ -432,6 +453,7 @@ const CustomCalendar = () => {
         viewConfig,
       }),
     [
+      resolvedLocalizer,
       calendarViews,
       view,
       date,

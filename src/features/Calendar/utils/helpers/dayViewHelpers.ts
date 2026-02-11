@@ -27,17 +27,18 @@ export const eventCoversDate = (event: CalendarEvent, date: Date) => {
   return moment(date).isBetween(start.startOf('day'), end.endOf('day'), undefined, '[]')
 }
 
-export const buildTimedSlots = (events: CalendarEvent[]) => {
+export const buildTimedSlots = (events: CalendarEvent[], date: Date) => {
   const { SLOT_HEIGHT, MIN_HEIGHT, MAX_VISUAL_HOURS, COLUMNS } = TIMED_SLOT_CONFIG
   const columns: TimedSlotEvent[][] = COLUMNS.map(() => [])
+
+  const dayStart = moment(date).startOf('day')
+  const dayEnd = dayStart.clone().add(24, 'hours')
+  const noon = dayStart.clone().add(12, 'hours')
 
   events.forEach((event) => {
     const palette = getColorPalette(event.color)
     const start = moment(event.start)
     const end = moment(event.end)
-    const dayStart = start.clone().startOf('day')
-    const dayEnd = dayStart.clone().add(24, 'hours')
-    const noon = dayStart.clone().add(12, 'hours')
     const clampedStart = moment.max(start, dayStart)
     const clampedEnd = moment.min(end, dayEnd)
 
