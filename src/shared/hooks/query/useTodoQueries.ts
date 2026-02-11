@@ -8,9 +8,9 @@ export function useGetTodoQuery(filter: TodoFilter) {
   return useCustomQuery(query.queryKey, query.queryFn)
 }
 
-export function useGetDetailTodoQuery(todoId: number, occurrenceDate: string) {
+export function useGetDetailTodoQuery(todoId: number, occurrenceDate: string, enabled = true) {
   const query = todoKeys.detail(todoId, occurrenceDate)
-  return useCustomQuery(query.queryKey, query.queryFn)
+  return useCustomQuery(query.queryKey, query.queryFn, { enabled })
 }
 
 export function useGetTodoProgressQuery(date: string) {

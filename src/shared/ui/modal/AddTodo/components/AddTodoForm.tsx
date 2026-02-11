@@ -78,7 +78,8 @@ const AddTodoForm = ({
   } = useAddTodoForm({ date, id: eventId })
   const { register, setValue } = formMethods
   const occurrenceDate = useMemo(() => moment(date).format('YYYY-MM-DD'), [date])
-  const { data: detailData } = useGetDetailTodoQuery(eventId, occurrenceDate)
+  const shouldFetchDetail = isEditing && eventId != null && eventId !== 0
+  const { data: detailData } = useGetDetailTodoQuery(eventId, occurrenceDate, shouldFetchDetail)
   const [calendarAnchor, setCalendarAnchor] = useState<DOMRect | null>(null)
   const [deleteWarningVisible, setDeleteWarningVisible] = useState(false)
   const [isMobileLayout, setIsMobileLayout] = useState(() => {
@@ -167,6 +168,8 @@ const AddTodoForm = ({
     />
   )
 
+  const hasExistingRecurrence = Boolean(detailData?.result?.recurrenceGroup)
+  const repeatGuardEnabled = isEditing && hasExistingRecurrence
   // 편집 모드에서 반복 변경을 가드해 확인 또는 취소가 가능하도록 합니다.
   const {
     isOpen: isEditConfirmOpen,
@@ -175,7 +178,7 @@ const AddTodoForm = ({
     requestConfirmation,
   } = useRepeatChangeGuard({
     repeatConfig,
-    isEditing,
+    isEditing: repeatGuardEnabled,
     setValue,
   })
   const [pendingTodoValues, setPendingTodoValues] = useState<AddTodoFormValues | null>(null)
