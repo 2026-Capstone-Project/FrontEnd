@@ -1,7 +1,8 @@
 import { type CalendarProps, type View, Views } from 'react-big-calendar'
 import type { withDragAndDropProps } from 'react-big-calendar/lib/addons/dragAndDrop'
 
-import type { CalendarEvent } from '@/features/Calendar/domain/types'
+import { normalizeDate } from '@/features/Calendar/utils/helpers/calendarPageHelpers'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 
 type CalendarDndProps = CalendarProps<CalendarEvent, object> &
   withDragAndDropProps<CalendarEvent, object>
@@ -15,10 +16,12 @@ type CalendarConfigArgs = {
   onView: (view: View) => void
   onNavigate: (date: Date) => void
   onSelectEvent: CalendarDndProps['onSelectEvent']
+  onDoubleClickEvent: CalendarDndProps['onDoubleClickEvent']
   onEventDrop: CalendarDndProps['onEventDrop']
   onEventResize: CalendarDndProps['onEventResize']
   onSelectSlot: CalendarDndProps['onSelectSlot']
   dayPropGetter: CalendarDndProps['dayPropGetter']
+  eventPropGetter?: CalendarDndProps['eventPropGetter']
   components: CalendarDndProps['components']
   viewConfig: {
     formats?: CalendarDndProps['formats']
@@ -35,10 +38,12 @@ export const buildCalendarConfig = ({
   onView,
   onNavigate,
   onSelectEvent,
+  onDoubleClickEvent,
   onEventDrop,
   onEventResize,
   onSelectSlot,
   dayPropGetter,
+  eventPropGetter,
   components,
   viewConfig,
 }: CalendarConfigArgs): CalendarDndProps => {
@@ -54,14 +59,18 @@ export const buildCalendarConfig = ({
     view,
     date,
     events,
+    startAccessor: (event) => normalizeDate(event.start),
+    endAccessor: (event) => normalizeDate(event.end),
     onView,
     onNavigate,
     onSelectEvent,
+    onDoubleClickEvent,
     onEventDrop,
     onEventResize,
     draggableAccessor: () => true,
     onSelectSlot,
     dayPropGetter,
+    eventPropGetter,
     components,
     formats: view === Views.DAY ? {} : viewConfig.formats,
     ...allDayAccessorProps,

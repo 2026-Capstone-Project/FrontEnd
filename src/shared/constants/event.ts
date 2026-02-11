@@ -4,9 +4,9 @@ import type {
   MonthlyPatternWeek,
   RepeatType,
   WeekdayName,
-} from '@/shared/types/repeat'
+} from '@/shared/types/event/recurrence/repeat'
 
-import type { EventColorType } from '../types/event'
+import type { EventColorType } from '../types/event/event'
 
 export const MAIN_OPTIONS: { type: RepeatType; label: string }[] = [
   { type: 'daily', label: '매일' },
@@ -43,4 +43,4 @@ export const MONTHLY_DAY_OPTIONS: MonthlyPatternDay[] = [
 
 export const CUSTOM_BASIS_OPTIONS: CustomRepeatBasis[] = ['daily', 'weekly', 'monthly', 'yearly']
 export const WEEK_DAYS = ['일', '월', '화', '수', '목', '금', '토']
-export const EVENT_COLORS: EventColorType[] = ['sky', 'mint', 'pink', 'violet', 'gray', 'yellow']
+export const EVENT_COLORS: EventColorType[] = ['BLUE', 'GREEN', 'PINK', 'PURPLE', 'GRAY', 'YELLOW']

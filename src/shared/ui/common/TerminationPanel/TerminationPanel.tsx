@@ -9,8 +9,8 @@ import {
 import { createPortal } from 'react-dom'
 
 import { theme } from '@/shared/styles/theme'
-import type { RepeatConfigSchema } from '@/shared/types/event'
-import type { RepeatConfig } from '@/shared/types/repeat'
+import type { RepeatConfigSchema } from '@/shared/types/event/event'
+import type { RepeatConfig } from '@/shared/types/event/recurrence/repeat'
 import Checkbox from '@/shared/ui/common/Checkbox/Checkbox'
 import CustomDatePicker from '@/shared/ui/modal/AddSchedule/components/CustomDatePicker/CustomDatePicker'
 import { formatIsoDate } from '@/shared/utils/date'
@@ -117,16 +117,31 @@ const TerminationPanel = ({ config, updateConfig, minDate }: Props) => {
   return (
     <S.RepeatDetail>
       <S.Label>종료</S.Label>
+
+      <S.TerminationRow>
+        <Checkbox
+          checked={terminationType === 'never'}
+          onChange={() =>
+            updateConfig({ customEndType: 'never', customEndDate: '', customEndCount: undefined })
+          }
+        />
+        종료 없음
+      </S.TerminationRow>
       <S.TerminationRow>
         <Checkbox
           checked={terminationType === 'until'}
           onChange={() => updateConfig({ customEndType: 'until' })}
         />
         <S.CalendarWrapper>
-          <S.CalendarTrigger type="button" onClick={handleCalendarTriggerClick}>
+          <S.CalendarTrigger
+            type="button"
+            onClick={handleCalendarTriggerClick}
+            disabled={terminationType !== 'until'}
+          >
             {formatDateLabel(config.customEndDate)}
           </S.CalendarTrigger>
-          {calendarOpen &&
+          {terminationType === 'until' &&
+            calendarOpen &&
             portalRoot &&
             createPortal(
               <S.CalendarPopover ref={calendarRef} style={calendarPortalStyle}>

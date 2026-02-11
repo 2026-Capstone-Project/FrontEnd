@@ -1,4 +1,5 @@
 /** @jsxImportSource @emotion/react */
+import moment from 'moment'
 import {
   type MouseEvent as ReactMouseEvent,
   useCallback,
@@ -9,23 +10,20 @@ import {
 import { createPortal } from 'react-dom'
 import { FormProvider } from 'react-hook-form'
 
-import type { CalendarEvent } from '@/features/Calendar/domain/types'
-import { useAddTodoForm } from '@/shared/hooks/useAddTodoForm'
-import { useRepeatChangeGuard } from '@/shared/hooks/useRepeatChangeGuard'
+import { useAddTodoForm } from '@/shared/hooks/form/useAddTodoForm'
+import { useRepeatChangeGuard } from '@/shared/hooks/repeat/useRepeatChangeGuard'
 import { theme } from '@/shared/styles/theme'
-import { type AddTodoFormValues } from '@/shared/types/event'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
+import { type AddTodoFormValues } from '@/shared/types/event/event'
 import Checkbox from '@/shared/ui/common/Checkbox/Checkbox'
 import RepeatTypeGroup from '@/shared/ui/common/RepeatTypeGroup/RepeatTypeGroup'
 import TerminationPanel from '@/shared/ui/common/TerminationPanel/TerminationPanel'
 import TitleSuggestionInput from '@/shared/ui/common/TitleSuggestionInput/TitleSuggestionInput'
+import { DeleteConfirmModal, EditConfirmModal, type EditConfirmOption } from '@/shared/ui/modal'
 import CustomBasisPanel from '@/shared/ui/modal/AddTodo/components/CustomBasisPanel/CustomBasisPanel'
 import CustomDatePicker from '@/shared/ui/modal/AddTodo/components/CustomDatePicker/CustomDatePicker'
 import CustomTimePicker from '@/shared/ui/modal/AddTodo/components/CustomTimePicker/CustomTimePicker'
 import * as S from '@/shared/ui/modal/AddTodo/index.style'
-import DeleteConfirmModal from '@/shared/ui/modal/DeleteConfirmModal/DeleteConfirmModal'
-import EditConfirmModal, {
-  type EditConfirmOption,
-} from '@/shared/ui/modal/EditConfirmModal/EditConfirmModal'
 import { formatDisplayDate } from '@/shared/utils/date'
 
 type AddTodoFormProps = {
@@ -175,21 +173,26 @@ const AddTodoForm = ({
     [buildDateTime, date, eventId, onEventTimingChange],
   )
 
-  const handleFormSubmit = handleSubmit((values) => {
-    if (requestConfirmation()) {
-      setPendingTodoValues(values)
-      return
-    }
-    if (eventId != null && eventId !== 0) {
-      const nextTitle = values.todoTitle ?? ''
-      if (nextTitle) {
-        onEventTitleConfirm?.(eventId, nextTitle)
+  const handleFormSubmit = handleSubmit(
+    (values) => {
+      if (requestConfirmation()) {
+        setPendingTodoValues(values)
+        return
       }
-    }
-    syncEventTiming(values)
-    onSubmit(values)
-    onClose()
-  })
+      if (eventId != null && eventId !== 0) {
+        const nextTitle = values.todoTitle ?? ''
+        if (nextTitle) {
+          onEventTitleConfirm?.(eventId, nextTitle)
+        }
+      }
+      syncEventTiming(values)
+      onSubmit(values)
+      onClose()
+    },
+    (errors) => {
+      console.log('[AddTodoForm] submit errors', errors)
+    },
+  )
 
   const handleConfirmedSubmit = useCallback(
     (option: EditConfirmOption) => {
@@ -326,15 +329,13 @@ const AddTodoForm = ({
       {deleteWarningVisible && (
         <DeleteConfirmModal
           title={todoTitle || '새로운 이벤트'}
+          eventId={eventId}
+          occurrenceDate={moment(todoDate).format('YYYY-MM-DD')}
           onClose={() => setDeleteWarningVisible(false)}
         />
       )}
       {isEditConfirmOpen && (
-        <EditConfirmModal
-          title={todoTitle || '할 일'}
-          onCancel={handleCancelRepeat}
-          onConfirm={handleConfirmedSubmit}
-        />
+        <EditConfirmModal onCancel={handleCancelRepeat} onConfirm={handleConfirmedSubmit} />
       )}
     </>
   )

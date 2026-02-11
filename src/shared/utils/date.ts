@@ -1,4 +1,4 @@
-import type { MonthlyPatternDay, MonthlyPatternWeek } from '../types/repeat'
+import type { MonthlyPatternDay, MonthlyPatternWeek } from '../types/event/recurrence/repeat'
 
 export const toDateValue = (value: Date | string | null | undefined) =>
   value instanceof Date ? value : value ? new Date(value) : null

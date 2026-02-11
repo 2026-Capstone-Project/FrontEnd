@@ -2,8 +2,12 @@
 import { useRef } from 'react'
 
 import { MONTHLY_DAY_OPTIONS, MONTHLY_WEEK_OPTIONS, MONTHS } from '@/shared/constants/event'
-import type { RepeatConfigSchema } from '@/shared/types/event'
-import type { MonthlyPatternDay, MonthlyPatternWeek, RepeatConfig } from '@/shared/types/repeat'
+import type { RepeatConfigSchema } from '@/shared/types/event/event'
+import type {
+  MonthlyPatternDay,
+  MonthlyPatternWeek,
+  RepeatConfig,
+} from '@/shared/types/event/recurrence/repeat'
 import Checkbox from '@/shared/ui/common/Checkbox/Checkbox'
 import Dropdown from '@/shared/ui/common/Dropdown/Dropdown'
 import { dayLabel, weekLabel } from '@/shared/utils/date'

@@ -1,20 +1,19 @@
 import { useEffect, useState } from 'react'
 import { type Control, type UseFormReturn } from 'react-hook-form'
 
-import type { CalendarEvent } from '@/features/Calendar/domain/types'
+import { useScheduleFormFields } from '@/shared/hooks/form/useScheduleFormFields'
+import { useRepeatConfigController } from '@/shared/hooks/repeat/useRepeatConfigController'
 import { useCalendarFieldPicker } from '@/shared/hooks/useCalendarFieldPicker'
-import { useRepeatConfigController } from '@/shared/hooks/useRepeatConfigController'
-import { useScheduleFormFields } from '@/shared/hooks/useScheduleFormFields'
 import { useSearchPlaceToggle } from '@/shared/hooks/useSearchPlaceToggle'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 import {
   type AddScheduleFormValues,
   type DatePickerField,
   type EventColorType,
   type RepeatConfigSchema,
   type TimePickerField,
-} from '@/shared/types/event'
-import { type RepeatConfig, type RepeatType } from '@/shared/types/repeat'
-import { formatIsoDate } from '@/shared/utils/date'
+} from '@/shared/types/event/event'
+import { type RepeatConfig, type RepeatType } from '@/shared/types/event/recurrence/repeat'
 
 type UseAddScheduleFormProps = {
   date: string
@@ -39,7 +38,6 @@ export type UseAddScheduleFormResult = {
   handleRepeatType: (value: RepeatType) => void
   updateConfig: (changes: Partial<RepeatConfig>) => void
   handleSubmit: UseFormReturn<AddScheduleFormValues>['handleSubmit']
-  onSubmit: (values: AddScheduleFormValues) => void
   setIsAllday: React.Dispatch<React.SetStateAction<boolean>>
   setEventColor: (value: EventColorType) => void
   mapRef: React.RefObject<HTMLDivElement | null>
@@ -53,7 +51,7 @@ export const useAddScheduleForm = ({
   date,
   initialEvent,
 }: UseAddScheduleFormProps): UseAddScheduleFormResult => {
-  const [isAllday, setIsAllday] = useState(initialEvent?.allDay ?? false)
+  const [isAllday, setIsAllday] = useState(initialEvent?.isAllDay ?? false)
 
   const {
     formMethods,
@@ -92,18 +90,9 @@ export const useAddScheduleForm = ({
 
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
-    setIsAllday(initialEvent?.allDay ?? false)
+    setIsAllday(initialEvent?.isAllDay ?? false)
   }, [initialEvent])
   /* eslint-enable react-hooks/set-state-in-effect */
-
-  const onSubmit = (values: AddScheduleFormValues) => {
-    const payload = {
-      ...values,
-      eventStartDate: formatIsoDate(values.eventStartDate),
-      eventEndDate: formatIsoDate(values.eventEndDate),
-    }
-    console.log('일정 저장', payload)
-  }
 
   return {
     formMethods,
@@ -123,7 +112,6 @@ export const useAddScheduleForm = ({
     handleDateSelect,
     handleTimeChange,
     handleSubmit,
-    onSubmit,
     setIsAllday,
     setEventColor,
     mapRef,

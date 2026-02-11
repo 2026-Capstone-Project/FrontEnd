@@ -1,10 +1,10 @@
 import moment from 'moment'
 import type { MutableRefObject, Ref } from 'react'
 
+import type { CalendarEvent } from '../../../../../shared/types/calendar/types'
 import { TIMED_SLOT_CONFIG } from '../../../domain/constants'
-import type { CalendarEvent } from '../../../domain/types'
 import { getColorPalette } from '../../../utils/colorPalette'
-import type { TimedSlotEvent } from '../../../utils/helpers/dayViewHelpers'
+import { getEventOccurrenceKey, type TimedSlotEvent } from '../../../utils/helpers/dayViewHelpers'
 import { TodoCheckbox } from '../../CustomEvent/CustomEvent.style'
 import * as S from '../dayView'
 import type { DragState, EventPointerDownHandler } from './dragHandlers'
@@ -44,7 +44,7 @@ export const renderTimeSlotRows = (
 export const renderAllDayEventBadges = (
   events: CalendarEvent[],
   onToggleTodo?: (eventId: CalendarEvent['id']) => void,
-  selectedEventId?: CalendarEvent['id'] | null,
+  selectedEventKey?: string | null,
   onEventSelect?: (event: CalendarEvent) => void,
   onEventClick?: (event: CalendarEvent) => void,
   onEventDoubleClick?: (event: CalendarEvent) => void,
@@ -56,7 +56,7 @@ export const renderAllDayEventBadges = (
         key={event.id}
         color={palette.base}
         pointColor={palette.point}
-        isSelected={selectedEventId === event.id}
+        isSelected={selectedEventKey === getEventOccurrenceKey(event)}
         onClick={() => {
           onEventSelect?.(event)
           onEventClick?.(event)
@@ -97,8 +97,9 @@ export const renderTimeOverlayColumn = ({
   dragStateRef,
   handleEventPointerDown,
   handleResizePointerDown,
+  handleResizeStartPointerDown,
   onToggleTodo,
-  selectedEventId,
+  selectedEventKey,
   onEventSelect,
   onEventClick,
   onEventDoubleClick,
@@ -114,8 +115,9 @@ export const renderTimeOverlayColumn = ({
   dragStateRef: MutableRefObject<DragState | null>
   handleEventPointerDown: EventPointerDownHandler
   handleResizePointerDown: EventPointerDownHandler
+  handleResizeStartPointerDown: EventPointerDownHandler
   onToggleTodo?: (eventId: CalendarEvent['id']) => void
-  selectedEventId?: CalendarEvent['id'] | null
+  selectedEventKey?: string | null
   onEventSelect?: (event: CalendarEvent) => void
   onEventClick?: (event: CalendarEvent) => void
   onEventDoubleClick?: (event: CalendarEvent) => void
@@ -139,15 +141,18 @@ export const renderTimeOverlayColumn = ({
           const eventEnd = normalizeDateValue(event.end)
           const currentDragState = dragStateRef.current
           const isDraggingEvent = currentDragState?.event.id === event.id
+          const isPreviewing = Boolean(currentDragState?.preview)
           const columnShift =
-            isDraggingEvent && currentDragState?.mode === 'move'
+            isDraggingEvent && currentDragState?.mode === 'move' && !isPreviewing
               ? (currentDragState?.columnShift ?? 0)
               : 0
           const translateX = columnShift ? columnShift * (columnWidth + columnGapPx) : 0
           const moveDeltaMinutes =
-            isDraggingEvent && currentDragState?.mode === 'move' ? currentDragState.deltaMinutes : 0
+            isDraggingEvent && currentDragState?.mode === 'move' && !isPreviewing
+              ? currentDragState.deltaMinutes
+              : 0
           const resizeDeltaMinutes =
-            isDraggingEvent && currentDragState?.mode === 'resize'
+            isDraggingEvent && currentDragState?.mode === 'resize' && !isPreviewing
               ? currentDragState.deltaMinutes
               : 0
           const moveOffset = (moveDeltaMinutes / 60) * rowHeightForCalc
@@ -164,7 +169,7 @@ export const renderTimeOverlayColumn = ({
               key={event.id}
               color={palette.base}
               pointColor={palette.point}
-              isSelected={selectedEventId === event.id}
+              isSelected={selectedEventKey === getEventOccurrenceKey(event)}
               overflowTop={overflowTopResolved}
               overflowBottom={overflowBottomResolved}
               style={{
@@ -179,24 +184,23 @@ export const renderTimeOverlayColumn = ({
                 onEventClick?.(event)
               }}
               onDoubleClick={() => onEventDoubleClick?.(event)}
+              onPointerDown={(pointerEvent) => {
+                onEventSelect?.(event)
+                handleEventPointerDown(
+                  pointerEvent,
+                  event,
+                  rowHeightForCalc,
+                  eventStart,
+                  eventEnd,
+                  {
+                    gridRect: gridRef?.current?.getBoundingClientRect() ?? null,
+                    originColumnIndex: columnIndex,
+                    columnGapPx: Number.isNaN(columnGapPx) ? 0 : columnGapPx,
+                  },
+                )
+              }}
             >
-              <S.EventRow
-                onPointerDown={(pointerEvent) => {
-                  onEventSelect?.(event)
-                  handleEventPointerDown(
-                    pointerEvent,
-                    event,
-                    rowHeightForCalc,
-                    eventStart,
-                    eventEnd,
-                    {
-                      gridRect: gridRef?.current?.getBoundingClientRect() ?? null,
-                      originColumnIndex: columnIndex,
-                      columnGapPx: Number.isNaN(columnGapPx) ? 0 : columnGapPx,
-                    },
-                  )
-                }}
-              >
+              <S.EventRow>
                 {event.type === 'todo' ? (
                   <TodoCheckbox
                     type="checkbox"
@@ -216,6 +220,18 @@ export const renderTimeOverlayColumn = ({
                 <S.EventTitle>{event.title}</S.EventTitle>
               </S.EventRow>
               {event.location && <S.EventLocation>{event.location}</S.EventLocation>}
+              <S.EventResizerTop
+                onPointerDown={(pointerEvent) => {
+                  pointerEvent.stopPropagation()
+                  handleResizeStartPointerDown(
+                    pointerEvent,
+                    event,
+                    rowHeightForCalc,
+                    eventStart,
+                    eventEnd,
+                  )
+                }}
+              />
               <S.EventResizer
                 onPointerDown={(pointerEvent) => {
                   pointerEvent.stopPropagation()

@@ -1,7 +1,7 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import type { CalendarEvent } from '@/features/Calendar/domain/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 import AddModalLayout from '@/shared/ui/modal/AddModalLayout/AddModalLayout'
 import AddScheduleForm from '@/shared/ui/modal/AddSchedule/components/AddScheduleForm'
 import AddTodoForm from '@/shared/ui/modal/AddTodo/components/AddTodoForm'
@@ -21,7 +21,7 @@ type AddItemModalProps = {
   initialEvent?: CalendarEvent | null
   onEventColorChange?: (eventId: CalendarEvent['id'], color: CalendarEvent['color']) => void
   onEventTitleConfirm?: (eventId: CalendarEvent['id'], title: CalendarEvent['title']) => void
-  onEventTypeChange?: (eventId: CalendarEvent['id'], type: CalendarEvent['type']) => void
+  onEventTypeChange?: (eventId: CalendarEvent['id'], type: ActiveType) => void
   onEventTimingChange?: (
     eventId: CalendarEvent['id'],
     start: Date,
@@ -47,6 +47,7 @@ const AddItemModal = ({
   const [activeType, setActiveType] = useState<ActiveType>(defaultType)
   const [footerChildren, setFooterChildren] = useState<ReactNode | null>(null)
   const [deleteHandler, setDeleteHandler] = useState<() => void>(() => () => undefined)
+  const [closeGuard, setCloseGuard] = useState<null | (() => boolean)>(null)
   const noopDeleteHandler = useCallback(() => undefined, [])
 
   const registerDeleteHandler = useCallback(
@@ -57,8 +58,20 @@ const AddItemModal = ({
   )
 
   const registerFooterChildren = useCallback((node: React.ReactNode | null) => {
-    setFooterChildren(node)
+    setFooterChildren((prev) => (prev === node ? prev : node))
   }, [])
+
+  const registerCloseGuard = useCallback((guard?: (() => boolean) | null) => {
+    setCloseGuard((prev) => {
+      const next = guard ?? null
+      return prev === next ? prev : next
+    })
+  }, [])
+
+  const handleClose = useCallback(() => {
+    if (closeGuard && !closeGuard()) return
+    onClose()
+  }, [closeGuard, onClose])
 
   useEffect(() => {
     setActiveType(defaultType)
@@ -69,10 +82,12 @@ const AddItemModal = ({
     onEventTypeChange?.(eventId, activeType)
   }, [activeType, eventId, onEventTypeChange])
 
-  const handleSubmitId = useMemo(
-    () => (activeType === 'todo' ? 'add-todo-form' : 'add-schedule-form'),
-    [activeType],
-  )
+  const handleSubmit = useCallback(() => {
+    const submitFormId = activeType === 'todo' ? 'add-todo-form' : 'add-schedule-form'
+    const target = document.getElementById(submitFormId) as HTMLFormElement | null
+    if (!target) return
+    target.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+  }, [activeType])
 
   const tabs = (
     <S.TabControls>
@@ -109,8 +124,8 @@ const AddItemModal = ({
     <AddModalLayout
       mode={mode}
       type={activeType}
-      onClose={onClose}
-      submitFormId={handleSubmitId}
+      onClose={handleClose}
+      onSubmit={handleSubmit}
       handleDelete={deleteHandler}
       footerChildren={footerChildren}
       headerExtras={tabsVisible ? tabs : undefined}
@@ -121,7 +136,7 @@ const AddItemModal = ({
           date={date}
           eventId={eventId}
           mode={mode}
-          onClose={onClose}
+          onClose={handleClose}
           registerDeleteHandler={registerDeleteHandler}
           headerTitlePortalTarget={headerTitlePortalTarget}
           isEditing={isEditing}
@@ -133,9 +148,10 @@ const AddItemModal = ({
           date={date}
           eventId={eventId}
           mode={mode}
-          onClose={onClose}
+          onClose={handleClose}
           registerDeleteHandler={registerDeleteHandler}
           registerFooterChildren={registerFooterChildren}
+          registerCloseGuard={registerCloseGuard}
           headerTitlePortalTarget={headerTitlePortalTarget}
           initialEvent={initialEvent}
           isEditing={isEditing}

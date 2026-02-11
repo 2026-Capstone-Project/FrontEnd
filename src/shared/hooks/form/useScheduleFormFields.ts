@@ -2,14 +2,15 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { useEffect } from 'react'
 import { type Control, type Resolver, useForm, type UseFormReturn, useWatch } from 'react-hook-form'
 
-import type { CalendarEvent } from '@/features/Calendar/domain/types'
 import { addScheduleSchema } from '@/shared/schemas/schedule'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 import {
   type AddScheduleFormValues,
   type EventColorType,
   type RepeatConfigSchema,
-} from '@/shared/types/event'
-import { defaultRepeatConfig } from '@/shared/types/repeat'
+} from '@/shared/types/event/event'
+import { defaultRepeatConfig } from '@/shared/types/event/recurrence/repeat'
+import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/recurrenceGroup'
 
 type UseScheduleFormFieldsProps = {
   date: string
@@ -48,10 +49,11 @@ export const useScheduleFormFields = ({
       : new Date(defaultStart)
   const defaultStartTime = formatTimeFromDate(defaultStart)
   const defaultEndTime = formatTimeFromDate(defaultEnd)
-  const initialTitle = initialEvent?.title ?? '새로운 일정'
-  const initialDescription = initialEvent?.memo ?? ''
-  const initialColor = initialEvent?.color ?? 'sky'
-  const initialIsAllDay = initialEvent?.allDay ?? isAllday
+  const initialTitle =
+    initialEvent?.title === '새 일정' ? '' : (initialEvent?.title ?? '새로운 일정')
+  const initialDescription = initialEvent?.content ?? ''
+  const initialColor = initialEvent?.color ?? 'BLUE'
+  const initialIsAllDay = initialEvent?.isAllDay ?? isAllday
   const formMethods = useForm<AddScheduleFormValues>({
     resolver,
     defaultValues: {
@@ -74,7 +76,7 @@ export const useScheduleFormFields = ({
   const eventEndTime = useWatch({ control, name: 'eventEndTime' })
   const repeatConfig = (useWatch({ control, name: 'repeatConfig' }) ??
     (defaultRepeatConfig as RepeatConfigSchema)) as RepeatConfigSchema
-  const eventColor = (useWatch({ control, name: 'eventColor' }) ?? 'sky') as EventColorType
+  const eventColor = (useWatch({ control, name: 'eventColor' }) ?? 'BLUE') as EventColorType
   const eventTitle = useWatch({ control, name: 'eventTitle' })
 
   useEffect(() => {
@@ -101,9 +103,19 @@ export const useScheduleFormFields = ({
     setValue('eventEndDate', end)
     setValue('eventStartTime', formatTimeFromDate(start))
     setValue('eventEndTime', formatTimeFromDate(end))
-    setValue('eventTitle', initialEvent?.title ?? '새로운 일정')
-    setValue('eventDescription', initialEvent?.memo ?? '')
-    setValue('eventColor', initialEvent?.color ?? 'sky')
+    const nextTitle = initialEvent?.title ?? '새로운 일정'
+    setValue('eventTitle', nextTitle === '새 일정' ? '' : nextTitle)
+    setValue('eventDescription', initialEvent?.content ?? '')
+    setValue('eventColor', initialEvent?.color ?? 'BLUE')
+    const mappedRepeatConfig = mapRecurrenceGroupToRepeatConfig(initialEvent?.recurrenceGroup)
+    const nextRepeatConfig: RepeatConfigSchema = {
+      ...defaultRepeatConfig,
+      ...mappedRepeatConfig,
+      customWeeklyDays: mappedRepeatConfig.customWeeklyDays ?? [],
+      customMonthlyDates: mappedRepeatConfig.customMonthlyDates ?? [],
+      customYearlyMonths: mappedRepeatConfig.customYearlyMonths ?? [],
+    } as RepeatConfigSchema
+    setValue('repeatConfig', nextRepeatConfig, { shouldValidate: true })
   }, [date, initialEvent, setValue])
 
   return {

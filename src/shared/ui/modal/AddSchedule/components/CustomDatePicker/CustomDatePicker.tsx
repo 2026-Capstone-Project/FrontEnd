@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 
 import Arrow from '@/shared/assets/icons/chevron.svg?react'
 import { theme } from '@/shared/styles/theme'
-import { type DatePickerRenderProps } from '@/shared/types/event'
+import { type DatePickerRenderProps } from '@/shared/types/event/event'
 import { toDateValue } from '@/shared/utils/date'
 
 import * as S from './CustomDatePicker.style'

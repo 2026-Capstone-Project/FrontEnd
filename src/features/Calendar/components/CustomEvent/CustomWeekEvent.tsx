@@ -6,7 +6,7 @@ import type { CalendarEvent } from '../CustomView/CustomDayView'
 import * as S from './CustomEvent.style'
 
 const formatTimeRange = (event: CalendarEvent) => {
-  if (event.allDay) {
+  if (event.isAllDay) {
     return '종일'
   }
   const start = moment(event.start).format('HH:mm')
@@ -17,6 +17,7 @@ const formatTimeRange = (event: CalendarEvent) => {
 type CustomWeekEventProps = {
   event: CalendarEvent
   onEventClick: (event: CalendarEvent) => void
+  onEventDoubleClick: (event: CalendarEvent) => void
   onToggleTodo?: (eventId: CalendarEvent['id']) => void
   isSelected?: boolean
 }
@@ -24,25 +25,35 @@ type CustomWeekEventProps = {
 const CustomWeekEvent: React.FC<CustomWeekEventProps> = ({
   event,
   onEventClick,
+  onEventDoubleClick,
   onToggleTodo,
   isSelected,
 }) => {
   const palette = getColorPalette(event.color)
   const baseColor = palette?.base
   const pointColor = palette?.point
+  const isTodo = 'type' in event && (event as { type?: string }).type === 'todo'
+  const isDone = 'isDone' in event && (event as { isDone?: boolean }).isDone
 
   return (
     <S.WeekEventContainer
       backgroundColor={baseColor}
       pointColor={pointColor}
       isSelected={isSelected}
-      onClick={() => onEventClick(event)}
+      onClick={(eventMouse) => {
+        eventMouse.stopPropagation()
+        onEventClick(event)
+      }}
+      onDoubleClick={(eventMouse) => {
+        eventMouse.stopPropagation()
+        onEventDoubleClick(event)
+      }}
     >
       <S.WeekEventRow>
-        {event.type === 'todo' ? (
+        {isTodo ? (
           <S.TodoCheckbox
             type="checkbox"
-            checked={!!event.isDone}
+            checked={!!isDone}
             onPointerDown={(eventPointer) => eventPointer.stopPropagation()}
             onMouseDown={(eventMouse) => eventMouse.stopPropagation()}
             onClick={(eventClick) => eventClick.stopPropagation()}

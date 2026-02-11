@@ -1,7 +1,7 @@
 import moment from 'moment'
 import type { stringOrDate } from 'react-big-calendar'
 
-import type { CalendarEvent } from '@/features/Calendar/domain/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 
 import { TIMED_SLOT_CONFIG } from '../../domain/constants'
 import { getColorPalette } from '../colorPalette'
@@ -21,23 +21,27 @@ export const isDateOnlyString = (value?: stringOrDate) =>
 export const compareByStart = (a: CalendarEvent, b: CalendarEvent) =>
   moment(a.start).diff(moment(b.start))
 
+export const getEventOccurrenceKey = (event: CalendarEvent) =>
+  `${event.id}_${moment(event.start).format('YYYY-MM-DDTHH:mm')}`
+
 export const eventCoversDate = (event: CalendarEvent, date: Date) => {
   const start = moment(event.start)
   const end = moment(event.end)
   return moment(date).isBetween(start.startOf('day'), end.endOf('day'), undefined, '[]')
 }
 
-export const buildTimedSlots = (events: CalendarEvent[]) => {
+export const buildTimedSlots = (events: CalendarEvent[], date: Date) => {
   const { SLOT_HEIGHT, MIN_HEIGHT, MAX_VISUAL_HOURS, COLUMNS } = TIMED_SLOT_CONFIG
   const columns: TimedSlotEvent[][] = COLUMNS.map(() => [])
+
+  const dayStart = moment(date).startOf('day')
+  const dayEnd = dayStart.clone().add(24, 'hours')
+  const noon = dayStart.clone().add(12, 'hours')
 
   events.forEach((event) => {
     const palette = getColorPalette(event.color)
     const start = moment(event.start)
     const end = moment(event.end)
-    const dayStart = start.clone().startOf('day')
-    const dayEnd = dayStart.clone().add(24, 'hours')
-    const noon = dayStart.clone().add(12, 'hours')
     const clampedStart = moment.max(start, dayStart)
     const clampedEnd = moment.min(end, dayEnd)
 
@@ -49,16 +53,14 @@ export const buildTimedSlots = (events: CalendarEvent[]) => {
       const columnIndex = segmentStart.hour() < 12 ? 0 : 1
       const columnStart = dayStart.clone().add(COLUMNS[columnIndex], 'hours')
       const minutesSinceColumnStart = segmentStart.diff(columnStart, 'minutes')
+      const top = (minutesSinceColumnStart / 60) * SLOT_HEIGHT
       const durationMinutes = Math.max(segmentEnd.diff(segmentStart, 'minutes'), 15)
       const calculatedHeight = (durationMinutes / 60) * SLOT_HEIGHT
-      const height = Math.min(
-        calculatedHeight,
-        SLOT_HEIGHT * MAX_VISUAL_HOURS - minutesSinceColumnStart,
-      )
+      const height = Math.min(calculatedHeight, SLOT_HEIGHT * (MAX_VISUAL_HOURS - 1) - top)
 
       columns[columnIndex].push({
         event,
-        top: minutesSinceColumnStart,
+        top,
         height: Math.max(height, MIN_HEIGHT),
         palette,
         overflowTop: segmentStart.isAfter(start),

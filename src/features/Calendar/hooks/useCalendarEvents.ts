@@ -1,15 +1,28 @@
-import { useCallback, useState } from 'react'
+// 캘린더 이벤트 목록과 편집 동작을 관리하는 훅
+import moment from 'moment'
+import { useCallback, useEffect, useState } from 'react'
 import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 
-import type { CalendarEvent } from '../components/CustomView/CustomDayView'
-import { mockCalendarEvents } from '../mocks/calendarEvents'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
+
 import { createEvent, normalizeDate, updateEventRange } from '../utils/helpers/calendarPageHelpers'
 
-export const useCalendarEvents = () => {
-  const [events, setEvents] = useState<CalendarEvent[]>(() => [...mockCalendarEvents])
+type UseCalendarEventsOptions = {
+  initialEvents?: CalendarEvent[]
+}
+
+export const useCalendarEvents = (options: UseCalendarEventsOptions = {}) => {
+  const { initialEvents } = options
+  const [events, setEvents] = useState<CalendarEvent[]>(() => initialEvents ?? [])
+
+  useEffect(() => {
+    if (!initialEvents) return
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setEvents(initialEvents)
+  }, [initialEvents])
 
   const addEvent = useCallback((date: Date, allDay = false) => {
-    const createdId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    const createdId = Date.now()
     const nextEvent: CalendarEvent = { ...createEvent(date, 0, allDay), id: createdId }
     setEvents((prev) => [...prev, nextEvent])
     return createdId
@@ -43,7 +56,16 @@ export const useCalendarEvents = () => {
   const updateEventTiming = useCallback(
     (eventId: CalendarEvent['id'], start: Date, end: Date, allDay: boolean) => {
       setEvents((prev) =>
-        prev.map((event) => (event.id === eventId ? { ...event, start, end, allDay } : event)),
+        prev.map((event) =>
+          event.id === eventId
+            ? {
+                ...event,
+                start: moment(start).format('YYYY-MM-DDTHH:mm'),
+                end: moment(end).format('YYYY-MM-DDTHH:mm'),
+                isAllDay: allDay,
+              }
+            : event,
+        ),
       )
     },
     [],
@@ -69,6 +91,12 @@ export const useCalendarEvents = () => {
     [],
   )
 
+  const updateEventId = useCallback((tempId: CalendarEvent['id'], nextId: CalendarEvent['id']) => {
+    setEvents((prev) =>
+      prev.map((event) => (event.id === tempId ? { ...event, id: nextId } : event)),
+    )
+  }, [])
+
   const toggleEventDone = useCallback((eventId: CalendarEvent['id']) => {
     setEvents((prev) =>
       prev.map((event) => (event.id === eventId ? { ...event, isDone: !event.isDone } : event)),
@@ -89,6 +117,7 @@ export const useCalendarEvents = () => {
     updateEventTiming,
     updateEventType,
     updateEventTitle,
+    updateEventId,
     toggleEventDone,
     removeEvent,
   }

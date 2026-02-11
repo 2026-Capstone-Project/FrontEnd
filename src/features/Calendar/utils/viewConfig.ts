@@ -39,6 +39,7 @@ const viewConfigMap: Partial<Record<View, ViewConfig>> = {
       weekdayFormat,
       dateFormat: formatDayNumber,
     },
+    allDayAccessor: (event) => event.isAllDay,
   },
   week: {
     formats: {
@@ -49,6 +50,7 @@ const viewConfigMap: Partial<Record<View, ViewConfig>> = {
     components: {
       header: CustomHeader,
     },
+    // 주간뷰에서는 일정 전부를 종일 영역에 표시
     allDayAccessor: () => true,
   },
   day: {
@@ -59,6 +61,7 @@ const viewConfigMap: Partial<Record<View, ViewConfig>> = {
     components: {
       header: CustomHeader,
     },
+    allDayAccessor: (event) => event.isAllDay,
   },
 }
 

@@ -3,8 +3,8 @@ import { useEffect } from 'react'
 import { type Control, type Resolver, useForm, type UseFormReturn, useWatch } from 'react-hook-form'
 
 import { addTodoSchema } from '@/shared/schemas/todo'
-import { type AddTodoFormValues, type RepeatConfigSchema } from '@/shared/types/event'
-import { defaultRepeatConfig } from '@/shared/types/repeat'
+import { type AddTodoFormValues, type RepeatConfigSchema } from '@/shared/types/event/event'
+import { defaultRepeatConfig } from '@/shared/types/event/recurrence/repeat'
 
 type UseTodoFormFieldsProps = {
   date: string

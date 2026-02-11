@@ -53,7 +53,6 @@ export const MobileButtons = styled.div`
 export const CalendarWrapper = styled.div<{ view: string }>`
   width: 100%;
   height: ${(props) => (props.view === 'week' ? 'auto' : 'fit-content')};
-  min-height: 600px;
   padding: 20px 0 0 0;
   background-color: white;
   border: 1px solid #efefef;

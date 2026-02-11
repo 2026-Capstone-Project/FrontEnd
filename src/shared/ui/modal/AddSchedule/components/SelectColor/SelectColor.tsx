@@ -1,14 +1,15 @@
 /** @jsxImportSource @emotion/react */
 import { useEffect, useRef, useState } from 'react'
 
-import { type EventColorType, getColorPalette } from '@/features/Calendar/utils/colorPalette'
 import Arrow from '@/shared/assets/icons/chevron.svg?react'
 import { EVENT_COLORS } from '@/shared/constants/event'
+import { theme } from '@/shared/styles/theme'
+import type { EventColorType } from '@/shared/types/event/event'
 
 import * as S from './SelectColor.style'
 
 type SelectColorProps = {
-  value: EventColorType
+  value?: EventColorType
   onChange: (value: EventColorType) => void
 }
 
@@ -33,17 +34,22 @@ const SelectColor = ({ value, onChange }: SelectColorProps) => {
       document.removeEventListener('touchstart', handleOutsideClick)
     }
   }, [dropdownOpen])
+  const resolvedValue = EVENT_COLORS.includes(value as EventColorType)
+    ? (value as EventColorType)
+    : EVENT_COLORS[0]
+  const palette = theme.colors[resolvedValue]
+
   return (
     <S.ColorDropdown ref={dropdownRef} onClick={() => setDropdownOpen((prev) => !prev)}>
-      <S.Circle color={getColorPalette(value).point} />
+      <S.Circle color={palette.point} />
       <Arrow css={{ rotate: '-90deg' }} color="#A5A5A5" />
       {dropdownOpen && (
         <S.ColorOptions>
           {EVENT_COLORS.map((colorName) => (
             <S.CircleOption
               key={colorName}
-              color={getColorPalette(colorName).point}
-              isSelected={value === colorName}
+              color={theme.colors[colorName].point}
+              isSelected={resolvedValue === colorName}
               onClick={() => {
                 onChange(colorName)
                 setDropdownOpen(false)

@@ -9,7 +9,7 @@ export const ModalWrapper = styled.div`
   border-radius: 20px;
   box-shadow: 0 0 100px 30px rgba(0, 0, 0, 0.1);
   width: fit-content;
-  max-width: 400px;
+  min-width: 400px;
   gap: 28px;
   display: flex;
   flex-direction: column;
@@ -24,6 +24,7 @@ export const Title = styled.h2`
   margin-bottom: 16px;
   font-size: 24px;
   font-weight: 600;
+  white-space: nowrap;
   ${media.down(theme.breakPoints.tablet)} {
     font-size: 20px;
   }
