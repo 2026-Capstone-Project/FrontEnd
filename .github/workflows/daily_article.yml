@@ -5,6 +5,10 @@ on:
     - cron: "0 15 * * *" # 한국 시간 기준 매일 자정 (UTC 15:00)
   workflow_dispatch: # 수동 실행 버튼
 
+concurrency:
+  group: daily-article-auto-daily-log
+  cancel-in-progress: false
+
 jobs:
   generate-and-push:
     runs-on: ubuntu-latest
@@ -15,6 +19,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
+          ref: auto-daily-log
           fetch-depth: 0 # 모든 브랜치 이력을 가져옴
 
       - name: Set up Python
