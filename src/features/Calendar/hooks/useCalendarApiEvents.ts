@@ -1,10 +1,10 @@
-// 캘린더 API 응답을 화면용 이벤트로 변환하는 훅
 import { useMemo } from 'react'
 
 import { useEventQuery, useTodoForCalendarQuery } from '@/shared/hooks/query/useCalendarQueries'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { TodoType } from '@/shared/types/todo/types'
 
+// 할 일의 dueTime 값을 시/분으로 파싱합니다.
 const parseDueTime = (value?: TodoType['dueTime']) => {
   if (!value) {
     return { hour: 0, minute: 0 }
@@ -22,6 +22,7 @@ const parseDueTime = (value?: TodoType['dueTime']) => {
   }
 }
 
+// 로컬 시간대 기준 날짜/시간 객체를 생성합니다.
 const buildLocalDateTime = (dateValue: string, timeValue?: TodoType['dueTime']) => {
   const [year, month, day] = dateValue.split('-').map((item) => Number.parseInt(item, 10))
   const { hour, minute } = parseDueTime(timeValue)
@@ -48,9 +49,11 @@ const toTodoEvent = (todo: TodoType): CalendarEvent => {
     recurrenceGroup: null,
     type: 'todo',
     isDone: todo.isCompleted,
+    isRecurring: todo.isRecurring,
   }
 }
 
+// 기간 내 캘린더 이벤트/할 일을 조회해 캘린더용으로 매핑.
 export const useCalendarApiEvents = (startDate: string, endDate: string) => {
   const { data, refetch, isFetching } = useEventQuery(startDate, endDate)
   const { data: todoData } = useTodoForCalendarQuery(startDate, endDate)

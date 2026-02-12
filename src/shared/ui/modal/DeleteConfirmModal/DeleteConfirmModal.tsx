@@ -52,10 +52,17 @@ const DeleteConfirmModal = (props: DeleteConfirmModalProps) => {
   const { onClose, title } = props
   const radioName = useId()
   const [selectedOption, setSelectedOption] = useState<'single' | 'future'>('single')
+  const isEventTarget = props.target.type === 'event'
 
   const options = [
-    { value: 'single', label: '이 이벤트' },
-    { value: 'future', label: '이 이벤트부터 이후 이벤트' },
+    {
+      value: 'single',
+      label: isEventTarget ? '이 이벤트' : '이 할 일',
+    },
+    {
+      value: 'future',
+      label: isEventTarget ? '이 이벤트부터 이후 이벤트' : '이 할 일부터 이후 할 일',
+    },
   ] as const
 
   const handleDelete = () => {
@@ -88,7 +95,7 @@ const DeleteConfirmModal = (props: DeleteConfirmModalProps) => {
   return createPortal(
     <Modal onClick={onClose}>
       <S.ModalWrapper>
-        <S.Title>반복 일정 "{title}" 삭제 </S.Title>
+        <S.Title>{`${isEventTarget ? '반복 일정' : '반복 할 일'} "${title}" 삭제`}</S.Title>
         <S.OptionsContainer>
           {options.map((option) => {
             const optionId = `${radioName}-${option.value}`
@@ -113,7 +120,9 @@ const DeleteConfirmModal = (props: DeleteConfirmModalProps) => {
         </S.OptionsContainer>
         <S.ButtonsContainer>
           <S.CancelButton onClick={onClose}>취소</S.CancelButton>
-          <S.DeleteButton onClick={handleDelete}>이벤트 삭제</S.DeleteButton>
+          <S.DeleteButton onClick={handleDelete}>
+            {isEventTarget ? '이벤트 삭제' : '할 일 삭제'}
+          </S.DeleteButton>
         </S.ButtonsContainer>
       </S.ModalWrapper>
     </Modal>,

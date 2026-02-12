@@ -217,7 +217,7 @@ const AddTodoForm = ({
   )
 
   const handleFormSubmit = handleSubmit(
-    (values) => {
+    async (values) => {
       if (requestConfirmation()) {
         setPendingTodoValues(values)
         return
@@ -229,8 +229,12 @@ const AddTodoForm = ({
         }
       }
       syncEventTiming(values)
-      onSubmit(values)
-      onClose()
+      try {
+        await onSubmit(values)
+        onClose()
+      } catch (error) {
+        console.error('[AddTodoForm] submit failed', error)
+      }
     },
     (errors) => {
       console.log('[AddTodoForm] submit errors', errors)
@@ -238,7 +242,7 @@ const AddTodoForm = ({
   )
 
   const handleConfirmedSubmit = useCallback(
-    (option: EditConfirmOption) => {
+    async (option: EditConfirmOption) => {
       void option
       if (!pendingTodoValues) return
       confirmChange()
@@ -249,9 +253,13 @@ const AddTodoForm = ({
         }
       }
       syncEventTiming(pendingTodoValues)
-      onSubmit(pendingTodoValues)
-      onClose()
-      setPendingTodoValues(null)
+      try {
+        await onSubmit(pendingTodoValues)
+        onClose()
+        setPendingTodoValues(null)
+      } catch (error) {
+        console.error('[AddTodoForm] submit failed', error)
+      }
     },
     [
       confirmChange,

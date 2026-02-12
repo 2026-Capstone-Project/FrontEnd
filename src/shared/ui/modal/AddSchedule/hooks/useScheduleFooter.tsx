@@ -21,7 +21,7 @@ type UseScheduleFooterProps = {
     values: AddScheduleFormValues,
     scope?: RecurrenceEventScope,
     occurrenceDate?: string,
-  ) => void
+  ) => Promise<unknown>
   onEventColorChange?: (eventId: CalendarEvent['id'], color: EventColorType) => void
   registerFooterChildren?: (node: ReactNode | null) => void
   registerDeleteHandler?: (handler?: () => void) => void
@@ -117,7 +117,7 @@ export const useScheduleFooter = ({
       if (isExistingRecurring) {
         openApplyConfirm(nextValues)
       } else {
-        patchSchedule(nextValues)
+        void patchSchedule(nextValues)
       }
     },
     [

@@ -1,7 +1,7 @@
 import styled from '@emotion/styled'
 import { Outlet } from 'react-router-dom'
 
-import Header from '@/features/Common/Header'
+import Header from '@/shared/ui/Header/Header'
 
 import DefaultAppLayout from './defaultAppLayout'
 

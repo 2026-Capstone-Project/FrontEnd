@@ -26,8 +26,8 @@ export const useSchedulePatchController = ({
   const formatDateTime = useCallback((value: Date) => moment(value).format('YYYY-MM-DDTHH:mm'), [])
 
   const { usePatchEvent, usePostEvent } = useCalendarMutation()
-  const { mutate: patchEventMutation } = usePatchEvent()
-  const { mutate: postEventMutation } = usePostEvent()
+  const { mutateAsync: patchEventMutation } = usePatchEvent()
+  const { mutateAsync: postEventMutation } = usePostEvent()
 
   // 서버 반복 규칙을 폼 기본값으로 매핑
   const initialRepeatConfig = useMemo<RepeatConfigSchema>(() => {
@@ -83,7 +83,7 @@ export const useSchedulePatchController = ({
           ? undefined
           : (mapRepeatConfigToRecurrenceGroup(values.repeatConfig) ?? undefined)
 
-      postEventMutation({
+      return postEventMutation({
         title: values.eventTitle?.trim() || '새 일정',
         content: values.eventDescription ?? '',
         startTime: formatDateTime(start),

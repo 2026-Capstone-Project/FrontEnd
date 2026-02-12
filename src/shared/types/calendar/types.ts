@@ -1,8 +1,6 @@
 import type { EventColorType } from '@/shared/types/event/event'
 import type { RecurrenceGroup } from '@/shared/types/recurrence/recurrence'
 
-import type { TodoType } from '../todo/types'
-
 export type Event = {
   id: number
   calculated: boolean
@@ -21,6 +19,7 @@ export type CalendarEvent = Omit<Event, 'start' | 'end'> & {
   end: string | Date
   type?: 'todo' | 'schedule'
   isDone?: boolean
+  isRecurring?: boolean
 }
 
 export type GetEventsResponseDTO = {
@@ -28,7 +27,3 @@ export type GetEventsResponseDTO = {
 }
 
 export type GetEventDetailResponseDTO = Event
-
-export type GetTodoForCalendarResponseDTO = {
-  todos: Array<TodoType>
-}

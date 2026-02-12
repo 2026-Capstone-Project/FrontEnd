@@ -121,7 +121,7 @@ const AddScheduleFormContent = ({
       setValue('eventEndTime', undefined, { shouldValidate: true })
     }
     if (isEditing) {
-      patchSchedule({
+      void patchSchedule({
         ...getValues(),
         isAllday: nextIsAllDay,
         ...(nextIsAllDay ? { eventStartTime: undefined, eventEndTime: undefined } : {}),

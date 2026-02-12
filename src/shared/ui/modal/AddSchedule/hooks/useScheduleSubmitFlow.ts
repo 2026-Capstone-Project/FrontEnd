@@ -19,8 +19,8 @@ type UseScheduleSubmitFlowProps = {
     values: AddScheduleFormValues,
     scope?: RecurrenceEventScope,
     occurrenceDate?: string,
-  ) => void
-  createSchedule: (values: AddScheduleFormValues) => void
+  ) => Promise<unknown>
+  createSchedule: (values: AddScheduleFormValues) => Promise<unknown>
   syncEventTiming: (values: AddScheduleFormValues) => void
   handleTitleConfirm: (value: string) => void
   buildDateTime: (dateValue: Date | null, timeValue?: string) => Date
@@ -76,7 +76,7 @@ export const useScheduleSubmitFlow = ({
 
   // 폼 제출 처리(일반/반복 분기)
   const handleFormSubmit = handleSubmit(
-    (values) => {
+    async (values) => {
       if (isExistingRecurring && requestConfirmation()) {
         setPendingScheduleValues(values)
         return
@@ -92,12 +92,16 @@ export const useScheduleSubmitFlow = ({
         }
       }
       syncEventTiming(values)
-      if (isEditing) {
-        patchSchedule(values)
-      } else {
-        createSchedule(values)
+      try {
+        if (isEditing) {
+          await patchSchedule(values)
+        } else {
+          await createSchedule(values)
+        }
+        onClose()
+      } catch (error) {
+        console.error('[AddScheduleForm] submit failed', error)
       }
-      onClose()
     },
     (errors) => {
       console.log('[AddScheduleForm] submit errors', errors)
@@ -106,7 +110,7 @@ export const useScheduleSubmitFlow = ({
 
   // 반복 일정 수정 범위를 확인 후 제출 처리
   const handleConfirmedSubmit = useCallback(
-    (option: EditConfirmOption) => {
+    async (option: EditConfirmOption) => {
       void option
       if (!pendingScheduleValues) return
       if (isEditConfirmOpen) {
@@ -129,9 +133,13 @@ export const useScheduleSubmitFlow = ({
             ? 'THIS_AND_FOLLOWING_EVENTS'
             : 'ALL_EVENTS'
       syncEventTiming(pendingScheduleValues)
-      patchSchedule(pendingScheduleValues, scope, occurrenceDate)
-      onClose()
-      clearApplyConfirm()
+      try {
+        await patchSchedule(pendingScheduleValues, scope, occurrenceDate)
+        onClose()
+        clearApplyConfirm()
+      } catch (error) {
+        console.error('[AddScheduleForm] submit failed', error)
+      }
     },
     [
       buildDateTime,

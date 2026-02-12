@@ -10,11 +10,11 @@ export const todoKeys = createQueryKeys('todo', {
     queryFn: () => getTodos(filter),
   }),
   detail: (todoId: number, occurrenceDate: string) => ({
-    queryKey: ['todo', { todoId, occurrenceDate }],
+    queryKey: [{ todoId, occurrenceDate }],
     queryFn: () => getDetailTodo(todoId, occurrenceDate),
   }),
   progress: (date: string) => ({
-    queryKey: ['progress', date],
+    queryKey: [date],
     queryFn: () => getTodoProgress(date),
   }),
 })

@@ -105,6 +105,7 @@ export const mapRecurrenceGroupToRepeatConfig = (group?: RecurrenceGroup | null)
   if (frequency === 'WEEKLY') {
     const weeklyDays = toWeekdays(source.daysOfWeek)
     base.customWeeklyDays = weeklyDays.length > 0 ? weeklyDays : []
+    base.customWeeklyInterval = interval
   }
 
   if (frequency === 'MONTHLY') {
@@ -176,7 +177,7 @@ export const mapRepeatConfigToRecurrenceGroup = (
   }
 
   if (basis === 'weekly') {
-    base.intervalValue = 1
+    base.intervalValue = config.customWeeklyInterval ?? 1
     base.daysOfWeek = toWeeks(config.customWeeklyDays)
   }
 

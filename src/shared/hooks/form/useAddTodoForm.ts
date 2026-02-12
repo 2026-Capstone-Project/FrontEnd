@@ -35,7 +35,7 @@ export type UseAddTodoFormResult = {
   handleRepeatType: (value: RepeatType) => void
   updateConfig: (changes: Partial<RepeatConfig>) => void
   handleSubmit: UseFormReturn<AddTodoFormValues>['handleSubmit']
-  onSubmit: (values: AddTodoFormValues) => void
+  onSubmit: (values: AddTodoFormValues) => Promise<unknown>
   setIsAllday: React.Dispatch<React.SetStateAction<boolean>>
   todoTitle: string | undefined
   repeatEndDate: Date | null
@@ -47,7 +47,7 @@ const isCustomBasis = (value: RepeatType): value is CustomRepeatBasis =>
 export const useAddTodoForm = ({ date }: UseAddTodoProps): UseAddTodoFormResult => {
   const [isAllday, setIsAllday] = useState(false)
   const { usePostTodo } = useTodoMutations()
-  const { mutate: postTodoMutate } = usePostTodo()
+  const { mutateAsync: postTodoMutate } = usePostTodo()
 
   const {
     formMethods,
@@ -155,7 +155,7 @@ export const useAddTodoForm = ({ date }: UseAddTodoProps): UseAddTodoFormResult 
       values.repeatConfig.repeatType === 'none'
         ? undefined
         : (mapRepeatConfigToRecurrenceGroup(values.repeatConfig) ?? undefined)
-    postTodoMutate({
+    return postTodoMutate({
       title: values.todoTitle?.trim() || '새로운 할 일',
       startDate: formatIsoDate(values.todoDate),
       dueTime: values.isAllday ? undefined : values.todoEndTime,

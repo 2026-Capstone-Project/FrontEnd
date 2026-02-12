@@ -20,7 +20,7 @@ type PatchEventMutate = (params: {
     occurrenceDate?: string
     recurrenceGroup?: Event['recurrenceGroup'] | null
   }
-}) => void
+}) => Promise<unknown>
 
 type UseSchedulePatchArgs = {
   eventId: number | null
@@ -43,7 +43,7 @@ export const useSchedulePatch = ({
 }: UseSchedulePatchArgs) =>
   useCallback(
     (values: AddScheduleFormValues, scope?: RecurrenceEventScope, occurrenceDate?: string) => {
-      if (eventId == null || eventId === 0) return
+      if (eventId == null || eventId === 0) return Promise.resolve()
       const startDate = values.eventStartDate ?? new Date(date)
       const endDate = values.eventEndDate ?? startDate
       const [start, end] = values.isAllday
@@ -96,12 +96,12 @@ export const useSchedulePatch = ({
         occurrenceDate: nextOccurrenceDate,
       }
 
-      if (Object.keys(eventData).length === 0) return
+      if (Object.keys(eventData).length === 0) return Promise.resolve()
       if (isRecurring && scope) {
         eventData.recurrenceUpdateScope = scope
       }
 
-      patchEventMutation({ eventId, eventData })
+      return patchEventMutation({ eventId, eventData })
     },
     [
       buildDateTime,

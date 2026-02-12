@@ -1,5 +1,4 @@
-import { useQueryClient } from '@tanstack/react-query'
-import { type MouseEventHandler, useState } from 'react'
+import { type MouseEventHandler, useEffect, useState } from 'react'
 
 import Repeat from '@/shared/assets/icons/rotate.svg?react'
 import Trash from '@/shared/assets/icons/trash-2.svg?react'
@@ -41,22 +40,17 @@ const TodoCard = ({
 }) => {
   const [selected, setSelected] = useState(isCompleted ?? false)
   const [openModal, setOpenModal] = useState(false)
-  const queryClient = useQueryClient()
   const { useDeleteTodo } = useTodoMutations()
   const { mutate: deleteTodoMutate } = useDeleteTodo()
+  useEffect(() => {
+    setSelected(isCompleted ?? false)
+  }, [isCompleted])
   const handleDelete = () => {
     if (isRecurring) {
       setOpenModal(true)
       return
     }
-    deleteTodoMutate(
-      { todoId: id },
-      {
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ['todo', 'list'] })
-        },
-      },
-    )
+    deleteTodoMutate({ todoId: id })
   }
   return (
     <S.Wrapper

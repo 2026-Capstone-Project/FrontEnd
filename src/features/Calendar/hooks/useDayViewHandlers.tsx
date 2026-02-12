@@ -44,6 +44,7 @@ export const useDayViewHandlers = ({
   onEventClick,
   onEventDoubleClick,
 }: UseDayViewHandlersArgs) => {
+  // 일간 뷰의 시간 슬롯을 더블 클릭했을 때 새 일정을 생성하는 핸들러
   const handleDayViewSlotDoubleClick = useCallback(
     (slotDate: Date) => {
       clearSelectedDate()
@@ -58,6 +59,7 @@ export const useDayViewHandlers = ({
     [clearSelectedDate, clearSelectedEvent, enqueueEvent, handleAddEvent, onCreateEvent],
   )
 
+  // 일간 뷰에서 일정을 드래그하여 시간 변경 시 호출되는 핸들러
   const handleDayViewEventDrag = useCallback(
     (event: CalendarEvent, start: Date, end: Date) => {
       updateEventTime(event.id, start, end, event.type)
@@ -65,6 +67,7 @@ export const useDayViewHandlers = ({
     [updateEventTime],
   )
 
+  // 일간 뷰에서 일정을 드래그하는 동안 미리보기 업데이트를 위한 핸들러
   const handleDayViewEventDragPreview = useCallback(
     (event: CalendarEvent, start: Date, end: Date) => {
       updateEventTimePreview?.(event.id, start, end, event.type)
@@ -72,6 +75,7 @@ export const useDayViewHandlers = ({
     [updateEventTimePreview],
   )
 
+  // 일간 뷰 컴포넌트에 핸들러를 주입한 새로운 컴포넌트를 메모이제이션
   const dayViewWithHandlers = useMemo<
     React.FC<Parameters<typeof CustomDayView>[0]> & ViewStatic
   >(() => {
