@@ -1,3 +1,4 @@
+import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
 import { DeleteConfirmModal, EditConfirmModal, type EditConfirmOption } from '@/shared/ui/modal'
 
 type ScheduleConfirmModalsProps = {
@@ -22,24 +23,24 @@ const ScheduleConfirmModals = ({
   onCloseDelete,
   onCancelEdit,
   onConfirmEdit,
-}: ScheduleConfirmModalsProps) => (
-  <>
-    {deleteWarningVisible && (
-      <DeleteConfirmModal
-        occurrenceDate={occurrenceDate}
-        eventId={eventId}
-        title={eventTitle || '새로운 이벤트'}
-        onClose={onCloseDelete}
-      />
-    )}
-    {(isEditConfirmOpen || isApplyConfirmOpen) && (
-      <EditConfirmModal
-        title={eventTitle || '일정'}
-        onCancel={onCancelEdit}
-        onConfirm={onConfirmEdit}
-      />
-    )}
-  </>
-)
+}: ScheduleConfirmModalsProps) => {
+  const { useDeleteEvent } = useCalendarMutation()
+  const { mutate: deleteEventMutate } = useDeleteEvent()
 
+  return (
+    <>
+      {deleteWarningVisible && (
+        <DeleteConfirmModal
+          title={eventTitle || '새로운 이벤트'}
+          onClose={onCloseDelete}
+          target={{ type: 'event', id: eventId, occurrenceDate }}
+          mutate={deleteEventMutate}
+        />
+      )}
+      {(isEditConfirmOpen || isApplyConfirmOpen) && (
+        <EditConfirmModal onCancel={onCancelEdit} onConfirm={onConfirmEdit} />
+      )}
+    </>
+  )
+}
 export default ScheduleConfirmModals

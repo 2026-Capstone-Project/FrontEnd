@@ -41,9 +41,10 @@ export const updateEventRange = (
   eventId: CalendarEvent['id'],
   start: Date,
   end: Date,
+  type?: CalendarEvent['type'],
 ) =>
   events.map((item) =>
-    item.id === eventId
+    item.id === eventId && (type ? item.type === type : true)
       ? {
           ...item,
           start: moment(start).format('YYYY-MM-DDTHH:mm'),

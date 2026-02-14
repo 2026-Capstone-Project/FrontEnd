@@ -10,7 +10,7 @@ import {
   type CustomRepeatBasis,
   type RepeatConfig,
   type RepeatType,
-} from '@/shared/types/event/recurrence/repeat'
+} from '@/shared/types/recurrence/repeat'
 
 type UseRepeatConfigControllerProps = {
   repeatConfig: RepeatConfigSchema

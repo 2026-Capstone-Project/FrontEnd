@@ -6,20 +6,22 @@ import { type UseFormGetValues } from 'react-hook-form'
 import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { AddScheduleFormValues, EventColorType } from '@/shared/types/event/event'
-import type { RepeatConfig } from '@/shared/types/event/recurrence/repeat'
+import type { RecurrenceEventScope } from '@/shared/types/recurrence/recurrence'
+import type { RepeatConfig } from '@/shared/types/recurrence/repeat'
 import SelectColor from '@/shared/ui/modal/AddSchedule/components/SelectColor/SelectColor'
 
 type UseScheduleFooterProps = {
   repeatConfig: RepeatConfig
   eventId: CalendarEvent['id']
   initialEvent?: CalendarEvent | null
+  isEditing: boolean
   getValues: UseFormGetValues<AddScheduleFormValues>
   setEventColor: (value: EventColorType) => void
   patchSchedule: (
     values: AddScheduleFormValues,
-    scope?: 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS' | 'ALL_EVENTS',
+    scope?: RecurrenceEventScope,
     occurrenceDate?: string,
-  ) => void
+  ) => Promise<unknown>
   onEventColorChange?: (eventId: CalendarEvent['id'], color: EventColorType) => void
   registerFooterChildren?: (node: ReactNode | null) => void
   registerDeleteHandler?: (handler?: () => void) => void
@@ -33,6 +35,7 @@ export const useScheduleFooter = ({
   repeatConfig,
   eventId,
   initialEvent,
+  isEditing,
   getValues,
   setEventColor,
   patchSchedule,
@@ -106,17 +109,21 @@ export const useScheduleFooter = ({
       setEventColor(value)
       if (eventId != null && eventId !== 0) {
         onEventColorChange?.(eventId, value)
-        const nextValues = { ...getValues(), eventColor: value }
-        if (isExistingRecurring) {
-          openApplyConfirm(nextValues)
-        } else {
-          patchSchedule(nextValues)
-        }
+      }
+      if (!isEditing) {
+        return
+      }
+      const nextValues = { ...getValues(), eventColor: value }
+      if (isExistingRecurring) {
+        openApplyConfirm(nextValues)
+      } else {
+        void patchSchedule(nextValues)
       }
     },
     [
       eventId,
       getValues,
+      isEditing,
       isExistingRecurring,
       onEventColorChange,
       openApplyConfirm,

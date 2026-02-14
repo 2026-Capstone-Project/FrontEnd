@@ -1,8 +1,8 @@
-// 캘린더 반응형(데스크톱/모바일) 상태를 감지하는 훅
 import { useEffect, useState } from 'react'
 
 import { theme } from '@/shared/styles/theme'
 
+// 캘린더 반응형(데스크톱/모바일) 상태를 감지하는 훅
 export const useCalendarResponsive = () => {
   const [isDesktop, setIsDesktop] = useState(() => {
     if (typeof window === 'undefined') return false

@@ -7,10 +7,8 @@ export const HeaderWrapper = styled.header`
   width: 100%;
   background-color: ${theme.colors.white};
   border-bottom: 1px solid ${theme.colors.lightGray};
-  position: fixed;
-  z-index: 100;
-  top: 0;
   box-shadow: 0 0 15px 0 rgba(0, 0, 0, 0.15);
+  height: 72px;
 `
 
 export const Inner = styled.div`

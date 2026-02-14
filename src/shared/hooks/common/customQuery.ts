@@ -13,7 +13,7 @@ import { useInfiniteQuery, useMutation, useQuery, useSuspenseQuery } from '@tans
 
 type DefaultQueryOptions = {
   staleTime?: number
-  retry?: number
+  retry?: UseQueryOptions<unknown, unknown, unknown, QueryKey>['retry']
 }
 
 const STALE_TIME = 1000 * 60 * 3

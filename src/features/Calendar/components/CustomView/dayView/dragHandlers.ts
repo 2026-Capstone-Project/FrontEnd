@@ -45,6 +45,7 @@ export type DragMode = 'move' | 'resize' | 'resize-start'
 export type DragState = {
   event: CalendarEvent
   startClientY: number
+  startClientX: number
   startDate: Date
   endDate: Date
   deltaMinutes: number
@@ -80,6 +81,7 @@ export const useDayViewDragHandlers = (
 ) => {
   const [, setDragRenderTrigger] = useState(0)
   const dragStateRef = useRef<DragState | null>(null)
+  const dragThresholdPassedRef = useRef(false)
   const cleanupRef = useRef<undefined | (() => void)>(undefined)
   const previewFrameRef = useRef<number | null>(null)
   const pendingPreviewRef = useRef<{ event: CalendarEvent; start: Date; end: Date } | null>(null)
@@ -123,15 +125,20 @@ export const useDayViewDragHandlers = (
     ) => {
       cleanupRef.current?.()
       const pointerStartY = pointerEvent.clientY
+      const pointerStartX = pointerEvent.clientX
       const minutesPerPixel = getMinutesPerPixel(rowHeight)
       const gridRect = options?.gridRect ?? null
       const originColumnIndex = options?.originColumnIndex
       const columnGapPx = options?.columnGapPx ?? 0
 
       const handlePointerMove = (moveEvent: PointerEvent) => {
+        const deltaX = moveEvent.clientX - pointerStartX
         const deltaY = moveEvent.clientY - pointerStartY
         const rawDeltaMinutes = deltaY * minutesPerPixel
         const deltaMinutes = snapMinutes(rawDeltaMinutes)
+        if (Math.hypot(deltaX, deltaY) > 6) {
+          dragThresholdPassedRef.current = true
+        }
         let columnShift = 0
         if (gridRect && typeof originColumnIndex === 'number') {
           const gap = Math.max(columnGapPx, 0)
@@ -151,6 +158,7 @@ export const useDayViewDragHandlers = (
         dragStateRef.current = {
           event: calendarEvent,
           startClientY: pointerStartY,
+          startClientX: pointerStartX,
           startDate: start,
           endDate: end,
           deltaMinutes,
@@ -225,6 +233,7 @@ export const useDayViewDragHandlers = (
 
       const cleanup = createCleanup(handlePointerMove, handlePointerUp, handleCancel)
       cleanupRef.current = cleanup
+      dragThresholdPassedRef.current = false
       window.addEventListener('pointermove', handlePointerMove)
       window.addEventListener('pointerup', handlePointerUp)
       window.addEventListener('pointercancel', handleCancel)
@@ -232,6 +241,7 @@ export const useDayViewDragHandlers = (
       dragStateRef.current = {
         event: calendarEvent,
         startClientY: pointerStartY,
+        startClientX: pointerStartX,
         startDate: start,
         endDate: end,
         deltaMinutes: 0,
@@ -264,6 +274,7 @@ export const useDayViewDragHandlers = (
 
   return {
     dragStateRef,
+    dragThresholdPassedRef,
     handleEventPointerDown,
     handleResizePointerDown,
     handleResizeStartPointerDown,

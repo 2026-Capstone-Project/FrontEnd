@@ -3,10 +3,9 @@ import { useCallback } from 'react'
 
 import type { CalendarEvent, Event } from '@/shared/types/calendar/types'
 import type { AddScheduleFormValues, RepeatConfigSchema } from '@/shared/types/event/event'
+import type { RecurrenceEventScope } from '@/shared/types/recurrence/recurrence'
 import { mapRepeatConfigToRecurrenceGroup } from '@/shared/utils/recurrenceGroup'
 import { areRepeatConfigsEqual } from '@/shared/utils/repeatConfig'
-
-type PatchScope = 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS' | 'ALL_EVENTS'
 
 type PatchEventMutate = (params: {
   eventId: number
@@ -17,11 +16,11 @@ type PatchEventMutate = (params: {
     endTime?: string
     color?: Event['color']
     isAllDay?: boolean
-    recurrenceUpdateScope?: PatchScope
+    recurrenceUpdateScope?: RecurrenceEventScope
     occurrenceDate?: string
     recurrenceGroup?: Event['recurrenceGroup'] | null
   }
-}) => void
+}) => Promise<unknown>
 
 type UseSchedulePatchArgs = {
   eventId: number | null
@@ -43,8 +42,8 @@ export const useSchedulePatch = ({
   buildDateTime,
 }: UseSchedulePatchArgs) =>
   useCallback(
-    (values: AddScheduleFormValues, scope?: PatchScope, occurrenceDate?: string) => {
-      if (eventId == null || eventId === 0) return
+    (values: AddScheduleFormValues, scope?: RecurrenceEventScope, occurrenceDate?: string) => {
+      if (eventId == null || eventId === 0) return Promise.resolve()
       const startDate = values.eventStartDate ?? new Date(date)
       const endDate = values.eventEndDate ?? startDate
       const [start, end] = values.isAllday
@@ -97,12 +96,12 @@ export const useSchedulePatch = ({
         occurrenceDate: nextOccurrenceDate,
       }
 
-      if (Object.keys(eventData).length === 0) return
+      if (Object.keys(eventData).length === 0) return Promise.resolve()
       if (isRecurring && scope) {
         eventData.recurrenceUpdateScope = scope
       }
 
-      patchEventMutation({ eventId, eventData })
+      return patchEventMutation({ eventId, eventData })
     },
     [
       buildDateTime,

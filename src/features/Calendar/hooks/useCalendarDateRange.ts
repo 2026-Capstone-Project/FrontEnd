@@ -1,8 +1,8 @@
-// 캘린더 뷰와 기준 날짜로 API 조회 범위를 계산하는 훅
 import moment from 'moment'
 import { useMemo } from 'react'
 import { type View, Views } from 'react-big-calendar'
 
+// 캘린더 뷰와 기준 날짜로 API 조회 범위를 계산하는 훅
 export const useCalendarDateRange = (view: View, date: Date) =>
   useMemo(() => {
     const base = moment(date)

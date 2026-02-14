@@ -9,7 +9,6 @@ export const Container = styled.div`
   align-items: center;
   justify-content: center;
   gap: 16px;
-  padding: 40px 20px;
   text-align: center;
   background: ${theme.colors.background};
   color: ${theme.colors.textPrimary};

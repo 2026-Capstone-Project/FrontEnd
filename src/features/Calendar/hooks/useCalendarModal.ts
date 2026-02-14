@@ -1,3 +1,4 @@
+// 훅: 캘린더 모달 상태와 열림/닫힘 흐름을 관리합니다.
 // 캘린더 모달의 열림/편집 상태와 삭제 단축키를 관리하는 훅
 import { useCallback, useEffect, useState } from 'react'
 

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { type Control, type UseFormReturn } from 'react-hook-form'
 
+import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type {
   AddTodoFormValues,
@@ -8,12 +9,9 @@ import type {
   RepeatConfigSchema,
   TimePickerField,
 } from '@/shared/types/event/event'
-import type {
-  CustomRepeatBasis,
-  RepeatConfig,
-  RepeatType,
-} from '@/shared/types/event/recurrence/repeat'
+import type { CustomRepeatBasis, RepeatConfig, RepeatType } from '@/shared/types/recurrence/repeat'
 import { formatIsoDate } from '@/shared/utils/date'
+import { mapRepeatConfigToRecurrenceGroup } from '@/shared/utils/recurrenceGroup'
 
 import { useTodoFormFields } from './useTodoFormFields'
 
@@ -37,7 +35,7 @@ export type UseAddTodoFormResult = {
   handleRepeatType: (value: RepeatType) => void
   updateConfig: (changes: Partial<RepeatConfig>) => void
   handleSubmit: UseFormReturn<AddTodoFormValues>['handleSubmit']
-  onSubmit: (values: AddTodoFormValues) => void
+  onSubmit: (values: AddTodoFormValues) => Promise<unknown>
   setIsAllday: React.Dispatch<React.SetStateAction<boolean>>
   todoTitle: string | undefined
   repeatEndDate: Date | null
@@ -48,6 +46,8 @@ const isCustomBasis = (value: RepeatType): value is CustomRepeatBasis =>
 
 export const useAddTodoForm = ({ date }: UseAddTodoProps): UseAddTodoFormResult => {
   const [isAllday, setIsAllday] = useState(false)
+  const { usePostTodo } = useTodoMutations()
+  const { mutateAsync: postTodoMutate } = usePostTodo()
 
   const {
     formMethods,
@@ -151,11 +151,19 @@ export const useAddTodoForm = ({ date }: UseAddTodoProps): UseAddTodoFormResult 
   }, [todoDate])
 
   const onSubmit = (values: AddTodoFormValues) => {
-    const payload = {
-      ...values,
-      todoDate: formatIsoDate(values.todoDate),
-    }
-    console.log('투두 저장', payload)
+    const recurrenceGroup =
+      values.repeatConfig.repeatType === 'none'
+        ? undefined
+        : (mapRepeatConfigToRecurrenceGroup(values.repeatConfig) ?? undefined)
+    return postTodoMutate({
+      title: values.todoTitle?.trim() || '새로운 할 일',
+      startDate: formatIsoDate(values.todoDate),
+      dueTime: values.isAllday ? undefined : values.todoEndTime,
+      isAllDay: values.isAllday ? true : false,
+      priority: 'MEDIUM',
+      memo: values.todoDescription ?? '',
+      recurrenceGroup,
+    })
   }
 
   return {

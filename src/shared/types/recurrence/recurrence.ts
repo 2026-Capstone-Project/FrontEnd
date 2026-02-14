@@ -1,4 +1,4 @@
-import type { Week } from '../event'
+import type { Week } from '../event/event'
 
 export interface RecurrenceGroup {
   frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY'
@@ -6,11 +6,13 @@ export interface RecurrenceGroup {
   endDate?: string
   occurrenceCount?: number
   intervalValue?: number
-  dayOfWeek?: Array<Week>
   daysOfWeek?: Array<Week>
   monthlyType?: 'DAY_OF_MONTH' | 'DAY_OF_WEEK'
-  daysOfMonth?: Array<number>
   weekOfMonth?: number
+  daysOfMonth?: Array<number>
   dayOfWeekInMonth?: Array<Week>
   monthOfYear?: number
 }
+
+export type RecurrenceEventScope = 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS' | 'ALL_EVENTS'
+export type RecurrenceTodoScope = 'THIS_TODO' | 'THIS_AND_FOLLOWING' | 'ALL_TODOS'

@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 
 import { deleteEvent, patchEvent, postEvents } from '@/shared/api/calendar/api'
+import type { RecurrenceEventScope } from '@/shared/types/recurrence/recurrence'
 
 import { useCustomMutation } from '../common/customQuery'
 
@@ -36,7 +37,7 @@ export function useCalendarMutation() {
       }: {
         eventId: number
         params: {
-          scope?: 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS' | 'ALL_EVENTS'
+          scope?: RecurrenceEventScope
           occurrenceDate: string
         }
       }) => deleteEvent(eventId, params),

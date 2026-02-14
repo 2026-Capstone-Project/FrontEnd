@@ -4,7 +4,7 @@ import { type Control, type Resolver, useForm, type UseFormReturn, useWatch } fr
 
 import { addTodoSchema } from '@/shared/schemas/todo'
 import { type AddTodoFormValues, type RepeatConfigSchema } from '@/shared/types/event/event'
-import { defaultRepeatConfig } from '@/shared/types/event/recurrence/repeat'
+import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 
 type UseTodoFormFieldsProps = {
   date: string
@@ -30,7 +30,7 @@ export const useTodoFormFields = ({
   const formMethods = useForm<AddTodoFormValues>({
     resolver,
     defaultValues: {
-      todoTitle: '새로운 할 일',
+      todoTitle: '',
       todoDescription: '',
       todoDate: new Date(date),
       todoEndTime: '10:00',

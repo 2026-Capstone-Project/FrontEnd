@@ -7,7 +7,6 @@ export const Container = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  padding: 20px;
   min-height: 100vh;
   width: 100%;
   gap: 20px;
@@ -15,7 +14,6 @@ export const Container = styled.div`
   @media (min-width: 1024px) {
     flex-direction: row;
     align-items: flex-start;
-    padding: 40px;
     gap: 40px;
   }
 `

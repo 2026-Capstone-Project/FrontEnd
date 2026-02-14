@@ -71,6 +71,7 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
   const [rowHeight, setRowHeight] = useState(50)
   const {
     dragStateRef,
+    dragThresholdPassedRef,
     handleEventPointerDown,
     handleResizePointerDown,
     handleResizeStartPointerDown,
@@ -137,6 +138,7 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
               onEventSelect,
               onEventClick,
               onEventDoubleClick,
+              dragThresholdPassedRef,
               gridRef,
               columnIndex,
             }),

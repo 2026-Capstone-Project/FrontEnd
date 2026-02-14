@@ -17,7 +17,8 @@ const ContentWrapper = styled.div`
   justify-self: center;
   align-self: flex-start;
   height: 100%;
-  min-height: 100%;
+  max-height: fit-content;
+  overflow-y: auto;
   display: flex;
   overflow-x: hidden;
   justify-content: center;
@@ -25,7 +26,7 @@ const ContentWrapper = styled.div`
   gap: 32px;
   max-width: 1440px;
   width: 100%;
-  padding: 20px;
+  padding: 40px 40px 0 40px;
   ${media.down(theme.breakPoints.tablet)} {
     padding: 16px 24px;
   }

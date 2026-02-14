@@ -11,10 +11,13 @@ import { createPortal } from 'react-dom'
 import { FormProvider } from 'react-hook-form'
 
 import { useAddTodoForm } from '@/shared/hooks/form/useAddTodoForm'
+import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
+import { useGetDetailTodoQuery } from '@/shared/hooks/query/useTodoQueries'
 import { useRepeatChangeGuard } from '@/shared/hooks/repeat/useRepeatChangeGuard'
 import { theme } from '@/shared/styles/theme'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import { type AddTodoFormValues } from '@/shared/types/event/event'
+import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 import Checkbox from '@/shared/ui/common/Checkbox/Checkbox'
 import RepeatTypeGroup from '@/shared/ui/common/RepeatTypeGroup/RepeatTypeGroup'
 import TerminationPanel from '@/shared/ui/common/TerminationPanel/TerminationPanel'
@@ -25,6 +28,7 @@ import CustomDatePicker from '@/shared/ui/modal/AddTodo/components/CustomDatePic
 import CustomTimePicker from '@/shared/ui/modal/AddTodo/components/CustomTimePicker/CustomTimePicker'
 import * as S from '@/shared/ui/modal/AddTodo/index.style'
 import { formatDisplayDate } from '@/shared/utils/date'
+import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/recurrenceGroup'
 
 type AddTodoFormProps = {
   registerDeleteHandler?: (handler?: () => void) => void
@@ -74,6 +78,11 @@ const AddTodoForm = ({
     todoTitle,
   } = useAddTodoForm({ date, id: eventId })
   const { register, setValue } = formMethods
+  const occurrenceDate = useMemo(() => moment(date).format('YYYY-MM-DD'), [date])
+  const shouldFetchDetail = isEditing && eventId != null && eventId !== 0
+  const { data: detailData } = useGetDetailTodoQuery(eventId, occurrenceDate, shouldFetchDetail)
+  const { useDeleteTodo } = useTodoMutations()
+  const { mutate: deleteTodoMutate } = useDeleteTodo()
   const [calendarAnchor, setCalendarAnchor] = useState<DOMRect | null>(null)
   const [deleteWarningVisible, setDeleteWarningVisible] = useState(false)
   const [isMobileLayout, setIsMobileLayout] = useState(() => {
@@ -81,6 +90,38 @@ const AddTodoForm = ({
     return window.matchMedia(`(max-width: ${theme.breakPoints.tablet})`).matches
   })
   const startDate = formatDisplayDate(todoDate)
+
+  useEffect(() => {
+    if (!isEditing) return
+    const detail = detailData?.result
+    if (!detail) return
+
+    const baseDate = detail.occurrenceDate ? new Date(detail.occurrenceDate) : new Date(date)
+    const dueTime = detail.dueTime
+    const parsedTime =
+      typeof dueTime === 'string'
+        ? dueTime.slice(0, 5)
+        : `${String(dueTime?.hour ?? 0).padStart(2, '0')}:${String(dueTime?.minute ?? 0).padStart(
+            2,
+            '0',
+          )}`
+
+    setValue('todoTitle', detail.title ?? '', { shouldValidate: true })
+    setValue('todoDescription', detail.memo ?? '', { shouldValidate: true })
+    setValue('todoDate', baseDate, { shouldValidate: true })
+    setValue('todoEndTime', parsedTime, { shouldValidate: true })
+    setIsAllday(detail.isAllDay)
+
+    const mappedRepeatConfig = mapRecurrenceGroupToRepeatConfig(detail.recurrenceGroup)
+    const nextRepeatConfig = {
+      ...defaultRepeatConfig,
+      ...mappedRepeatConfig,
+      customWeeklyDays: mappedRepeatConfig.customWeeklyDays ?? [],
+      customMonthlyDates: mappedRepeatConfig.customMonthlyDates ?? [],
+      customYearlyMonths: mappedRepeatConfig.customYearlyMonths ?? [],
+    }
+    setValue('repeatConfig', nextRepeatConfig, { shouldValidate: true })
+  }, [date, detailData, isEditing, setIsAllday, setValue])
 
   const handleCalendarButtonClick =
     (field: 'start' | 'end') => (event: ReactMouseEvent<HTMLButtonElement>) => {
@@ -130,6 +171,8 @@ const AddTodoForm = ({
     />
   )
 
+  const hasExistingRecurrence = Boolean(detailData?.result?.recurrenceGroup)
+  const repeatGuardEnabled = isEditing && hasExistingRecurrence
   // 편집 모드에서 반복 변경을 가드해 확인 또는 취소가 가능하도록 합니다.
   const {
     isOpen: isEditConfirmOpen,
@@ -138,7 +181,7 @@ const AddTodoForm = ({
     requestConfirmation,
   } = useRepeatChangeGuard({
     repeatConfig,
-    isEditing,
+    isEditing: repeatGuardEnabled,
     setValue,
   })
   const [pendingTodoValues, setPendingTodoValues] = useState<AddTodoFormValues | null>(null)
@@ -174,7 +217,7 @@ const AddTodoForm = ({
   )
 
   const handleFormSubmit = handleSubmit(
-    (values) => {
+    async (values) => {
       if (requestConfirmation()) {
         setPendingTodoValues(values)
         return
@@ -186,8 +229,12 @@ const AddTodoForm = ({
         }
       }
       syncEventTiming(values)
-      onSubmit(values)
-      onClose()
+      try {
+        await onSubmit(values)
+        onClose()
+      } catch (error) {
+        console.error('[AddTodoForm] submit failed', error)
+      }
     },
     (errors) => {
       console.log('[AddTodoForm] submit errors', errors)
@@ -195,7 +242,7 @@ const AddTodoForm = ({
   )
 
   const handleConfirmedSubmit = useCallback(
-    (option: EditConfirmOption) => {
+    async (option: EditConfirmOption) => {
       void option
       if (!pendingTodoValues) return
       confirmChange()
@@ -206,9 +253,13 @@ const AddTodoForm = ({
         }
       }
       syncEventTiming(pendingTodoValues)
-      onSubmit(pendingTodoValues)
-      onClose()
-      setPendingTodoValues(null)
+      try {
+        await onSubmit(pendingTodoValues)
+        onClose()
+        setPendingTodoValues(null)
+      } catch (error) {
+        console.error('[AddTodoForm] submit failed', error)
+      }
     },
     [
       confirmChange,
@@ -329,9 +380,13 @@ const AddTodoForm = ({
       {deleteWarningVisible && (
         <DeleteConfirmModal
           title={todoTitle || '새로운 이벤트'}
-          eventId={eventId}
-          occurrenceDate={moment(todoDate).format('YYYY-MM-DD')}
           onClose={() => setDeleteWarningVisible(false)}
+          target={{
+            type: 'todo',
+            id: eventId,
+            occurrenceDate: moment(todoDate).format('YYYY-MM-DD'),
+          }}
+          mutate={deleteTodoMutate}
         />
       )}
       {isEditConfirmOpen && (

@@ -11,6 +11,8 @@ export const PageWrapper = styled.div`
   gap: 32px;
   width: 100%;
   max-width: 1440px;
+  flex: 1;
+  min-height: 100%;
   position: relative;
   .mobile-custom-view-button {
     display: none;

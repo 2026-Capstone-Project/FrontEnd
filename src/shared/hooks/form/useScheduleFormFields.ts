@@ -9,13 +9,14 @@ import {
   type EventColorType,
   type RepeatConfigSchema,
 } from '@/shared/types/event/event'
-import { defaultRepeatConfig } from '@/shared/types/event/recurrence/repeat'
+import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/recurrenceGroup'
 
 type UseScheduleFormFieldsProps = {
   date: string
   isAllday: boolean
   initialEvent?: CalendarEvent | null
+  isEditing: boolean
 }
 
 export type UseScheduleFormFieldsResult = {
@@ -40,6 +41,7 @@ export const useScheduleFormFields = ({
   date,
   isAllday,
   initialEvent,
+  isEditing,
 }: UseScheduleFormFieldsProps): UseScheduleFormFieldsResult => {
   const resolver = yupResolver(addScheduleSchema) as Resolver<AddScheduleFormValues>
   const defaultStart = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
@@ -94,6 +96,7 @@ export const useScheduleFormFields = ({
   }, [isAllday, setValue])
 
   useEffect(() => {
+    if (!isEditing || !initialEvent) return
     const start = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
     const end =
       initialEvent?.end && initialEvent.end !== initialEvent?.start
@@ -116,7 +119,7 @@ export const useScheduleFormFields = ({
       customYearlyMonths: mappedRepeatConfig.customYearlyMonths ?? [],
     } as RepeatConfigSchema
     setValue('repeatConfig', nextRepeatConfig, { shouldValidate: true })
-  }, [date, initialEvent, setValue])
+  }, [date, initialEvent, isEditing, setValue])
 
   return {
     formMethods,

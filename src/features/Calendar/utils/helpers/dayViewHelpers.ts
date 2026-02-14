@@ -8,9 +8,13 @@ import { getColorPalette } from '../colorPalette'
 
 export type TimedSlotEvent = {
   event: CalendarEvent
+  start: Date
+  end: Date
   top: number
   height: number
   palette: { base: string; point: string }
+  laneIndex?: number
+  laneCount?: number
   overflowTop?: boolean
   overflowBottom?: boolean
 }
@@ -60,6 +64,8 @@ export const buildTimedSlots = (events: CalendarEvent[], date: Date) => {
 
       columns[columnIndex].push({
         event,
+        start: segmentStart.toDate(),
+        end: segmentEnd.toDate(),
         top,
         height: Math.max(height, MIN_HEIGHT),
         palette,
@@ -77,5 +83,44 @@ export const buildTimedSlots = (events: CalendarEvent[], date: Date) => {
     pushSegment(clampedStart, clampedEnd)
   })
 
+  const assignLanes = (columnEvents: TimedSlotEvent[]) => {
+    const sorted = [...columnEvents].sort((a, b) => a.start.getTime() - b.start.getTime())
+    const active: Array<{ end: Date; lane: number }> = []
+    let cluster: TimedSlotEvent[] = []
+    let maxLane = 0
+
+    const finalizeCluster = () => {
+      if (cluster.length === 0) return
+      cluster.forEach((item) => {
+        item.laneCount = maxLane
+      })
+      cluster = []
+      maxLane = 0
+    }
+
+    sorted.forEach((item) => {
+      const now = item.start.getTime()
+      active.sort((a, b) => a.end.getTime() - b.end.getTime())
+      while (active.length > 0 && active[0].end.getTime() <= now) {
+        active.shift()
+      }
+
+      if (active.length === 0) {
+        finalizeCluster()
+      }
+
+      const usedLanes = new Set(active.map((entry) => entry.lane))
+      let lane = 0
+      while (usedLanes.has(lane)) lane += 1
+      active.push({ end: item.end, lane })
+      item.laneIndex = lane
+      cluster.push(item)
+      maxLane = Math.max(maxLane, active.length)
+    })
+
+    finalizeCluster()
+  }
+
+  columns.forEach(assignLanes)
   return columns
 }

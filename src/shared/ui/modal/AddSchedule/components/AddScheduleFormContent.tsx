@@ -87,11 +87,12 @@ const AddScheduleFormContent = ({
   }, [closeGuard, registerCloseGuard])
 
   // 패치 요청에 필요한 포맷/빌더/함수 묶음
-  const { formatDateTime, buildDateTime, patchSchedule } = useSchedulePatchController({
-    eventId,
-    date,
-    initialEvent,
-  })
+  const { formatDateTime, buildDateTime, patchSchedule, createSchedule } =
+    useSchedulePatchController({
+      eventId,
+      date,
+      initialEvent,
+    })
 
   // UI 표시용 날짜 문자열
   const startDate = formatDisplayDate(eventStartDate)
@@ -119,12 +120,14 @@ const AddScheduleFormContent = ({
       setValue('eventStartTime', undefined, { shouldValidate: true })
       setValue('eventEndTime', undefined, { shouldValidate: true })
     }
-    patchSchedule({
-      ...getValues(),
-      isAllday: nextIsAllDay,
-      ...(nextIsAllDay ? { eventStartTime: undefined, eventEndTime: undefined } : {}),
-    })
-  }, [getValues, isAllday, patchSchedule, setIsAllday, setValue])
+    if (isEditing) {
+      void patchSchedule({
+        ...getValues(),
+        isAllday: nextIsAllDay,
+        ...(nextIsAllDay ? { eventStartTime: undefined, eventEndTime: undefined } : {}),
+      })
+    }
+  }, [getValues, isAllday, isEditing, patchSchedule, setIsAllday, setValue])
 
   const isInlineMode = mode === 'inline'
   const shouldShowModalOverlay = !isInlineMode && (activeCalendarField || isSearchPlaceOpen)
@@ -156,6 +159,7 @@ const AddScheduleFormContent = ({
     repeatConfig,
     setValue,
     patchSchedule,
+    createSchedule,
     syncEventTiming,
     handleTitleConfirm,
     buildDateTime,
@@ -167,6 +171,7 @@ const AddScheduleFormContent = ({
     repeatConfig,
     eventId,
     initialEvent,
+    isEditing,
     getValues,
     setEventColor,
     patchSchedule,

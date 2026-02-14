@@ -1,38 +1,89 @@
+import type { UseMutateFunction } from '@tanstack/react-query'
 import { useId, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
+import type {
+  RecurrenceEventScope,
+  RecurrenceTodoScope,
+} from '@/shared/types/recurrence/recurrence'
 
 import Modal from '../../common/Modal/Modal'
 import * as S from './DeleteConfirmModal.style'
 
-const DeleteConfirmModal = ({
-  onClose,
-  title,
-  eventId,
-  occurrenceDate,
-}: {
+type EventDeleteVariables = {
+  eventId: number
+  params: {
+    scope?: RecurrenceEventScope
+    occurrenceDate: string
+  }
+}
+
+type TodoDeleteVariables = {
+  todoId: number
+  occurrenceDate?: string
+  scope?: RecurrenceTodoScope
+}
+
+type DeleteConfirmTarget =
+  | { type: 'event'; id: number; occurrenceDate: string }
+  | { type: 'todo'; id: number; occurrenceDate?: string }
+
+type DeleteConfirmModalBaseProps = {
   onClose: () => void
   title: string
-  eventId: number
-  occurrenceDate: string
-}) => {
+}
+
+type DeleteConfirmModalProps =
+  | (DeleteConfirmModalBaseProps & {
+      target: Extract<DeleteConfirmTarget, { type: 'event' }>
+      mutate: UseMutateFunction<unknown, unknown, EventDeleteVariables, unknown>
+    })
+  | (DeleteConfirmModalBaseProps & {
+      target: Extract<DeleteConfirmTarget, { type: 'todo' }>
+      mutate: UseMutateFunction<unknown, unknown, TodoDeleteVariables, unknown>
+    })
+
+const isEventDeleteProps = (
+  props: DeleteConfirmModalProps,
+): props is Extract<DeleteConfirmModalProps, { target: { type: 'event' } }> =>
+  props.target.type === 'event'
+
+const DeleteConfirmModal = (props: DeleteConfirmModalProps) => {
+  const { onClose, title } = props
   const radioName = useId()
-  const [selectedOption, setSelectedOption] = useState<'single' | 'future' | 'all'>('single')
-  const { useDeleteEvent } = useCalendarMutation()
-  const { mutate: deleteEventMutate } = useDeleteEvent()
-  type DeleteScope = 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS' | 'ALL_EVENTS'
+  const [selectedOption, setSelectedOption] = useState<'single' | 'future'>('single')
+  const isEventTarget = props.target.type === 'event'
+
   const options = [
-    { value: 'single', label: '이 이벤트' },
-    { value: 'future', label: '이 이벤트부터 이후 이벤트' },
+    {
+      value: 'single',
+      label: isEventTarget ? '이 이벤트' : '이 할 일',
+    },
+    {
+      value: 'future',
+      label: isEventTarget ? '이 이벤트부터 이후 이벤트' : '이 할 일부터 이후 할 일',
+    },
   ] as const
 
   const handleDelete = () => {
-    const scope: DeleteScope =
-      selectedOption === 'single' ? 'THIS_EVENT' : 'THIS_AND_FOLLOWING_EVENTS'
-    const params = { scope, occurrenceDate }
-    deleteEventMutate(
-      { eventId, params },
+    if (isEventDeleteProps(props)) {
+      const scope: RecurrenceEventScope =
+        selectedOption === 'single' ? 'THIS_EVENT' : 'THIS_AND_FOLLOWING_EVENTS'
+      const params = { scope, occurrenceDate: props.target.occurrenceDate }
+      props.mutate(
+        { eventId: props.target.id, params },
+        {
+          onSuccess: () => {
+            onClose()
+          },
+        },
+      )
+      return
+    }
+    const scope: RecurrenceTodoScope =
+      selectedOption === 'single' ? 'THIS_TODO' : 'THIS_AND_FOLLOWING'
+    props.mutate(
+      { todoId: props.target.id, occurrenceDate: props.target.occurrenceDate, scope },
       {
         onSuccess: () => {
           onClose()
@@ -44,7 +95,7 @@ const DeleteConfirmModal = ({
   return createPortal(
     <Modal onClick={onClose}>
       <S.ModalWrapper>
-        <S.Title>반복 일정 "{title}" 삭제 </S.Title>
+        <S.Title>{`${isEventTarget ? '반복 일정' : '반복 할 일'} "${title}" 삭제`}</S.Title>
         <S.OptionsContainer>
           {options.map((option) => {
             const optionId = `${radioName}-${option.value}`
@@ -69,7 +120,9 @@ const DeleteConfirmModal = ({
         </S.OptionsContainer>
         <S.ButtonsContainer>
           <S.CancelButton onClick={onClose}>취소</S.CancelButton>
-          <S.DeleteButton onClick={handleDelete}>이벤트 삭제</S.DeleteButton>
+          <S.DeleteButton onClick={handleDelete}>
+            {isEventTarget ? '이벤트 삭제' : '할 일 삭제'}
+          </S.DeleteButton>
         </S.ButtonsContainer>
       </S.ModalWrapper>
     </Modal>,
