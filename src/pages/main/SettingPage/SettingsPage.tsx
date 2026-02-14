@@ -1,11 +1,14 @@
 import { type FC, type SVGProps, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import GoogleIcon from '@/assets/social/google.svg?react'
 import KakaoIcon from '@/assets/social/kakao.svg?react'
 import NaverIcon from '@/assets/social/naver.svg?react'
 import Modal from '@/features/Common/Modal'
+import { fetchUserInfo, logoutAPI } from '@/shared/api/auth/auth'
+import { queryClient } from '@/shared/api/queryClient'
 import { SettingsAPI } from '@/shared/api/settings/settings'
-import { useCustomSuspenseQuery } from '@/shared/hooks/customQuery'
+import { useCustomQuery, useCustomSuspenseQuery } from '@/shared/hooks/customQuery'
 import { useSettingsMutation } from '@/shared/hooks/useSettingsMutation'
 import type { CalendarView, ReminderTiming } from '@/shared/types/settings/settings'
 import { useAuthStore } from '@/store/useAuthStore'
@@ -13,20 +16,26 @@ import { useAuthStore } from '@/store/useAuthStore'
 import * as S from './Settings.styles'
 
 const PROVIDER_ICONS: Record<string, FC<SVGProps<SVGSVGElement>>> = {
-  google: GoogleIcon,
-  kakao: KakaoIcon,
-  naver: NaverIcon,
-}
-
-const User = {
-  name: '김컴과',
-  email: 'computer@gmail.com',
-  provider: 'google',
+  GOOGLE: GoogleIcon,
+  KAKAO: KakaoIcon,
+  NAVER: NaverIcon,
 }
 
 export default function SettingsPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const logout = useAuthStore((state) => state.logout)
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    try {
+      await logoutAPI()
+    } finally {
+      queryClient.clear()
+      logout()
+      alert('로그아웃 되셨습니다.')
+      navigate('/')
+    }
+  }
 
   const { toggleBriefing, updateTime, updateReminder, toggleSuggestion, updateView, deleteUser } =
     useSettingsMutation()
@@ -38,7 +47,12 @@ export default function SettingsPage() {
     if (!res.isSuccess) throw new Error('설정 불러오기 실패')
     return res.result
   })
-  const IconComponent = PROVIDER_ICONS[User.provider]
+
+  const { data: User } = useCustomQuery(['userInfo'], fetchUserInfo, {
+    select: (response) => response.result,
+  })
+
+  const IconComponent = User?.provider ? PROVIDER_ICONS[User.provider] : null
 
   return (
     <S.Container>
@@ -55,12 +69,12 @@ export default function SettingsPage() {
           <S.Row>
             <S.ProfileWrapper>
               <S.TextGroup>
-                <S.Name>{User.name}</S.Name>
+                <S.Name>{User?.nickname}</S.Name>
                 <S.InfoRow>
                   <S.ProviderIconWrapper>
                     {IconComponent && <IconComponent width={30} height={30} />}
                   </S.ProviderIconWrapper>
-                  <S.Email>{User.email}</S.Email>
+                  <S.Email>{User?.email}</S.Email>
                 </S.InfoRow>
               </S.TextGroup>
             </S.ProfileWrapper>
@@ -157,7 +171,7 @@ export default function SettingsPage() {
             <S.InfoGroup>
               <label>로그아웃</label>
             </S.InfoGroup>
-            <S.Button onClick={logout}>로그아웃</S.Button>
+            <S.Button onClick={handleLogout}>로그아웃</S.Button>
           </S.Row>
           <S.Row>
             <S.InfoGroup>
