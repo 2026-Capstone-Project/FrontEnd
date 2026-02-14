@@ -5,42 +5,53 @@ import { SettingsAPI } from '@/shared/api/settings/settings'
 import type { CalendarView, ReminderTiming } from '@/shared/types/settings/settings'
 import { useAuthStore } from '@/store/useAuthStore'
 
+import type { TCommonResponse } from '../types/common/common'
+
 export const useSettingsMutation = () => {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const logout = useAuthStore((state) => state.logout)
 
+  const handleResponse = async <T>(apiCall: Promise<TCommonResponse<T>>) => {
+    const res = await apiCall
+    if (!res.isSuccess) {
+      throw new Error(res.message || '업데이트 실패')
+    }
+    return res
+  }
+
   const mutationOptions = {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
     },
-    onError: () => {
-      alert('업데이트 실패')
+    onError: (error: Error) => {
+      alert(error.message || '업데이트 실패')
     },
   }
 
   const toggleBriefing = useMutation({
-    mutationFn: SettingsAPI.toggleDailyBriefing,
+    mutationFn: () => handleResponse(SettingsAPI.toggleDailyBriefing()),
     ...mutationOptions,
   })
 
   const updateTime = useMutation({
-    mutationFn: SettingsAPI.updateBriefingTime,
+    mutationFn: (time: string) => handleResponse(SettingsAPI.updateBriefingTime(time)),
     ...mutationOptions,
   })
 
   const updateReminder = useMutation({
-    mutationFn: (timing: ReminderTiming) => SettingsAPI.updateReminderTiming(timing),
+    mutationFn: (timing: ReminderTiming) =>
+      handleResponse(SettingsAPI.updateReminderTiming(timing)),
     ...mutationOptions,
   })
 
   const toggleSuggestion = useMutation({
-    mutationFn: SettingsAPI.toggleSuggestion,
+    mutationFn: () => handleResponse(SettingsAPI.toggleSuggestion()),
     ...mutationOptions,
   })
 
   const updateView = useMutation({
-    mutationFn: (view: CalendarView) => SettingsAPI.updateDefaultView(view),
+    mutationFn: (view: CalendarView) => handleResponse(SettingsAPI.updateDefaultView(view)),
     ...mutationOptions,
   })
 
@@ -52,6 +63,8 @@ export const useSettingsMutation = () => {
         logout()
         alert('회원 탈퇴가 완료되었습니다.')
         navigate('/', { replace: true })
+      } else {
+        alert(res.message || '탈퇴 실패')
       }
     },
     onError: () => {
