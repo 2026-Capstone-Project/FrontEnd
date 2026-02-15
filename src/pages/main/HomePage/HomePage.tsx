@@ -11,7 +11,7 @@ export default function HomePage() {
     select: (response) => response.result,
   })
 
-  const { data: reminders } = useCustomQuery(['reminders'], fetchReminders, {
+  const { data: reminders = [] } = useCustomQuery(['reminders'], fetchReminders, {
     select: (response) => response.result,
     refetchInterval: 60000,
   })
@@ -27,9 +27,17 @@ export default function HomePage() {
     }).format(date)
   }
 
+  const getEmptyMessage = (reason?: string) => {
+    if (reason === 'DISABLED') return '브리핑 기능이 비활성화 상태입니다'
+    if (reason === 'NOT_EVENT_TODAY') return '오늘 예정된 일정이 없습니다'
+    return ''
+  }
+
   const formatTime = (timeStr: string) => {
-    const [hh, mm] = timeStr.split(':')
-    return `${hh}:${mm}`
+    if (!timeStr) return ''
+    const parts = timeStr.split(':')
+    if (parts.length < 2) return timeStr
+    return `${parts[0]}:${parts[1]}`
   }
 
   return (
@@ -60,8 +68,7 @@ export default function HomePage() {
             ) : (
               <S.ScheduleItem>
                 <span className="content">
-                  {briefing?.reason === 'DISABLED' ? '브리핑 기능이 비활성화 상태입니다' : ''}
-                  {briefing?.reason === 'NOT_EVENT_TODAY' ? '오늘 예정된 일정이 없습니다' : ''}
+                  {getEmptyMessage(briefing?.reason) || '오늘의 브리핑을 확인할 수 없습니다.'}
                 </span>
               </S.ScheduleItem>
             )}

@@ -1,14 +1,10 @@
 import type { TCommonResponse } from '../common/common'
+import type { BriefingTime } from '../settings/settings'
 export type BriefingReason = 'AVAILABLE' | 'DISABLED' | 'NOT_EVENT_TODAY'
 
 export type TargetType = 'EVENT' | 'TODO'
 
-export interface BriefTime {
-  hour: number
-  minute: number
-  second: number
-  nano: number
-}
+export type BriefTime = BriefingTime
 
 export interface BriefItem {
   targetType: TargetType
@@ -26,7 +22,6 @@ export interface BriefingResult {
 
 export type BriefingResponse = TCommonResponse<BriefingResult>
 
-//리마인더 타입 시작 지점
 export interface Reminder {
   id: number
   reminderTime: string
