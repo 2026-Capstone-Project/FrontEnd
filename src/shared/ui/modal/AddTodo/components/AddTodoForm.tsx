@@ -2,6 +2,7 @@
 import moment from 'moment'
 import {
   type MouseEvent as ReactMouseEvent,
+  type ReactNode,
   useCallback,
   useEffect,
   useMemo,
@@ -23,6 +24,7 @@ import RepeatTypeGroup from '@/shared/ui/common/RepeatTypeGroup/RepeatTypeGroup'
 import TerminationPanel from '@/shared/ui/common/TerminationPanel/TerminationPanel'
 import TitleSuggestionInput from '@/shared/ui/common/TitleSuggestionInput/TitleSuggestionInput'
 import { DeleteConfirmModal, EditConfirmModal, type EditConfirmOption } from '@/shared/ui/modal'
+import SelectColor from '@/shared/ui/modal/AddSchedule/components/SelectColor/SelectColor'
 import CustomBasisPanel from '@/shared/ui/modal/AddTodo/components/CustomBasisPanel/CustomBasisPanel'
 import CustomDatePicker from '@/shared/ui/modal/AddTodo/components/CustomDatePicker/CustomDatePicker'
 import CustomTimePicker from '@/shared/ui/modal/AddTodo/components/CustomTimePicker/CustomTimePicker'
@@ -32,6 +34,7 @@ import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/recurrenceGroup
 
 type AddTodoFormProps = {
   registerDeleteHandler?: (handler?: () => void) => void
+  registerFooterChildren?: (node: ReactNode | null) => void
   date: string
   mode?: 'modal' | 'inline'
   eventId: CalendarEvent['id']
@@ -39,6 +42,7 @@ type AddTodoFormProps = {
   isEditing?: boolean
   headerTitlePortalTarget?: HTMLElement | null
   onEventTitleConfirm?: (eventId: CalendarEvent['id'], title: string) => void
+  onEventColorChange?: (eventId: CalendarEvent['id'], color: CalendarEvent['color']) => void
   onEventTimingChange?: (
     eventId: CalendarEvent['id'],
     start: Date,
@@ -53,9 +57,11 @@ const AddTodoForm = ({
   eventId,
   onClose,
   registerDeleteHandler,
+  registerFooterChildren,
   isEditing = false,
   headerTitlePortalTarget,
   onEventTitleConfirm,
+  onEventColorChange,
   onEventTimingChange,
 }: AddTodoFormProps) => {
   const {
@@ -76,6 +82,8 @@ const AddTodoForm = ({
     todoEndTime,
     todoDate,
     todoTitle,
+    eventColor,
+    setEventColor,
   } = useAddTodoForm({ date, id: eventId })
   const { register, setValue } = formMethods
   const occurrenceDate = useMemo(() => moment(date).format('YYYY-MM-DD'), [date])
@@ -110,6 +118,7 @@ const AddTodoForm = ({
     setValue('todoDescription', detail.memo ?? '', { shouldValidate: true })
     setValue('todoDate', baseDate, { shouldValidate: true })
     setValue('todoEndTime', parsedTime, { shouldValidate: true })
+    setValue('eventColor', detail.color ?? 'GRAY', { shouldValidate: true })
     setIsAllday(detail.isAllDay)
 
     const mappedRepeatConfig = mapRecurrenceGroupToRepeatConfig(detail.recurrenceGroup)
@@ -290,6 +299,26 @@ const AddTodoForm = ({
     registerDeleteHandler?.(handleDelete)
     return () => registerDeleteHandler?.()
   }, [handleDelete, registerDeleteHandler])
+
+  const handleColorChange = useCallback(
+    (value: CalendarEvent['color']) => {
+      setEventColor(value)
+      if (eventId != null && eventId !== 0) {
+        onEventColorChange?.(eventId, value)
+      }
+    },
+    [eventId, onEventColorChange, setEventColor],
+  )
+
+  const footerNode = useMemo(
+    () => <SelectColor value={eventColor} onChange={handleColorChange} />,
+    [eventColor, handleColorChange],
+  )
+
+  useEffect(() => {
+    registerFooterChildren?.(footerNode)
+    return () => registerFooterChildren?.(null)
+  }, [footerNode, registerFooterChildren])
 
   return (
     <>

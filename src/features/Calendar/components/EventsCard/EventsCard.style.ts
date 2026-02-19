@@ -3,7 +3,7 @@ import styled from '@emotion/styled'
 import { media } from '@/shared/styles/media'
 import { theme } from '@/shared/styles/theme'
 
-export const CardOverlay = styled.div`
+export const CardOverlay = styled.div<{ mode: 'inline' | 'modal' }>`
   width: 100%;
   display: flex;
   justify-content: center;
@@ -12,11 +12,11 @@ export const CardOverlay = styled.div`
   height: fit-content;
 
   ${media.down(theme.breakPoints.desktop)} {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    height: 100vh;
+    position: ${({ mode }) => (mode === 'modal' ? 'fixed' : 'relative')};
+    inset: ${({ mode }) => (mode === 'modal' ? '0' : 'auto')};
+    background-color: ${({ mode }) => (mode === 'modal' ? 'rgba(0, 0, 0, 0.1)' : 'transparent')};
+    z-index: ${({ mode }) => (mode === 'modal' ? 1000 : 'auto')};
+    height: ${({ mode }) => (mode === 'modal' ? '100vh' : 'fit-content')};
   }
 `
 
@@ -24,7 +24,7 @@ export const CardWrapper = styled.div`
   display: flex;
 `
 
-export const Card = styled.div`
+export const Card = styled.div<{ mode: 'inline' | 'modal' }>`
   display: flex;
   flex-direction: column;
   border-radius: 20px;
@@ -33,12 +33,12 @@ export const Card = styled.div`
   height: fit-content;
   background-color: #ffffff;
   ${media.down(theme.breakPoints.desktop)} {
-    position: absolute;
-    z-index: 1000;
-    align-self: center;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    position: ${({ mode }) => (mode === 'modal' ? 'absolute' : 'relative')};
+    z-index: ${({ mode }) => (mode === 'modal' ? 1000 : 'auto')};
+    align-self: ${({ mode }) => (mode === 'modal' ? 'center' : 'auto')};
+    left: ${({ mode }) => (mode === 'modal' ? '50%' : 'auto')};
+    top: ${({ mode }) => (mode === 'modal' ? '50%' : 'auto')};
+    transform: ${({ mode }) => (mode === 'modal' ? 'translate(-50%, -50%)' : 'none')};
     max-width: 90vw;
   }
 `

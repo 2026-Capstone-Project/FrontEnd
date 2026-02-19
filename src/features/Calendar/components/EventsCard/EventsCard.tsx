@@ -1,5 +1,3 @@
-import { createPortal } from 'react-dom'
-
 import { useEventQuery, useTodoForCalendarQuery } from '@/shared/hooks/query/useCalendarQueries'
 
 import EventDetailCard from '../EventDetailCard/EventDetailCard'
@@ -22,14 +20,14 @@ const EventsCard = ({
   const { data: todoData } = useTodoForCalendarQuery(formattedDate, formattedDate)
   const details = eventData?.result?.details ?? []
 
-  return createPortal(
-    <S.CardOverlay onClick={mode === 'modal' ? onClose : undefined}>
+  return (
+    <S.CardOverlay mode={mode} onClick={mode === 'modal' ? onClose : undefined}>
       <S.CardWrapper
         onClick={(event) => {
           event.stopPropagation()
         }}
       >
-        <S.Card>
+        <S.Card mode={mode}>
           <S.Header>
             {selectedDate.toLocaleDateString('ko-KR', {
               year: 'numeric',
@@ -53,8 +51,7 @@ const EventsCard = ({
           )}
         </S.Card>
       </S.CardWrapper>
-    </S.CardOverlay>,
-    document.getElementById(mode === 'modal' ? 'modal-root' : 'desktop-card-area')!,
+    </S.CardOverlay>
   )
 }
 

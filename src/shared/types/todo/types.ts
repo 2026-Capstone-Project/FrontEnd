@@ -1,3 +1,4 @@
+import type { EventColorType } from '../event/event'
 import type { PriorityType } from '../event/priority'
 import type { RecurrenceGroup } from '../recurrence/recurrence'
 
@@ -16,6 +17,7 @@ export type TodoType = {
         nano: number
       }
   isAllDay: boolean
+  color: EventColorType
   priority: PriorityType
   memo: string
   isCompleted: boolean
@@ -31,6 +33,7 @@ export type PostTodoRequestDTO = {
   startDate: string
   dueTime?: string
   isAllDay: boolean
+  color: EventColorType
   priority: PriorityType
   memo?: string
   recurrenceGroup?: RecurrenceGroup
@@ -51,6 +54,7 @@ export type PatchTodoRequestDTO = {
   startDate?: string
   dueTime?: string
   isAllDay?: boolean
+  color?: EventColorType
   priority?: PriorityType
   memo?: string
   recurrenceGroup?: RecurrenceGroup | null

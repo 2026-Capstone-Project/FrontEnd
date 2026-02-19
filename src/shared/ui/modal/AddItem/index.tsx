@@ -138,8 +138,10 @@ const AddItemModal = ({
           mode={mode}
           onClose={handleClose}
           registerDeleteHandler={registerDeleteHandler}
+          registerFooterChildren={registerFooterChildren}
           headerTitlePortalTarget={headerTitlePortalTarget}
           isEditing={isEditing}
+          onEventColorChange={onEventColorChange}
           onEventTitleConfirm={onEventTitleConfirm}
           onEventTimingChange={onEventTimingChange}
         />

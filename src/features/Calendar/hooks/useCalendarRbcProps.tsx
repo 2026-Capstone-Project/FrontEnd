@@ -1,6 +1,6 @@
 // 훅: react-big-calendar 설정/컴포넌트/props를 생성합니다.
 import moment from 'moment'
-import type { ComponentType } from 'react'
+import type { ComponentProps, ComponentType } from 'react'
 import { useMemo } from 'react'
 import type {
   DateCellWrapperProps,
@@ -15,11 +15,7 @@ import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAnd
 
 import CalendarHeader from '@/features/Calendar/components/CalendarDateHeader/CalendarDateHeader'
 import CustomToolbar from '@/features/Calendar/components/CalendarToolbar/CalendarToolbar'
-import {
-  CustomMonthEvent,
-  CustomMonthShowMore,
-  CustomWeekEvent,
-} from '@/features/Calendar/components/CustomEvent'
+import { CustomMonthEvent, CustomMonthShowMore } from '@/features/Calendar/components/CustomEvent'
 import CustomWeekView from '@/features/Calendar/components/CustomView/CustomWeekView'
 import {
   getDayPropStyle,
@@ -102,21 +98,26 @@ export const useCalendarRbcProps = ({
         ),
       }
     }
-    if (view === Views.WEEK) {
-      return {
-        event: (props: EventProps<CalendarEvent>) => (
-          <CustomWeekEvent
-            event={props.event}
-            onEventClick={onSelectEventOnly}
-            onEventDoubleClick={onSelectEvent}
-            onToggleTodo={onToggleTodo}
-            isSelected={getEventOccurrenceKey(props.event) === selectedEventKey}
-          />
-        ),
-      }
-    }
     return {}
   }, [onSelectEvent, onSelectEventOnly, onToggleTodo, selectedEventKey, view])
+
+  const weekViewWithHandlers = useMemo(() => {
+    return Object.assign(
+      (props: ComponentProps<typeof CustomWeekView>) => (
+        <CustomWeekView
+          {...props}
+          onToggleTodo={onToggleTodo}
+          onSelectEvent={onSelectEventOnly}
+          onDoubleClickEvent={onSelectEvent}
+          selectedEventKey={selectedEventKey}
+        />
+      ),
+      {
+        navigate: CustomWeekView.navigate,
+        title: CustomWeekView.title,
+      },
+    ) as ComponentType & ViewStatic
+  }, [onSelectEvent, onSelectEventOnly, onToggleTodo, selectedEventKey])
 
   // react-big-calendar components 병합 (툴바/헤더/이벤트 등)
   const mergedComponents = useMemo(
@@ -137,10 +138,10 @@ export const useCalendarRbcProps = ({
   const calendarViews = useMemo(
     () => ({
       month: true,
-      week: CustomWeekView,
+      week: weekViewWithHandlers,
       day: dayViewComponent,
     }),
-    [dayViewComponent],
+    [dayViewComponent, weekViewWithHandlers],
   )
 
   // 이벤트 날짜를 정규화해서 달력에 전달

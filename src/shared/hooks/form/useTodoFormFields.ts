@@ -3,7 +3,11 @@ import { useEffect } from 'react'
 import { type Control, type Resolver, useForm, type UseFormReturn, useWatch } from 'react-hook-form'
 
 import { addTodoSchema } from '@/shared/schemas/todo'
-import { type AddTodoFormValues, type RepeatConfigSchema } from '@/shared/types/event/event'
+import {
+  type AddTodoFormValues,
+  type EventColorType,
+  type RepeatConfigSchema,
+} from '@/shared/types/event/event'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 
 type UseTodoFormFieldsProps = {
@@ -20,6 +24,7 @@ export type UseTodoFormFieldsResult = {
   todoEndTime: string | undefined
   repeatConfig: RepeatConfigSchema
   todoTitle: string | undefined
+  eventColor: EventColorType
 }
 
 export const useTodoFormFields = ({
@@ -35,6 +40,7 @@ export const useTodoFormFields = ({
       todoDate: new Date(date),
       todoEndTime: '10:00',
       isAllday,
+      eventColor: 'GRAY',
       repeatConfig: defaultRepeatConfig as RepeatConfigSchema,
     },
   })
@@ -45,11 +51,13 @@ export const useTodoFormFields = ({
   const repeatConfig = (useWatch({ control, name: 'repeatConfig' }) ??
     (defaultRepeatConfig as RepeatConfigSchema)) as RepeatConfigSchema
   const todoTitle = useWatch({ control, name: 'todoTitle' })
+  const eventColor = (useWatch({ control, name: 'eventColor' }) ?? 'GRAY') as EventColorType
 
   useEffect(() => {
     register('todoDate')
     register('todoEndTime')
     register('isAllday')
+    register('eventColor')
     register('repeatConfig')
   }, [register])
 
@@ -71,5 +79,6 @@ export const useTodoFormFields = ({
     todoEndTime,
     repeatConfig,
     todoTitle,
+    eventColor,
   }
 }

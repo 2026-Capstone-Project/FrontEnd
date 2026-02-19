@@ -54,6 +54,8 @@ const CalendarModals = ({
 }: CalendarModalsProps) => {
   const shouldRenderModal = modalEventId != null
   const shouldRenderEventCard = !isModalOpen && showEventCard
+  const eventCardMode: 'inline' | 'modal' = 'inline'
+  const eventCardPortalRoot = cardPortalRoot ?? modalPortalRoot
   const isTodoModal = modalEvent?.type === 'todo'
   const safeDetailEventId = isModalEditing && !isTodoModal ? modalEventId : null
   const occurrenceDate = useMemo(() => {
@@ -87,6 +89,7 @@ const CalendarModals = ({
             mode={modalMode}
             eventId={modalEventId}
             tabsVisible={!isModalEditing}
+            onEventColorChange={eventActions.onEventColorChange}
             onEventTitleConfirm={eventActions.onEventTitleConfirm}
             onEventTimingChange={eventActions.onEventTimingChange}
             isEditing={isModalEditing}
@@ -105,6 +108,7 @@ const CalendarModals = ({
             mode={modalMode}
             eventId={modalEventId}
             tabsVisible={!isModalEditing}
+            onEventColorChange={eventActions.onEventColorChange}
             onEventTitleConfirm={eventActions.onEventTitleConfirm}
             onEventTimingChange={eventActions.onEventTimingChange}
             isEditing={isModalEditing}
@@ -152,19 +156,14 @@ const CalendarModals = ({
         )}
 
       {shouldRenderEventCard &&
-        !isInlineMode &&
-        modalPortalRoot &&
+        eventCardPortalRoot &&
         createPortal(
-          <EventsCard onClose={onCloseEventCard} selectedDate={eventCardDate} mode={modalMode} />,
-          modalPortalRoot,
-        )}
-
-      {shouldRenderEventCard &&
-        isInlineMode &&
-        cardPortalRoot &&
-        createPortal(
-          <EventsCard onClose={onCloseEventCard} selectedDate={eventCardDate} mode={modalMode} />,
-          cardPortalRoot,
+          <EventsCard
+            onClose={onCloseEventCard}
+            selectedDate={eventCardDate}
+            mode={eventCardMode}
+          />,
+          eventCardPortalRoot,
         )}
     </>
   )

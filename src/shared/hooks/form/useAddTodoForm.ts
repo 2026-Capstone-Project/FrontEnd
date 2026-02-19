@@ -6,6 +6,7 @@ import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type {
   AddTodoFormValues,
   DatePickerField,
+  EventColorType,
   RepeatConfigSchema,
   TimePickerField,
 } from '@/shared/types/event/event'
@@ -29,6 +30,7 @@ export type UseAddTodoFormResult = {
   todoDate: Date | null
   todoEndTime: string | undefined
   repeatConfig: RepeatConfigSchema
+  eventColor: EventColorType
   handleCalendarOpen: (field: DatePickerField) => void
   handleDateSelect: (selectedDate: Date) => void
   handleTimeChange: (field: TimePickerField, value: string) => void
@@ -37,6 +39,7 @@ export type UseAddTodoFormResult = {
   handleSubmit: UseFormReturn<AddTodoFormValues>['handleSubmit']
   onSubmit: (values: AddTodoFormValues) => Promise<unknown>
   setIsAllday: React.Dispatch<React.SetStateAction<boolean>>
+  setEventColor: (value: EventColorType) => void
   todoTitle: string | undefined
   repeatEndDate: Date | null
 }
@@ -44,10 +47,11 @@ export type UseAddTodoFormResult = {
 const isCustomBasis = (value: RepeatType): value is CustomRepeatBasis =>
   value !== 'none' && value !== 'custom'
 
-export const useAddTodoForm = ({ date }: UseAddTodoProps): UseAddTodoFormResult => {
+export const useAddTodoForm = ({ date, id }: UseAddTodoProps): UseAddTodoFormResult => {
   const [isAllday, setIsAllday] = useState(false)
-  const { usePostTodo } = useTodoMutations()
+  const { usePostTodo, usePatchTodo } = useTodoMutations()
   const { mutateAsync: postTodoMutate } = usePostTodo()
+  const { mutateAsync: patchTodoMutate } = usePatchTodo()
 
   const {
     formMethods,
@@ -58,6 +62,7 @@ export const useAddTodoForm = ({ date }: UseAddTodoProps): UseAddTodoFormResult 
     todoEndTime,
     repeatConfig,
     todoTitle,
+    eventColor,
   } = useTodoFormFields({ date, isAllday })
 
   const calendarRef = useRef<HTMLDivElement | null>(null)
@@ -150,20 +155,38 @@ export const useAddTodoForm = ({ date }: UseAddTodoProps): UseAddTodoFormResult 
     return clone
   }, [todoDate])
 
+  const setEventColor = useCallback(
+    (value: EventColorType) => {
+      setValue('eventColor', value, { shouldValidate: true })
+    },
+    [setValue],
+  )
+
   const onSubmit = (values: AddTodoFormValues) => {
     const recurrenceGroup =
       values.repeatConfig.repeatType === 'none'
         ? undefined
         : (mapRepeatConfigToRecurrenceGroup(values.repeatConfig) ?? undefined)
-    return postTodoMutate({
+    const payload = {
       title: values.todoTitle?.trim() || '새로운 할 일',
       startDate: formatIsoDate(values.todoDate),
       dueTime: values.isAllday ? undefined : values.todoEndTime,
       isAllDay: values.isAllday ? true : false,
-      priority: 'MEDIUM',
+      color: values.eventColor,
+      priority: 'MEDIUM' as const,
       memo: values.todoDescription ?? '',
       recurrenceGroup,
-    })
+    }
+
+    if (id && id !== 0) {
+      return patchTodoMutate({
+        todoId: id,
+        occurrenceDate: formatIsoDate(date),
+        requestBody: payload,
+      })
+    }
+
+    return postTodoMutate(payload)
   }
 
   return {
@@ -177,12 +200,14 @@ export const useAddTodoForm = ({ date }: UseAddTodoProps): UseAddTodoFormResult 
     todoDate,
     todoEndTime,
     repeatConfig,
+    eventColor,
     handleCalendarOpen,
     handleDateSelect,
     handleTimeChange,
     handleSubmit,
     onSubmit,
     setIsAllday,
+    setEventColor,
     todoTitle,
     repeatEndDate,
   }

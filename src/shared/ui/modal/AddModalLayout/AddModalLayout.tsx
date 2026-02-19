@@ -33,7 +33,7 @@ const AddModalLayout = ({
         event.stopPropagation()
       }}
     >
-      <S.ModalWrapper mode={mode}>
+      <S.ModalWrapper mode={mode} data-item-type={type}>
         <S.ModalHeader>
           <S.TitleWrapper>
             <S.ModalHeaderTitle>
@@ -46,7 +46,7 @@ const AddModalLayout = ({
 
         <S.ModalContent>{children}</S.ModalContent>
         <S.ModalFooter>
-          <S.FooterLeft>{type === 'schedule' && footerChildren}</S.FooterLeft>
+          <S.FooterLeft>{footerChildren}</S.FooterLeft>
           <S.FooterRight>
             <Trash onClick={handleDelete} css={{ cursor: 'pointer' }} color="#757575" />
             <S.Button type="button" onClick={onSubmit}>

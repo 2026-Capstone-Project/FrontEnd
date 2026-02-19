@@ -45,7 +45,7 @@ const toTodoEvent = (todo: TodoType): CalendarEvent => {
     end,
     location: null,
     isAllDay: todo.isAllDay,
-    color: 'GRAY',
+    color: todo.color ?? 'GRAY',
     recurrenceGroup: null,
     type: 'todo',
     isDone: todo.isCompleted,
