@@ -1,62 +1,103 @@
 import BellIcon from '@/assets/icons/bell.svg?react'
 import AIChatModal from '@/features/Common/AIChatModal'
 import { SparkleIcon } from '@/features/Home/Icon/SparkleIcon'
+import { fetchReminders, fetchTodayBriefing } from '@/shared/api/home/home'
+import { useCustomQuery } from '@/shared/hooks/customQuery'
 
 import * as S from './HomePage.styles'
 
 export default function HomePage() {
+  const { data: briefing, isLoading } = useCustomQuery(['todayBriefing'], fetchTodayBriefing, {
+    select: (response) => response.result,
+  })
+
+  const { data: reminders = [] } = useCustomQuery(['reminders'], fetchReminders, {
+    select: (response) => response.result,
+    refetchInterval: 60000,
+  })
+
+  const formatDateKorean = (dateString?: string) => {
+    if (!dateString) return ''
+    const date = new Date(dateString)
+    return new Intl.DateTimeFormat('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      weekday: 'long',
+    }).format(date)
+  }
+
+  const getEmptyMessage = (reason?: string) => {
+    if (reason === 'DISABLED') return '브리핑 기능이 비활성화 상태입니다'
+    if (reason === 'NOT_EVENT_TODAY') return '오늘 예정된 일정이 없습니다'
+    return ''
+  }
+
+  const formatTime = (timeStr: string) => {
+    if (!timeStr) return ''
+    const parts = timeStr.split(':')
+    if (parts.length < 2) return timeStr
+    return `${parts[0]}:${parts[1]}`
+  }
+
   return (
     <S.Container>
       <S.Left>
-        <S.DateTitle>2025년 12월 30일 화요일</S.DateTitle>
+        <S.DateTitle>{formatDateKorean(briefing?.date)}</S.DateTitle>
         <S.SubTitle>AI가 오늘의 일정을 한눈에, 쉽게 정리해드려요</S.SubTitle>
         <AIChatModal />
+
         <S.BriefingCard>
           <S.BriefingHeader>
             <S.CardTitle>오늘의 일정 브리핑</S.CardTitle>
-            <S.RedDot />
+            {briefing?.reason === 'AVAILABLE' && <S.RedDot />}
           </S.BriefingHeader>
 
           <S.BriefingContent>
-            <S.ScheduleList>
+            {isLoading ? (
+              <S.ScheduleItem>AI가 브리핑을 생성하고 있습니다. . .</S.ScheduleItem>
+            ) : briefing?.reason === 'AVAILABLE' && briefing.briefInfo ? (
+              <S.ScheduleList>
+                {briefing.briefInfo.map((item, index) => (
+                  <S.ScheduleItem key={index}>
+                    <span className="time">{formatTime(item.startTime)}</span>
+                    <span className="content">{item.title}</span>
+                  </S.ScheduleItem>
+                ))}
+              </S.ScheduleList>
+            ) : (
               <S.ScheduleItem>
-                <span className="time">14:00</span>
-                <span className="content">졸프 회의</span>
+                <span className="content">
+                  {getEmptyMessage(briefing?.reason) || '오늘의 브리핑을 확인할 수 없습니다.'}
+                </span>
               </S.ScheduleItem>
-              <S.ScheduleItem>
-                <span className="time">19:00</span>
-                <span className="content">친구와 저녁 약속</span>
-              </S.ScheduleItem>
-              <S.ScheduleItem isDeadline>
-                <span className="time">23:59</span>
-                <span className="content">전공 과제 마감</span>
-              </S.ScheduleItem>
-            </S.ScheduleList>
+            )}
           </S.BriefingContent>
-
           <S.BadgeRow>
             <S.Badge>
-              <span>2</span>일정
+              <span>{briefing?.eventCount ?? 0}</span>일정
             </S.Badge>
             <S.Badge>
-              <span>1</span>
+              <span>{briefing?.toDoCount ?? 0}</span>
               <S.TodoText>할 일</S.TodoText>
             </S.Badge>
           </S.BadgeRow>
         </S.BriefingCard>
 
-        <S.Card>
-          <S.CardHeader>
-            <S.Tag type="remind">리마인드</S.Tag>
-            <S.IconWrapper>
-              <BellIcon />
-            </S.IconWrapper>
-          </S.CardHeader>
+        {reminders?.map((reminder) => {
+          return (
+            <S.Card key={reminder.id}>
+              <S.CardHeader>
+                <S.Tag type="remind">리마인드</S.Tag>
+                <S.IconWrapper>
+                  <BellIcon />
+                </S.IconWrapper>
+              </S.CardHeader>
 
-          <S.CardText>
-            <b>8시간 뒤,</b> 전공 과제 마감이에요.
-          </S.CardText>
-        </S.Card>
+              <S.CardText>{reminder.message}</S.CardText>
+            </S.Card>
+          )
+        })}
 
         <S.Card>
           <S.CardHeader>
