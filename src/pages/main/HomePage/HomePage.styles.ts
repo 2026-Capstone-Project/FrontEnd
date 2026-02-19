@@ -7,10 +7,9 @@ export const Container = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  min-height: 100vh;
   width: 100%;
   gap: 20px;
-
+  position: relative;
   @media (min-width: 1024px) {
     flex-direction: row;
     align-items: flex-start;

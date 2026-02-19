@@ -9,10 +9,9 @@ export const Container = styled.div`
   border-radius: 30px;
   padding: 24px 32px;
   box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
-
-  position: fixed;
-  top: 150px;
-  right: 40px;
+  position: absolute;
+  top: 70px;
+  right: 0;
   width: 450px;
   height: 430px;
   z-index: 999;
