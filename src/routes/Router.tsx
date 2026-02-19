@@ -5,6 +5,7 @@ import ErrorPage from '@/pages/common/ErrorPage/ErrorPage'
 import AuthRoutes from './AuthRoutes'
 import MainRoutes from './MainRoutes'
 import SettingRoutes from './SettingRoutes'
+
 export const authRouter = createBrowserRouter([
   AuthRoutes,
   {
