@@ -24,7 +24,7 @@ const App = () => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const reissueRes = await axiosInstance.post('/api/v1/security/reissue-cookie', {})
+        const reissueRes = await axiosInstance.post('/security/reissue-cookie', {})
 
         if (reissueRes.data.isSuccess) {
           login()

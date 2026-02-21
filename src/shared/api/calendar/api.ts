@@ -12,7 +12,7 @@ export const getEvents = async ({
   startDate: string
   endDate: string
 }): Promise<TCommonResponse<GetEventsResponseDTO>> => {
-  const { data } = await axiosInstance.get('/api/v1/events', {
+  const { data } = await axiosInstance.get('/events', {
     params: { startDate, endDate },
   })
   return data
@@ -22,7 +22,7 @@ export const getDetailEvent = async (
   eventId: number,
   occurrenceDate: string,
 ): Promise<TCommonResponse<GetEventDetailResponseDTO>> => {
-  const { data } = await axiosInstance.get(`/api/v1/events/${eventId}`, {
+  const { data } = await axiosInstance.get(`/events/${eventId}`, {
     params: { occurrenceDate },
   })
   return data
@@ -38,7 +38,7 @@ export const postEvents = async (eventData: {
   isAllDay?: boolean
   recurrenceGroup?: RecurrenceGroup
 }) => {
-  const { data } = await axiosInstance.post('/api/v1/events', eventData)
+  const { data } = await axiosInstance.post('/events', eventData)
   return data
 }
 
@@ -56,7 +56,7 @@ export const patchEvent = async (
     recurrenceGroup?: RecurrenceGroup | null
   },
 ) => {
-  const { data } = await axiosInstance.patch(`/api/v1/events/${eventId}`, eventData)
+  const { data } = await axiosInstance.patch(`/events/${eventId}`, eventData)
   return data
 }
 
@@ -67,7 +67,7 @@ export const deleteEvent = async (
     scope?: RecurrenceEventScope
   },
 ) => {
-  const { data } = await axiosInstance.delete(`/api/v1/events/${eventId}`, { params })
+  const { data } = await axiosInstance.delete(`/events/${eventId}`, { params })
   return data
 }
 
@@ -75,7 +75,7 @@ export const getTodoForCalendar = async (
   startDate: string,
   endDate: string,
 ): Promise<TCommonResponse<GetTodoForCalendarResponseDTO>> => {
-  const { data } = await axiosInstance.get(`/api/v1/todos/calendar`, {
+  const { data } = await axiosInstance.get(`/todos/calendar`, {
     params: { startDate, endDate },
   })
   return data

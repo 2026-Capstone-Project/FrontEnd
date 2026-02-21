@@ -1,5 +1,6 @@
 import styled from '@emotion/styled'
 
+import { media } from '@/shared/styles/media'
 import { theme } from '@/shared/styles/theme'
 
 export const Container = styled.div`
@@ -7,11 +8,10 @@ export const Container = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  min-height: 100vh;
   width: 100%;
   gap: 20px;
-
-  @media (min-width: 1024px) {
+  position: relative;
+  ${media.up(theme.breakPoints.desktop)} {
     flex-direction: row;
     align-items: flex-start;
     gap: 40px;

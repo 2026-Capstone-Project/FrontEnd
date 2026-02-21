@@ -2,7 +2,7 @@ import BellIcon from '@/assets/icons/bell.svg?react'
 import AIChatModal from '@/features/Common/AIChatModal'
 import { SparkleIcon } from '@/features/Home/Icon/SparkleIcon'
 import { fetchReminders, fetchTodayBriefing } from '@/shared/api/home/home'
-import { useCustomQuery } from '@/shared/hooks/customQuery'
+import { useCustomQuery } from '@/shared/hooks/common/customQuery'
 
 import * as S from './HomePage.styles'
 
@@ -45,7 +45,6 @@ export default function HomePage() {
       <S.Left>
         <S.DateTitle>{formatDateKorean(briefing?.date)}</S.DateTitle>
         <S.SubTitle>AI가 오늘의 일정을 한눈에, 쉽게 정리해드려요</S.SubTitle>
-        <AIChatModal />
 
         <S.BriefingCard>
           <S.BriefingHeader>
@@ -132,6 +131,7 @@ export default function HomePage() {
           </S.ButtonRow>
         </S.Card>
       </S.Left>
+      <AIChatModal />
     </S.Container>
   )
 }
