@@ -6,7 +6,7 @@ import { theme } from '@/shared/styles/theme'
 export const Card = styled.div`
   width: 426px;
   border-radius: 20px;
-  background: ${theme.colors.lightGray};
+  background: ${theme.colors.white};
   padding: 40px 40px 30px 40px;
   box-sizing: border-box;
 
@@ -42,7 +42,7 @@ export const KeepButton = styled.button`
   height: 45px;
   border: none;
   border-radius: 16px;
-  background: #d7e2e9;
+  background: ${theme.colors.sub};
   color: ${theme.colors.primary2};
   font-size: 18px;
   font-weight: 600;
