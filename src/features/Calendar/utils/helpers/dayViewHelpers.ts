@@ -28,6 +28,11 @@ export const compareByStart = (a: CalendarEvent, b: CalendarEvent) =>
 export const getEventOccurrenceKey = (event: CalendarEvent) =>
   `${event.id}_${moment(event.start).format('YYYY-MM-DDTHH:mm')}`
 
+export const resolveOccurrenceDateTime = (
+  occurrenceDate: CalendarEvent['occurrenceDate'] | undefined,
+  fallbackStart: CalendarEvent['start'] | Date,
+) => moment(occurrenceDate ?? fallbackStart).format('YYYY-MM-DDTHH:mm:ss')
+
 export const eventCoversDate = (event: CalendarEvent, date: Date) => {
   const start = moment(event.start)
   const end = moment(event.end)

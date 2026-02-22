@@ -4,6 +4,7 @@ import type { View } from 'react-big-calendar'
 import { Views } from 'react-big-calendar'
 import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 
+import { resolveOccurrenceDateTime } from '@/features/Calendar/utils/helpers/dayViewHelpers'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 
 type UseCalendarDragDropArgs = {
@@ -40,9 +41,7 @@ export const useCalendarDragDrop = ({
       }
       const nextStart = moment(start).format('YYYY-MM-DDTHH:mm:ss')
       const nextEnd = moment(end).format('YYYY-MM-DDTHH:mm:ss')
-      const occurrenceDate = event.occurrenceDate
-        ? moment(event.occurrenceDate).format('YYYY-MM-DDTHH:mm:ss')
-        : moment(event.start).format('YYYY-MM-DDTHH:mm:ss')
+      const occurrenceDate = resolveOccurrenceDateTime(event.occurrenceDate, event.start)
       patchEventMutate({
         eventId: event.id,
         params: { occurrenceDate },

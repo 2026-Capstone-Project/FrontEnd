@@ -23,7 +23,10 @@ import {
   useStoredCalendarView,
 } from '@/features/Calendar/hooks'
 import { useCalendarEvents } from '@/features/Calendar/hooks/useCalendarEvents'
-import { getEventOccurrenceKey } from '@/features/Calendar/utils/helpers/dayViewHelpers'
+import {
+  getEventOccurrenceKey,
+  resolveOccurrenceDateTime,
+} from '@/features/Calendar/utils/helpers/dayViewHelpers'
 import Plus from '@/shared/assets/icons/plus.svg?react'
 import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
 import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
@@ -210,8 +213,10 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
       }
       const nextEnd = moment(end).format('YYYY-MM-DDTHH:mm:ss')
       const targetEvent = events.find((eventItem) => eventItem.id === eventId)
-      const baseOccurrenceDate = targetEvent?.occurrenceDate ?? targetEvent?.start ?? start
-      const occurrenceDate = moment(baseOccurrenceDate).format('YYYY-MM-DDTHH:mm:ss')
+      const occurrenceDate = resolveOccurrenceDateTime(
+        targetEvent?.occurrenceDate,
+        targetEvent?.start ?? start,
+      )
       patchEventMutate({
         eventId,
         params: { occurrenceDate },
@@ -386,20 +391,16 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
   return (
     <div css={{ position: 'relative', height: 'fit-content', width: '100%' }}>
       {/* 모바일 전용 헤더 버튼 */}
-      <div>
-        <div>
-          <S.MobileButtons>
-            <CustomViewButton view={view} onView={onView} className="mobile-custom-view-button" />
-            <button className="add-button" onClick={() => handleAddEvent()} type="button">
-              <Plus height={20} width={20} color={theme.colors.primary} />
-            </button>
-          </S.MobileButtons>
-          {/* 캘린더 본문 */}
-          <S.CalendarWrapper view={view}>
-            <DragAndDropCalendar {...calendarProps} />
-          </S.CalendarWrapper>
-        </div>
-      </div>
+      <S.MobileButtons>
+        <CustomViewButton view={view} onView={onView} className="mobile-custom-view-button" />
+        <button className="add-button" onClick={() => handleAddEvent()} type="button">
+          <Plus height={20} width={20} color={theme.colors.primary} />
+        </button>
+      </S.MobileButtons>
+      {/* 캘린더 본문 */}
+      <S.CalendarWrapper view={view}>
+        <DragAndDropCalendar {...calendarProps} />
+      </S.CalendarWrapper>
       {/* 모달/카드 영역 */}
       <CalendarModals
         modalDate={modalDate}

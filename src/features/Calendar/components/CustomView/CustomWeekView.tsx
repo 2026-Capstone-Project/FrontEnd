@@ -43,6 +43,12 @@ const formatTime = (event: CalendarEvent) => {
   return moment(event.start).format('HH:mm')
 }
 
+const buildEventAriaLabel = (event: CalendarEvent) => {
+  const prefix =
+    event.isAllDay || isDateOnlyString(event.start) ? '종일 일정' : `${formatTime(event)} 일정`
+  return `${prefix}: ${event.title}`
+}
+
 const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
   date = new Date(),
   events = [],
@@ -154,6 +160,7 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
               <S.AllDayEventBar
                 key={segment.key}
                 type="button"
+                aria-label={buildEventAriaLabel(segment.event)}
                 $lane={segment.lane}
                 $startIndex={segment.startIndex}
                 $span={segment.endIndex - segment.startIndex + 1}
@@ -173,8 +180,8 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
                   <TodoCheckbox
                     type="checkbox"
                     checked={isDone}
-                    onPointerDown={(eventPointer) => eventPointer.stopPropagation()}
                     onMouseDown={(eventMouse) => eventMouse.stopPropagation()}
+                    onKeyDown={(eventKey) => eventKey.stopPropagation()}
                     onClick={(eventClick) => eventClick.stopPropagation()}
                     onChange={(eventChange) => {
                       eventChange.stopPropagation()
@@ -208,6 +215,7 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
               <S.EventCard
                 key={getEventOccurrenceKey(event)}
                 type="button"
+                aria-label={buildEventAriaLabel(event)}
                 $backgroundColor={palette.base}
                 $pointColor={palette.point}
                 $isSelected={getEventOccurrenceKey(event) === selectedEventKey}
@@ -225,8 +233,8 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
                     <TodoCheckbox
                       type="checkbox"
                       checked={isDone}
-                      onPointerDown={(eventPointer) => eventPointer.stopPropagation()}
                       onMouseDown={(eventMouse) => eventMouse.stopPropagation()}
+                      onKeyDown={(eventKey) => eventKey.stopPropagation()}
                       onClick={(eventClick) => eventClick.stopPropagation()}
                       onChange={(eventChange) => {
                         eventChange.stopPropagation()
