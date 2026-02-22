@@ -2,10 +2,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 
 import { SettingsAPI } from '@/shared/api/settings/settings'
+import type { TCommonResponse } from '@/shared/types/common/common'
 import type { CalendarView, ReminderTiming } from '@/shared/types/settings/settings'
 import { useAuthStore } from '@/store/useAuthStore'
-
-import type { TCommonResponse } from '../types/common/common'
 
 export const useSettingsMutation = () => {
   const queryClient = useQueryClient()

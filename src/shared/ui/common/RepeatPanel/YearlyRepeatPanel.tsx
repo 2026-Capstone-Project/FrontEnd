@@ -7,7 +7,7 @@ import type {
   MonthlyPatternDay,
   MonthlyPatternWeek,
   RepeatConfig,
-} from '@/shared/types/event/recurrence/repeat'
+} from '@/shared/types/recurrence/repeat'
 import Checkbox from '@/shared/ui/common/Checkbox/Checkbox'
 import Dropdown from '@/shared/ui/common/Dropdown/Dropdown'
 import { dayLabel, weekLabel } from '@/shared/utils/date'

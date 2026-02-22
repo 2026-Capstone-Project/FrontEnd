@@ -1,6 +1,6 @@
 import Rotate from '@/shared/assets/icons/rotate.svg?react'
 import { MAIN_OPTIONS } from '@/shared/constants/event'
-import type { CustomRepeatBasis, RepeatType } from '@/shared/types/event/recurrence/repeat'
+import type { CustomRepeatBasis, RepeatType } from '@/shared/types/recurrence/repeat'
 
 import * as S from './RepeatTypeGroup.style'
 

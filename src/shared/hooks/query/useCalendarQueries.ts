@@ -1,4 +1,4 @@
-import { calendarKeys } from '@/shared/api/queryKey'
+import { calendarKeys } from '@/shared/api/queryKeys'
 import { useCustomQuery } from '@/shared/hooks/common/customQuery'
 
 export function useEventQuery(startDate: string, endDate: string) {
