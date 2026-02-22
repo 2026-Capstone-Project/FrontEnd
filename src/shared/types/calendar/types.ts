@@ -4,6 +4,7 @@ import type { RecurrenceGroup } from '@/shared/types/recurrence/recurrence'
 export type Event = {
   id: number
   calculated: boolean
+  occurrenceDate?: string
   title: string
   content: string | null
   start: string

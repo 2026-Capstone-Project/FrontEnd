@@ -11,11 +11,13 @@ type UseCalendarDragDropArgs = {
   moveEvent: (args: EventInteractionArgs<CalendarEvent>) => void
   patchEventMutate: (payload: {
     eventId: number
+    params: {
+      occurrenceDate: string
+    }
     eventData: {
       startTime: string
       endTime: string
       isAllDay: boolean
-      occurrenceDate: string
     }
   }) => void
   patchTodoTiming: (todoEvent: CalendarEvent, start: Date) => void
@@ -36,15 +38,18 @@ export const useCalendarDragDrop = ({
         patchTodoTiming(event, start as Date)
         return
       }
-      const nextStart = moment(start).format('YYYY-MM-DDTHH:mm')
-      const nextEnd = moment(end).format('YYYY-MM-DDTHH:mm')
+      const nextStart = moment(start).format('YYYY-MM-DDTHH:mm:ss')
+      const nextEnd = moment(end).format('YYYY-MM-DDTHH:mm:ss')
+      const occurrenceDate = event.occurrenceDate
+        ? moment(event.occurrenceDate).format('YYYY-MM-DDTHH:mm:ss')
+        : moment(event.start).format('YYYY-MM-DDTHH:mm:ss')
       patchEventMutate({
         eventId: event.id,
+        params: { occurrenceDate },
         eventData: {
           startTime: nextStart,
           endTime: nextEnd,
           isAllDay: event.isAllDay ?? false,
-          occurrenceDate: nextStart,
         },
       })
     },

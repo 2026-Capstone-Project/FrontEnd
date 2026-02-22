@@ -126,12 +126,7 @@ export const useScheduleSubmitFlow = ({
       const occurrenceDate = formatDateTime(
         buildDateTime(startDate, pendingScheduleValues.eventStartTime),
       )
-      const scope =
-        option === 'single'
-          ? 'THIS_EVENT'
-          : option === 'future'
-            ? 'THIS_AND_FOLLOWING_EVENTS'
-            : 'ALL_EVENTS'
+      const scope = option === 'future' ? 'THIS_AND_FOLLOWING_EVENTS' : 'THIS_EVENT'
       syncEventTiming(pendingScheduleValues)
       try {
         await patchSchedule(pendingScheduleValues, scope, occurrenceDate)

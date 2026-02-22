@@ -208,15 +208,17 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
         }
         return
       }
-      const nextStart = moment(start).format('YYYY-MM-DDTHH:mm')
-      const nextEnd = moment(end).format('YYYY-MM-DDTHH:mm')
+      const nextEnd = moment(end).format('YYYY-MM-DDTHH:mm:ss')
+      const targetEvent = events.find((eventItem) => eventItem.id === eventId)
+      const baseOccurrenceDate = targetEvent?.occurrenceDate ?? targetEvent?.start ?? start
+      const occurrenceDate = moment(baseOccurrenceDate).format('YYYY-MM-DDTHH:mm:ss')
       patchEventMutate({
         eventId,
+        params: { occurrenceDate },
         eventData: {
-          startTime: nextStart,
+          startTime: moment(start).format('YYYY-MM-DDTHH:mm:ss'),
           endTime: nextEnd,
           isAllDay: false,
-          occurrenceDate: nextStart,
         },
       })
     },

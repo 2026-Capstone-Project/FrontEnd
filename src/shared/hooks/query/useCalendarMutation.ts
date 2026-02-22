@@ -20,8 +20,15 @@ export function useCalendarMutation() {
   }
   function usePatchEvent() {
     return useCustomMutation(
-      ({ eventId, eventData }: { eventId: number; eventData: Parameters<typeof patchEvent>[1] }) =>
-        patchEvent(eventId, eventData),
+      ({
+        eventId,
+        eventData,
+        params,
+      }: {
+        eventId: number
+        eventData: Parameters<typeof patchEvent>[1]
+        params: Parameters<typeof patchEvent>[2]
+      }) => patchEvent(eventId, eventData, params),
       {
         onSuccess: () => {
           invalidateCalendarQueries()

@@ -23,7 +23,10 @@ export const useSchedulePatchController = ({
   initialEvent,
 }: UseSchedulePatchControllerProps) => {
   // API 전송용 날짜/시간 포맷팅
-  const formatDateTime = useCallback((value: Date) => moment(value).format('YYYY-MM-DDTHH:mm'), [])
+  const formatDateTime = useCallback(
+    (value: Date) => moment(value).format('YYYY-MM-DDTHH:mm:ss'),
+    [],
+  )
 
   const { usePatchEvent, usePostEvent } = useCalendarMutation()
   const { mutateAsync: patchEventMutation } = usePatchEvent()

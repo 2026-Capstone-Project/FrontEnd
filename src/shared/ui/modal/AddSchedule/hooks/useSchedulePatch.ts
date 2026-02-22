@@ -9,6 +9,10 @@ import { areRepeatConfigsEqual } from '@/shared/utils/repeatConfig'
 
 type PatchEventMutate = (params: {
   eventId: number
+  params: {
+    occurrenceDate: string
+    scope?: Extract<RecurrenceEventScope, 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS'>
+  }
   eventData: {
     title?: string
     content?: string
@@ -16,8 +20,6 @@ type PatchEventMutate = (params: {
     endTime?: string
     color?: Event['color']
     isAllDay?: boolean
-    recurrenceUpdateScope?: RecurrenceEventScope
-    occurrenceDate?: string
     recurrenceGroup?: Event['recurrenceGroup'] | null
   }
 }) => Promise<unknown>
@@ -76,7 +78,11 @@ export const useSchedulePatch = ({
       const nextContent = values.eventDescription ?? ''
       const nextStart = formatDateTime(start)
       const nextEnd = formatDateTime(end)
-      const nextOccurrenceDate = occurrenceDate ?? nextStart
+      const nextOccurrenceDate =
+        occurrenceDate ??
+        (initialEvent?.occurrenceDate
+          ? formatDateTime(new Date(initialEvent.occurrenceDate))
+          : nextStart)
 
       const eventData: Parameters<PatchEventMutate>[0]['eventData'] = {
         ...(nextTitle !== initialTitle ? { title: nextTitle } : {}),
@@ -93,15 +99,17 @@ export const useSchedulePatch = ({
                   : mapRepeatConfigToRecurrenceGroup(values.repeatConfig),
             }
           : {}),
-        occurrenceDate: nextOccurrenceDate,
       }
 
       if (Object.keys(eventData).length === 0) return Promise.resolve()
-      if (isRecurring && scope) {
-        eventData.recurrenceUpdateScope = scope
-      }
-
-      return patchEventMutation({ eventId, eventData })
+      return patchEventMutation({
+        eventId,
+        params: {
+          occurrenceDate: nextOccurrenceDate,
+          ...(isRecurring && scope ? { scope } : {}),
+        },
+        eventData,
+      })
     },
     [
       buildDateTime,
