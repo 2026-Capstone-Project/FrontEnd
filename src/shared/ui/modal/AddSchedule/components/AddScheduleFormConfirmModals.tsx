@@ -1,8 +1,8 @@
-import moment from 'moment'
-
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { EditConfirmOption } from '@/shared/ui/modal'
-import { ScheduleConfirmModals } from '@/shared/ui/modal/AddSchedule/components'
+import { formatIsoDate } from '@/shared/utils/date'
+
+import ScheduleConfirmModals from './ScheduleConfirmModals'
 
 type AddScheduleFormConfirmModalsProps = {
   deleteWarningVisible: boolean
@@ -33,7 +33,7 @@ const AddScheduleFormConfirmModals = ({
       // 반복 일정 적용 모달에 보여줄 타이틀
       eventTitle={eventTitle}
       // 반복 일정 적용 시 기준이 되는 occurrenceDate
-      occurrenceDate={eventStartDate ? moment(eventStartDate).format('YYYY-MM-DD') : ''}
+      occurrenceDate={eventStartDate ? formatIsoDate(eventStartDate) : ''}
       eventId={eventId}
       isEditConfirmOpen={isEditConfirmOpen}
       isApplyConfirmOpen={isApplyConfirmOpen}

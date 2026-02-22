@@ -98,8 +98,13 @@ export const useScheduleSubmitFlow = ({
         await createSchedule(values)
       }
       onClose()
-    } catch {
-      return
+    } catch (error) {
+      console.error('[AddScheduleForm] submit failed', error)
+      const message =
+        error instanceof Error
+          ? error.message
+          : '일정 저장 중 오류가 발생했습니다. 다시 시도해주세요.'
+      alert(message)
     }
   })
 
@@ -127,8 +132,13 @@ export const useScheduleSubmitFlow = ({
         await patchSchedule(pendingScheduleValues, scope, occurrenceDate)
         onClose()
         clearApplyConfirm()
-      } catch {
-        return
+      } catch (error) {
+        console.error('[AddScheduleForm] submit failed', error)
+        const message =
+          error instanceof Error
+            ? error.message
+            : '일정 저장 중 오류가 발생했습니다. 다시 시도해주세요.'
+        alert(message)
       }
     },
     [

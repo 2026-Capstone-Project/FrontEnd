@@ -19,7 +19,6 @@ const CalendarPage = () => {
           display: 'flex',
           justifyContent: 'center',
           width: '100%',
-          alignItems: 'center',
         }}
       >
         <EventsCard selectedDate={selectedDate} />

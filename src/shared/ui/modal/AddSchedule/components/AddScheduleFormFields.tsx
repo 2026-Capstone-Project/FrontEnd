@@ -7,14 +7,13 @@ import Checkbox from '@/shared/ui/common/Checkbox/Checkbox'
 import RepeatTypeGroup from '@/shared/ui/common/RepeatTypeGroup/RepeatTypeGroup'
 import TerminationPanel from '@/shared/ui/common/TerminationPanel/TerminationPanel'
 import TitleSuggestionInput from '@/shared/ui/common/TitleSuggestionInput/TitleSuggestionInput'
-import {
-  CustomBasisPanel,
-  CustomDatePicker,
-  CustomTimePicker,
-  SearchPlace,
-} from '@/shared/ui/modal/AddSchedule/components'
 import { useAddScheduleFormContext } from '@/shared/ui/modal/AddSchedule/components/AddScheduleFormContext.hooks'
 import * as S from '@/shared/ui/modal/AddSchedule/index.style'
+
+import CustomBasisPanel from './CustomBasisPanel/CustomBasisPanel'
+import CustomDatePicker from './CustomDatePicker/CustomDatePicker'
+import CustomTimePicker from './CustomTimePicker/CustomTimePicker'
+import SearchPlace from './SearchPlace/SearchPlace'
 
 const AddScheduleFormFields = () => {
   const { register } = useFormContext<AddScheduleFormValues>()

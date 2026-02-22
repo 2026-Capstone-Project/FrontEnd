@@ -183,7 +183,8 @@ export const useAddTodoForm = ({
       recurrenceGroup,
     }
 
-    if (isEditing && id && id !== 0) {
+    const isPersistedTodoId = typeof id === 'number' && id > 0
+    if (isEditing && isPersistedTodoId) {
       return patchTodoMutate({
         todoId: id,
         occurrenceDate: formatIsoDate(date),

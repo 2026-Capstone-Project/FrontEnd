@@ -299,8 +299,13 @@ const AddTodoForm = ({
     try {
       await onSubmit(values)
       requestClose(true)
-    } catch {
-      return
+    } catch (error) {
+      console.error('[AddTodoForm] submit failed', error)
+      const message =
+        error instanceof Error
+          ? error.message
+          : '할 일 저장 중 오류가 발생했습니다. 다시 시도해주세요.'
+      alert(message)
     }
   })
 
@@ -320,8 +325,13 @@ const AddTodoForm = ({
         await onSubmit(pendingTodoValues)
         requestClose(true)
         setPendingTodoValues(null)
-      } catch {
-        return
+      } catch (error) {
+        console.error('[AddTodoForm] submit failed', error)
+        const message =
+          error instanceof Error
+            ? error.message
+            : '할 일 저장 중 오류가 발생했습니다. 다시 시도해주세요.'
+        alert(message)
       }
     },
     [
