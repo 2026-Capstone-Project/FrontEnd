@@ -6,6 +6,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 import { createPortal } from 'react-dom'
@@ -23,7 +24,12 @@ import Checkbox from '@/shared/ui/common/Checkbox/Checkbox'
 import RepeatTypeGroup from '@/shared/ui/common/RepeatTypeGroup/RepeatTypeGroup'
 import TerminationPanel from '@/shared/ui/common/TerminationPanel/TerminationPanel'
 import TitleSuggestionInput from '@/shared/ui/common/TitleSuggestionInput/TitleSuggestionInput'
-import { DeleteConfirmModal, EditConfirmModal, type EditConfirmOption } from '@/shared/ui/modal'
+import {
+  DeleteConfirmModal,
+  EditConfirmModal,
+  type EditConfirmOption,
+  UnsavedChangesConfirmModal,
+} from '@/shared/ui/modal'
 import SelectColor from '@/shared/ui/modal/AddSchedule/components/SelectColor/SelectColor'
 import CustomBasisPanel from '@/shared/ui/modal/AddTodo/components/CustomBasisPanel/CustomBasisPanel'
 import CustomDatePicker from '@/shared/ui/modal/AddTodo/components/CustomDatePicker/CustomDatePicker'
@@ -34,6 +40,7 @@ import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/recurrenceGroup
 
 type AddTodoFormProps = {
   registerDeleteHandler?: (handler?: () => void) => void
+  registerCloseGuard?: (guard?: (() => boolean) | null) => void
   registerFooterChildren?: (node: ReactNode | null) => void
   date: string
   mode?: 'modal' | 'inline'
@@ -57,6 +64,7 @@ const AddTodoForm = ({
   eventId,
   onClose,
   registerDeleteHandler,
+  registerCloseGuard,
   registerFooterChildren,
   isEditing = false,
   headerTitlePortalTarget,
@@ -85,12 +93,16 @@ const AddTodoForm = ({
     eventColor,
     setEventColor,
   } = useAddTodoForm({ date, id: eventId, isEditing })
-  const { register, setValue } = formMethods
+  const { register, setValue, formState } = formMethods
+  const { isDirty } = formState
+  const allowCloseRef = useRef(false)
+  const [isUnsavedConfirmOpen, setIsUnsavedConfirmOpen] = useState(false)
   const occurrenceDate = useMemo(() => moment(date).format('YYYY-MM-DD'), [date])
   const shouldFetchDetail = isEditing && eventId != null && eventId !== 0
   const { data: detailData } = useGetDetailTodoQuery(eventId, occurrenceDate, shouldFetchDetail)
-  const { useDeleteTodo } = useTodoMutations()
+  const { useDeleteTodo, usePatchTodo } = useTodoMutations()
   const { mutate: deleteTodoMutate } = useDeleteTodo()
+  const { mutate: patchTodoMutate } = usePatchTodo()
   const [calendarAnchor, setCalendarAnchor] = useState<DOMRect | null>(null)
   const [deleteWarningVisible, setDeleteWarningVisible] = useState(false)
   const [isMobileLayout, setIsMobileLayout] = useState(() => {
@@ -177,6 +189,41 @@ const AddTodoForm = ({
     }
     return moment(todoDate ?? date).format('YYYY-MM-DD')
   }, [date, detailData?.result?.occurrenceDate, todoDate])
+  const requestClose = useCallback(
+    (force?: boolean) => {
+      if (force) {
+        allowCloseRef.current = true
+      }
+      onClose()
+    },
+    [onClose],
+  )
+
+  const closeGuard = useCallback(() => {
+    if (allowCloseRef.current) {
+      allowCloseRef.current = false
+      return true
+    }
+    if (!isDirty) return true
+    setIsUnsavedConfirmOpen(true)
+    return false
+  }, [isDirty])
+
+  const handleCloseUnsavedConfirm = useCallback(() => {
+    setIsUnsavedConfirmOpen(false)
+  }, [])
+
+  const handleLeaveUnsavedForm = useCallback(() => {
+    setIsUnsavedConfirmOpen(false)
+    requestClose(true)
+  }, [requestClose])
+
+  useEffect(() => {
+    if (!registerCloseGuard) return
+    registerCloseGuard(closeGuard)
+    return () => registerCloseGuard()
+  }, [closeGuard, registerCloseGuard])
+
   const renderTitleInput = () => (
     <TitleSuggestionInput
       fieldName="todoTitle"
@@ -251,7 +298,7 @@ const AddTodoForm = ({
     syncEventTiming(values)
     try {
       await onSubmit(values)
-      onClose()
+      requestClose(true)
     } catch {
       return
     }
@@ -271,7 +318,7 @@ const AddTodoForm = ({
       syncEventTiming(pendingTodoValues)
       try {
         await onSubmit(pendingTodoValues)
-        onClose()
+        requestClose(true)
         setPendingTodoValues(null)
       } catch {
         return
@@ -280,10 +327,10 @@ const AddTodoForm = ({
     [
       confirmChange,
       eventId,
-      onClose,
       onEventTitleConfirm,
       onSubmit,
       pendingTodoValues,
+      requestClose,
       syncEventTiming,
     ],
   )
@@ -295,7 +342,7 @@ const AddTodoForm = ({
 
   const handleDelete = useCallback(() => {
     if (!isPersistedTodo) {
-      onClose()
+      requestClose(true)
       return
     }
     if (repeatConfig.repeatType !== 'none') {
@@ -308,7 +355,7 @@ const AddTodoForm = ({
         occurrenceDate: deleteOccurrenceDate,
       },
       {
-        onSuccess: () => onClose(),
+        onSuccess: () => requestClose(true),
       },
     )
   }, [
@@ -316,8 +363,8 @@ const AddTodoForm = ({
     deleteTodoMutate,
     eventId,
     isPersistedTodo,
-    onClose,
     repeatConfig.repeatType,
+    requestClose,
   ])
 
   useEffect(() => {
@@ -331,8 +378,27 @@ const AddTodoForm = ({
       if (eventId != null && eventId !== 0) {
         onEventColorChange?.(eventId, value)
       }
+      if (!isEditing || eventId == null || eventId === 0) {
+        return
+      }
+      patchTodoMutate({
+        todoId: eventId,
+        occurrenceDate: deleteOccurrenceDate,
+        ...(hasExistingRecurrence ? { scope: 'THIS_TODO' as const } : {}),
+        requestBody: {
+          color: value,
+        },
+      })
     },
-    [eventId, onEventColorChange, setEventColor],
+    [
+      deleteOccurrenceDate,
+      eventId,
+      hasExistingRecurrence,
+      isEditing,
+      onEventColorChange,
+      patchTodoMutate,
+      setEventColor,
+    ],
   )
 
   const footerNode = useMemo(
@@ -466,6 +532,14 @@ const AddTodoForm = ({
       )}
       {isEditConfirmOpen && (
         <EditConfirmModal onCancel={handleCancelRepeat} onConfirm={handleConfirmedSubmit} />
+      )}
+      {isUnsavedConfirmOpen && (
+        <UnsavedChangesConfirmModal
+          target="todo"
+          isEditing={isEditing}
+          onClose={handleCloseUnsavedConfirm}
+          onConfirmLeave={handleLeaveUnsavedForm}
+        />
       )}
     </>
   )

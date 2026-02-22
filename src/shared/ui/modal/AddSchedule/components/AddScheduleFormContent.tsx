@@ -1,10 +1,11 @@
 /** @jsxImportSource @emotion/react  */
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useFormContext } from 'react-hook-form'
 
 import type { UseAddScheduleFormResult } from '@/shared/hooks/form/useAddScheduleForm'
 import type { AddScheduleFormValues } from '@/shared/types/event/event'
+import { UnsavedChangesConfirmModal } from '@/shared/ui/modal'
 import { type AddScheduleFormProps } from '@/shared/ui/modal/AddSchedule/components/AddScheduleForm.types'
 import AddScheduleFormConfirmModals from '@/shared/ui/modal/AddSchedule/components/AddScheduleFormConfirmModals'
 import { AddScheduleFormProvider } from '@/shared/ui/modal/AddSchedule/components/AddScheduleFormContext'
@@ -62,6 +63,7 @@ const AddScheduleFormContent = ({
   const { setValue, getValues, formState } = useFormContext<AddScheduleFormValues>()
   const { isDirty } = formState
   const allowCloseRef = useRef(false)
+  const [isUnsavedConfirmOpen, setIsUnsavedConfirmOpen] = useState(false)
 
   const requestClose = useCallback(
     (force?: boolean) => {
@@ -79,8 +81,18 @@ const AddScheduleFormContent = ({
       return true
     }
     if (!isDirty) return true
-    return window.confirm('저장하지 않은 변경사항이 있습니다. 닫을까요?')
+    setIsUnsavedConfirmOpen(true)
+    return false
   }, [isDirty])
+
+  const handleCloseUnsavedConfirm = useCallback(() => {
+    setIsUnsavedConfirmOpen(false)
+  }, [])
+
+  const handleLeaveUnsavedForm = useCallback(() => {
+    setIsUnsavedConfirmOpen(false)
+    requestClose(true)
+  }, [requestClose])
 
   useEffect(() => {
     if (!registerCloseGuard) return
@@ -178,7 +190,6 @@ const AddScheduleFormContent = ({
     handleFormSubmit,
     handleConfirmedSubmit,
     handleCancelRepeat,
-    openApplyConfirm,
   } = useScheduleSubmitFlow({
     date,
     eventId,
@@ -208,7 +219,6 @@ const AddScheduleFormContent = ({
     onEventColorChange,
     registerFooterChildren,
     registerDeleteHandler,
-    openApplyConfirm,
     eventColor,
     closeModal: () => requestClose(true),
     occurrenceDate: date,
@@ -259,6 +269,14 @@ const AddScheduleFormContent = ({
         onCancelEdit={handleCancelRepeat}
         onConfirmEdit={handleConfirmedSubmit}
       />
+      {isUnsavedConfirmOpen && (
+        <UnsavedChangesConfirmModal
+          target="schedule"
+          isEditing={isEditing}
+          onClose={handleCloseUnsavedConfirm}
+          onConfirmLeave={handleLeaveUnsavedForm}
+        />
+      )}
     </>
   )
 }

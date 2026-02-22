@@ -148,6 +148,7 @@ const AddItemModal = ({
           mode={mode}
           onClose={handleClose}
           registerDeleteHandler={registerDeleteHandler}
+          registerCloseGuard={registerCloseGuard}
           registerFooterChildren={registerFooterChildren}
           headerTitlePortalTarget={headerTitlePortalTarget}
           isEditing={isEditing}

@@ -25,7 +25,6 @@ type UseScheduleFooterProps = {
   onEventColorChange?: (eventId: CalendarEvent['id'], color: EventColorType) => void
   registerFooterChildren?: (node: ReactNode | null) => void
   registerDeleteHandler?: (handler?: () => void) => void
-  openApplyConfirm: (values: AddScheduleFormValues) => void
   eventColor: EventColorType
   closeModal: () => void
   occurrenceDate: string
@@ -42,7 +41,6 @@ export const useScheduleFooter = ({
   onEventColorChange,
   registerFooterChildren,
   registerDeleteHandler,
-  openApplyConfirm,
   eventColor,
   closeModal,
   occurrenceDate,
@@ -98,7 +96,7 @@ export const useScheduleFooter = ({
     return () => registerDeleteHandler?.()
   }, [handleDelete, registerDeleteHandler])
 
-  // 색상 변경 처리(반복 일정이면 확인 모달)
+  // 색상 변경 처리(편집 모드에서는 즉시 patch)
   const isExistingRecurring = useMemo(
     () => initialEvent?.recurrenceGroup != null,
     [initialEvent?.recurrenceGroup],
@@ -114,11 +112,7 @@ export const useScheduleFooter = ({
         return
       }
       const nextValues = { ...getValues(), eventColor: value }
-      if (isExistingRecurring) {
-        openApplyConfirm(nextValues)
-      } else {
-        void patchSchedule(nextValues)
-      }
+      void patchSchedule(nextValues, isExistingRecurring ? 'THIS_EVENT' : undefined)
     },
     [
       eventId,
@@ -126,7 +120,6 @@ export const useScheduleFooter = ({
       isEditing,
       isExistingRecurring,
       onEventColorChange,
-      openApplyConfirm,
       patchSchedule,
       setEventColor,
     ],
