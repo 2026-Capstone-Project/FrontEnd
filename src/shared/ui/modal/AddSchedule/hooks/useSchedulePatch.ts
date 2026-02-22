@@ -78,6 +78,10 @@ export const useSchedulePatch = ({
       const nextContent = values.eventDescription ?? ''
       const nextStart = formatDateTime(start)
       const nextEnd = formatDateTime(end)
+      // occurrenceDate 우선순위:
+      // 1) 호출자가 명시적으로 전달한 occurrenceDate
+      // 2) 기존 이벤트가 가진 태생 occurrenceDate
+      // 3) 현재 계산된 startTime
       const nextOccurrenceDate =
         occurrenceDate ??
         (initialEvent?.occurrenceDate

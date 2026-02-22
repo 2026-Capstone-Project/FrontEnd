@@ -35,6 +35,7 @@ import CustomBasisPanel from '@/shared/ui/modal/AddTodo/components/CustomBasisPa
 import CustomDatePicker from '@/shared/ui/modal/AddTodo/components/CustomDatePicker/CustomDatePicker'
 import CustomTimePicker from '@/shared/ui/modal/AddTodo/components/CustomTimePicker/CustomTimePicker'
 import * as S from '@/shared/ui/modal/AddTodo/index.style'
+import { useSyncEventTiming } from '@/shared/ui/modal/hooks/useSyncEventTiming'
 import { formatDisplayDate } from '@/shared/utils/date'
 import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/recurrenceGroup'
 
@@ -140,7 +141,7 @@ const AddTodoForm = ({
       customWeeklyDays: mappedRepeatConfig.customWeeklyDays ?? [],
       customMonthlyDates: mappedRepeatConfig.customMonthlyDates ?? [],
       customYearlyMonths: mappedRepeatConfig.customYearlyMonths ?? [],
-    } as RepeatConfigSchema
+    }
     setValue('repeatConfig', nextRepeatConfig, { shouldValidate: true })
   }, [date, detailData, isEditing, setIsAllday, setValue])
 
@@ -384,6 +385,7 @@ const AddTodoForm = ({
 
   const handleColorChange = useCallback(
     (value: CalendarEvent['color']) => {
+      const previousColor = eventColor
       setEventColor(value)
       if (eventId != null && eventId !== 0) {
         onEventColorChange?.(eventId, value)
@@ -391,16 +393,27 @@ const AddTodoForm = ({
       if (!isEditing || eventId == null || eventId === 0) {
         return
       }
-      patchTodoMutate({
-        todoId: eventId,
-        occurrenceDate: deleteOccurrenceDate,
-        ...(hasExistingRecurrence ? { scope: 'THIS_TODO' as const } : {}),
-        requestBody: {
-          color: value,
+      patchTodoMutate(
+        {
+          todoId: eventId,
+          occurrenceDate: deleteOccurrenceDate,
+          ...(hasExistingRecurrence ? { scope: 'THIS_TODO' as const } : {}),
+          requestBody: {
+            color: value,
+          },
         },
-      })
+        {
+          onError: () => {
+            setEventColor(previousColor)
+            if (eventId != null && eventId !== 0) {
+              onEventColorChange?.(eventId, previousColor)
+            }
+          },
+        },
+      )
     },
     [
+      eventColor,
       deleteOccurrenceDate,
       eventId,
       hasExistingRecurrence,
@@ -416,21 +429,16 @@ const AddTodoForm = ({
     [eventColor, handleColorChange],
   )
 
-  useEffect(() => {
-    if (eventId == null || eventId === 0) return
-    if (!onEventTimingChange) return
-    const baseDate = todoDate ?? new Date(date)
-    if (isAllday) {
-      const start = new Date(baseDate)
-      start.setHours(0, 0, 0, 0)
-      const end = new Date(baseDate)
-      end.setHours(23, 59, 59, 999)
-      onEventTimingChange(eventId, start, end, true)
-      return
-    }
-    const start = buildDateTime(baseDate, todoEndTime)
-    onEventTimingChange(eventId, start, start, false)
-  }, [buildDateTime, date, eventId, isAllday, onEventTimingChange, todoDate, todoEndTime])
+  useSyncEventTiming({
+    eventId,
+    fallbackDate: date,
+    isAllDay: isAllday,
+    startDate: todoDate,
+    startTime: todoEndTime,
+    singlePointTime: true,
+    buildDateTime,
+    onEventTimingChange,
+  })
 
   useEffect(() => {
     registerFooterChildren?.(footerNode)

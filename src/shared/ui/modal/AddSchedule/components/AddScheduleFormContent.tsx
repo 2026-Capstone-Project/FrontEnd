@@ -19,6 +19,7 @@ import {
   useScheduleSubmitFlow,
 } from '@/shared/ui/modal/AddSchedule/hooks'
 import * as S from '@/shared/ui/modal/AddSchedule/index.style'
+import { useSyncEventTiming } from '@/shared/ui/modal/hooks/useSyncEventTiming'
 import { formatDisplayDate } from '@/shared/utils/date'
 
 type AddScheduleFormContentProps = AddScheduleFormProps & {
@@ -155,33 +156,17 @@ const AddScheduleFormContent = ({
     buildDateTime,
   })
 
-  useEffect(() => {
-    if (eventId == null || eventId === 0) return
-    if (!onEventTimingChange) return
-    const startDate = eventStartDate ?? new Date(date)
-    const endDate = eventEndDate ?? startDate
-    if (isAllday) {
-      const start = new Date(startDate)
-      start.setHours(0, 0, 0, 0)
-      const end = new Date(endDate)
-      end.setHours(23, 59, 59, 999)
-      onEventTimingChange(eventId, start, end, true)
-      return
-    }
-    const start = buildDateTime(startDate, eventStartTime)
-    const end = buildDateTime(endDate, eventEndTime)
-    onEventTimingChange(eventId, start, end, false)
-  }, [
-    buildDateTime,
-    date,
-    eventEndDate,
-    eventEndTime,
+  useSyncEventTiming({
     eventId,
-    eventStartDate,
-    eventStartTime,
-    isAllday,
+    fallbackDate: date,
+    isAllDay: isAllday,
+    startDate: eventStartDate,
+    endDate: eventEndDate,
+    startTime: eventStartTime,
+    endTime: eventEndTime,
+    buildDateTime,
     onEventTimingChange,
-  ])
+  })
 
   // 제출/확인 플로우(반복 일정 포함)
   const {
