@@ -3,23 +3,23 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useFormContext } from 'react-hook-form'
 
-import type { UseAddScheduleFormResult } from '@/shared/hooks/form/useAddScheduleForm'
-import type { AddScheduleFormValues } from '@/shared/types/event/event'
-import { UnsavedChangesConfirmModal } from '@/shared/ui/modal'
-import { type AddScheduleFormProps } from '@/shared/ui/modal/AddSchedule/components/AddScheduleForm.types'
-import AddScheduleFormConfirmModals from '@/shared/ui/modal/AddSchedule/components/AddScheduleFormConfirmModals'
-import { AddScheduleFormProvider } from '@/shared/ui/modal/AddSchedule/components/AddScheduleFormContext'
-import { useAddScheduleFormContextValue } from '@/shared/ui/modal/AddSchedule/components/AddScheduleFormContext.hooks'
-import AddScheduleFormFields from '@/shared/ui/modal/AddSchedule/components/AddScheduleFormFields'
 import {
   useScheduleEventSync,
   useScheduleFooter,
   useScheduleFormAnchors,
   useSchedulePatchController,
   useScheduleSubmitFlow,
-} from '@/shared/ui/modal/AddSchedule/hooks'
-import * as S from '@/shared/ui/modal/AddSchedule/index.style'
-import { useSyncEventTiming } from '@/shared/ui/modal/hooks/useSyncEventTiming'
+} from '@/shared/hooks/addSchedule'
+import { useSyncEventTiming } from '@/shared/hooks/form'
+import type { UseAddScheduleFormResult } from '@/shared/hooks/form/useAddScheduleForm'
+import type { AddScheduleFormValues } from '@/shared/types/event/event'
+import type { AddScheduleFormProps } from '@/shared/types/modal/addSchedule'
+import { UnsavedChangesConfirmModal } from '@/shared/ui/modal'
+import AddScheduleFormConfirmModals from '@/shared/ui/modal/AddSchedule/form/AddScheduleFormConfirmModals'
+import { useAddScheduleFormContextValue } from '@/shared/ui/modal/AddSchedule/form/AddScheduleFormContext'
+import AddScheduleFormFields from '@/shared/ui/modal/AddSchedule/form/AddScheduleFormFields'
+import { AddScheduleFormProvider } from '@/shared/ui/modal/AddSchedule/form/AddScheduleFormProvider'
+import * as S from '@/shared/ui/modal/AddSchedule/styles/index.style'
 import { formatDisplayDate } from '@/shared/utils/date'
 
 type AddScheduleFormContentProps = AddScheduleFormProps & {

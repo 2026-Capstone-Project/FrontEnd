@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import {
   AddScheduleFormContext,
   type AddScheduleFormContextValue,
-} from '@/shared/ui/modal/AddSchedule/components/AddScheduleFormContext.hooks'
+} from '@/shared/ui/modal/AddSchedule/form/AddScheduleFormContext'
 
 type AddScheduleFormProviderProps = {
   value: AddScheduleFormContextValue

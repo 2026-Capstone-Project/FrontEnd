@@ -8,7 +8,7 @@ import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { AddScheduleFormValues, EventColorType } from '@/shared/types/event/event'
 import type { RecurrenceEventScope } from '@/shared/types/recurrence/recurrence'
 import type { RepeatConfig } from '@/shared/types/recurrence/repeat'
-import SelectColor from '@/shared/ui/modal/AddSchedule/components/SelectColor/SelectColor'
+import SelectColor from '@/shared/ui/modal/common/SelectColor/SelectColor'
 
 type UseScheduleFooterProps = {
   repeatConfig: RepeatConfig

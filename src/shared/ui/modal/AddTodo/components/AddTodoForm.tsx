@@ -12,6 +12,7 @@ import {
 import { createPortal } from 'react-dom'
 import { FormProvider } from 'react-hook-form'
 
+import { useSyncEventTiming } from '@/shared/hooks/form'
 import { useAddTodoForm } from '@/shared/hooks/form/useAddTodoForm'
 import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
 import { useGetDetailTodoQuery } from '@/shared/hooks/query/useTodoQueries'
@@ -30,12 +31,11 @@ import {
   type EditConfirmOption,
   UnsavedChangesConfirmModal,
 } from '@/shared/ui/modal'
-import SelectColor from '@/shared/ui/modal/AddSchedule/components/SelectColor/SelectColor'
-import CustomBasisPanel from '@/shared/ui/modal/AddTodo/components/CustomBasisPanel/CustomBasisPanel'
-import CustomDatePicker from '@/shared/ui/modal/AddTodo/components/CustomDatePicker/CustomDatePicker'
-import CustomTimePicker from '@/shared/ui/modal/AddTodo/components/CustomTimePicker/CustomTimePicker'
 import * as S from '@/shared/ui/modal/AddTodo/index.style'
-import { useSyncEventTiming } from '@/shared/ui/modal/hooks/useSyncEventTiming'
+import CustomBasisPanel from '@/shared/ui/modal/common/CustomBasisPanel/CustomBasisPanel'
+import CustomDatePicker from '@/shared/ui/modal/common/CustomDatePicker/CustomDatePicker'
+import CustomTimePicker from '@/shared/ui/modal/common/CustomTimePicker/CustomTimePicker'
+import SelectColor from '@/shared/ui/modal/common/SelectColor/SelectColor'
 import { formatDisplayDate } from '@/shared/utils/date'
 import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/recurrenceGroup'
 
@@ -138,6 +138,12 @@ const AddTodoForm = ({
     const nextRepeatConfig: RepeatConfigSchema = {
       ...defaultRepeatConfig,
       ...mappedRepeatConfig,
+      customMonthlyMode: mappedRepeatConfig.customMonthlyMode ?? 'dates',
+      customMonthlyPatternWeek: mappedRepeatConfig.customMonthlyPatternWeek ?? '1',
+      customMonthlyPatternDay: mappedRepeatConfig.customMonthlyPatternDay ?? 'mon',
+      customYearlyConditionEnabled: mappedRepeatConfig.customYearlyConditionEnabled ?? false,
+      customYearlyConditionWeek: mappedRepeatConfig.customYearlyConditionWeek ?? '1',
+      customYearlyConditionDay: mappedRepeatConfig.customYearlyConditionDay ?? 'mon',
       customWeeklyDays: mappedRepeatConfig.customWeeklyDays ?? [],
       customMonthlyDates: mappedRepeatConfig.customMonthlyDates ?? [],
       customYearlyMonths: mappedRepeatConfig.customYearlyMonths ?? [],

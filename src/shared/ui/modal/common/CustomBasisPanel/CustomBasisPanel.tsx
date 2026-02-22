@@ -2,7 +2,7 @@ import styled from '@emotion/styled'
 
 import { theme } from '@/shared/styles/theme'
 import type { RepeatConfigSchema } from '@/shared/types/event/event'
-import type { CustomRepeatBasis, RepeatConfig } from '@/shared/types/event/recurrence/repeat'
+import type { CustomRepeatBasis, RepeatConfig } from '@/shared/types/recurrence/repeat'
 import {
   DailyRepeatPanel,
   MonthlyRepeatPanel,

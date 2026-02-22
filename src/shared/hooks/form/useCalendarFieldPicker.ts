@@ -6,8 +6,7 @@ import type {
   DatePickerField,
   TimePickerField,
 } from '@/shared/types/event/event'
-
-import { formatMinutes, toMinutes } from '../utils/timeUtils'
+import { formatMinutes, toMinutes } from '@/shared/utils/timeUtils'
 
 type UseCalendarFieldPickerProps = {
   setValue: UseFormSetValue<AddScheduleFormValues>

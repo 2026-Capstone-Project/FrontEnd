@@ -4,7 +4,7 @@ import { createContext, useContext, useMemo } from 'react'
 import type { UseAddScheduleFormResult } from '@/shared/hooks/form/useAddScheduleForm'
 import type { DatePickerField, TimePickerField } from '@/shared/types/event/event'
 import type { RepeatConfigSchema } from '@/shared/types/event/event'
-import type { RepeatConfig, RepeatType } from '@/shared/types/event/recurrence/repeat'
+import type { RepeatConfig, RepeatType } from '@/shared/types/recurrence/repeat'
 
 export type AddScheduleFormContextValue = {
   headerTitlePortalTarget?: HTMLElement | null
@@ -37,7 +37,7 @@ export type AddScheduleFormContextValue = {
   onTitleConfirm: (value: string) => void
 }
 
-export const AddScheduleFormContext = createContext<AddScheduleFormContextValue | null>(null)
+const AddScheduleFormContext = createContext<AddScheduleFormContextValue | null>(null)
 
 export const useAddScheduleFormContext = () => {
   const context = useContext(AddScheduleFormContext)
@@ -137,3 +137,5 @@ export const useAddScheduleFormContextValue = ({
     ],
   )
 }
+
+export { AddScheduleFormContext }

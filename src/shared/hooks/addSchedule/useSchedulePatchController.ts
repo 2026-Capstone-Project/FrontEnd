@@ -1,11 +1,11 @@
 import moment from 'moment'
 import { useCallback, useMemo } from 'react'
 
+import { useSchedulePatch } from '@/shared/hooks/addSchedule/useSchedulePatch'
 import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { AddScheduleFormValues, RepeatConfigSchema } from '@/shared/types/event/event'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
-import { useSchedulePatch } from '@/shared/ui/modal/AddSchedule/hooks/useSchedulePatch'
 import {
   mapRecurrenceGroupToRepeatConfig,
   mapRepeatConfigToRecurrenceGroup,

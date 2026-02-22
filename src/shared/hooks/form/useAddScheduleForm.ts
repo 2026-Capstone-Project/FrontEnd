@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { type Control, type UseFormReturn } from 'react-hook-form'
 
+import { useCalendarFieldPicker } from '@/shared/hooks/form/useCalendarFieldPicker'
 import { useScheduleFormFields } from '@/shared/hooks/form/useScheduleFormFields'
+import { useSearchPlaceToggle } from '@/shared/hooks/form/useSearchPlaceToggle'
 import { useRepeatConfigController } from '@/shared/hooks/repeat/useRepeatConfigController'
-import { useCalendarFieldPicker } from '@/shared/hooks/useCalendarFieldPicker'
-import { useSearchPlaceToggle } from '@/shared/hooks/useSearchPlaceToggle'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import {
   type AddScheduleFormValues,

@@ -1,6 +1,5 @@
 export { default as CustomBasisPanel } from './CustomBasisPanel/CustomBasisPanel'
 export { default as CustomDatePicker } from './CustomDatePicker/CustomDatePicker'
 export { default as CustomTimePicker } from './CustomTimePicker/CustomTimePicker'
-export { default as ScheduleConfirmModals } from './ScheduleConfirmModals'
+export { default as RecentSearch } from './RecentSearch/RecentSearch'
 export { default as SearchPlace } from './SearchPlace/SearchPlace'
-export { default as SelectColor } from './SelectColor/SelectColor'
