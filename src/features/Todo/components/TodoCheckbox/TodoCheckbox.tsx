@@ -8,12 +8,14 @@ const TodoCheckbox = ({
   checked,
   onChange,
   label,
+  ariaLabel,
   activeColor,
   inactiveColor,
 }: {
   label?: string
   checked: boolean
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  ariaLabel?: string
   activeColor?: string
   inactiveColor?: string
 }) => {
@@ -25,6 +27,7 @@ const TodoCheckbox = ({
         <S.Checkbox
           id={id}
           isChecked={checked}
+          aria-label={ariaLabel}
           activeColor={activeColor}
           inactiveColor={inactiveColor}
           type="checkbox"

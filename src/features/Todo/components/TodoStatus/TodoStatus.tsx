@@ -20,7 +20,7 @@ const TodoStatus = ({ progress, total }: { progress: number; total: number }) =>
         </S.StatusBar>
       ) : (
         <S.EmptyState>
-          <S.DotRow>
+          <S.DotRow aria-hidden="true">
             <S.Dot $index={0} />
             <S.Dot $index={1} />
             <S.Dot $index={2} />

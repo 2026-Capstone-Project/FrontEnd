@@ -59,13 +59,21 @@ const TodoCard = ({
   }, [deleteTodoMutate, id, isRecurringTodo, occurrenceDate])
 
   const handleToggleComplete = () => {
+    const previousSelected = selected
     const nextSelected = !selected
     setSelected(nextSelected)
-    patchCompleteTodoMutate({
-      todoId: id,
-      occurrenceDate,
-      isCompleted: nextSelected,
-    })
+    patchCompleteTodoMutate(
+      {
+        todoId: id,
+        occurrenceDate,
+        isCompleted: nextSelected,
+      },
+      {
+        onError: () => {
+          setSelected(previousSelected)
+        },
+      },
+    )
   }
 
   return (
@@ -76,7 +84,7 @@ const TodoCard = ({
       onDoubleClick={onDoubleClick}
     >
       <S.TodoLeftWrapper>
-        <TodoCheckbox checked={selected} onChange={handleToggleComplete} />
+        <TodoCheckbox checked={selected} onChange={handleToggleComplete} ariaLabel="할 일 완료" />
         <S.TodoInfoWrapper>
           <S.Title>{title}</S.Title>
           <S.Info $isHighlight={isHighlight}>
