@@ -56,6 +56,7 @@ const AddScheduleFormFields = () => {
             fieldName="eventTitle"
             placeholder="새로운 일정"
             autoFocus
+            onLiveChange={onTitleConfirm}
             onConfirm={onTitleConfirm}
           />
         )}
@@ -154,6 +155,7 @@ const AddScheduleFormFields = () => {
             fieldName="eventTitle"
             placeholder="새로운 일정"
             autoFocus
+            onLiveChange={onTitleConfirm}
             onConfirm={onTitleConfirm}
           />,
           headerTitlePortalTarget,

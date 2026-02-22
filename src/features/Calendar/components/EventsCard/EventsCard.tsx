@@ -2,15 +2,7 @@ import { useEventQuery, useTodoForCalendarQuery } from '@/shared/hooks/query/use
 
 import EventDetailCard from '../EventDetailCard/EventDetailCard'
 import * as S from './EventsCard.style'
-const EventsCard = ({
-  selectedDate,
-  onClose,
-  mode,
-}: {
-  selectedDate: Date
-  onClose: () => void
-  mode: 'inline' | 'modal'
-}) => {
+const EventsCard = ({ selectedDate }: { selectedDate: Date }) => {
   const editDate = new Date(selectedDate)
   const year = editDate.getFullYear()
   const month = String(editDate.getMonth() + 1).padStart(2, '0')
@@ -21,37 +13,35 @@ const EventsCard = ({
   const details = eventData?.result?.details ?? []
 
   return (
-    <S.CardOverlay mode={mode} onClick={mode === 'modal' ? onClose : undefined}>
-      <S.CardWrapper
-        onClick={(event) => {
-          event.stopPropagation()
-        }}
-      >
-        <S.Card mode={mode}>
-          <S.Header>
-            {selectedDate.toLocaleDateString('ko-KR', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              weekday: 'long',
-            })}
-            <S.Dot />
-          </S.Header>
-          {details.length > 0 || (todoData?.result?.todos.length ?? 0) > 0 ? (
-            <S.EventCards>
-              {details.map((event) => (
-                <EventDetailCard key={event.id} event={event} type={'schedule'} />
-              ))}
-              {todoData?.result?.todos.map((todo) => (
-                <EventDetailCard key={todo.todoId} event={todo} type={'todo'} />
-              ))}
-            </S.EventCards>
-          ) : (
-            <S.EmptyEvent>예정된 일정 없음</S.EmptyEvent>
-          )}
-        </S.Card>
-      </S.CardWrapper>
-    </S.CardOverlay>
+    <S.CardWrapper
+      onClick={(event) => {
+        event.stopPropagation()
+      }}
+    >
+      <S.Card mode={'inline'}>
+        <S.Header>
+          {selectedDate.toLocaleDateString('ko-KR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            weekday: 'long',
+          })}
+          <S.Dot />
+        </S.Header>
+        {details.length > 0 || (todoData?.result?.todos.length ?? 0) > 0 ? (
+          <S.EventCards>
+            {details.map((event) => (
+              <EventDetailCard key={event.id} event={event} type={'schedule'} />
+            ))}
+            {todoData?.result?.todos.map((todo) => (
+              <EventDetailCard key={todo.todoId} event={todo} type={'todo'} />
+            ))}
+          </S.EventCards>
+        ) : (
+          <S.EmptyEvent>예정된 일정 없음</S.EmptyEvent>
+        )}
+      </S.Card>
+    </S.CardWrapper>
   )
 }
 

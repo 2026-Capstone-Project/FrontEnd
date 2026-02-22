@@ -7,22 +7,16 @@ import type { CalendarEvent } from '@/shared/types/calendar/types'
 import AddSchedule from '@/shared/ui/modal/AddSchedule'
 import AddTodo from '@/shared/ui/modal/AddTodo'
 
-import EventsCard from '../EventsCard/EventsCard'
-
 type CalendarModalsProps = {
   modalDate: string
   modalEventId: CalendarEvent['id'] | null
   modalEvent: CalendarEvent | null
   isModalEditing: boolean
-  isModalOpen: boolean
   isInlineMode: boolean
   modalMode: 'modal' | 'inline'
   modalPortalRoot: HTMLElement | null
   cardPortalRoot: HTMLElement | null
-  eventCardDate: Date
-  showEventCard: boolean
   onCloseModal: () => void
-  onCloseEventCard: () => void
   eventActions: {
     onEventColorChange: (eventId: CalendarEvent['id'], color: CalendarEvent['color']) => void
     onEventTitleConfirm: (eventId: CalendarEvent['id'], title: CalendarEvent['title']) => void
@@ -41,21 +35,14 @@ const CalendarModals = ({
   modalEventId,
   modalEvent,
   isModalEditing,
-  isModalOpen,
   isInlineMode,
   modalMode,
   modalPortalRoot,
   cardPortalRoot,
-  eventCardDate,
-  showEventCard,
   onCloseModal,
-  onCloseEventCard,
   eventActions,
 }: CalendarModalsProps) => {
   const shouldRenderModal = modalEventId != null
-  const shouldRenderEventCard = !isModalOpen && showEventCard
-  const eventCardMode: 'inline' | 'modal' = 'inline'
-  const eventCardPortalRoot = cardPortalRoot ?? modalPortalRoot
   const isTodoModal = modalEvent?.type === 'todo'
   const safeDetailEventId = isModalEditing && !isTodoModal ? modalEventId : null
   const occurrenceDate = useMemo(() => {
@@ -153,17 +140,6 @@ const CalendarModals = ({
             onEventTimingChange={eventActions.onEventTimingChange}
           />,
           cardPortalRoot,
-        )}
-
-      {shouldRenderEventCard &&
-        eventCardPortalRoot &&
-        createPortal(
-          <EventsCard
-            onClose={onCloseEventCard}
-            selectedDate={eventCardDate}
-            mode={eventCardMode}
-          />,
-          eventCardPortalRoot,
         )}
     </>
   )

@@ -22,6 +22,9 @@ export const CardOverlay = styled.div<{ mode: 'inline' | 'modal' }>`
 
 export const CardWrapper = styled.div`
   display: flex;
+  ${media.down(theme.breakPoints.desktop)} {
+    width: 100%;
+  }
 `
 
 export const Card = styled.div<{ mode: 'inline' | 'modal' }>`
@@ -33,13 +36,7 @@ export const Card = styled.div<{ mode: 'inline' | 'modal' }>`
   height: fit-content;
   background-color: #ffffff;
   ${media.down(theme.breakPoints.desktop)} {
-    position: ${({ mode }) => (mode === 'modal' ? 'absolute' : 'relative')};
-    z-index: ${({ mode }) => (mode === 'modal' ? 1000 : 'auto')};
-    align-self: ${({ mode }) => (mode === 'modal' ? 'center' : 'auto')};
-    left: ${({ mode }) => (mode === 'modal' ? '50%' : 'auto')};
-    top: ${({ mode }) => (mode === 'modal' ? '50%' : 'auto')};
-    transform: ${({ mode }) => (mode === 'modal' ? 'translate(-50%, -50%)' : 'none')};
-    max-width: 90vw;
+    width: 100%;
   }
 `
 export const EventCards = styled.div`

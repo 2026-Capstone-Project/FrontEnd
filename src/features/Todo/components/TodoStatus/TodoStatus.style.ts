@@ -6,7 +6,6 @@ export const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 170px;
   padding: 32px 34px;
   gap: 32px;
   justify-content: center;
@@ -27,12 +26,16 @@ export const StatusBar = styled.div`
   width: 100%;
   background-color: #ffffff;
   border-radius: 20px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
 `
 export const StatusInfo = styled.div<{ width: number }>`
   text-align: center;
+  align-items: center;
+  justify-content: center;
+  display: flex;
   font-weight: 600;
   font-size: 14px;
   color: #ffffff;
@@ -68,5 +71,41 @@ export const Percentage = styled.div`
   color: ${theme.colors.primary2};
   ${media.down(theme.breakPoints.desktop)} {
     font-size: 20px;
+  }
+`
+
+export const EmptyState = styled.div`
+  display: flex;
+  flex: 1;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+`
+
+export const DotRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 22px;
+`
+
+export const Dot = styled.div<{ $index: number }>`
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: ${({ $index }) =>
+    $index === 0 ? '#47AAC5' : $index === 1 ? '#1E8DB2' : '#0C6C87'};
+`
+
+export const EmptyMessage = styled.div`
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: ${theme.colors.primary2};
+  text-align: center;
+  word-break: keep-all;
+  ${media.down(theme.breakPoints.desktop)} {
+    font-size: 16px;
   }
 `

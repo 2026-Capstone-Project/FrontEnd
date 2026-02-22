@@ -17,7 +17,7 @@ import { useGetDetailTodoQuery } from '@/shared/hooks/query/useTodoQueries'
 import { useRepeatChangeGuard } from '@/shared/hooks/repeat/useRepeatChangeGuard'
 import { theme } from '@/shared/styles/theme'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
-import { type AddTodoFormValues } from '@/shared/types/event/event'
+import { type AddTodoFormValues, type RepeatConfigSchema } from '@/shared/types/event/event'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 import Checkbox from '@/shared/ui/common/Checkbox/Checkbox'
 import RepeatTypeGroup from '@/shared/ui/common/RepeatTypeGroup/RepeatTypeGroup'
@@ -84,7 +84,7 @@ const AddTodoForm = ({
     todoTitle,
     eventColor,
     setEventColor,
-  } = useAddTodoForm({ date, id: eventId })
+  } = useAddTodoForm({ date, id: eventId, isEditing })
   const { register, setValue } = formMethods
   const occurrenceDate = useMemo(() => moment(date).format('YYYY-MM-DD'), [date])
   const shouldFetchDetail = isEditing && eventId != null && eventId !== 0
@@ -122,13 +122,13 @@ const AddTodoForm = ({
     setIsAllday(detail.isAllDay)
 
     const mappedRepeatConfig = mapRecurrenceGroupToRepeatConfig(detail.recurrenceGroup)
-    const nextRepeatConfig = {
+    const nextRepeatConfig: RepeatConfigSchema = {
       ...defaultRepeatConfig,
       ...mappedRepeatConfig,
       customWeeklyDays: mappedRepeatConfig.customWeeklyDays ?? [],
       customMonthlyDates: mappedRepeatConfig.customMonthlyDates ?? [],
       customYearlyMonths: mappedRepeatConfig.customYearlyMonths ?? [],
-    }
+    } as RepeatConfigSchema
     setValue('repeatConfig', nextRepeatConfig, { shouldValidate: true })
   }, [date, detailData, isEditing, setIsAllday, setValue])
 
@@ -176,6 +176,11 @@ const AddTodoForm = ({
       placeholder="새로운 할 일"
       autoFocus
       formController={formMethods}
+      onLiveChange={(value) => {
+        if (eventId != null && eventId !== 0) {
+          onEventTitleConfirm?.(eventId, value)
+        }
+      }}
       onConfirm={(value) => onEventTitleConfirm?.(eventId, value)}
     />
   )
@@ -316,6 +321,22 @@ const AddTodoForm = ({
   )
 
   useEffect(() => {
+    if (eventId == null || eventId === 0) return
+    if (!onEventTimingChange) return
+    const baseDate = todoDate ?? new Date(date)
+    if (isAllday) {
+      const start = new Date(baseDate)
+      start.setHours(0, 0, 0, 0)
+      const end = new Date(baseDate)
+      end.setHours(23, 59, 59, 999)
+      onEventTimingChange(eventId, start, end, true)
+      return
+    }
+    const start = buildDateTime(baseDate, todoEndTime)
+    onEventTimingChange(eventId, start, start, false)
+  }, [buildDateTime, date, eventId, isAllday, onEventTimingChange, todoDate, todoEndTime])
+
+  useEffect(() => {
     registerFooterChildren?.(footerNode)
     return () => registerFooterChildren?.(null)
   }, [footerNode, registerFooterChildren])
@@ -401,6 +422,11 @@ const AddTodoForm = ({
               placeholder="새로운 할 일"
               autoFocus
               formController={formMethods}
+              onLiveChange={(value) => {
+                if (eventId != null && eventId !== 0) {
+                  onEventTitleConfirm?.(eventId, value)
+                }
+              }}
               onConfirm={(value) => onEventTitleConfirm?.(eventId, value)}
             />,
             headerTitlePortalTarget,

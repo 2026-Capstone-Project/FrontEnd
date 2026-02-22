@@ -43,9 +43,7 @@ export const ColorDropdown = styled.div`
   cursor: pointer;
 `
 export const ColorOptions = styled.div`
-  position: absolute;
-  top: 42px;
-  right: 0px;
+  position: fixed;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   row-gap: 10px;
@@ -53,4 +51,6 @@ export const ColorOptions = styled.div`
   padding: 10px;
   background-color: ${(props) => props.theme.colors.inputColor};
   border-radius: 8px;
+  z-index: 11000;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 `

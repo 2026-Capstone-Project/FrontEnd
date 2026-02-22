@@ -68,6 +68,7 @@ type TitleSuggestionInputProps<TFieldValues extends FieldValues> = {
   autoFocus?: boolean
   formController?: TitleSuggestionInputFormController<TFieldValues>
   onConfirm?: (value: string) => void
+  onLiveChange?: (value: string) => void
 }
 
 const TitleSuggestionInput = <TFieldValues extends FieldValues>({
@@ -77,6 +78,7 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
   autoFocus = false,
   formController,
   onConfirm,
+  onLiveChange,
 }: TitleSuggestionInputProps<TFieldValues>) => {
   const context = useFormContext<TFieldValues>()
   const registerFn = formController?.register ?? context?.register
@@ -158,6 +160,10 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
         {...registerProps}
         ref={handleInputRef}
         placeholder={placeholder}
+        onChange={(event) => {
+          registerProps.onChange?.(event)
+          onLiveChange?.(event.target.value)
+        }}
         onKeyDown={handleKeyDown}
       />
       {suggestionsVisible && filteredSuggestions.length > 0 && (

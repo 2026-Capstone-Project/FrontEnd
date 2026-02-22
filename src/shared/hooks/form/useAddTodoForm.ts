@@ -19,6 +19,7 @@ import { useTodoFormFields } from './useTodoFormFields'
 type UseAddTodoProps = {
   date: string
   id: CalendarEvent['id']
+  isEditing?: boolean
 }
 
 export type UseAddTodoFormResult = {
@@ -47,7 +48,11 @@ export type UseAddTodoFormResult = {
 const isCustomBasis = (value: RepeatType): value is CustomRepeatBasis =>
   value !== 'none' && value !== 'custom'
 
-export const useAddTodoForm = ({ date, id }: UseAddTodoProps): UseAddTodoFormResult => {
+export const useAddTodoForm = ({
+  date,
+  id,
+  isEditing = false,
+}: UseAddTodoProps): UseAddTodoFormResult => {
   const [isAllday, setIsAllday] = useState(false)
   const { usePostTodo, usePatchTodo } = useTodoMutations()
   const { mutateAsync: postTodoMutate } = usePostTodo()
@@ -178,7 +183,7 @@ export const useAddTodoForm = ({ date, id }: UseAddTodoProps): UseAddTodoFormRes
       recurrenceGroup,
     }
 
-    if (id && id !== 0) {
+    if (isEditing && id && id !== 0) {
       return patchTodoMutate({
         todoId: id,
         occurrenceDate: formatIsoDate(date),

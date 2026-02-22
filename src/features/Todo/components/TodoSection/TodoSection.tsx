@@ -178,6 +178,7 @@ const TodoSection = () => {
         <S.CardList>
           {data?.result.todos.map((todo) => (
             <TodoCard
+              key={`${todo.todoId}-${todo.occurrenceDate}`}
               id={todo.todoId}
               title={todo.title}
               date={getTodoDateLabel(todo.occurrenceDate, todo.dueTime)}

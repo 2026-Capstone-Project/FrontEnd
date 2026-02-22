@@ -1,4 +1,4 @@
-import { type MouseEventHandler, useEffect, useState } from 'react'
+import { type MouseEventHandler, useCallback, useEffect, useState } from 'react'
 
 import Repeat from '@/shared/assets/icons/rotate.svg?react'
 import Trash from '@/shared/assets/icons/trash-2.svg?react'
@@ -40,28 +40,43 @@ const TodoCard = ({
 }) => {
   const [selected, setSelected] = useState(isCompleted ?? false)
   const [openModal, setOpenModal] = useState(false)
-  const { useDeleteTodo } = useTodoMutations()
+  const isRecurringTodo = Boolean(isRecurring)
+  const { useDeleteTodo, usePatchCompleteTodo } = useTodoMutations()
   const { mutate: deleteTodoMutate } = useDeleteTodo()
+  const { mutate: patchCompleteTodoMutate } = usePatchCompleteTodo()
   useEffect(() => {
     setSelected(isCompleted ?? false)
   }, [isCompleted])
-  const handleDelete = () => {
-    if (isRecurring) {
+  const handleDelete = useCallback(() => {
+    if (isRecurringTodo) {
       setOpenModal(true)
       return
     }
-    deleteTodoMutate({ todoId: id })
+    deleteTodoMutate({
+      todoId: id,
+      occurrenceDate,
+    })
+  }, [deleteTodoMutate, id, isRecurringTodo, occurrenceDate])
+
+  const handleToggleComplete = () => {
+    const nextSelected = !selected
+    setSelected(nextSelected)
+    patchCompleteTodoMutate({
+      todoId: id,
+      occurrenceDate,
+      isCompleted: nextSelected,
+    })
   }
+
   return (
     <S.Wrapper
-      key={id}
       $isHighlight={isHighlight}
       $isOverdue={isOverdue}
       $isEditing={isEditing}
       onDoubleClick={onDoubleClick}
     >
       <S.TodoLeftWrapper>
-        <TodoCheckbox checked={selected} onChange={() => setSelected(!selected)} />
+        <TodoCheckbox checked={selected} onChange={handleToggleComplete} />
         <S.TodoInfoWrapper>
           <S.Title>{title}</S.Title>
           <S.Info $isHighlight={isHighlight}>
@@ -83,9 +98,15 @@ const TodoCard = ({
       </S.TodoLeftWrapper>
       <S.ButtonWrapper>
         <PriorityBadge priority={priority} />
-        <Trash color="#c5c5c5" onClick={handleDelete} />
+        <Trash
+          color="#c5c5c5"
+          onClick={(event) => {
+            event.stopPropagation()
+            handleDelete()
+          }}
+        />
       </S.ButtonWrapper>
-      {openModal && (
+      {openModal && isRecurringTodo && (
         <DeleteConfirmModal
           onClose={() => setOpenModal(false)}
           title={title}

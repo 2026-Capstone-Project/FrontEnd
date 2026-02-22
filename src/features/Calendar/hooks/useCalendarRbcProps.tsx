@@ -36,9 +36,11 @@ type UseCalendarRbcPropsArgs = {
   onView: (view: View) => void
   onNavigate: (date: Date) => void
   onSelectDate: (date: Date) => void
+  onSelectWeekDate: (date: Date) => void
   onSelectEvent: (event: CalendarEvent) => void
   onSelectEventOnly: (event: CalendarEvent) => void
   onDoubleClickEvent: (event: CalendarEvent) => void
+  onDoubleClickDate: (date: Date) => void
   onToggleTodo: (eventId: CalendarEvent['id']) => void
   onSelectSlot: (slotInfo: SlotInfo) => void
   onEventDrop: (args: EventInteractionArgs<CalendarEvent>) => void
@@ -57,9 +59,11 @@ export const useCalendarRbcProps = ({
   onView,
   onNavigate,
   onSelectDate,
+  onSelectWeekDate,
   onSelectEvent,
   onSelectEventOnly,
   onDoubleClickEvent,
+  onDoubleClickDate,
   onToggleTodo,
   onSelectSlot,
   onEventDrop,
@@ -106,9 +110,12 @@ export const useCalendarRbcProps = ({
       (props: ComponentProps<typeof CustomWeekView>) => (
         <CustomWeekView
           {...props}
+          selectedDate={effectiveSelectedDate}
           onToggleTodo={onToggleTodo}
+          onSelectDate={onSelectWeekDate}
           onSelectEvent={onSelectEventOnly}
           onDoubleClickEvent={onSelectEvent}
+          onDoubleClickDate={onDoubleClickDate}
           selectedEventKey={selectedEventKey}
         />
       ),
@@ -117,7 +124,15 @@ export const useCalendarRbcProps = ({
         title: CustomWeekView.title,
       },
     ) as ComponentType & ViewStatic
-  }, [onSelectEvent, onSelectEventOnly, onToggleTodo, selectedEventKey])
+  }, [
+    effectiveSelectedDate,
+    onDoubleClickDate,
+    onSelectEvent,
+    onSelectEventOnly,
+    onSelectWeekDate,
+    onToggleTodo,
+    selectedEventKey,
+  ])
 
   // react-big-calendar components 병합 (툴바/헤더/이벤트 등)
   const mergedComponents = useMemo(

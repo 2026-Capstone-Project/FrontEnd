@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import type { CalendarEvent } from '@/shared/types/calendar/types'
@@ -48,6 +48,7 @@ const AddItemModal = ({
   const [footerChildren, setFooterChildren] = useState<ReactNode | null>(null)
   const [deleteHandler, setDeleteHandler] = useState<() => void>(() => () => undefined)
   const [closeGuard, setCloseGuard] = useState<null | (() => boolean)>(null)
+  const modalWrapperRef = useRef<HTMLDivElement | null>(null)
   const noopDeleteHandler = useCallback(() => undefined, [])
 
   const registerDeleteHandler = useCallback(
@@ -84,8 +85,15 @@ const AddItemModal = ({
 
   const handleSubmit = useCallback(() => {
     const submitFormId = activeType === 'todo' ? 'add-todo-form' : 'add-schedule-form'
-    const target = document.getElementById(submitFormId) as HTMLFormElement | null
+    const scopedTarget = modalWrapperRef.current?.querySelector(
+      `#${submitFormId}`,
+    ) as HTMLFormElement | null
+    const target = scopedTarget ?? (document.getElementById(submitFormId) as HTMLFormElement | null)
     if (!target) return
+    if (typeof target.requestSubmit === 'function') {
+      target.requestSubmit()
+      return
+    }
     target.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
   }, [activeType])
 
@@ -126,10 +134,12 @@ const AddItemModal = ({
       type={activeType}
       onClose={handleClose}
       onSubmit={handleSubmit}
+      submitFormId={activeType === 'todo' ? 'add-todo-form' : 'add-schedule-form'}
       handleDelete={deleteHandler}
       footerChildren={footerChildren}
       headerExtras={tabsVisible ? tabs : undefined}
       headerTitleContainerRef={handleHeaderTitleRef}
+      modalWrapperRef={modalWrapperRef}
     >
       {activeType === 'todo' ? (
         <AddTodoForm

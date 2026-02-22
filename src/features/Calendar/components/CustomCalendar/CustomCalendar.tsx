@@ -3,7 +3,7 @@ import 'moment/locale/ko'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 
 import moment from 'moment'
-import { cloneElement, type MouseEvent, useCallback, useMemo, useState } from 'react'
+import { cloneElement, type MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { Calendar, type DateCellWrapperProps, momentLocalizer } from 'react-big-calendar'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 
@@ -40,7 +40,11 @@ const localizer = momentLocalizer(moment)
 const DragAndDropCalendar = withDragAndDrop<CalendarEvent, object>(Calendar)
 export type SelectDateSource = 'date-cell' | 'slot' | 'header' | 'date-header'
 
-const CustomCalendar = () => {
+type CustomCalendarProps = {
+  onSelectedDateChange?: (selectedDate: Date) => void
+}
+
+const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
   // 사용자 뷰 상태(월/주/일) 저장
   const { view, setView } = useStoredCalendarView()
   const [date, setDate] = useState<Date>(new Date())
@@ -268,12 +272,23 @@ const CustomCalendar = () => {
     setSelectedEventId,
     setSelectedEventKey,
   })
-
-  // 이벤트 선택 시 상세 모달 열기
-  /** 선택된 날짜에 배경 강조 스타일을 적용하도록 props를 반환합니다. */
-  const effectiveSelectedDate = useMemo(
-    () => (isInlineMode ? (selectedDate ?? date) : selectedDate),
-    [date, isInlineMode, selectedDate],
+  const handleWeekViewCreateEvent = useCallback(
+    (slotDate: Date) => {
+      const start = moment(slotDate).startOf('day').set({ hour: 9, minute: 0, second: 0 }).toDate()
+      const createdId = enqueueEvent(start, false)
+      if (createdId != null) {
+        handleAddEvent(start, createdId)
+      }
+    },
+    [enqueueEvent, handleAddEvent],
+  )
+  const handleWeekViewSelectDate = useCallback(
+    (nextDate: Date) => {
+      setSelectedDate(nextDate)
+      setSelectedEventId(null)
+      setSelectedEventKey(null)
+    },
+    [setSelectedDate, setSelectedEventId, setSelectedEventKey],
   )
 
   // 일간뷰 전용 핸들러 주입
@@ -326,13 +341,15 @@ const CustomCalendar = () => {
     date,
     events,
     selectedEventKey,
-    effectiveSelectedDate,
+    effectiveSelectedDate: selectedDate,
     onView,
     onNavigate,
     onSelectDate,
     onSelectEvent: selectEvent,
     onSelectEventOnly: selectEventOnly,
     onDoubleClickEvent: selectEvent,
+    onDoubleClickDate: handleWeekViewCreateEvent,
+    onSelectWeekDate: handleWeekViewSelectDate,
     onToggleTodo: handleToggleTodo,
     onSelectSlot: handleSelectSlotWrapper,
     onEventDrop: handleEventDrop,
@@ -360,36 +377,38 @@ const CustomCalendar = () => {
     }),
     [updateEventColor, updateEventTitle, updateEventType, updateEventTiming],
   )
-  const eventCardDate = effectiveSelectedDate ?? date
+  useEffect(() => {
+    onSelectedDateChange?.(selectedDate ?? date)
+  }, [date, onSelectedDateChange, selectedDate])
 
   return (
     <div css={{ position: 'relative', height: 'fit-content', width: '100%' }}>
       {/* 모바일 전용 헤더 버튼 */}
-      <S.MobileButtons>
-        <CustomViewButton view={view} onView={onView} className="mobile-custom-view-button" />
-        <button className="add-button" onClick={() => handleAddEvent()} type="button">
-          <Plus height={20} width={20} color={theme.colors.primary} />
-        </button>
-      </S.MobileButtons>
-      {/* 캘린더 본문 */}
-      <S.CalendarWrapper view={view}>
-        <DragAndDropCalendar {...calendarProps} />
-      </S.CalendarWrapper>
+      <div>
+        <div>
+          <S.MobileButtons>
+            <CustomViewButton view={view} onView={onView} className="mobile-custom-view-button" />
+            <button className="add-button" onClick={() => handleAddEvent()} type="button">
+              <Plus height={20} width={20} color={theme.colors.primary} />
+            </button>
+          </S.MobileButtons>
+          {/* 캘린더 본문 */}
+          <S.CalendarWrapper view={view}>
+            <DragAndDropCalendar {...calendarProps} />
+          </S.CalendarWrapper>
+        </div>
+      </div>
       {/* 모달/카드 영역 */}
       <CalendarModals
         modalDate={modalDate}
         modalEventId={modal.eventId}
         modalEvent={modalEvent}
         isModalEditing={isModalEditing}
-        isModalOpen={modal.isOpen}
         isInlineMode={isInlineMode}
         modalMode={modalMode}
         modalPortalRoot={modalPortalRoot}
         cardPortalRoot={cardPortalRoot}
-        eventCardDate={eventCardDate}
-        showEventCard={isInlineMode ? true : selectedDate != null}
         onCloseModal={handleCloseModalWithCleanup}
-        onCloseEventCard={() => setSelectedDate(null)}
         eventActions={eventActions}
       />
       {/* 반복 일정 삭제 확인 */}
