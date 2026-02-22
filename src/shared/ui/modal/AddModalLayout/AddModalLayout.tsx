@@ -56,11 +56,13 @@ const AddModalLayout = ({
             <S.Button
               type={submitFormId ? 'submit' : 'button'}
               form={submitFormId}
-              onClick={() => {
-                if (!submitFormId) {
-                  onSubmit()
-                }
-              }}
+              onClick={
+                submitFormId
+                  ? undefined
+                  : () => {
+                      onSubmit()
+                    }
+              }
             >
               <Check color="#ffffff" />
             </S.Button>

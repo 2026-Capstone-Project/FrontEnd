@@ -90,6 +90,7 @@ const AddItemModal = ({
     ) as HTMLFormElement | null
     const target = scopedTarget ?? (document.getElementById(submitFormId) as HTMLFormElement | null)
     if (!target) return
+    // requestSubmit을 지원하지 않는 환경에서는 아래 dispatchEvent 경로로 안전하게 폴백합니다.
     if (typeof target.requestSubmit === 'function') {
       target.requestSubmit()
       return

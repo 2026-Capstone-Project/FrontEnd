@@ -47,8 +47,8 @@ export const PageWrapper = styled.div`
   flex-direction: column;
   align-items: flex-start;
   width: 100%;
-  min-height: calc(100vh - 110px);
-  height: calc(100vh - 110px);
+  min-height: 0;
+  height: 100%;
   flex: 1;
   gap: 32px;
 `

@@ -68,6 +68,7 @@ const SelectColor = ({ value, onChange }: SelectColorProps) => {
       <S.Circle color={palette.point} />
       <Arrow css={{ rotate: '-90deg' }} color="#A5A5A5" />
       {dropdownOpen &&
+        // SSR 환경에서 document 접근 에러를 피하기 위한 방어 로직입니다.
         typeof document !== 'undefined' &&
         createPortal(
           <S.ColorOptions
