@@ -57,11 +57,6 @@ const AddModalLayout = ({
               type={submitFormId ? 'submit' : 'button'}
               form={submitFormId}
               onClick={() => {
-                console.log('[AddModalLayout] check clicked', {
-                  type,
-                  mode,
-                  submitFormId: submitFormId ?? null,
-                })
                 if (!submitFormId) {
                   onSubmit()
                 }

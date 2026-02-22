@@ -75,38 +75,33 @@ export const useScheduleSubmitFlow = ({
   }, [])
 
   // 폼 제출 처리(일반/반복 분기)
-  const handleFormSubmit = handleSubmit(
-    async (values) => {
-      if (isExistingRecurring && requestConfirmation()) {
-        setPendingScheduleValues(values)
-        return
+  const handleFormSubmit = handleSubmit(async (values) => {
+    if (isExistingRecurring && requestConfirmation()) {
+      setPendingScheduleValues(values)
+      return
+    }
+    if (isExistingRecurring) {
+      openApplyConfirm(values)
+      return
+    }
+    if (eventId != null && eventId !== 0) {
+      const nextTitle = values.eventTitle ?? ''
+      if (nextTitle) {
+        handleTitleConfirm(nextTitle)
       }
-      if (isExistingRecurring) {
-        openApplyConfirm(values)
-        return
+    }
+    syncEventTiming(values)
+    try {
+      if (isEditing) {
+        await patchSchedule(values)
+      } else {
+        await createSchedule(values)
       }
-      if (eventId != null && eventId !== 0) {
-        const nextTitle = values.eventTitle ?? ''
-        if (nextTitle) {
-          handleTitleConfirm(nextTitle)
-        }
-      }
-      syncEventTiming(values)
-      try {
-        if (isEditing) {
-          await patchSchedule(values)
-        } else {
-          await createSchedule(values)
-        }
-        onClose()
-      } catch (error) {
-        console.error('[AddScheduleForm] submit failed', error)
-      }
-    },
-    (errors) => {
-      console.log('[AddScheduleForm] submit errors', errors)
-    },
-  )
+      onClose()
+    } catch {
+      return
+    }
+  })
 
   // 반복 일정 수정 범위를 확인 후 제출 처리
   const handleConfirmedSubmit = useCallback(
@@ -132,8 +127,8 @@ export const useScheduleSubmitFlow = ({
         await patchSchedule(pendingScheduleValues, scope, occurrenceDate)
         onClose()
         clearApplyConfirm()
-      } catch (error) {
-        console.error('[AddScheduleForm] submit failed', error)
+      } catch {
+        return
       }
     },
     [

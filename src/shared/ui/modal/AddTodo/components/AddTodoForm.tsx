@@ -170,6 +170,13 @@ const AddTodoForm = ({
 
   const isInlineMode = mode === 'inline'
   const shouldShowModalOverlay = !isInlineMode && activeCalendarField
+  const isPersistedTodo = isEditing && eventId != null && eventId !== 0
+  const deleteOccurrenceDate = useMemo(() => {
+    if (detailData?.result?.occurrenceDate) {
+      return moment(detailData.result.occurrenceDate).format('YYYY-MM-DD')
+    }
+    return moment(todoDate ?? date).format('YYYY-MM-DD')
+  }, [date, detailData?.result?.occurrenceDate, todoDate])
   const renderTitleInput = () => (
     <TitleSuggestionInput
       fieldName="todoTitle"
@@ -230,30 +237,25 @@ const AddTodoForm = ({
     [buildDateTime, date, eventId, onEventTimingChange],
   )
 
-  const handleFormSubmit = handleSubmit(
-    async (values) => {
-      if (requestConfirmation()) {
-        setPendingTodoValues(values)
-        return
+  const handleFormSubmit = handleSubmit(async (values) => {
+    if (requestConfirmation()) {
+      setPendingTodoValues(values)
+      return
+    }
+    if (eventId != null && eventId !== 0) {
+      const nextTitle = values.todoTitle ?? ''
+      if (nextTitle) {
+        onEventTitleConfirm?.(eventId, nextTitle)
       }
-      if (eventId != null && eventId !== 0) {
-        const nextTitle = values.todoTitle ?? ''
-        if (nextTitle) {
-          onEventTitleConfirm?.(eventId, nextTitle)
-        }
-      }
-      syncEventTiming(values)
-      try {
-        await onSubmit(values)
-        onClose()
-      } catch (error) {
-        console.error('[AddTodoForm] submit failed', error)
-      }
-    },
-    (errors) => {
-      console.log('[AddTodoForm] submit errors', errors)
-    },
-  )
+    }
+    syncEventTiming(values)
+    try {
+      await onSubmit(values)
+      onClose()
+    } catch {
+      return
+    }
+  })
 
   const handleConfirmedSubmit = useCallback(
     async (option: EditConfirmOption) => {
@@ -271,8 +273,8 @@ const AddTodoForm = ({
         await onSubmit(pendingTodoValues)
         onClose()
         setPendingTodoValues(null)
-      } catch (error) {
-        console.error('[AddTodoForm] submit failed', error)
+      } catch {
+        return
       }
     },
     [
@@ -292,13 +294,31 @@ const AddTodoForm = ({
   }, [revertChange])
 
   const handleDelete = useCallback(() => {
+    if (!isPersistedTodo) {
+      onClose()
+      return
+    }
     if (repeatConfig.repeatType !== 'none') {
       setDeleteWarningVisible(true)
-      console.log('반복 할 일 삭제 로직 처리')
-    } else {
-      console.log('할 일 삭제 로직 처리')
+      return
     }
-  }, [repeatConfig])
+    deleteTodoMutate(
+      {
+        todoId: eventId,
+        occurrenceDate: deleteOccurrenceDate,
+      },
+      {
+        onSuccess: () => onClose(),
+      },
+    )
+  }, [
+    deleteOccurrenceDate,
+    deleteTodoMutate,
+    eventId,
+    isPersistedTodo,
+    onClose,
+    repeatConfig.repeatType,
+  ])
 
   useEffect(() => {
     registerDeleteHandler?.(handleDelete)
@@ -439,7 +459,7 @@ const AddTodoForm = ({
           target={{
             type: 'todo',
             id: eventId,
-            occurrenceDate: moment(todoDate).format('YYYY-MM-DD'),
+            occurrenceDate: deleteOccurrenceDate,
           }}
           mutate={deleteTodoMutate}
         />
