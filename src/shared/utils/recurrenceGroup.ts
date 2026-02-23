@@ -14,7 +14,7 @@ type RecurrenceLike = RecurrenceGroup & {
   interval?: number
   intervalValue?: number
   daysOfWeek?: Week[]
-  dayOfWeekInMonth?: Week[] | Week | MonthlyWeekDayRule | null
+  dayOfWeekInMonth?: RecurrenceGroup['dayOfWeekInMonth']
   isCustom?: boolean
 }
 
@@ -51,24 +51,18 @@ const toPatternWeek = (value?: number | null): MonthlyPatternWeek | undefined =>
   return String(normalized) as MonthlyPatternWeek
 }
 
-const toWeekArray = (value?: Week[] | Week | MonthlyWeekDayRule | null): Week[] => {
+const toWeekArray = (value?: RecurrenceGroup['dayOfWeekInMonth']): Week[] => {
   if (!value) return []
-  if (value === 'SINGLE' || value === 'WEEKDAY' || value === 'WEEKEND' || value === 'ALL_DAYS')
-    return []
-  return Array.isArray(value) ? value : [value]
+  return [value]
 }
 
 const toPatternDayFromRule = (
   rule?: MonthlyWeekDayRule | null,
-  value?: Week[] | Week | MonthlyWeekDayRule | null,
+  value?: RecurrenceGroup['dayOfWeekInMonth'],
 ): MonthlyPatternDay | undefined => {
   if (rule === 'WEEKDAY') return 'weekday'
   if (rule === 'WEEKEND') return 'weekend'
   if (rule === 'ALL_DAYS') return 'allweek'
-  if (value === 'SINGLE') return undefined
-  if (value === 'WEEKDAY') return 'weekday'
-  if (value === 'WEEKEND') return 'weekend'
-  if (value === 'ALL_DAYS') return 'allweek'
   const weekdays = toWeekArray(value)
   if (weekdays.length === 0) return undefined
   return toWeekday(weekdays[0])
@@ -209,13 +203,14 @@ export const mapRepeatConfigToRecurrenceGroup = (
         config.customMonthlyPatternWeek === 'last' ? -1 : Number(config.customMonthlyPatternWeek)
       const patternDay = config.customMonthlyPatternDay
       if (patternDay === 'weekday') {
-        base.dayOfWeekInMonth = 'WEEKDAY'
+        base.weekdayRule = 'WEEKDAY'
       } else if (patternDay === 'weekend') {
-        base.dayOfWeekInMonth = 'WEEKEND'
+        base.weekdayRule = 'WEEKEND'
       } else if (patternDay === 'allweek') {
-        base.dayOfWeekInMonth = 'ALL_DAYS'
+        base.weekdayRule = 'ALL_DAYS'
       } else {
         const weekday = toWeekFromPatternDay(patternDay) ?? 'MONDAY'
+        base.weekdayRule = 'SINGLE'
         base.dayOfWeekInMonth = weekday
       }
     } else {

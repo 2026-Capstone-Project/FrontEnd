@@ -13,9 +13,9 @@ export interface RecurrenceGroup {
   weekOfMonth?: number
   daysOfMonth?: Array<number>
   weekdayRule?: MonthlyWeekDayRule
-  dayOfWeekInMonth?: Array<Week> | Week | MonthlyWeekDayRule | null
+  dayOfWeekInMonth?: Week | null
   monthOfYear?: number
 }
 
-export type RecurrenceEventScope = 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS' | 'ALL_EVENTS'
-export type RecurrenceTodoScope = 'THIS_TODO' | 'THIS_AND_FOLLOWING' | 'ALL_TODOS'
+export type RecurrenceEventScope = 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS'
+export type RecurrenceTodoScope = 'THIS_TODO' | 'THIS_AND_FOLLOWING'
