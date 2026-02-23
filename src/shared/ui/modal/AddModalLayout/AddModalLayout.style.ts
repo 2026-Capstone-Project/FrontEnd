@@ -61,6 +61,7 @@ export const ModalHeader = styled.div`
   justify-content: space-between;
   height: fit-content;
   padding: 24px 24px 0px 24px;
+  margin-bottom: 10px;
 `
 export const TitleWrapper = styled.div`
   display: flex;
@@ -94,7 +95,7 @@ export const ModalTitle = styled.h2`
 `
 export const ModalContent = styled.div`
   display: flex;
-  margin: 10px 0;
+  padding: 10px 0;
   flex-direction: column;
   overflow-y: scroll;
   scrollbar-gutter: stable both-edges;
