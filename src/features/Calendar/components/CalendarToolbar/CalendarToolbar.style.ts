@@ -22,7 +22,6 @@ export const ToolbarWrapper = styled.div`
   .date-label {
     font-size: 24px;
     font-weight: 700;
-    margin-top: 20px;
     color: #202124;
     ${media.down(theme.breakPoints.desktop)} {
       font-size: 20px;
