@@ -16,8 +16,7 @@ const ContentWrapper = styled.div`
   flex-direction: row;
   justify-self: center;
   align-self: center;
-  height: 100%;
-  max-height: fit-content;
+  height: calc(100vh - 64px);
   overflow-y: auto;
   display: flex;
   overflow-x: hidden;
