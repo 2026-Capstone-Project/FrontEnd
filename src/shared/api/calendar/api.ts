@@ -65,8 +65,8 @@ export const patchEvent = async (
 export const deleteEvent = async (
   eventId: number,
   params: {
-    occurrenceDate?: string
-    scope?: RecurrenceEventScope
+    occurrenceDate: string
+    scope?: Extract<RecurrenceEventScope, 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS'>
   },
 ) => {
   const { data } = await axiosInstance.delete(`/events/${eventId}`, { params })

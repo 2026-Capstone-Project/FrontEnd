@@ -46,13 +46,16 @@ const CalendarModals = ({
   const isTodoModal = modalEvent?.type === 'todo'
   const safeDetailEventId = isModalEditing && !isTodoModal ? modalEventId : null
   const occurrenceDate = useMemo(() => {
+    if (modalEvent?.occurrenceDate) {
+      return moment(modalEvent.occurrenceDate).format('YYYY-MM-DDTHH:mm:ss')
+    }
     const base =
       modalEvent?.start instanceof Date
         ? modalEvent.start
         : modalEvent?.start
           ? new Date(modalEvent.start)
           : modalDate
-    return base ? moment(base).format('YYYY-MM-DDTHH:mm') : ''
+    return base ? moment(base).format('YYYY-MM-DDTHH:mm:ss') : ''
   }, [modalDate, modalEvent])
   const { data } = useDetailEventQuery(safeDetailEventId, occurrenceDate)
   const detailEvent = useMemo<CalendarEvent | null>(() => {

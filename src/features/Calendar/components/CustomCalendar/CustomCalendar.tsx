@@ -151,7 +151,7 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
     (eventId: CalendarEvent['id'], occurrenceDate: string, isRecurring: boolean) => {
       const params = {
         ...(isRecurring ? { scope: 'THIS_EVENT' as const } : {}),
-        occurrenceDate: moment(occurrenceDate).format('YYYY-MM-DD'),
+        occurrenceDate: moment(occurrenceDate).format('YYYY-MM-DDTHH:mm:ss'),
       }
       deleteEventMutate(
         {
@@ -282,7 +282,7 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
     selectedEventKey,
     selectedDate,
     onClearSelection: clearSelection,
-    onOpenRecurringConfirm: ({ eventId, title, date: occurrenceDate }) =>
+    onOpenRecurringConfirm: ({ eventId, title, occurrenceDate }) =>
       setDeleteConfirm({
         isOpen: true,
         eventId,

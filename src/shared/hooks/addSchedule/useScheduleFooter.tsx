@@ -79,7 +79,7 @@ export const useScheduleFooter = ({
       {
         eventId: eventIdRef.current,
         params: {
-          occurrenceDate: moment(occurrenceDateRef.current).format('YYYY-MM-DD'),
+          occurrenceDate: moment(occurrenceDateRef.current).format('YYYY-MM-DDTHH:mm:ss'),
         },
       },
       {

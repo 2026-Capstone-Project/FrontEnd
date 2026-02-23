@@ -206,7 +206,7 @@ const AddScheduleFormContent = ({
     registerDeleteHandler,
     eventColor,
     closeModal: () => requestClose(true),
-    occurrenceDate: date,
+    occurrenceDate: initialEvent?.occurrenceDate ?? date,
   })
 
   const contextValue = useAddScheduleFormContextValue({
@@ -243,7 +243,7 @@ const AddScheduleFormContent = ({
       <AddScheduleFormConfirmModals
         deleteWarningVisible={deleteWarningVisible}
         eventTitle={eventTitle}
-        eventStartDate={eventStartDate}
+        occurrenceDate={initialEvent?.occurrenceDate ?? date}
         eventId={eventId}
         isEditConfirmOpen={isEditConfirmOpen}
         isApplyConfirmOpen={isApplyConfirmOpen}

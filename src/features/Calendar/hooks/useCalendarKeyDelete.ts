@@ -2,7 +2,10 @@ import moment from 'moment'
 import { useEffect } from 'react'
 
 import { normalizeDate } from '@/features/Calendar/utils/helpers/calendarPageHelpers'
-import { getEventOccurrenceKey } from '@/features/Calendar/utils/helpers/dayViewHelpers'
+import {
+  getEventOccurrenceKey,
+  resolveOccurrenceDateTime,
+} from '@/features/Calendar/utils/helpers/dayViewHelpers'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 
 type UseCalendarKeyDeleteArgs = {
@@ -16,7 +19,7 @@ type UseCalendarKeyDeleteArgs = {
   onOpenRecurringConfirm: (payload: {
     eventId: CalendarEvent['id']
     title: string
-    date: string
+    occurrenceDate: string
   }) => void
   onRemoveEvent: (
     eventId: CalendarEvent['id'],
@@ -63,6 +66,10 @@ export const useCalendarKeyDelete = ({
 
       const baseDate =
         selectedDate ?? (selectedEvent.start ? normalizeDate(selectedEvent.start) : new Date(date))
+      const eventOccurrenceDate = resolveOccurrenceDateTime(
+        selectedEvent.occurrenceDate,
+        selectedEvent.start ?? baseDate,
+      )
       const isRecurringEvent =
         selectedEvent.type === 'todo'
           ? Boolean(selectedEvent.isRecurring)
@@ -73,7 +80,7 @@ export const useCalendarKeyDelete = ({
       if (selectedEvent.type === 'todo') {
         onDeleteTodo({
           todoId: selectedEvent.id,
-          occurrenceDate: moment(baseDate).format('YYYY-MM-DD'),
+          occurrenceDate: selectedEvent.occurrenceDate ?? moment(baseDate).format('YYYY-MM-DD'),
           scope: isRecurringEvent ? 'THIS_TODO' : undefined,
         })
         onClearSelection()
@@ -84,12 +91,12 @@ export const useCalendarKeyDelete = ({
         onOpenRecurringConfirm({
           eventId: selectedEventId,
           title: selectedEvent.title ?? '',
-          date: moment(baseDate).format('YYYY-MM-DD'),
+          occurrenceDate: eventOccurrenceDate,
         })
         return
       }
 
-      onRemoveEvent(selectedEventId, baseDate.toISOString(), false)
+      onRemoveEvent(selectedEventId, eventOccurrenceDate, false)
       onClearSelection()
     }
 
