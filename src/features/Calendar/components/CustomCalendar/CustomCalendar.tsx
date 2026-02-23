@@ -169,6 +169,17 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
       removeEvent: handleRemoveEvent,
       isRecurring,
     })
+  const [openedModalMode, setOpenedModalMode] = useState<'modal' | 'inline' | null>(null)
+
+  useEffect(() => {
+    if (!modal.isOpen) {
+      setOpenedModalMode(null)
+      return
+    }
+    if (openedModalMode == null) {
+      setOpenedModalMode(isInlineMode ? 'inline' : 'modal')
+    }
+  }, [isInlineMode, modal.isOpen, openedModalMode])
 
   // 선택 상태 관리
   const {
@@ -192,6 +203,11 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
     }
     handleCloseModal()
   }, [handleCloseModal, isModalEditing, modal.eventId, removeEvent])
+
+  const clearPendingDraftEvent = useCallback(() => {
+    if (!modal.isOpen || isModalEditing || modal.eventId == null) return
+    removeEvent(modal.eventId)
+  }, [isModalEditing, modal.eventId, modal.isOpen, removeEvent])
 
   // 반복 삭제 확인 모달 닫기
   const handleCloseDeleteConfirm = useCallback(() => {
@@ -275,19 +291,21 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
     view,
     enqueueEvent,
     onAddEvent: handleAddEvent,
+    onBeforeCreate: clearPendingDraftEvent,
     setSelectedDate,
     setSelectedEventId,
     setSelectedEventKey,
   })
   const handleWeekViewCreateEvent = useCallback(
     (slotDate: Date) => {
+      clearPendingDraftEvent()
       const start = moment(slotDate).startOf('day').set({ hour: 9, minute: 0, second: 0 }).toDate()
       const createdId = enqueueEvent(start, false)
       if (createdId != null) {
         handleAddEvent(start, createdId)
       }
     },
-    [enqueueEvent, handleAddEvent],
+    [clearPendingDraftEvent, enqueueEvent, handleAddEvent],
   )
   const handleWeekViewSelectDate = useCallback(
     (nextDate: Date) => {
@@ -373,7 +391,8 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
     }
     return modal.eventId == null ? null : (events.find((item) => item.id === modal.eventId) ?? null)
   }, [events, modal.eventId, selectedEventKey])
-  const modalMode: 'modal' | 'inline' = isInlineMode ? 'inline' : 'modal'
+  const modalMode: 'modal' | 'inline' = openedModalMode ?? (isInlineMode ? 'inline' : 'modal')
+  const isModalInlineMode = modalMode === 'inline'
   // 이벤트 수정 핸들러 묶음
   const eventActions = useMemo(
     () => ({
@@ -407,7 +426,7 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
         modalEventId={modal.eventId}
         modalEvent={modalEvent}
         isModalEditing={isModalEditing}
-        isInlineMode={isInlineMode}
+        isInlineMode={isModalInlineMode}
         modalMode={modalMode}
         modalPortalRoot={modalPortalRoot}
         cardPortalRoot={cardPortalRoot}

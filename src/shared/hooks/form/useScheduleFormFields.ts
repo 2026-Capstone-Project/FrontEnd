@@ -51,8 +51,7 @@ export const useScheduleFormFields = ({
       : new Date(defaultStart)
   const defaultStartTime = formatTimeFromDate(defaultStart)
   const defaultEndTime = formatTimeFromDate(defaultEnd)
-  const initialTitle =
-    initialEvent?.title === '새 일정' ? '' : (initialEvent?.title ?? '새로운 일정')
+  const initialTitle = initialEvent?.title === '새 일정' ? '' : (initialEvent?.title ?? '')
   const initialDescription = initialEvent?.content ?? ''
   const initialColor = initialEvent?.color ?? 'BLUE'
   const initialIsAllDay = initialEvent?.isAllDay ?? isAllday
@@ -106,7 +105,7 @@ export const useScheduleFormFields = ({
     setValue('eventEndDate', end)
     setValue('eventStartTime', formatTimeFromDate(start))
     setValue('eventEndTime', formatTimeFromDate(end))
-    const nextTitle = initialEvent?.title ?? '새로운 일정'
+    const nextTitle = initialEvent?.title ?? ''
     setValue('eventTitle', nextTitle === '새 일정' ? '' : nextTitle)
     setValue('eventDescription', initialEvent?.content ?? '')
     setValue('eventColor', initialEvent?.color ?? 'BLUE')
