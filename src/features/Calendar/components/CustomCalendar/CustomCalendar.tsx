@@ -23,11 +23,13 @@ import {
   useDayViewHandlers,
   useStoredCalendarView,
 } from '@/features/Calendar/hooks'
+import { buildRecurringGroupForFutureDrop } from '@/features/Calendar/hooks/useCalendarDragDrop'
 import { useCalendarEvents } from '@/features/Calendar/hooks/useCalendarEvents'
 import {
   getEventOccurrenceKey,
   resolveOccurrenceDateTime,
 } from '@/features/Calendar/utils/helpers/dayViewHelpers'
+import { getDetailTodo } from '@/shared/api/todo/api'
 import Plus from '@/shared/assets/icons/plus.svg?react'
 import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
 import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
@@ -116,6 +118,21 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
     [events, patchCompleteTodoMutate, toggleEventDone],
   )
 
+  const resolveFutureTodoRecurrenceGroup = useCallback(
+    async (todoId: number, occurrenceDate: string, nextStart: Date) => {
+      try {
+        // "이후 일정만 변경"일 때는 현재 occurrence 기준의 상세 recurrence를 받아
+        // 드롭한 날짜(nextStart)에 맞는 recurrenceGroup으로 재계산해 patch에 포함합니다.
+        const { result } = await getDetailTodo(todoId, occurrenceDate)
+        return buildRecurringGroupForFutureDrop(result?.recurrenceGroup ?? null, nextStart)
+      } catch (error) {
+        console.error('[CustomCalendar] failed to resolve todo recurrenceGroup', error)
+        return undefined
+      }
+    },
+    [],
+  )
+
   // Todo 일정 이동 시 시간 패치
   const patchTodoTiming = useCallback(
     (
@@ -127,19 +144,34 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
       const occurrenceDate =
         options?.occurrenceDate ??
         moment(todoEvent.occurrenceDate ?? todoEvent.start).format('YYYY-MM-DD')
+      const patchScope = options?.scope ?? (todoEvent.isRecurring ? 'THIS_TODO' : undefined)
       const dueTime = todoEvent.isAllDay ? undefined : moment(start).format('HH:mm')
-      patchTodoMutate({
-        todoId: todoEvent.id,
-        occurrenceDate,
-        ...(options?.scope ? { scope: options.scope } : {}),
-        requestBody: {
-          startDate,
-          dueTime,
-          isAllDay: todoEvent.isAllDay,
-        },
-      })
+      const submitPatch = (recurrenceGroup?: CalendarEvent['recurrenceGroup']) => {
+        patchTodoMutate({
+          todoId: todoEvent.id,
+          occurrenceDate,
+          ...(patchScope ? { scope: patchScope } : {}),
+          requestBody: {
+            startDate,
+            dueTime,
+            isAllDay: todoEvent.isAllDay,
+            ...(recurrenceGroup ? { recurrenceGroup } : {}),
+          },
+        })
+      }
+
+      if (patchScope === 'THIS_AND_FOLLOWING') {
+        // 반복 할 일을 "이후 항목" 범위로 이동한 경우 recurrenceGroup 보정이 필요합니다.
+        void resolveFutureTodoRecurrenceGroup(todoEvent.id, occurrenceDate, start).then(
+          (recurrenceGroup) => {
+            submitPatch(recurrenceGroup)
+          },
+        )
+        return
+      }
+      submitPatch()
     },
-    [patchTodoMutate],
+    [patchTodoMutate, resolveFutureTodoRecurrenceGroup],
   )
 
   // 반응형 레이아웃 판단
@@ -252,9 +284,13 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
         targetEvent?.occurrenceDate,
         targetEvent?.start ?? start,
       )
+      const patchScope = targetEvent?.recurrenceGroup != null ? ('THIS_EVENT' as const) : undefined
       patchEventMutate({
         eventId,
-        params: { occurrenceDate },
+        params: {
+          occurrenceDate,
+          ...(patchScope ? { scope: patchScope } : {}),
+        },
         eventData: {
           startTime: moment(start).format('YYYY-MM-DDTHH:mm:ss'),
           endTime: nextEnd,
@@ -434,7 +470,9 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
   // 모달에 넘길 이벤트 조회
   const modalEvent = useMemo(() => {
     if (selectedEventKey) {
-      return events.find((item) => getEventOccurrenceKey(item) === selectedEventKey) ?? null
+      const selectedOccurrenceEvent =
+        events.find((item) => getEventOccurrenceKey(item) === selectedEventKey) ?? null
+      if (selectedOccurrenceEvent) return selectedOccurrenceEvent
     }
     return modal.eventId == null ? null : (events.find((item) => item.id === modal.eventId) ?? null)
   }, [events, modal.eventId, selectedEventKey])
