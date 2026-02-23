@@ -85,7 +85,6 @@ const CalendarModals = ({
         )}
       {shouldRenderModal &&
         isTodoModal &&
-        modalPortalRoot &&
         isInlineMode &&
         cardPortalRoot &&
         createPortal(
@@ -123,7 +122,6 @@ const CalendarModals = ({
         )}
       {shouldRenderModal &&
         !isTodoModal &&
-        modalPortalRoot &&
         isInlineMode &&
         cardPortalRoot &&
         createPortal(

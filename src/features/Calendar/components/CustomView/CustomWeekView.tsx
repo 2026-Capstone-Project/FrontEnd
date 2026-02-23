@@ -120,8 +120,12 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
               <S.DateCell
                 $isLast={day === 6}
                 $isSelected={isSelectedDay}
-                onClick={() => {
-                  onSelectDate?.(dayMoment.toDate())
+                onClick={(eventMouse) => {
+                  const nextDate = dayMoment.toDate()
+                  onSelectDate?.(nextDate)
+                  if (eventMouse.detail === 2) {
+                    onDoubleClickDate?.(nextDate)
+                  }
                 }}
               >
                 <S.DayNumber
@@ -144,8 +148,12 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
               <S.AllDayGridLineCell
                 key={`all-day-line-${dayMoment.format('YYYY-MM-DD')}`}
                 $isSelected={isSelectedDay}
-                onClick={() => {
-                  onSelectDate?.(dayMoment.toDate())
+                onClick={(eventMouse) => {
+                  const nextDate = dayMoment.toDate()
+                  onSelectDate?.(nextDate)
+                  if (eventMouse.detail === 2) {
+                    onDoubleClickDate?.(nextDate)
+                  }
                 }}
               />
             )
@@ -255,11 +263,11 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
             <S.DayColumn
               key={dayMoment.format('YYYY-MM-DD')}
               $isSelected={isSelectedDay}
-              onClick={() => {
+              onClick={(eventMouse) => {
                 onSelectDate?.(dayDate)
-              }}
-              onDoubleClick={() => {
-                onDoubleClickDate?.(dayDate)
+                if (eventMouse.detail === 2) {
+                  onDoubleClickDate?.(dayDate)
+                }
               }}
             >
               <S.DaySection $variant="timed">
