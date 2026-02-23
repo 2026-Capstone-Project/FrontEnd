@@ -12,27 +12,21 @@ import {
 import { createPortal } from 'react-dom'
 import { FormProvider } from 'react-hook-form'
 
+import { useTodoSubmitFlow } from '@/shared/hooks/addTodo/useTodoSubmitFlow'
 import { useUnsavedCloseGuard } from '@/shared/hooks/common/useUnsavedCloseGuard'
 import { useSyncEventTiming } from '@/shared/hooks/form'
 import { useAddTodoForm } from '@/shared/hooks/form/useAddTodoForm'
 import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
 import { useGetDetailTodoQuery } from '@/shared/hooks/query/useTodoQueries'
-import { useRepeatChangeGuard } from '@/shared/hooks/repeat/useRepeatChangeGuard'
 import { theme } from '@/shared/styles/theme'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import { type AddTodoFormValues, type RepeatConfigSchema } from '@/shared/types/event/event'
-import type { RecurrenceTodoScope } from '@/shared/types/recurrence/recurrence'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 import Checkbox from '@/shared/ui/common/Checkbox/Checkbox'
 import RepeatTypeGroup from '@/shared/ui/common/RepeatTypeGroup/RepeatTypeGroup'
 import TerminationPanel from '@/shared/ui/common/TerminationPanel/TerminationPanel'
 import TitleSuggestionInput from '@/shared/ui/common/TitleSuggestionInput/TitleSuggestionInput'
-import {
-  DeleteConfirmModal,
-  EditConfirmModal,
-  type EditConfirmOption,
-  UnsavedChangesConfirmModal,
-} from '@/shared/ui/modal'
+import { DeleteConfirmModal, EditConfirmModal, UnsavedChangesConfirmModal } from '@/shared/ui/modal'
 import * as S from '@/shared/ui/modal/AddTodo/index.style'
 import CustomBasisPanel from '@/shared/ui/modal/common/CustomBasisPanel/CustomBasisPanel'
 import CustomDatePicker from '@/shared/ui/modal/common/CustomDatePicker/CustomDatePicker'
@@ -114,7 +108,6 @@ const AddTodoForm = ({
   const { mutate: patchTodoMutate } = usePatchTodo()
   const [calendarAnchor, setCalendarAnchor] = useState<DOMRect | null>(null)
   const [deleteWarningVisible, setDeleteWarningVisible] = useState(false)
-  const [isApplyConfirmOpen, setIsApplyConfirmOpen] = useState(false)
   const [isMobileLayout, setIsMobileLayout] = useState(() => {
     if (typeof window === 'undefined') return false
     return window.matchMedia(`(max-width: ${theme.breakPoints.tablet})`).matches
@@ -242,34 +235,12 @@ const AddTodoForm = ({
 
   const hasExistingRecurrence = Boolean(detailData?.result?.recurrenceGroup)
   const repeatGuardEnabled = isEditing && hasExistingRecurrence
-  // 편집 모드에서 반복 변경을 가드해 확인 또는 취소가 가능하도록 합니다.
-  const {
-    isOpen: isEditConfirmOpen,
-    confirmChange,
-    revertChange,
-    requestConfirmation,
-  } = useRepeatChangeGuard({
-    repeatConfig,
-    isEditing: repeatGuardEnabled,
-    setValue,
-  })
-  const [pendingTodoValues, setPendingTodoValues] = useState<AddTodoFormValues | null>(null)
   const patchOccurrenceDate = useMemo(() => {
     if (detailData?.result?.occurrenceDate) {
       return moment(detailData.result.occurrenceDate).format('YYYY-MM-DD')
     }
     return moment(todoDate ?? date).format('YYYY-MM-DD')
   }, [date, detailData?.result?.occurrenceDate, todoDate])
-
-  const openApplyConfirm = useCallback((values: AddTodoFormValues) => {
-    setPendingTodoValues(values)
-    setIsApplyConfirmOpen(true)
-  }, [])
-
-  const clearApplyConfirm = useCallback(() => {
-    setPendingTodoValues(null)
-    setIsApplyConfirmOpen(false)
-  }, [])
 
   const buildDateTime = useCallback((dateValue: Date | null, timeValue?: string) => {
     const nextDate = dateValue ? new Date(dateValue) : new Date()
@@ -300,86 +271,25 @@ const AddTodoForm = ({
     },
     [buildDateTime, date, eventId, onEventTimingChange],
   )
-
-  const handleFormSubmit = handleSubmit(async (values) => {
-    if (requestConfirmation()) {
-      setPendingTodoValues(values)
-      return
-    }
-    if (hasExistingRecurrence) {
-      openApplyConfirm(values)
-      return
-    }
-    if (eventId != null && eventId !== 0) {
-      const nextTitle = values.todoTitle ?? ''
-      if (nextTitle) {
-        onEventTitleConfirm?.(eventId, nextTitle)
-      }
-    }
-    syncEventTiming(values)
-    try {
-      await onSubmit(values, { occurrenceDate: patchOccurrenceDate })
-      requestClose(true)
-    } catch (error) {
-      console.error('[AddTodoForm] submit failed', error)
-      const message =
-        error instanceof Error
-          ? error.message
-          : '할 일 저장 중 오류가 발생했습니다. 다시 시도해주세요.'
-      alert(message)
-    }
+  const {
+    isEditConfirmOpen,
+    isApplyConfirmOpen,
+    handleFormSubmit,
+    handleConfirmedSubmit,
+    handleCancelRepeat,
+  } = useTodoSubmitFlow({
+    eventId,
+    hasExistingRecurrence,
+    repeatGuardEnabled,
+    repeatConfig,
+    setValue,
+    handleSubmit,
+    patchOccurrenceDate,
+    onSubmit,
+    onClose: () => requestClose(true),
+    syncEventTiming,
+    onEventTitleConfirm,
   })
-
-  const handleConfirmedSubmit = useCallback(
-    async (option: EditConfirmOption) => {
-      if (!pendingTodoValues) return
-      if (isEditConfirmOpen) {
-        confirmChange()
-      }
-      if (eventId != null && eventId !== 0) {
-        const nextTitle = pendingTodoValues.todoTitle ?? ''
-        if (nextTitle) {
-          onEventTitleConfirm?.(eventId, nextTitle)
-        }
-      }
-      const scope: RecurrenceTodoScope = option === 'future' ? 'THIS_AND_FOLLOWING' : 'THIS_TODO'
-      syncEventTiming(pendingTodoValues)
-      try {
-        await onSubmit(pendingTodoValues, {
-          occurrenceDate: patchOccurrenceDate,
-          scope,
-        })
-        requestClose(true)
-        clearApplyConfirm()
-      } catch (error) {
-        console.error('[AddTodoForm] submit failed', error)
-        const message =
-          error instanceof Error
-            ? error.message
-            : '할 일 저장 중 오류가 발생했습니다. 다시 시도해주세요.'
-        alert(message)
-      }
-    },
-    [
-      confirmChange,
-      clearApplyConfirm,
-      eventId,
-      isEditConfirmOpen,
-      onEventTitleConfirm,
-      onSubmit,
-      pendingTodoValues,
-      patchOccurrenceDate,
-      requestClose,
-      syncEventTiming,
-    ],
-  )
-
-  const handleCancelRepeat = useCallback(() => {
-    if (isEditConfirmOpen) {
-      revertChange()
-    }
-    clearApplyConfirm()
-  }, [clearApplyConfirm, isEditConfirmOpen, revertChange])
 
   const handleDelete = useCallback(() => {
     if (!isPersistedTodo) {
