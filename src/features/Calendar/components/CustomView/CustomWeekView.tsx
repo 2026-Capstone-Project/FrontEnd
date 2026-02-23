@@ -1,6 +1,7 @@
 import moment from 'moment'
 import React from 'react'
 import type { NavigateAction, ViewStatic } from 'react-big-calendar'
+import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 
 import { getColorPalette } from '@/features/Calendar/utils/colorPalette'
 import {
@@ -24,6 +25,7 @@ type WeekProps = {
   onSelectEvent?: (event: CalendarEvent) => void
   onDoubleClickEvent?: (event: CalendarEvent) => void
   onDoubleClickDate?: (date: Date) => void
+  onEventDrop?: (args: EventInteractionArgs<CalendarEvent>) => void
   onToggleTodo?: (eventId: CalendarEvent['id']) => void
   selectedEventKey?: string | null
 }
@@ -57,11 +59,13 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
   onSelectEvent,
   onDoubleClickEvent,
   onDoubleClickDate,
+  onEventDrop,
   onToggleTodo,
   selectedEventKey,
 }: WeekProps) => {
   const weekStart = moment(date).startOf('week')
   const weekDays = Array.from({ length: 7 }, (_, index) => weekStart.clone().add(index, 'day'))
+  const allDaySectionRef = React.useRef<HTMLElement | null>(null)
   const today = moment()
   const weeklyAllDayEvents = React.useMemo(
     () =>
@@ -105,6 +109,69 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
     () => allDaySegments.reduce((maxLane, segment) => Math.max(maxLane, segment.lane), -1) + 1,
     [allDaySegments],
   )
+  const eventsByOccurrenceKey = React.useMemo(
+    () => new Map(events.map((event) => [getEventOccurrenceKey(event), event])),
+    [events],
+  )
+  const [draggingEventKey, setDraggingEventKey] = React.useState<string | null>(null)
+  const clearDraggingEvent = React.useCallback(() => {
+    setDraggingEventKey(null)
+  }, [])
+  const handleDropToDate = React.useCallback(
+    (targetDate: Date, dropAsAllDay: boolean) => {
+      if (!onEventDrop || !draggingEventKey) return
+      const draggingEvent = eventsByOccurrenceKey.get(draggingEventKey)
+      setDraggingEventKey(null)
+      if (!draggingEvent) return
+
+      const originalStart = moment(draggingEvent.start)
+      const originalEnd = moment(draggingEvent.end)
+      const originalStartDay = originalStart.clone().startOf('day')
+      const originalEndDay = originalEnd.clone().startOf('day')
+      const originalAllDay = draggingEvent.isAllDay || isDateOnlyString(draggingEvent.start)
+      const durationMs = Math.max(originalEnd.diff(originalStart), 0)
+      const useAllDayTime = dropAsAllDay || originalAllDay
+
+      const nextStart = useAllDayTime
+        ? moment(targetDate).startOf('day')
+        : moment(targetDate).set({
+            hour: originalStart.hour(),
+            minute: originalStart.minute(),
+            second: originalStart.second(),
+            millisecond: originalStart.millisecond(),
+          })
+      const nextEnd = useAllDayTime
+        ? (() => {
+            const spanDays = Math.max(originalEndDay.diff(originalStartDay, 'days') + 1, 1)
+            return nextStart
+              .clone()
+              .add(spanDays - 1, 'days')
+              .endOf('day')
+          })()
+        : durationMs > 0
+          ? nextStart.clone().add(durationMs, 'milliseconds')
+          : nextStart.clone().add(1, 'hour')
+
+      onEventDrop({
+        event: draggingEvent,
+        start: nextStart.toDate(),
+        end: nextEnd.toDate(),
+        allDay: useAllDayTime,
+      } as EventInteractionArgs<CalendarEvent>)
+    },
+    [draggingEventKey, eventsByOccurrenceKey, onEventDrop],
+  )
+  const handleDropToAllDayByPointer = React.useCallback(
+    (clientX: number) => {
+      const sectionRect = allDaySectionRef.current?.getBoundingClientRect()
+      if (!sectionRect || sectionRect.width <= 0) return
+      const relativeX = Math.max(0, Math.min(clientX - sectionRect.left, sectionRect.width - 1))
+      const dayWidth = sectionRect.width / 7
+      const dayIndex = Math.max(0, Math.min(6, Math.floor(relativeX / dayWidth)))
+      handleDropToDate(weekDays[dayIndex].toDate(), true)
+    },
+    [handleDropToDate, weekDays],
+  )
 
   return (
     <S.WeekContainer>
@@ -140,7 +207,16 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
           )
         })}
       </S.WeekHeaderRow>
-      <S.AllDaySection>
+      <S.AllDaySection
+        ref={allDaySectionRef}
+        onDragOver={(eventMouse) => {
+          eventMouse.preventDefault()
+        }}
+        onDrop={(eventMouse) => {
+          eventMouse.preventDefault()
+          handleDropToAllDayByPointer(eventMouse.clientX)
+        }}
+      >
         <S.AllDayGridLines>
           {weekDays.map((dayMoment) => {
             const isSelectedDay = selectedDate ? dayMoment.isSame(selectedDate, 'day') : false
@@ -154,6 +230,13 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
                   if (eventMouse.detail === 2) {
                     onDoubleClickDate?.(nextDate)
                   }
+                }}
+                onDragOver={(eventMouse) => {
+                  eventMouse.preventDefault()
+                }}
+                onDrop={(eventMouse) => {
+                  eventMouse.preventDefault()
+                  handleDropToAllDayByPointer(eventMouse.clientX)
                 }}
               />
             )
@@ -183,6 +266,13 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
                   eventMouse.stopPropagation()
                   onDoubleClickEvent?.(segment.event)
                 }}
+                draggable
+                onDragStart={(eventMouse) => {
+                  eventMouse.stopPropagation()
+                  eventMouse.dataTransfer.effectAllowed = 'move'
+                  setDraggingEventKey(segment.key)
+                }}
+                onDragEnd={clearDraggingEvent}
               >
                 {isTodo ? (
                   <TodoCheckbox
@@ -235,6 +325,13 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
                   eventMouse.stopPropagation()
                   onDoubleClickEvent?.(event)
                 }}
+                draggable
+                onDragStart={(eventMouse) => {
+                  eventMouse.stopPropagation()
+                  eventMouse.dataTransfer.effectAllowed = 'move'
+                  setDraggingEventKey(getEventOccurrenceKey(event))
+                }}
+                onDragEnd={clearDraggingEvent}
               >
                 <S.EventHeader>
                   {isTodo ? (
@@ -268,6 +365,13 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
                 if (eventMouse.detail === 2) {
                   onDoubleClickDate?.(dayDate)
                 }
+              }}
+              onDragOver={(eventMouse) => {
+                eventMouse.preventDefault()
+              }}
+              onDrop={(eventMouse) => {
+                eventMouse.preventDefault()
+                handleDropToDate(dayDate, false)
               }}
             >
               <S.DaySection $variant="timed">

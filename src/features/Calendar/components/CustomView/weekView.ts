@@ -140,7 +140,10 @@ export const AllDayEventBar = styled.button<{
   background-color: ${({ $backgroundColor }) => $backgroundColor ?? theme.colors.white};
   border: none;
   border-radius: 6px;
-  cursor: pointer;
+  cursor: grab;
+  &:active {
+    cursor: grabbing;
+  }
   outline: ${({ $isSelected, $pointColor }) =>
     $isSelected ? `2px solid ${$pointColor ?? theme.colors.primary2}` : 'none'};
   outline-offset: -1px;
@@ -182,13 +185,16 @@ export const EventCard = styled.button<{
   gap: 6px;
   padding: 8px;
   background-color: ${({ $backgroundColor }) => $backgroundColor ?? theme.colors.white};
-  border: none;
+  border: 2px solid
+    ${({ $isSelected, $pointColor }) =>
+      $isSelected ? ($pointColor ?? theme.colors.primary2) : 'transparent'};
   border-radius: 6px;
+  box-sizing: border-box;
   text-align: left;
-  cursor: pointer;
-  outline: ${({ $isSelected, $pointColor }) =>
-    $isSelected ? `2px solid ${$pointColor ?? theme.colors.primary2}` : 'none'};
-  outline-offset: -1px;
+  cursor: grab;
+  &:active {
+    cursor: grabbing;
+  }
 `
 
 export const EventHeader = styled.div`

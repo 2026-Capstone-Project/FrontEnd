@@ -116,6 +116,7 @@ export const useCalendarRbcProps = ({
           onSelectEvent={onSelectEventOnly}
           onDoubleClickEvent={onSelectEvent}
           onDoubleClickDate={onDoubleClickDate}
+          onEventDrop={onEventDrop}
           selectedEventKey={selectedEventKey}
         />
       ),
@@ -127,6 +128,7 @@ export const useCalendarRbcProps = ({
   }, [
     effectiveSelectedDate,
     onDoubleClickDate,
+    onEventDrop,
     onSelectEvent,
     onSelectEventOnly,
     onSelectWeekDate,
