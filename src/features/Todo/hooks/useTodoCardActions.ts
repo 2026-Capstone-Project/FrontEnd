@@ -1,6 +1,9 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 
-import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
+import {
+  useDeleteTodoMutation,
+  usePatchCompleteTodoMutation,
+} from '@/shared/hooks/query/useTodoMutations'
 
 type UseTodoCardActionsArgs = {
   id: number
@@ -15,16 +18,12 @@ export const useTodoCardActions = ({
   isCompleted,
   isRecurring,
 }: UseTodoCardActionsArgs) => {
-  const [selected, setSelected] = useState(isCompleted ?? false)
+  const [optimisticSelected, setOptimisticSelected] = useState<boolean | null>(null)
   const [openDeleteModal, setOpenDeleteModal] = useState(false)
   const isRecurringTodo = Boolean(isRecurring)
-  const { useDeleteTodo, usePatchCompleteTodo } = useTodoMutations()
-  const { mutate: deleteTodoMutate } = useDeleteTodo()
-  const { mutate: patchCompleteTodoMutate } = usePatchCompleteTodo()
-
-  useEffect(() => {
-    setSelected(isCompleted ?? false)
-  }, [isCompleted])
+  const { mutate: deleteTodoMutate } = useDeleteTodoMutation()
+  const { mutate: patchCompleteTodoMutate } = usePatchCompleteTodoMutation()
+  const selected = optimisticSelected ?? isCompleted ?? false
 
   // 반복 할 일은 단순 삭제하지 않고 확인 모달을 먼저 노출합니다.
   const handleDelete = useCallback(() => {
@@ -40,9 +39,8 @@ export const useTodoCardActions = ({
 
   // 체크 토글은 즉시 UI 반영(낙관적 업데이트) 후 실패 시 이전 값으로 되돌립니다.
   const handleToggleComplete = () => {
-    const previousSelected = selected
     const nextSelected = !selected
-    setSelected(nextSelected)
+    setOptimisticSelected(nextSelected)
     patchCompleteTodoMutate(
       {
         todoId: id,
@@ -51,7 +49,8 @@ export const useTodoCardActions = ({
       },
       {
         onError: () => {
-          setSelected(previousSelected)
+          // 실패 시에는 서버 값(isCompleted)으로 다시 보여주기 위해 낙관 상태를 해제합니다.
+          setOptimisticSelected(null)
         },
       },
     )
