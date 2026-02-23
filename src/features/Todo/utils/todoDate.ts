@@ -37,6 +37,8 @@ const getWeekLabel = (date: Date) => {
   return names[date.getDay()] ?? ''
 }
 
+// Todo 카드에 표시할 상대 날짜 텍스트를 계산합니다.
+// 예: 오늘/내일/이번주 월요일/다음주 화요일 혹은 YYYY.MM.DD
 export const getTodoDateLabel = (occurrenceDate: string, dueTime?: DueTimeLike) => {
   const targetDate = parseYmd(occurrenceDate)
   const today = new Date()
@@ -56,6 +58,8 @@ export const getTodoDateLabel = (occurrenceDate: string, dueTime?: DueTimeLike) 
   return timeLabel ? `${ymd} ${timeLabel}` : ymd
 }
 
+// 마감 시각 비교를 위해 occurrenceDate + dueTime을 실제 Date 객체로 변환합니다.
+// 종일 할 일은 해당 날짜 23:59:59.999를 마감 시각으로 사용합니다.
 export const getTodoDueDateTime = (
   occurrenceDate: string,
   dueTime?: DueTimeLike,
