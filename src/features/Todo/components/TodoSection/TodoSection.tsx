@@ -6,90 +6,14 @@ import { theme } from '@/shared/styles/theme'
 import type { TodoFilter } from '@/shared/types/todo/types'
 import AddTodoModal from '@/shared/ui/modal/AddTodo'
 
+import {
+  formatYmd,
+  getIsoDateWithOffset,
+  getTodoDateLabel,
+  getTodoDueDateTime,
+} from '../../utils/todoDate'
 import TodoCard from '../TodoCard/TodoCard'
 import * as S from './TodoSection.style'
-
-const getIsoDateWithOffset = (offset: number) => {
-  const date = new Date()
-  date.setHours(0, 0, 0, 0)
-  date.setDate(date.getDate() + offset)
-  return date.toISOString()
-}
-
-const formatYmd = (date: Date) =>
-  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
-    date.getDate(),
-  ).padStart(2, '0')}`
-
-const parseYmd = (value: string) => {
-  const [year, month, day] = value.split('-').map((part) => Number.parseInt(part, 10))
-  return new Date(year, (month || 1) - 1, day || 1)
-}
-
-type DueTimeLike =
-  | string
-  | { hour: number; minute: number; second: number; nano: number }
-  | undefined
-
-const formatTime = (value?: DueTimeLike) => {
-  if (!value) return ''
-  if (typeof value === 'string') return value.slice(0, 5)
-  const hour = String(value.hour ?? 0).padStart(2, '0')
-  const minute = String(value.minute ?? 0).padStart(2, '0')
-  return `${hour}:${minute}`
-}
-
-const getWeekLabel = (date: Date) => {
-  const names = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일']
-  return names[date.getDay()] ?? ''
-}
-
-const getTodoDateLabel = (occurrenceDate: string, dueTime?: DueTimeLike) => {
-  const targetDate = parseYmd(occurrenceDate)
-  const today = new Date()
-  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-  const diffDays = Math.floor((targetDate.getTime() - todayStart.getTime()) / (1000 * 60 * 60 * 24))
-  const timeLabel = formatTime(dueTime)
-  if (diffDays === 0) return `오늘 ${timeLabel}`.trim()
-  if (diffDays === 1) return `내일 ${timeLabel}`.trim()
-  if (diffDays >= 2 && diffDays <= 6)
-    return `이번주 ${getWeekLabel(targetDate)} ${timeLabel}`.trim()
-  if (diffDays >= 7 && diffDays <= 13)
-    return `다음주 ${getWeekLabel(targetDate)} ${timeLabel}`.trim()
-  const ymd = `${targetDate.getFullYear()}.${String(targetDate.getMonth() + 1).padStart(
-    2,
-    '0',
-  )}.${String(targetDate.getDate()).padStart(2, '0')}`
-  return timeLabel ? `${ymd} ${timeLabel}` : ymd
-}
-
-const getTodoDueDateTime = (occurrenceDate: string, dueTime?: DueTimeLike, isAllDay?: boolean) => {
-  const base = parseYmd(occurrenceDate)
-  if (isAllDay || !dueTime) {
-    return new Date(base.getFullYear(), base.getMonth(), base.getDate(), 23, 59, 59, 999)
-  }
-  if (typeof dueTime !== 'string') {
-    return new Date(
-      base.getFullYear(),
-      base.getMonth(),
-      base.getDate(),
-      dueTime.hour || 0,
-      dueTime.minute || 0,
-      dueTime.second || 0,
-      0,
-    )
-  }
-  const [hour, minute, second] = dueTime.split(':').map((part) => Number.parseInt(part, 10))
-  return new Date(
-    base.getFullYear(),
-    base.getMonth(),
-    base.getDate(),
-    hour || 0,
-    minute || 0,
-    second || 0,
-    0,
-  )
-}
 
 const TodoSection = () => {
   const [todoState, setTodoState] = useState<TodoFilter>('ALL')
