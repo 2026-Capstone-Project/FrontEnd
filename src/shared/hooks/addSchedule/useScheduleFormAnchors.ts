@@ -15,6 +15,9 @@ export const useScheduleFormAnchors = ({
   isSearchPlaceOpen,
   openSearchPlace,
 }: UseScheduleFormAnchorsProps) => {
+  const CALENDAR_PORTAL_WIDTH = 330
+  const CALENDAR_PORTAL_HEIGHT = 360
+  const VIEWPORT_MARGIN = 12
   const [calendarAnchor, setCalendarAnchor] = useState<DOMRect | null>(null)
   const [mapAnchor, setMapAnchor] = useState<DOMRect | null>(null)
   const mapButtonRef = useRef<HTMLButtonElement | null>(null)
@@ -59,11 +62,29 @@ export const useScheduleFormAnchors = ({
   const portalPosition = useMemo(() => {
     if (!calendarAnchor) return null
     if (typeof window === 'undefined') return null
-    const scrollY = window.scrollY || 0
-    const scrollX = window.scrollX || 0
+    const viewportWidth = window.innerWidth
+    const viewportHeight = window.innerHeight
+    const maxLeft = Math.max(
+      VIEWPORT_MARGIN,
+      viewportWidth - CALENDAR_PORTAL_WIDTH - VIEWPORT_MARGIN,
+    )
+    const nextLeft = Math.min(Math.max(calendarAnchor.left, VIEWPORT_MARGIN), maxLeft)
+
+    const belowTop = calendarAnchor.bottom + 8
+    const aboveTop = calendarAnchor.top - CALENDAR_PORTAL_HEIGHT - 8
+    const fitsBelow = belowTop + CALENDAR_PORTAL_HEIGHT <= viewportHeight - VIEWPORT_MARGIN
+    const clampedAboveTop = Math.max(VIEWPORT_MARGIN, aboveTop)
+    const maxTop = Math.max(
+      VIEWPORT_MARGIN,
+      viewportHeight - CALENDAR_PORTAL_HEIGHT - VIEWPORT_MARGIN,
+    )
+    const nextTop = fitsBelow
+      ? Math.min(Math.max(belowTop, VIEWPORT_MARGIN), maxTop)
+      : Math.min(clampedAboveTop, maxTop)
+
     return {
-      top: calendarAnchor.bottom + scrollY + 8,
-      left: calendarAnchor.left + scrollX,
+      top: nextTop,
+      left: nextLeft,
     }
   }, [calendarAnchor])
 
