@@ -112,16 +112,7 @@ const TodoSection = () => {
 
   const { data } = useGetTodoQuery(todoState)
 
-  const createNewEvent = () => {
-    console.log('새로운 할 일 생성 로직 처리')
-    const id = Math.floor(Math.random() * 10000)
-    return id
-  }
-
   const handleCardDoubleClick = (date?: string, isEditing = true, id?: number) => {
-    if (!id) {
-      id = createNewEvent()
-    }
     setAddTodoDate(date ?? getIsoDateWithOffset(0))
     setIsAddTodoOpen({ id, open: true, isEdit: isEditing })
   }
@@ -178,6 +169,7 @@ const TodoSection = () => {
         <S.CardList>
           {data?.result.todos.map((todo) => (
             <TodoCard
+              key={`${todo.todoId}-${todo.occurrenceDate}`}
               id={todo.todoId}
               title={todo.title}
               date={getTodoDateLabel(todo.occurrenceDate, todo.dueTime)}
@@ -196,11 +188,11 @@ const TodoSection = () => {
           ))}
         </S.CardList>
       </S.Section>
-      {isAddTodoOpen.open && isAddTodoOpen.id !== undefined && (
+      {isAddTodoOpen.open && (
         <AddTodoModal
           date={addTodoDate}
           onClose={closeAddTodoModal}
-          eventId={isAddTodoOpen.id}
+          eventId={isAddTodoOpen.id ?? 0}
           tabsVisible={false}
           isEditing={isAddTodoOpen.isEdit}
           mode={isDesktop ? 'inline' : 'modal'}

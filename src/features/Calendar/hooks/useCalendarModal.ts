@@ -42,7 +42,8 @@ export const useCalendarModal = ({
 
   const handleEventClick = useCallback((event: CalendarEvent) => {
     const start = event.start instanceof Date ? event.start : new Date(event.start ?? Date.now())
-    setModalDate(start.toISOString())
+    const occurrenceBase = event.occurrenceDate ? new Date(event.occurrenceDate) : (start as Date)
+    setModalDate(occurrenceBase.toISOString())
     setIsModalEditing(true)
     setModal({ isOpen: true, eventId: event.id })
   }, [])

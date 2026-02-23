@@ -12,7 +12,7 @@ import { theme } from '@/shared/styles/theme'
 import type { RepeatConfigSchema } from '@/shared/types/event/event'
 import type { RepeatConfig } from '@/shared/types/recurrence/repeat'
 import Checkbox from '@/shared/ui/common/Checkbox/Checkbox'
-import CustomDatePicker from '@/shared/ui/modal/AddSchedule/components/CustomDatePicker/CustomDatePicker'
+import CustomDatePicker from '@/shared/ui/modal/common/CustomDatePicker/CustomDatePicker'
 import { formatIsoDate } from '@/shared/utils/date'
 
 import * as S from './TerminationPanel.style'

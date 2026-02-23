@@ -1,7 +1,7 @@
 import { formatIsoDate } from '@/shared/utils/date'
 
 import type { Week } from '../types/event/event'
-import type { RecurrenceGroup } from '../types/recurrence/recurrence'
+import type { MonthlyWeekDayRule, RecurrenceGroup } from '../types/recurrence/recurrence'
 import {
   defaultRepeatConfig,
   type MonthlyPatternDay,
@@ -14,7 +14,7 @@ type RecurrenceLike = RecurrenceGroup & {
   interval?: number
   intervalValue?: number
   daysOfWeek?: Week[]
-  dayOfWeekInMonth?: Week[] | null
+  dayOfWeekInMonth?: RecurrenceGroup['dayOfWeekInMonth']
   isCustom?: boolean
 }
 
@@ -51,9 +51,21 @@ const toPatternWeek = (value?: number | null): MonthlyPatternWeek | undefined =>
   return String(normalized) as MonthlyPatternWeek
 }
 
-const toPatternDay = (value?: Week[] | null): MonthlyPatternDay | undefined => {
-  if (!value || value.length === 0) return undefined
-  return toWeekday(value[0])
+const toWeekArray = (value?: RecurrenceGroup['dayOfWeekInMonth']): Week[] => {
+  if (!value) return []
+  return [value]
+}
+
+const toPatternDayFromRule = (
+  rule?: MonthlyWeekDayRule | null,
+  value?: RecurrenceGroup['dayOfWeekInMonth'],
+): MonthlyPatternDay | undefined => {
+  if (rule === 'WEEKDAY') return 'weekday'
+  if (rule === 'WEEKEND') return 'weekend'
+  if (rule === 'ALL_DAYS') return 'allweek'
+  const weekdays = toWeekArray(value)
+  if (weekdays.length === 0) return undefined
+  return toWeekday(weekdays[0])
 }
 
 const toWeek = (value?: WeekdayName | null): Week | undefined =>
@@ -79,6 +91,7 @@ export const mapRecurrenceGroupToRepeatConfig = (group?: RecurrenceGroup | null)
   }
 
   const source = group as RecurrenceLike
+  const sourceWeekdayRule = source.weekdayRule
   const interval = source.interval ?? source.intervalValue ?? 1
   const frequency = source.frequency
 
@@ -113,7 +126,8 @@ export const mapRecurrenceGroupToRepeatConfig = (group?: RecurrenceGroup | null)
     if (source.monthlyType === 'DAY_OF_WEEK') {
       base.customMonthlyMode = 'pattern'
       base.customMonthlyPatternWeek = toPatternWeek(source.weekOfMonth) ?? '1'
-      base.customMonthlyPatternDay = toPatternDay(source.dayOfWeekInMonth) ?? 'mon'
+      base.customMonthlyPatternDay =
+        toPatternDayFromRule(sourceWeekdayRule, source.dayOfWeekInMonth) ?? 'mon'
     } else {
       base.customMonthlyMode = 'dates'
       base.customMonthlyDates = source.daysOfMonth ?? []
@@ -124,7 +138,7 @@ export const mapRecurrenceGroupToRepeatConfig = (group?: RecurrenceGroup | null)
     base.customYearlyInterval = interval
     base.customYearlyMonths = source.monthOfYear ? [source.monthOfYear] : []
     const yearlyWeek = toPatternWeek(source.weekOfMonth)
-    const yearlyDay = toPatternDay(source.dayOfWeekInMonth)
+    const yearlyDay = toPatternDayFromRule(sourceWeekdayRule, source.dayOfWeekInMonth)
     if (yearlyWeek && yearlyDay) {
       base.customYearlyConditionEnabled = true
       base.customYearlyConditionWeek = yearlyWeek
@@ -187,8 +201,18 @@ export const mapRepeatConfigToRecurrenceGroup = (
       base.monthlyType = 'DAY_OF_WEEK'
       base.weekOfMonth =
         config.customMonthlyPatternWeek === 'last' ? -1 : Number(config.customMonthlyPatternWeek)
-      const weekday = toWeekFromPatternDay(config.customMonthlyPatternDay) ?? 'MONDAY'
-      base.dayOfWeekInMonth = [weekday]
+      const patternDay = config.customMonthlyPatternDay
+      if (patternDay === 'weekday') {
+        base.weekdayRule = 'WEEKDAY'
+      } else if (patternDay === 'weekend') {
+        base.weekdayRule = 'WEEKEND'
+      } else if (patternDay === 'allweek') {
+        base.weekdayRule = 'ALL_DAYS'
+      } else {
+        const weekday = toWeekFromPatternDay(patternDay) ?? 'MONDAY'
+        base.weekdayRule = 'SINGLE'
+        base.dayOfWeekInMonth = weekday
+      }
     } else {
       base.monthlyType = 'DAY_OF_MONTH'
       base.daysOfMonth = (config.customMonthlyDates ?? []).filter(Boolean) as number[]
@@ -201,8 +225,21 @@ export const mapRepeatConfigToRecurrenceGroup = (
     if (config.customYearlyConditionEnabled) {
       base.weekOfMonth =
         config.customYearlyConditionWeek === 'last' ? -1 : Number(config.customYearlyConditionWeek)
-      const weekday = toWeekFromPatternDay(config.customYearlyConditionDay) ?? 'MONDAY'
-      base.dayOfWeekInMonth = [weekday]
+      const conditionDay = config.customYearlyConditionDay
+      if (conditionDay === 'weekday') {
+        base.weekdayRule = 'WEEKDAY'
+        base.dayOfWeekInMonth = null
+      } else if (conditionDay === 'weekend') {
+        base.weekdayRule = 'WEEKEND'
+        base.dayOfWeekInMonth = null
+      } else if (conditionDay === 'allweek') {
+        base.weekdayRule = 'ALL_DAYS'
+        base.dayOfWeekInMonth = null
+      } else {
+        const weekday = toWeekFromPatternDay(conditionDay) ?? 'MONDAY'
+        base.weekdayRule = 'SINGLE'
+        base.dayOfWeekInMonth = weekday
+      }
     }
   }
 

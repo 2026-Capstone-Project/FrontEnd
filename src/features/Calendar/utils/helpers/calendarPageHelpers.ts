@@ -29,7 +29,7 @@ export const createEvent = (date: Date, index: number, allDay = false): Calendar
     calculated: false,
     location: null,
     isAllDay: allDay,
-    color: 'BLUE',
+    color: 'GRAY',
     recurrenceGroup: null,
     type: 'schedule',
   }

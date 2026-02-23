@@ -9,7 +9,7 @@ import { fetchUserInfo, logoutAPI } from '@/shared/api/auth/auth'
 import { queryClient } from '@/shared/api/queryClient'
 import { SettingsAPI } from '@/shared/api/settings/settings'
 import { useCustomQuery, useCustomSuspenseQuery } from '@/shared/hooks/common/customQuery'
-import { useSettingsMutation } from '@/shared/hooks/useSettingsMutation'
+import { useSettingsMutation } from '@/shared/hooks/query'
 import type { CalendarView, ReminderTiming } from '@/shared/types/settings/settings'
 import { useAuthStore } from '@/store/useAuthStore'
 

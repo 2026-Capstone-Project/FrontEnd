@@ -51,20 +51,22 @@ export const patchEvent = async (
     endTime?: string
     color?: EventColorType
     isAllDay?: boolean
-    recurrenceUpdateScope?: RecurrenceEventScope
-    occurrenceDate?: string
     recurrenceGroup?: RecurrenceGroup | null
   },
+  params: {
+    occurrenceDate: string
+    scope?: Extract<RecurrenceEventScope, 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS'>
+  },
 ) => {
-  const { data } = await axiosInstance.patch(`/events/${eventId}`, eventData)
+  const { data } = await axiosInstance.patch(`/events/${eventId}`, eventData, { params })
   return data
 }
 
 export const deleteEvent = async (
   eventId: number,
   params: {
-    occurrenceDate?: string
-    scope?: RecurrenceEventScope
+    occurrenceDate: string
+    scope?: Extract<RecurrenceEventScope, 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS'>
   },
 ) => {
   const { data } = await axiosInstance.delete(`/events/${eventId}`, { params })

@@ -47,10 +47,10 @@ export const PageWrapper = styled.div`
   flex-direction: column;
   align-items: flex-start;
   width: 100%;
+  min-height: 0;
   height: 100%;
   flex: 1;
   gap: 32px;
-  min-height: 100%;
 `
 
 export const EmptyState = styled.div`

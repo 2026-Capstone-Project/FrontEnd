@@ -9,6 +9,7 @@ type UseCalendarCreateHandlersArgs = {
   view: View
   enqueueEvent: (startDate: Date, isAllDay: boolean) => CalendarEvent['id'] | null
   onAddEvent: (start?: Date, createdId?: CalendarEvent['id']) => void
+  onBeforeCreate?: () => void
   setSelectedDate: (date: Date | null) => void
   setSelectedEventId: (id: CalendarEvent['id'] | null) => void
   setSelectedEventKey: (key: string | null) => void
@@ -19,6 +20,7 @@ export const useCalendarCreateHandlers = ({
   view,
   enqueueEvent,
   onAddEvent,
+  onBeforeCreate,
   setSelectedDate,
   setSelectedEventId,
   setSelectedEventKey,
@@ -26,6 +28,7 @@ export const useCalendarCreateHandlers = ({
   const { handleSelectSlot } = useCalendarCreateEvent({
     view,
     enqueueEvent,
+    onBeforeCreate,
     onCreated: (start, nextId) => {
       onAddEvent(start, nextId)
     },
@@ -33,6 +36,7 @@ export const useCalendarCreateHandlers = ({
 
   const handleDayViewCreateEvent = useCallback(
     (slotDate: Date) => {
+      onBeforeCreate?.()
       const startBase = moment(slotDate).set({ second: 0, millisecond: 0 })
       const snappedMinute = startBase.minute() < 30 ? 0 : 30
       const start = startBase.set({ minute: snappedMinute }).toDate()
@@ -41,7 +45,7 @@ export const useCalendarCreateHandlers = ({
         onAddEvent(start, createdId)
       }
     },
-    [enqueueEvent, onAddEvent],
+    [enqueueEvent, onAddEvent, onBeforeCreate],
   )
 
   const handleSelectSlotWrapper = useCallback(

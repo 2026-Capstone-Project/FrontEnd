@@ -225,7 +225,7 @@ export const EventBadgeWrapper = styled.div<{
 
 export const EventTitle = styled.div`
   font-weight: 600;
-  font-size: 13px;
+  font-size: 12px;
   color: ${({ theme }) => theme.colors.black};
 `
 

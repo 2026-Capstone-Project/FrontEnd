@@ -3,8 +3,9 @@ import 'moment/locale/ko'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 
 import moment from 'moment'
-import { cloneElement, type MouseEvent, useCallback, useMemo, useState } from 'react'
+import { cloneElement, type MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { Calendar, type DateCellWrapperProps, momentLocalizer } from 'react-big-calendar'
+import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 
 import {
@@ -23,12 +24,20 @@ import {
   useStoredCalendarView,
 } from '@/features/Calendar/hooks'
 import { useCalendarEvents } from '@/features/Calendar/hooks/useCalendarEvents'
-import { getEventOccurrenceKey } from '@/features/Calendar/utils/helpers/dayViewHelpers'
+import {
+  getEventOccurrenceKey,
+  resolveOccurrenceDateTime,
+} from '@/features/Calendar/utils/helpers/dayViewHelpers'
 import Plus from '@/shared/assets/icons/plus.svg?react'
 import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
 import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
 import { theme } from '@/shared/styles/theme'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import type {
+  RecurrenceEventScope,
+  RecurrenceTodoScope,
+} from '@/shared/types/recurrence/recurrence'
+import { EditConfirmModal, type EditConfirmOption } from '@/shared/ui/modal'
 import DeleteConfirmModal from '@/shared/ui/modal/DeleteConfirmModal/DeleteConfirmModal'
 
 import { CustomViewButton } from '../CustomViewButton/CustomViewButton'
@@ -40,7 +49,11 @@ const localizer = momentLocalizer(moment)
 const DragAndDropCalendar = withDragAndDrop<CalendarEvent, object>(Calendar)
 export type SelectDateSource = 'date-cell' | 'slot' | 'header' | 'date-header'
 
-const CustomCalendar = () => {
+type CustomCalendarProps = {
+  onSelectedDateChange?: (selectedDate: Date) => void
+}
+
+const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
   // 사용자 뷰 상태(월/주/일) 저장
   const { view, setView } = useStoredCalendarView()
   const [date, setDate] = useState<Date>(new Date())
@@ -62,6 +75,11 @@ const CustomCalendar = () => {
     title: string
     occurrenceDate: string
   }>({ isOpen: false, eventId: null, title: '', occurrenceDate: '' })
+  const [recurringDropConfirm, setRecurringDropConfirm] = useState<{
+    isOpen: boolean
+    target: 'event' | 'todo'
+    args: EventInteractionArgs<CalendarEvent> | null
+  }>({ isOpen: false, target: 'event', args: null })
   // 로컬 캘린더 이벤트 상태 및 동작
   const {
     events,
@@ -100,12 +118,20 @@ const CustomCalendar = () => {
 
   // Todo 일정 이동 시 시간 패치
   const patchTodoTiming = useCallback(
-    (todoEvent: CalendarEvent, start: Date) => {
+    (
+      todoEvent: CalendarEvent,
+      start: Date,
+      options?: { scope?: RecurrenceTodoScope; occurrenceDate?: string },
+    ) => {
       const startDate = moment(start).format('YYYY-MM-DD')
+      const occurrenceDate =
+        options?.occurrenceDate ??
+        moment(todoEvent.occurrenceDate ?? todoEvent.start).format('YYYY-MM-DD')
       const dueTime = todoEvent.isAllDay ? undefined : moment(start).format('HH:mm')
       patchTodoMutate({
         todoId: todoEvent.id,
-        occurrenceDate: startDate,
+        occurrenceDate,
+        ...(options?.scope ? { scope: options.scope } : {}),
         requestBody: {
           startDate,
           dueTime,
@@ -125,7 +151,7 @@ const CustomCalendar = () => {
     (eventId: CalendarEvent['id'], occurrenceDate: string, isRecurring: boolean) => {
       const params = {
         ...(isRecurring ? { scope: 'THIS_EVENT' as const } : {}),
-        occurrenceDate: moment(occurrenceDate).format('YYYY-MM-DD'),
+        occurrenceDate: moment(occurrenceDate).format('YYYY-MM-DDTHH:mm:ss'),
       }
       deleteEventMutate(
         {
@@ -162,6 +188,17 @@ const CustomCalendar = () => {
       removeEvent: handleRemoveEvent,
       isRecurring,
     })
+  const [openedModalMode, setOpenedModalMode] = useState<'modal' | 'inline' | null>(null)
+
+  useEffect(() => {
+    if (!modal.isOpen) {
+      setOpenedModalMode(null)
+      return
+    }
+    if (openedModalMode == null) {
+      setOpenedModalMode(isInlineMode ? 'inline' : 'modal')
+    }
+  }, [isInlineMode, modal.isOpen, openedModalMode])
 
   // 선택 상태 관리
   const {
@@ -186,6 +223,11 @@ const CustomCalendar = () => {
     handleCloseModal()
   }, [handleCloseModal, isModalEditing, modal.eventId, removeEvent])
 
+  const clearPendingDraftEvent = useCallback(() => {
+    if (!modal.isOpen || isModalEditing || modal.eventId == null) return
+    removeEvent(modal.eventId)
+  }, [isModalEditing, modal.eventId, modal.isOpen, removeEvent])
+
   // 반복 삭제 확인 모달 닫기
   const handleCloseDeleteConfirm = useCallback(() => {
     setDeleteConfirm({ isOpen: false, eventId: null, title: '', occurrenceDate: '' })
@@ -204,15 +246,19 @@ const CustomCalendar = () => {
         }
         return
       }
-      const nextStart = moment(start).format('YYYY-MM-DDTHH:mm')
-      const nextEnd = moment(end).format('YYYY-MM-DDTHH:mm')
+      const nextEnd = moment(end).format('YYYY-MM-DDTHH:mm:ss')
+      const targetEvent = events.find((eventItem) => eventItem.id === eventId)
+      const occurrenceDate = resolveOccurrenceDateTime(
+        targetEvent?.occurrenceDate,
+        targetEvent?.start ?? start,
+      )
       patchEventMutate({
         eventId,
+        params: { occurrenceDate },
         eventData: {
-          startTime: nextStart,
+          startTime: moment(start).format('YYYY-MM-DDTHH:mm:ss'),
           endTime: nextEnd,
           isAllDay: false,
-          occurrenceDate: nextStart,
         },
       })
     },
@@ -236,7 +282,7 @@ const CustomCalendar = () => {
     selectedEventKey,
     selectedDate,
     onClearSelection: clearSelection,
-    onOpenRecurringConfirm: ({ eventId, title, date: occurrenceDate }) =>
+    onOpenRecurringConfirm: ({ eventId, title, occurrenceDate }) =>
       setDeleteConfirm({
         isOpen: true,
         eventId,
@@ -264,16 +310,29 @@ const CustomCalendar = () => {
     view,
     enqueueEvent,
     onAddEvent: handleAddEvent,
+    onBeforeCreate: clearPendingDraftEvent,
     setSelectedDate,
     setSelectedEventId,
     setSelectedEventKey,
   })
-
-  // 이벤트 선택 시 상세 모달 열기
-  /** 선택된 날짜에 배경 강조 스타일을 적용하도록 props를 반환합니다. */
-  const effectiveSelectedDate = useMemo(
-    () => (isInlineMode ? (selectedDate ?? date) : selectedDate),
-    [date, isInlineMode, selectedDate],
+  const handleWeekViewCreateEvent = useCallback(
+    (slotDate: Date) => {
+      clearPendingDraftEvent()
+      const start = moment(slotDate).startOf('day').set({ hour: 9, minute: 0, second: 0 }).toDate()
+      const createdId = enqueueEvent(start, false)
+      if (createdId != null) {
+        handleAddEvent(start, createdId)
+      }
+    },
+    [clearPendingDraftEvent, enqueueEvent, handleAddEvent],
+  )
+  const handleWeekViewSelectDate = useCallback(
+    (nextDate: Date) => {
+      setSelectedDate(nextDate)
+      setSelectedEventId(null)
+      setSelectedEventKey(null)
+    },
+    [setSelectedDate, setSelectedEventId, setSelectedEventKey],
   )
 
   // 일간뷰 전용 핸들러 주입
@@ -313,12 +372,40 @@ const CustomCalendar = () => {
   )
 
   // drag & drop 처리
-  const { handleEventDrop } = useCalendarDragDrop({
+  const { handleEventDrop, applyEventDrop } = useCalendarDragDrop({
     view,
     moveEvent,
     patchEventMutate,
     patchTodoTiming,
+    onRequireRecurringDropConfirm: (args, target) => {
+      setRecurringDropConfirm({ isOpen: true, target, args })
+    },
   })
+  const handleCloseRecurringDropConfirm = useCallback(() => {
+    setRecurringDropConfirm({ isOpen: false, target: 'event', args: null })
+  }, [])
+  const handleConfirmRecurringDrop = useCallback(
+    (option: EditConfirmOption) => {
+      if (!recurringDropConfirm.args) return
+      if (recurringDropConfirm.target === 'todo') {
+        const todoScope: RecurrenceTodoScope =
+          option === 'future' ? 'THIS_AND_FOLLOWING' : 'THIS_TODO'
+        applyEventDrop(recurringDropConfirm.args, { todoScope })
+        handleCloseRecurringDropConfirm()
+        return
+      }
+      const eventScope: RecurrenceEventScope =
+        option === 'future' ? 'THIS_AND_FOLLOWING_EVENTS' : 'THIS_EVENT'
+      applyEventDrop(recurringDropConfirm.args, { eventScope })
+      handleCloseRecurringDropConfirm()
+    },
+    [
+      applyEventDrop,
+      handleCloseRecurringDropConfirm,
+      recurringDropConfirm.args,
+      recurringDropConfirm.target,
+    ],
+  )
 
   // react-big-calendar props 구성
   const { calendarProps } = useCalendarRbcProps({
@@ -326,13 +413,15 @@ const CustomCalendar = () => {
     date,
     events,
     selectedEventKey,
-    effectiveSelectedDate,
+    effectiveSelectedDate: selectedDate,
     onView,
     onNavigate,
     onSelectDate,
     onSelectEvent: selectEvent,
     onSelectEventOnly: selectEventOnly,
     onDoubleClickEvent: selectEvent,
+    onDoubleClickDate: handleWeekViewCreateEvent,
+    onSelectWeekDate: handleWeekViewSelectDate,
     onToggleTodo: handleToggleTodo,
     onSelectSlot: handleSelectSlotWrapper,
     onEventDrop: handleEventDrop,
@@ -349,7 +438,8 @@ const CustomCalendar = () => {
     }
     return modal.eventId == null ? null : (events.find((item) => item.id === modal.eventId) ?? null)
   }, [events, modal.eventId, selectedEventKey])
-  const modalMode: 'modal' | 'inline' = isInlineMode ? 'inline' : 'modal'
+  const modalMode: 'modal' | 'inline' = openedModalMode ?? (isInlineMode ? 'inline' : 'modal')
+  const isModalInlineMode = modalMode === 'inline'
   // 이벤트 수정 핸들러 묶음
   const eventActions = useMemo(
     () => ({
@@ -360,7 +450,9 @@ const CustomCalendar = () => {
     }),
     [updateEventColor, updateEventTitle, updateEventType, updateEventTiming],
   )
-  const eventCardDate = effectiveSelectedDate ?? date
+  useEffect(() => {
+    onSelectedDateChange?.(selectedDate ?? date)
+  }, [date, onSelectedDateChange, selectedDate])
 
   return (
     <div css={{ position: 'relative', height: 'fit-content', width: '100%' }}>
@@ -381,15 +473,11 @@ const CustomCalendar = () => {
         modalEventId={modal.eventId}
         modalEvent={modalEvent}
         isModalEditing={isModalEditing}
-        isModalOpen={modal.isOpen}
-        isInlineMode={isInlineMode}
+        isInlineMode={isModalInlineMode}
         modalMode={modalMode}
         modalPortalRoot={modalPortalRoot}
         cardPortalRoot={cardPortalRoot}
-        eventCardDate={eventCardDate}
-        showEventCard={isInlineMode ? true : selectedDate != null}
         onCloseModal={handleCloseModalWithCleanup}
-        onCloseEventCard={() => setSelectedDate(null)}
         eventActions={eventActions}
       />
       {/* 반복 일정 삭제 확인 */}
@@ -403,6 +491,12 @@ const CustomCalendar = () => {
             occurrenceDate: deleteConfirm.occurrenceDate,
           }}
           mutate={deleteEventMutate}
+        />
+      )}
+      {recurringDropConfirm.isOpen && (
+        <EditConfirmModal
+          onCancel={handleCloseRecurringDropConfirm}
+          onConfirm={handleConfirmRecurringDrop}
         />
       )}
     </div>

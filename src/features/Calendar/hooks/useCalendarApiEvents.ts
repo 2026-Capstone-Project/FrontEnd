@@ -38,6 +38,7 @@ const toTodoEvent = (todo: TodoType): CalendarEvent => {
     : new Date(start.getTime() + 30 * 60 * 1000)
   return {
     id: todo.todoId,
+    occurrenceDate: todo.occurrenceDate,
     calculated: false,
     title: todo.title ?? '',
     content: todo.memo ?? null,
@@ -45,7 +46,7 @@ const toTodoEvent = (todo: TodoType): CalendarEvent => {
     end,
     location: null,
     isAllDay: todo.isAllDay,
-    color: 'GRAY',
+    color: todo.color ?? 'GRAY',
     recurrenceGroup: null,
     type: 'todo',
     isDone: todo.isCompleted,

@@ -7,22 +7,16 @@ import type { CalendarEvent } from '@/shared/types/calendar/types'
 import AddSchedule from '@/shared/ui/modal/AddSchedule'
 import AddTodo from '@/shared/ui/modal/AddTodo'
 
-import EventsCard from '../EventsCard/EventsCard'
-
 type CalendarModalsProps = {
   modalDate: string
   modalEventId: CalendarEvent['id'] | null
   modalEvent: CalendarEvent | null
   isModalEditing: boolean
-  isModalOpen: boolean
   isInlineMode: boolean
   modalMode: 'modal' | 'inline'
   modalPortalRoot: HTMLElement | null
   cardPortalRoot: HTMLElement | null
-  eventCardDate: Date
-  showEventCard: boolean
   onCloseModal: () => void
-  onCloseEventCard: () => void
   eventActions: {
     onEventColorChange: (eventId: CalendarEvent['id'], color: CalendarEvent['color']) => void
     onEventTitleConfirm: (eventId: CalendarEvent['id'], title: CalendarEvent['title']) => void
@@ -41,29 +35,27 @@ const CalendarModals = ({
   modalEventId,
   modalEvent,
   isModalEditing,
-  isModalOpen,
   isInlineMode,
   modalMode,
   modalPortalRoot,
   cardPortalRoot,
-  eventCardDate,
-  showEventCard,
   onCloseModal,
-  onCloseEventCard,
   eventActions,
 }: CalendarModalsProps) => {
   const shouldRenderModal = modalEventId != null
-  const shouldRenderEventCard = !isModalOpen && showEventCard
   const isTodoModal = modalEvent?.type === 'todo'
   const safeDetailEventId = isModalEditing && !isTodoModal ? modalEventId : null
   const occurrenceDate = useMemo(() => {
+    if (modalEvent?.occurrenceDate) {
+      return moment(modalEvent.occurrenceDate).format('YYYY-MM-DDTHH:mm:ss')
+    }
     const base =
       modalEvent?.start instanceof Date
         ? modalEvent.start
         : modalEvent?.start
           ? new Date(modalEvent.start)
           : modalDate
-    return base ? moment(base).format('YYYY-MM-DDTHH:mm') : ''
+    return base ? moment(base).format('YYYY-MM-DDTHH:mm:ss') : ''
   }, [modalDate, modalEvent])
   const { data } = useDetailEventQuery(safeDetailEventId, occurrenceDate)
   const detailEvent = useMemo<CalendarEvent | null>(() => {
@@ -87,6 +79,7 @@ const CalendarModals = ({
             mode={modalMode}
             eventId={modalEventId}
             tabsVisible={!isModalEditing}
+            onEventColorChange={eventActions.onEventColorChange}
             onEventTitleConfirm={eventActions.onEventTitleConfirm}
             onEventTimingChange={eventActions.onEventTimingChange}
             isEditing={isModalEditing}
@@ -95,7 +88,6 @@ const CalendarModals = ({
         )}
       {shouldRenderModal &&
         isTodoModal &&
-        modalPortalRoot &&
         isInlineMode &&
         cardPortalRoot &&
         createPortal(
@@ -105,6 +97,7 @@ const CalendarModals = ({
             mode={modalMode}
             eventId={modalEventId}
             tabsVisible={!isModalEditing}
+            onEventColorChange={eventActions.onEventColorChange}
             onEventTitleConfirm={eventActions.onEventTitleConfirm}
             onEventTimingChange={eventActions.onEventTimingChange}
             isEditing={isModalEditing}
@@ -122,6 +115,7 @@ const CalendarModals = ({
             mode={modalMode}
             eventId={modalEventId}
             event={detailEvent}
+            isEditing={isModalEditing}
             tabsVisible={!isModalEditing}
             onEventColorChange={eventActions.onEventColorChange}
             onEventTitleConfirm={eventActions.onEventTitleConfirm}
@@ -132,7 +126,6 @@ const CalendarModals = ({
         )}
       {shouldRenderModal &&
         !isTodoModal &&
-        modalPortalRoot &&
         isInlineMode &&
         cardPortalRoot &&
         createPortal(
@@ -142,28 +135,13 @@ const CalendarModals = ({
             mode={modalMode}
             eventId={modalEventId}
             event={detailEvent ?? modalEvent}
+            isEditing={isModalEditing}
             tabsVisible={!isModalEditing}
             onEventColorChange={eventActions.onEventColorChange}
             onEventTitleConfirm={eventActions.onEventTitleConfirm}
             onEventTypeChange={eventActions.onEventTypeChange}
             onEventTimingChange={eventActions.onEventTimingChange}
           />,
-          cardPortalRoot,
-        )}
-
-      {shouldRenderEventCard &&
-        !isInlineMode &&
-        modalPortalRoot &&
-        createPortal(
-          <EventsCard onClose={onCloseEventCard} selectedDate={eventCardDate} mode={modalMode} />,
-          modalPortalRoot,
-        )}
-
-      {shouldRenderEventCard &&
-        isInlineMode &&
-        cardPortalRoot &&
-        createPortal(
-          <EventsCard onClose={onCloseEventCard} selectedDate={eventCardDate} mode={modalMode} />,
           cardPortalRoot,
         )}
     </>
