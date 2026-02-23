@@ -1,5 +1,7 @@
 import type { Week } from '../event/event'
 
+export type MonthlyWeekDayRule = 'SINGLE' | 'WEEKDAY' | 'WEEKEND' | 'ALL_DAYS'
+
 export interface RecurrenceGroup {
   frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY'
   endType: 'NEVER' | 'END_BY_DATE' | 'END_BY_COUNT'
@@ -10,7 +12,8 @@ export interface RecurrenceGroup {
   monthlyType?: 'DAY_OF_MONTH' | 'DAY_OF_WEEK'
   weekOfMonth?: number
   daysOfMonth?: Array<number>
-  dayOfWeekInMonth?: Array<Week>
+  weekdayRule?: MonthlyWeekDayRule
+  dayOfWeekInMonth?: Array<Week> | Week | MonthlyWeekDayRule | null
   monthOfYear?: number
 }
 

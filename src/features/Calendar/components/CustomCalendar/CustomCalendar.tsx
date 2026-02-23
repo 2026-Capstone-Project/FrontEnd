@@ -5,6 +5,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css'
 import moment from 'moment'
 import { cloneElement, type MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { Calendar, type DateCellWrapperProps, momentLocalizer } from 'react-big-calendar'
+import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 
 import {
@@ -32,6 +33,11 @@ import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
 import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
 import { theme } from '@/shared/styles/theme'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import type {
+  RecurrenceEventScope,
+  RecurrenceTodoScope,
+} from '@/shared/types/recurrence/recurrence'
+import { EditConfirmModal, type EditConfirmOption } from '@/shared/ui/modal'
 import DeleteConfirmModal from '@/shared/ui/modal/DeleteConfirmModal/DeleteConfirmModal'
 
 import { CustomViewButton } from '../CustomViewButton/CustomViewButton'
@@ -69,6 +75,11 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
     title: string
     occurrenceDate: string
   }>({ isOpen: false, eventId: null, title: '', occurrenceDate: '' })
+  const [recurringDropConfirm, setRecurringDropConfirm] = useState<{
+    isOpen: boolean
+    target: 'event' | 'todo'
+    args: EventInteractionArgs<CalendarEvent> | null
+  }>({ isOpen: false, target: 'event', args: null })
   // 로컬 캘린더 이벤트 상태 및 동작
   const {
     events,
@@ -107,12 +118,20 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
 
   // Todo 일정 이동 시 시간 패치
   const patchTodoTiming = useCallback(
-    (todoEvent: CalendarEvent, start: Date) => {
+    (
+      todoEvent: CalendarEvent,
+      start: Date,
+      options?: { scope?: RecurrenceTodoScope; occurrenceDate?: string },
+    ) => {
       const startDate = moment(start).format('YYYY-MM-DD')
+      const occurrenceDate =
+        options?.occurrenceDate ??
+        moment(todoEvent.occurrenceDate ?? todoEvent.start).format('YYYY-MM-DD')
       const dueTime = todoEvent.isAllDay ? undefined : moment(start).format('HH:mm')
       patchTodoMutate({
         todoId: todoEvent.id,
-        occurrenceDate: startDate,
+        occurrenceDate,
+        ...(options?.scope ? { scope: options.scope } : {}),
         requestBody: {
           startDate,
           dueTime,
@@ -353,12 +372,40 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
   )
 
   // drag & drop 처리
-  const { handleEventDrop } = useCalendarDragDrop({
+  const { handleEventDrop, applyEventDrop } = useCalendarDragDrop({
     view,
     moveEvent,
     patchEventMutate,
     patchTodoTiming,
+    onRequireRecurringDropConfirm: (args, target) => {
+      setRecurringDropConfirm({ isOpen: true, target, args })
+    },
   })
+  const handleCloseRecurringDropConfirm = useCallback(() => {
+    setRecurringDropConfirm({ isOpen: false, target: 'event', args: null })
+  }, [])
+  const handleConfirmRecurringDrop = useCallback(
+    (option: EditConfirmOption) => {
+      if (!recurringDropConfirm.args) return
+      if (recurringDropConfirm.target === 'todo') {
+        const todoScope: RecurrenceTodoScope =
+          option === 'future' ? 'THIS_AND_FOLLOWING' : 'THIS_TODO'
+        applyEventDrop(recurringDropConfirm.args, { todoScope })
+        handleCloseRecurringDropConfirm()
+        return
+      }
+      const eventScope: RecurrenceEventScope =
+        option === 'future' ? 'THIS_AND_FOLLOWING_EVENTS' : 'THIS_EVENT'
+      applyEventDrop(recurringDropConfirm.args, { eventScope })
+      handleCloseRecurringDropConfirm()
+    },
+    [
+      applyEventDrop,
+      handleCloseRecurringDropConfirm,
+      recurringDropConfirm.args,
+      recurringDropConfirm.target,
+    ],
+  )
 
   // react-big-calendar props 구성
   const { calendarProps } = useCalendarRbcProps({
@@ -444,6 +491,12 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
             occurrenceDate: deleteConfirm.occurrenceDate,
           }}
           mutate={deleteEventMutate}
+        />
+      )}
+      {recurringDropConfirm.isOpen && (
+        <EditConfirmModal
+          onCancel={handleCloseRecurringDropConfirm}
+          onConfirm={handleConfirmRecurringDrop}
         />
       )}
     </div>
