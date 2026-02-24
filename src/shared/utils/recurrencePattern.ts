@@ -17,6 +17,7 @@ export type RecurrenceLike = RecurrenceGroup & {
   dayOfWeekInMonth?: RecurrenceGroup['dayOfWeekInMonth'] | Week[]
 }
 
+// Date에서 서버 반복 규칙에 쓰는 요일 enum을 계산한다.
 export const toWeekday = (value: Date): Week => WEEKDAY_BY_INDEX[value.getDay()]
 
 // 1~5주차 또는 마지막주(-1) 값을 반환합니다.
@@ -33,6 +34,7 @@ export const isSameYmd = (a: Date, b: Date) =>
   a.getMonth() === b.getMonth() &&
   a.getDate() === b.getDate()
 
+// dayOfWeekInMonth가 배열로 들어오는 케이스를 단일 요일 값으로 정규화한다.
 export const normalizeDayOfWeekInMonth = (
   value: RecurrenceLike['dayOfWeekInMonth'],
 ): RecurrenceGroup['dayOfWeekInMonth'] => {

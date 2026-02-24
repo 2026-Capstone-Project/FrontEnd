@@ -7,6 +7,7 @@ type DueTimeObject = {
 
 export type DueTimeLike = string | DueTimeObject | undefined
 
+// 오늘(00:00)을 기준으로 offset일 만큼 이동한 ISO 문자열을 만든다.
 export const getIsoDateWithOffset = (offset: number) => {
   const date = new Date()
   date.setHours(0, 0, 0, 0)
@@ -14,16 +15,19 @@ export const getIsoDateWithOffset = (offset: number) => {
   return date.toISOString()
 }
 
+// Date 객체를 API 파라미터에서 사용하는 YYYY-MM-DD 문자열로 변환한다.
 export const formatYmd = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
     date.getDate(),
   ).padStart(2, '0')}`
 
+// Todo 전용 날짜 문자열(YYYY-MM-DD)을 로컬 Date로 안전하게 파싱한다.
 const parseYmd = (value: string) => {
   const [year, month, day] = value.split('-').map((part) => Number.parseInt(part, 10))
   return new Date(year, (month || 1) - 1, day || 1)
 }
 
+// dueTime이 문자열/객체 어느 형태로 오더라도 표시용 HH:mm 문자열로 통일한다.
 const formatTime = (value?: DueTimeLike) => {
   if (!value) return ''
   if (typeof value === 'string') return value.slice(0, 5)
@@ -32,6 +36,7 @@ const formatTime = (value?: DueTimeLike) => {
   return `${hour}:${minute}`
 }
 
+// 상대 날짜 문구(이번주/다음주)에 들어갈 요일 한글 라벨을 반환한다.
 const getWeekLabel = (date: Date) => {
   const names = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일']
   return names[date.getDay()] ?? ''

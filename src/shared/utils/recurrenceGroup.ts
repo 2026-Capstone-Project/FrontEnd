@@ -18,6 +18,7 @@ type RecurrenceLike = RecurrenceGroup & {
   isCustom?: boolean
 }
 
+// 서버 요일 enum과 폼 요일 키 간 양방향 변환 테이블이다.
 const WEEKDAY_MAP: Record<Week, WeekdayName> = {
   SUNDAY: 'sun',
   MONDAY: 'mon',
@@ -38,12 +39,15 @@ const WEEKDAY_REVERSE_MAP: Record<WeekdayName, Week> = {
   sat: 'SATURDAY',
 }
 
+// 서버 요일 값을 반복 설정 UI에서 사용하는 키로 변환한다.
 const toWeekday = (value?: Week | null): WeekdayName | undefined =>
   value ? WEEKDAY_MAP[value] : undefined
 
+// 주간 반복 요일 배열을 UI의 요일 배열 포맷으로 바꾼다.
 const toWeekdays = (values?: Week[] | null) =>
   values ? values.map((value) => WEEKDAY_MAP[value]) : []
 
+// API의 weekOfMonth 숫자(-1, 1~5)를 UI 패턴 값('last', '1'~'5')으로 변환한다.
 const toPatternWeek = (value?: number | null): MonthlyPatternWeek | undefined => {
   if (!value) return undefined
   if (value <= 0) return 'last'
@@ -51,11 +55,13 @@ const toPatternWeek = (value?: number | null): MonthlyPatternWeek | undefined =>
   return String(normalized) as MonthlyPatternWeek
 }
 
+// 월간 규칙의 단일 요일 값을 배열 기반 처리 로직과 맞추기 위해 배열로 감싼다.
 const toWeekArray = (value?: RecurrenceGroup['dayOfWeekInMonth']): Week[] => {
   if (!value) return []
   return [value]
 }
 
+// 월간/연간 규칙(평일/주말/단일요일)을 UI 패턴 day 값으로 통합 변환한다.
 const toPatternDayFromRule = (
   rule?: MonthlyWeekDayRule | null,
   value?: RecurrenceGroup['dayOfWeekInMonth'],
@@ -68,18 +74,22 @@ const toPatternDayFromRule = (
   return toWeekday(weekdays[0])
 }
 
+// UI 요일 키를 서버 요일 enum으로 역변환한다.
 const toWeek = (value?: WeekdayName | null): Week | undefined =>
   value ? WEEKDAY_REVERSE_MAP[value] : undefined
 
+// pattern day 값 중 단일 요일만 서버 요일 enum으로 변환한다.
 const toWeekFromPatternDay = (value?: MonthlyPatternDay | null): Week | undefined => {
   if (!value) return undefined
   if (value === 'weekday' || value === 'weekend' || value === 'allweek') return undefined
   return toWeek(value as WeekdayName)
 }
 
+// UI 요일 배열에서 빈 값을 제거한 뒤 서버 요일 enum 배열로 변환한다.
 const toWeeks = (values?: (WeekdayName | undefined)[] | null) =>
   values?.filter(Boolean).map((value) => WEEKDAY_REVERSE_MAP[value as WeekdayName]) ?? []
 
+// 서버 recurrenceGroup을 반복 설정 폼의 RepeatConfig로 변환한다.
 export const mapRecurrenceGroupToRepeatConfig = (group?: RecurrenceGroup | null): RepeatConfig => {
   if (!group) {
     return {
@@ -164,6 +174,7 @@ export const mapRecurrenceGroupToRepeatConfig = (group?: RecurrenceGroup | null)
   return base
 }
 
+// 반복 설정 폼 값을 서버 전송용 recurrenceGroup DTO로 변환한다.
 export const mapRepeatConfigToRecurrenceGroup = (
   config?: RepeatConfig | null,
 ): RecurrenceGroup | null => {
