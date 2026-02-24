@@ -103,6 +103,7 @@ const AddTodoForm = ({
     detailOccurrenceDate,
     shouldFetchDetail,
   )
+  const isPersistedTodo = isEditing && eventId != null && eventId !== 0
   const { useDeleteTodo, usePatchTodo } = useTodoMutations()
   const { mutate: deleteTodoMutate } = useDeleteTodo()
   const { mutate: patchTodoMutate } = usePatchTodo()
@@ -211,7 +212,6 @@ const AddTodoForm = ({
 
   const isInlineMode = mode === 'inline'
   const shouldShowModalOverlay = !isInlineMode && activeCalendarField
-  const isPersistedTodo = isEditing && eventId != null && eventId !== 0
   const deleteOccurrenceDate = useMemo(() => {
     if (detailData?.result?.occurrenceDate) {
       return moment(detailData.result.occurrenceDate).format('YYYY-MM-DD')
@@ -281,6 +281,7 @@ const AddTodoForm = ({
     eventId,
     hasExistingRecurrence,
     repeatGuardEnabled,
+    isDetailReady: !isPersistedTodo || !shouldFetchDetail || Boolean(detailData?.result),
     repeatConfig,
     setValue,
     handleSubmit,

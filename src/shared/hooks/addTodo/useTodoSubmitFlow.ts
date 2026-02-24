@@ -11,6 +11,7 @@ type UseTodoSubmitFlowProps = {
   eventId: CalendarEvent['id']
   hasExistingRecurrence: boolean
   repeatGuardEnabled: boolean
+  isDetailReady: boolean
   repeatConfig: AddTodoFormValues['repeatConfig']
   setValue: UseFormSetValue<AddTodoFormValues>
   handleSubmit: UseFormHandleSubmit<AddTodoFormValues>
@@ -28,6 +29,7 @@ export const useTodoSubmitFlow = ({
   eventId,
   hasExistingRecurrence,
   repeatGuardEnabled,
+  isDetailReady,
   repeatConfig,
   setValue,
   handleSubmit,
@@ -108,6 +110,12 @@ export const useTodoSubmitFlow = ({
   )
 
   const handleFormSubmit = handleSubmit(async (values) => {
+    // 편집 모달에서 상세 데이터가 아직 hydrate 되지 않았다면
+    // recurrence/occurrenceDate 판단이 틀어질 수 있어 제출을 잠시 막습니다.
+    if (!isDetailReady) {
+      alert('할 일 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.')
+      return
+    }
     if (requestConfirmation()) {
       setPendingTodoValues(values)
       return

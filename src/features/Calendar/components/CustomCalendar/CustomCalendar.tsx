@@ -3,7 +3,15 @@ import 'moment/locale/ko'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 
 import moment from 'moment'
-import { cloneElement, type MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  cloneElement,
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { Calendar, type DateCellWrapperProps, momentLocalizer } from 'react-big-calendar'
 import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
@@ -71,6 +79,7 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
   const { mutate: patchCompleteTodoMutate } = usePatchCompleteTodo()
   const { mutate: patchTodoMutate } = usePatchTodo()
   const { mutate: deleteTodoMutate } = useDeleteTodo()
+  const recurringTodoPatchSeqRef = useRef<Map<string, number>>(new Map())
   const [deleteConfirm, setDeleteConfirm] = useState<{
     isOpen: boolean
     eventId: CalendarEvent['id'] | null
@@ -161,9 +170,15 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
       }
 
       if (patchScope === 'THIS_AND_FOLLOWING') {
+        const requestKey = `${todoEvent.id}-${occurrenceDate}`
+        const nextSequence = (recurringTodoPatchSeqRef.current.get(requestKey) ?? 0) + 1
+        recurringTodoPatchSeqRef.current.set(requestKey, nextSequence)
         // 반복 할 일을 "이후 항목" 범위로 이동한 경우 recurrenceGroup 보정이 필요합니다.
         void resolveFutureTodoRecurrenceGroup(todoEvent.id, occurrenceDate, start).then(
           (recurrenceGroup) => {
+            // 가장 마지막 드롭 요청만 반영해, 비동기 응답 역전으로 인한 역패치를 방지합니다.
+            const latestSequence = recurringTodoPatchSeqRef.current.get(requestKey)
+            if (latestSequence !== nextSequence) return
             submitPatch(recurrenceGroup)
           },
         )

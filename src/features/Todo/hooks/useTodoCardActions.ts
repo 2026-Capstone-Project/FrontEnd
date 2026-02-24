@@ -48,6 +48,10 @@ export const useTodoCardActions = ({
         isCompleted: nextSelected,
       },
       {
+        onSuccess: () => {
+          // 성공 이후에는 서버 데이터(isCompleted)를 단일 진실 원천으로 사용합니다.
+          setOptimisticSelected(null)
+        },
         onError: () => {
           // 실패 시에는 서버 값(isCompleted)으로 다시 보여주기 위해 낙관 상태를 해제합니다.
           setOptimisticSelected(null)
