@@ -10,6 +10,7 @@ import type {
   RepeatConfigSchema,
   TimePickerField,
 } from '@/shared/types/event/event'
+import type { PriorityType } from '@/shared/types/event/priority'
 import type { RecurrenceTodoScope } from '@/shared/types/recurrence/recurrence'
 import type { CustomRepeatBasis, RepeatConfig, RepeatType } from '@/shared/types/recurrence/repeat'
 import { formatIsoDate } from '@/shared/utils/date'
@@ -34,6 +35,7 @@ export type UseAddTodoFormResult = {
   todoEndTime: string | undefined
   repeatConfig: RepeatConfigSchema
   eventColor: EventColorType
+  todoPriority: PriorityType
   handleCalendarOpen: (field: DatePickerField) => void
   handleDateSelect: (selectedDate: Date) => void
   handleTimeChange: (field: TimePickerField, value: string) => void
@@ -46,6 +48,7 @@ export type UseAddTodoFormResult = {
   ) => Promise<unknown>
   setIsAllday: React.Dispatch<React.SetStateAction<boolean>>
   setEventColor: (value: EventColorType) => void
+  setTodoPriority: (value: PriorityType) => void
   todoTitle: string | undefined
   repeatEndDate: Date | null
 }
@@ -80,6 +83,7 @@ export const useAddTodoForm = ({
     repeatConfig,
     todoTitle,
     eventColor,
+    todoPriority,
   } = useTodoFormFields({ date, isAllday })
 
   const calendarRef = useRef<HTMLDivElement | null>(null)
@@ -179,6 +183,13 @@ export const useAddTodoForm = ({
     [setValue],
   )
 
+  const setTodoPriority = useCallback(
+    (value: PriorityType) => {
+      setValue('todoPriority', value, { shouldValidate: true, shouldDirty: true })
+    },
+    [setValue],
+  )
+
   const onSubmit = (
     values: AddTodoFormValues,
     options?: { occurrenceDate?: string; scope?: RecurrenceTodoScope },
@@ -213,7 +224,7 @@ export const useAddTodoForm = ({
       dueTime: values.isAllday ? undefined : values.todoEndTime,
       isAllDay: values.isAllday ? true : false,
       color: values.eventColor,
-      priority: 'MEDIUM' as const,
+      priority: values.todoPriority,
       memo: values.todoDescription ?? '',
       recurrenceGroup,
     }
@@ -244,6 +255,7 @@ export const useAddTodoForm = ({
     todoEndTime,
     repeatConfig,
     eventColor,
+    todoPriority,
     handleCalendarOpen,
     handleDateSelect,
     handleTimeChange,
@@ -251,6 +263,7 @@ export const useAddTodoForm = ({
     onSubmit,
     setIsAllday,
     setEventColor,
+    setTodoPriority,
     todoTitle,
     repeatEndDate,
   }

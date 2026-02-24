@@ -21,6 +21,7 @@ import { useGetDetailTodoQuery } from '@/shared/hooks/query/useTodoQueries'
 import { theme } from '@/shared/styles/theme'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import { type AddTodoFormValues, type RepeatConfigSchema } from '@/shared/types/event/event'
+import type { PriorityType } from '@/shared/types/event/priority'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 import Checkbox from '@/shared/ui/common/Checkbox/Checkbox'
 import RepeatTypeGroup from '@/shared/ui/common/RepeatTypeGroup/RepeatTypeGroup'
@@ -33,6 +34,7 @@ import CustomDatePicker from '@/shared/ui/modal/common/CustomDatePicker/CustomDa
 import CustomTimePicker from '@/shared/ui/modal/common/CustomTimePicker/CustomTimePicker'
 import SelectColor from '@/shared/ui/modal/common/SelectColor/SelectColor'
 import { formatDisplayDate } from '@/shared/utils/date'
+import { getPriorityColor } from '@/shared/utils/priority'
 import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/recurrenceGroup'
 
 type AddTodoFormProps = {
@@ -54,6 +56,12 @@ type AddTodoFormProps = {
     allDay: boolean,
   ) => void
 }
+
+const PRIORITY_OPTIONS: Array<{ value: PriorityType; label: string }> = [
+  { value: 'HIGH', label: '높음' },
+  { value: 'MEDIUM', label: '중간' },
+  { value: 'LOW', label: '낮음' },
+]
 
 const AddTodoForm = ({
   date,
@@ -89,6 +97,8 @@ const AddTodoForm = ({
     todoTitle,
     eventColor,
     setEventColor,
+    todoPriority,
+    setTodoPriority,
   } = useAddTodoForm({ date, id: eventId, isEditing })
   const { register, setValue, formState } = formMethods
   const { isDirty } = formState
@@ -155,6 +165,7 @@ const AddTodoForm = ({
     setValue('todoDate', baseDate, { shouldValidate: true })
     setValue('todoEndTime', parsedTime, { shouldValidate: true })
     setValue('eventColor', detail.color ?? 'GRAY', { shouldValidate: true })
+    setValue('todoPriority', detail.priority ?? 'MEDIUM', { shouldValidate: true })
     setIsAllday(detail.isAllDay)
 
     const mappedRepeatConfig = mapRecurrenceGroupToRepeatConfig(detail.recurrenceGroup)
@@ -428,6 +439,27 @@ const AddTodoForm = ({
                   document.getElementById('modal-root')!,
                 )}
             </S.Selection>
+            <S.PrioritySection>
+              <S.PriorityLabel>중요도</S.PriorityLabel>
+              <S.PriorityOptions>
+                {PRIORITY_OPTIONS.map((option) => {
+                  const token = getPriorityColor(option.value)
+                  const palette = theme.colors.priority[token]
+                  return (
+                    <S.PriorityOptionButton
+                      key={option.value}
+                      type="button"
+                      isActive={todoPriority === option.value}
+                      baseColor={palette.base}
+                      pointColor={palette.point}
+                      onClick={() => setTodoPriority(option.value)}
+                    >
+                      {option.label}
+                    </S.PriorityOptionButton>
+                  )
+                })}
+              </S.PriorityOptions>
+            </S.PrioritySection>
             <Checkbox
               checked={isAllday}
               onChange={() => setIsAllday((prev) => !prev)}
