@@ -22,7 +22,7 @@ export const PageWrapper = styled.div`
     gap: 16px;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 32px;
+    justify-content: flex-start;
     .mobile-custom-view-button {
       display: block;
     }
