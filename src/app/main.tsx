@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ThemeProvider } from '@emotion/react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
@@ -16,23 +15,21 @@ import { queryClient } from '../shared/api/queryClient'
 
 // eslint-disable-next-line react-refresh/only-export-components
 const App = () => {
-  const isLoggedIn = useAuthStore((state) => state.isLoggedIn)
-  const login = useAuthStore((state) => state.login)
-  const logout = useAuthStore((state) => state.logout)
+  const { isLoggedIn, login, logout } = useAuthStore()
   const [isInitializing, setIsInitializing] = useState(true)
 
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const reissueRes = await axiosInstance.post('/api/v1/security/reissue-cookie', {})
+        const response = await axiosInstance.get('/api/v1/members/me')
 
-        if (reissueRes.data.isSuccess) {
+        if (response.data.isSuccess) {
           login()
         } else {
           logout()
         }
-      } catch (error: any) {
-        console.error('인증 확인 실패:', error)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
         logout()
       } finally {
         setIsInitializing(false)

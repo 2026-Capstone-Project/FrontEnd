@@ -10,9 +10,6 @@ export default function SocialCallback() {
 
   useEffect(() => {
     if (!provider || !code || !state) return
-
-    localStorage.setItem('pendingLogin', 'true')
-
     const SERVER_URL = import.meta.env.VITE_SERVER_URL
     const upperProvider = provider.toUpperCase()
     const callbackUrl = `${SERVER_URL}/api/v1/auth/${upperProvider}/callback?code=${code}&state=${state}`
