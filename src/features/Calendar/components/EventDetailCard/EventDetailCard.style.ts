@@ -11,6 +11,7 @@ export const EventWrapper = styled.div`
 export const Time = styled.div`
   color: ${theme.colors.primary2};
   white-space: nowrap;
+  align-self: flex-start;
   min-width: 46px;
   font-size: 18px;
   font-weight: 500;
@@ -22,6 +23,7 @@ export const Time = styled.div`
 export const Title = styled.div<{ type: 'schedule' | 'todo' }>`
   font-size: 18px;
   font-weight: 500;
+  text-align: center;
   color: ${theme.colors.black};
   border-bottom: ${(props) => (props.type === 'todo' ? '2px solid' : 'none')};
   ${media.down(theme.breakPoints.desktop)} {

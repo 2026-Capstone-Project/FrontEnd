@@ -1,4 +1,4 @@
-import type { PriorityColorType } from '../types/priority'
+import type { PriorityColorType } from '../types/event/priority'
 
 export function translatePriority(priority: 'HIGH' | 'MEDIUM' | 'LOW'): string {
   switch (priority) {

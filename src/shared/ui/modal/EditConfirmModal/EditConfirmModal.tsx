@@ -4,15 +4,13 @@ import { createPortal } from 'react-dom'
 import Modal from '../../common/Modal/Modal'
 import * as S from './EditConfirmModal.style'
 
-const optionValues = ['single', 'future', 'all'] as const
+const optionValues = ['single', 'future'] as const
 export type EditConfirmOption = (typeof optionValues)[number]
 
 const EditConfirmModal = ({
-  title,
   onCancel,
   onConfirm,
 }: {
-  title: string
   onCancel?: () => void
   onConfirm?: (option: EditConfirmOption) => void
 }) => {
@@ -28,11 +26,8 @@ const EditConfirmModal = ({
             const optionId = `${radioName}-${value}`
             const isChecked = selectedOption === value
             const label =
-              value === 'single'
-                ? '이 이벤트에 대해서만 적용'
-                : value === 'future'
-                  ? '이 이벤트부터 이후 이벤트'
-                  : `모든 "${title}" 이벤트에 대해 적용`
+              value === 'single' ? '이 이벤트에 대해서만 적용' : '이 이벤트부터 이후 이벤트'
+
             return (
               <S.OptionWrapper key={value}>
                 <S.HiddenRadio

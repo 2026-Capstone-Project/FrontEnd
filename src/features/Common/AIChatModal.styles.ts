@@ -1,5 +1,6 @@
 import styled from '@emotion/styled'
 
+import { media } from '@/shared/styles/media'
 import { theme } from '@/shared/styles/theme'
 
 export const Container = styled.div`
@@ -9,15 +10,14 @@ export const Container = styled.div`
   border-radius: 30px;
   padding: 24px 32px;
   box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
-
-  position: fixed;
-  top: 150px;
-  right: 40px;
+  position: absolute;
+  top: 70px;
+  right: 0;
   width: 450px;
   height: 430px;
   z-index: 999;
 
-  @media (max-width: 1024px) {
+  ${media.down(theme.breakPoints.desktop)} {
     position: relative;
     top: 0;
     right: 0;
@@ -28,7 +28,7 @@ export const Container = styled.div`
     box-shadow: none;
   }
 
-  @media (max-width: 768px) {
+  ${media.down(theme.breakPoints.tablet)} {
     padding: 20px;
     border-radius: 20px;
   }
@@ -88,7 +88,7 @@ export const Input = styled.input`
   padding: 8px 0;
   border-radius: 20px;
 
-  @media (max-width: 480px) {
+  ${media.down(theme.breakPoints.mobile)} {
     font-size: 14px;
   }
 `

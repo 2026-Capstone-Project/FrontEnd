@@ -12,7 +12,7 @@ import type {
 
 import axiosInstance from '../axios'
 
-const API_BASE = '/api/v1/settings'
+const API_BASE = '/settings'
 
 export const SettingsAPI = {
   getSettings: () => axiosInstance.get<SettingsResponse>(API_BASE).then((res) => res.data),
@@ -41,7 +41,7 @@ export const SettingsAPI = {
       .then((res) => res.data),
 
   deleteUser: async (): Promise<DeleteMemberResponse> => {
-    const res = await axiosInstance.delete('/api/v1/members')
+    const res = await axiosInstance.delete('/members')
     return res.data
   },
 }

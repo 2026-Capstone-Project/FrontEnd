@@ -47,6 +47,30 @@ export const PageWrapper = styled.div`
   flex-direction: column;
   align-items: flex-start;
   width: 100%;
+  min-height: 0;
   height: 100%;
+  flex: 1;
   gap: 32px;
+`
+
+export const EmptyState = styled.div`
+  border: 1px dashed ${theme.colors.lightGray};
+  border-radius: 16px;
+  padding: 20px 24px;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+`
+
+export const EmptyTitle = styled.div`
+  font-size: 16px;
+  font-weight: 600;
+  color: ${theme.colors.textColor2};
+`
+
+export const EmptyDesc = styled.div`
+  font-size: 13px;
+  color: ${theme.colors.textColor2};
 `

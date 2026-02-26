@@ -136,12 +136,16 @@ export const DayEventBadge = styled(EventBadge)<{
   border-bottom-right-radius: ${({ overflowBottom }) => (overflowBottom ? '0' : '4px')};
   display: flex;
   width: 100%;
-  padding: 8px;
+  padding: 0 8px;
   align-items: flex-start;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
   pointer-events: auto;
   overflow: hidden;
+  cursor: grab;
+  &:active {
+    cursor: grabbing;
+  }
   &:hover {
     z-index: 2;
   }
@@ -156,6 +160,17 @@ export const EventResizer = styled.div`
   cursor: ns-resize;
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
+`
+
+export const EventResizerTop = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 12px;
+  cursor: ns-resize;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
 `
 
 export const DateInfo = styled.div`
@@ -210,7 +225,7 @@ export const EventBadgeWrapper = styled.div<{
 
 export const EventTitle = styled.div`
   font-weight: 600;
-  font-size: 13px;
+  font-size: 12px;
   color: ${({ theme }) => theme.colors.black};
 `
 

@@ -1,8 +1,10 @@
-import { type MouseEventHandler, useState } from 'react'
+import { type MouseEventHandler, useCallback, useEffect, useState } from 'react'
 
 import Repeat from '@/shared/assets/icons/rotate.svg?react'
 import Trash from '@/shared/assets/icons/trash-2.svg?react'
+import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
 import { theme } from '@/shared/styles/theme'
+import { DeleteConfirmModal } from '@/shared/ui/modal'
 
 import PriorityBadge from '../ImportantBadge/PriorityBadge'
 import TodoCheckbox from '../TodoCheckbox/TodoCheckbox'
@@ -11,41 +13,83 @@ const TodoCard = ({
   id,
   title,
   date,
+  occurrenceDate,
   isHighlight,
+  isOverdue,
   time,
   priority,
-  repeat,
+  isRecurring,
   repeatInfo,
   onDoubleClick,
   isEditing,
+  isCompleted,
 }: {
   id: number
   title: string
   date: string
+  occurrenceDate: string
   time?: string
   isHighlight?: boolean
+  isOverdue?: boolean
   priority: 'HIGH' | 'MEDIUM' | 'LOW'
-  repeat?: boolean
+  isRecurring?: boolean
   repeatInfo?: string
   onDoubleClick?: MouseEventHandler<HTMLDivElement>
   isEditing?: boolean
+  isCompleted?: boolean
 }) => {
-  const [selected, setSelected] = useState(false)
+  const [selected, setSelected] = useState(isCompleted ?? false)
+  const [openModal, setOpenModal] = useState(false)
+  const isRecurringTodo = Boolean(isRecurring)
+  const { useDeleteTodo, usePatchCompleteTodo } = useTodoMutations()
+  const { mutate: deleteTodoMutate } = useDeleteTodo()
+  const { mutate: patchCompleteTodoMutate } = usePatchCompleteTodo()
+  useEffect(() => {
+    setSelected(isCompleted ?? false)
+  }, [isCompleted])
+  const handleDelete = useCallback(() => {
+    if (isRecurringTodo) {
+      setOpenModal(true)
+      return
+    }
+    deleteTodoMutate({
+      todoId: id,
+      occurrenceDate,
+    })
+  }, [deleteTodoMutate, id, isRecurringTodo, occurrenceDate])
+
+  const handleToggleComplete = () => {
+    const previousSelected = selected
+    const nextSelected = !selected
+    setSelected(nextSelected)
+    patchCompleteTodoMutate(
+      {
+        todoId: id,
+        occurrenceDate,
+        isCompleted: nextSelected,
+      },
+      {
+        onError: () => {
+          setSelected(previousSelected)
+        },
+      },
+    )
+  }
 
   return (
     <S.Wrapper
-      key={id}
       $isHighlight={isHighlight}
+      $isOverdue={isOverdue}
       $isEditing={isEditing}
       onDoubleClick={onDoubleClick}
     >
       <S.TodoLeftWrapper>
-        <TodoCheckbox checked={selected} onChange={() => setSelected(!selected)} />
+        <TodoCheckbox checked={selected} onChange={handleToggleComplete} ariaLabel="할 일 완료" />
         <S.TodoInfoWrapper>
           <S.Title>{title}</S.Title>
           <S.Info $isHighlight={isHighlight}>
             {date} {time}{' '}
-            {repeat && (
+            {isRecurring && (
               <div
                 style={{
                   display: 'flex',
@@ -62,8 +106,22 @@ const TodoCard = ({
       </S.TodoLeftWrapper>
       <S.ButtonWrapper>
         <PriorityBadge priority={priority} />
-        <Trash color="#c5c5c5" />
+        <Trash
+          color="#c5c5c5"
+          onClick={(event) => {
+            event.stopPropagation()
+            handleDelete()
+          }}
+        />
       </S.ButtonWrapper>
+      {openModal && isRecurringTodo && (
+        <DeleteConfirmModal
+          onClose={() => setOpenModal(false)}
+          title={title}
+          target={{ type: 'todo', id, occurrenceDate }}
+          mutate={deleteTodoMutate}
+        />
+      )}
     </S.Wrapper>
   )
 }

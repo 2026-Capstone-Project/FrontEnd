@@ -4,36 +4,42 @@ import 'react-big-calendar/lib/css/react-big-calendar.css'
 
 import moment from 'moment'
 import { cloneElement, type MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import {
-  Calendar,
-  type DateCellWrapperProps,
-  type EventProps,
-  momentLocalizer,
-  type SlotInfo,
-  type View,
-  Views,
-} from 'react-big-calendar'
+import { Calendar, type DateCellWrapperProps, momentLocalizer } from 'react-big-calendar'
+import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 
-import CustomToolbar from '@/features/Calendar/components/CalendarToolbar/CalendarToolbar'
-import CustomWeekView from '@/features/Calendar/components/CustomView/CustomWeekView'
-import type { CalendarEvent } from '@/features/Calendar/domain/types'
 import {
+  useCalendarApiEvents,
+  useCalendarCreateHandlers,
+  useCalendarDateRange,
+  useCalendarDragDrop,
+  useCalendarKeyDelete,
   useCalendarModal,
+  useCalendarNavigation,
   useCalendarPortals,
-  useCalendarProps,
+  useCalendarRbcProps,
   useCalendarResponsive,
+  useCalendarSelection,
+  useDayViewHandlers,
   useStoredCalendarView,
 } from '@/features/Calendar/hooks'
 import { useCalendarEvents } from '@/features/Calendar/hooks/useCalendarEvents'
-import { useDayViewHandlers } from '@/features/Calendar/hooks/useDayViewHandlers'
-import { getDayPropStyle } from '@/features/Calendar/utils/helpers/calendarPageHelpers'
-import { getViewConfig } from '@/features/Calendar/utils/viewConfig'
+import {
+  getEventOccurrenceKey,
+  resolveOccurrenceDateTime,
+} from '@/features/Calendar/utils/helpers/dayViewHelpers'
 import Plus from '@/shared/assets/icons/plus.svg?react'
+import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
+import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
 import { theme } from '@/shared/styles/theme'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
+import type {
+  RecurrenceEventScope,
+  RecurrenceTodoScope,
+} from '@/shared/types/recurrence/recurrence'
+import { EditConfirmModal, type EditConfirmOption } from '@/shared/ui/modal'
+import DeleteConfirmModal from '@/shared/ui/modal/DeleteConfirmModal/DeleteConfirmModal'
 
-import CalendarHeader from '../CalendarDateHeader/CalendarDateHeader'
-import { CustomMonthEvent, CustomMonthShowMore, CustomWeekEvent } from '../CustomEvent'
 import { CustomViewButton } from '../CustomViewButton/CustomViewButton'
 import CalendarModals from './CalendarModals'
 import * as S from './CustomCalendar.style'
@@ -43,220 +49,456 @@ const localizer = momentLocalizer(moment)
 const DragAndDropCalendar = withDragAndDrop<CalendarEvent, object>(Calendar)
 export type SelectDateSource = 'date-cell' | 'slot' | 'header' | 'date-header'
 
-const CustomCalendar = () => {
+type CustomCalendarProps = {
+  onSelectedDateChange?: (selectedDate: Date) => void
+}
+
+const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
+  // 사용자 뷰 상태(월/주/일) 저장
   const { view, setView } = useStoredCalendarView()
   const [date, setDate] = useState<Date>(new Date())
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const [selectedEventId, setSelectedEventId] = useState<CalendarEvent['id'] | null>(null)
+  // 현재 뷰 기준으로 서버 조회 범위 계산
+  const { startDate, endDate } = useCalendarDateRange(view, date)
+  // 서버 일정 목록 조회
+  const { events: apiEvents, refetch: refetchEvents } = useCalendarApiEvents(startDate, endDate)
+
+  const { usePatchEvent, useDeleteEvent } = useCalendarMutation()
+  const { mutate: patchEventMutate } = usePatchEvent()
+  const { mutate: deleteEventMutate } = useDeleteEvent()
+  const { usePatchCompleteTodo, usePatchTodo, useDeleteTodo } = useTodoMutations()
+  const { mutate: patchCompleteTodoMutate } = usePatchCompleteTodo()
+  const { mutate: patchTodoMutate } = usePatchTodo()
+  const { mutate: deleteTodoMutate } = useDeleteTodo()
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean
+    eventId: CalendarEvent['id'] | null
+    title: string
+    occurrenceDate: string
+  }>({ isOpen: false, eventId: null, title: '', occurrenceDate: '' })
+  const [recurringDropConfirm, setRecurringDropConfirm] = useState<{
+    isOpen: boolean
+    target: 'event' | 'todo'
+    args: EventInteractionArgs<CalendarEvent> | null
+  }>({ isOpen: false, target: 'event', args: null })
+  // 로컬 캘린더 이벤트 상태 및 동작
   const {
     events,
     addEvent: enqueueEvent,
     moveEvent,
     resizeEvent,
-    updateEventTime,
+    updateEventTime: updateLocalEventTime,
     updateEventColor,
     updateEventTiming,
     updateEventType,
     updateEventTitle,
     toggleEventDone,
     removeEvent,
-  } = useCalendarEvents()
+  } = useCalendarEvents({ initialEvents: apiEvents })
+
+  // Todo 완료 토글
+  const handleToggleTodo = useCallback(
+    (eventId: CalendarEvent['id']) => {
+      const target = events.find(
+        (eventItem) => eventItem.id === eventId && eventItem.type === 'todo',
+      )
+      if (!target || target.type !== 'todo') {
+        return
+      }
+      const nextCompleted = !target.isDone
+      toggleEventDone(eventId, 'todo')
+      const occurrenceDate = moment(target.start).format('YYYY-MM-DD')
+      patchCompleteTodoMutate({
+        todoId: eventId,
+        occurrenceDate,
+        isCompleted: nextCompleted,
+      })
+    },
+    [events, patchCompleteTodoMutate, toggleEventDone],
+  )
+
+  // Todo 일정 이동 시 시간 패치
+  const patchTodoTiming = useCallback(
+    (
+      todoEvent: CalendarEvent,
+      start: Date,
+      options?: { scope?: RecurrenceTodoScope; occurrenceDate?: string },
+    ) => {
+      const startDate = moment(start).format('YYYY-MM-DD')
+      const occurrenceDate =
+        options?.occurrenceDate ??
+        moment(todoEvent.occurrenceDate ?? todoEvent.start).format('YYYY-MM-DD')
+      const dueTime = todoEvent.isAllDay ? undefined : moment(start).format('HH:mm')
+      patchTodoMutate({
+        todoId: todoEvent.id,
+        occurrenceDate,
+        ...(options?.scope ? { scope: options.scope } : {}),
+        requestBody: {
+          startDate,
+          dueTime,
+          isAllDay: todoEvent.isAllDay,
+        },
+      })
+    },
+    [patchTodoMutate],
+  )
+
+  // 반응형 레이아웃 판단
   const isDesktop = useCalendarResponsive()
+  const isInlineMode = isDesktop
   const { modalPortalRoot, cardPortalRoot } = useCalendarPortals()
+  // 일정 삭제(반복 여부 포함)
+  const handleRemoveEvent = useCallback(
+    (eventId: CalendarEvent['id'], occurrenceDate: string, isRecurring: boolean) => {
+      const params = {
+        ...(isRecurring ? { scope: 'THIS_EVENT' as const } : {}),
+        occurrenceDate: moment(occurrenceDate).format('YYYY-MM-DDTHH:mm:ss'),
+      }
+      deleteEventMutate(
+        {
+          eventId,
+          params,
+        },
+        {
+          onSuccess: () => {
+            refetchEvents()
+          },
+        },
+      )
+    },
+    [deleteEventMutate, refetchEvents],
+  )
+
+  // 반복 일정/할 일 판정
+  const isRecurring = useCallback(
+    (eventId: CalendarEvent['id']) => {
+      const target = events.find((eventItem) => eventItem.id === eventId)
+      if (!target) return false
+      if (target.type === 'todo') {
+        return Boolean(target.isRecurring)
+      }
+      return target.recurrenceGroup != null
+    },
+    [events],
+  )
+
+  // 모달 상태/핸들러
   const { modal, modalDate, isModalEditing, handleAddEvent, handleEventClick, handleCloseModal } =
     useCalendarModal({
       currentDate: date,
-      removeEvent,
+      removeEvent: handleRemoveEvent,
+      isRecurring,
     })
+  const [openedModalMode, setOpenedModalMode] = useState<'modal' | 'inline' | null>(null)
 
-  const onView = useCallback((newView: View) => setView(newView), [setView])
-  const onNavigate = useCallback((newDate: Date) => setDate(newDate), [setDate])
+  useEffect(() => {
+    if (!modal.isOpen) {
+      setOpenedModalMode(null)
+      return
+    }
+    if (openedModalMode == null) {
+      setOpenedModalMode(isInlineMode ? 'inline' : 'modal')
+    }
+  }, [isInlineMode, modal.isOpen, openedModalMode])
 
-  const handleSelectSlot = useCallback(
-    (slotInfo: SlotInfo) => {
-      // 슬롯 선택/더블클릭 처리: 선택 날짜 설정 후 더블클릭이면 새 일정 추가
-      if (slotInfo.action === 'doubleClick') {
-        setSelectedDate(null)
-        const isAllDaySlot = slotInfo.slots.length === 1
-        const createdId = enqueueEvent(slotInfo.start, isAllDaySlot)
-        handleAddEvent(slotInfo.start, createdId)
-      } else {
-        setSelectedDate(slotInfo.start)
-      }
-    },
-    [enqueueEvent, handleAddEvent],
-  )
-
-  const handleSelectEvent = useCallback(
-    (event: CalendarEvent) => {
-      setSelectedEventId(event.id)
-      handleEventClick(event)
-    },
-    [handleEventClick],
-  )
-
-  const handleSelectEventOnly = useCallback((event: CalendarEvent) => {
-    setSelectedEventId(event.id)
-  }, [])
-  /** 선택된 날짜에 배경 강조 스타일을 적용하도록 props를 반환합니다. */
-  const dayPropGetter = useCallback(
-    (calendarDate: Date) => getDayPropStyle(calendarDate, selectedDate),
-    [selectedDate],
-  )
-
-  const handleSelectDate = useCallback((next: Date) => setDate(next), [])
-  const viewConfig = useMemo(
-    () =>
-      getViewConfig(view, {
-        onAddHeader: handleSelectDate,
-      }),
-    [view, handleSelectDate],
-  )
-  const dayViewWithHandlers = useDayViewHandlers({
-    clearSelectedDate: () => setSelectedDate(null),
-    clearSelectedEvent: () => setSelectedEventId(null),
-    enqueueEvent,
-    handleAddEvent,
-    updateEventTime,
-    onToggleTodo: toggleEventDone,
+  // 선택 상태 관리
+  const {
+    selectedDate,
+    setSelectedDate,
     selectedEventId,
-    onEventSelect: handleSelectEventOnly,
-    onEventClick: modal.isOpen ? handleSelectEvent : undefined,
-    onEventDoubleClick: handleSelectEvent,
+    setSelectedEventId,
+    selectedEventKey,
+    setSelectedEventKey,
+    clearSelection,
+    selectEvent,
+    selectEventOnly,
+  } = useCalendarSelection({
+    onOpenEvent: handleEventClick,
   })
 
-  const isInlineMode = isDesktop
+  // 모달 닫힘 시 임시 이벤트 정리
+  const handleCloseModalWithCleanup = useCallback(() => {
+    if (!isModalEditing && modal.eventId != null) {
+      removeEvent(modal.eventId)
+    }
+    handleCloseModal()
+  }, [handleCloseModal, isModalEditing, modal.eventId, removeEvent])
 
+  const clearPendingDraftEvent = useCallback(() => {
+    if (!modal.isOpen || isModalEditing || modal.eventId == null) return
+    removeEvent(modal.eventId)
+  }, [isModalEditing, modal.eventId, modal.isOpen, removeEvent])
+
+  // 반복 삭제 확인 모달 닫기
+  const handleCloseDeleteConfirm = useCallback(() => {
+    setDeleteConfirm({ isOpen: false, eventId: null, title: '', occurrenceDate: '' })
+  }, [])
+
+  // 일간 뷰에서 시간 변경 확정 처리
+  const handleDayViewEventTimeChange = useCallback(
+    (eventId: CalendarEvent['id'], start: Date, end: Date, type?: CalendarEvent['type']) => {
+      updateLocalEventTime(eventId, start, end, type)
+      if (type === 'todo') {
+        const todoEvent = events.find(
+          (eventItem) => eventItem.id === eventId && eventItem.type === 'todo',
+        )
+        if (todoEvent) {
+          patchTodoTiming(todoEvent, start)
+        }
+        return
+      }
+      const nextEnd = moment(end).format('YYYY-MM-DDTHH:mm:ss')
+      const targetEvent = events.find((eventItem) => eventItem.id === eventId)
+      const occurrenceDate = resolveOccurrenceDateTime(
+        targetEvent?.occurrenceDate,
+        targetEvent?.start ?? start,
+      )
+      patchEventMutate({
+        eventId,
+        params: { occurrenceDate },
+        eventData: {
+          startTime: moment(start).format('YYYY-MM-DDTHH:mm:ss'),
+          endTime: nextEnd,
+          isAllDay: false,
+        },
+      })
+    },
+    [events, patchEventMutate, patchTodoTiming, updateLocalEventTime],
+  )
+
+  // 일간 뷰에서 시간 변경 미리보기
+  const handleDayViewEventTimePreview = useCallback(
+    (eventId: CalendarEvent['id'], start: Date, end: Date, type?: CalendarEvent['type']) => {
+      updateLocalEventTime(eventId, start, end, type)
+    },
+    [updateLocalEventTime],
+  )
+
+  // 키보드 삭제(Backspace) 처리
+  useCalendarKeyDelete({
+    isModalOpen: modal.isOpen,
+    date,
+    events,
+    selectedEventId,
+    selectedEventKey,
+    selectedDate,
+    onClearSelection: clearSelection,
+    onOpenRecurringConfirm: ({ eventId, title, occurrenceDate }) =>
+      setDeleteConfirm({
+        isOpen: true,
+        eventId,
+        title,
+        occurrenceDate,
+      }),
+    onRemoveEvent: handleRemoveEvent,
+    onDeleteTodo: deleteTodoMutate,
+  })
+
+  // 뷰/날짜 이동 처리
+  const { onView, onNavigate, onSelectDate } = useCalendarNavigation({
+    view,
+    date,
+    isDesktop,
+    setView,
+    setDate,
+    setSelectedDate,
+    setSelectedEventId,
+    setSelectedEventKey,
+  })
+
+  // 슬롯 선택 및 일간 뷰 생성 처리
+  const { handleDayViewCreateEvent, handleSelectSlotWrapper } = useCalendarCreateHandlers({
+    view,
+    enqueueEvent,
+    onAddEvent: handleAddEvent,
+    onBeforeCreate: clearPendingDraftEvent,
+    setSelectedDate,
+    setSelectedEventId,
+    setSelectedEventKey,
+  })
+  const handleWeekViewCreateEvent = useCallback(
+    (slotDate: Date) => {
+      clearPendingDraftEvent()
+      const start = moment(slotDate).startOf('day').set({ hour: 9, minute: 0, second: 0 }).toDate()
+      const createdId = enqueueEvent(start, false)
+      if (createdId != null) {
+        handleAddEvent(start, createdId)
+      }
+    },
+    [clearPendingDraftEvent, enqueueEvent, handleAddEvent],
+  )
+  const handleWeekViewSelectDate = useCallback(
+    (nextDate: Date) => {
+      setSelectedDate(nextDate)
+      setSelectedEventId(null)
+      setSelectedEventKey(null)
+    },
+    [setSelectedDate, setSelectedEventId, setSelectedEventKey],
+  )
+
+  // 일간뷰 전용 핸들러 주입
+  const dayViewWithHandlers = useDayViewHandlers({
+    clearSelectedDate: () => setSelectedDate(null),
+    clearSelectedEvent: () => {
+      setSelectedEventId(null)
+      setSelectedEventKey(null)
+    },
+    enqueueEvent,
+    handleAddEvent,
+    updateEventTime: handleDayViewEventTimeChange,
+    updateEventTimePreview: handleDayViewEventTimePreview,
+    onCreateEvent: handleDayViewCreateEvent,
+    onToggleTodo: handleToggleTodo,
+    selectedEventKey,
+    onEventSelect: selectEventOnly,
+    onEventClick: undefined,
+    onEventDoubleClick: selectEvent,
+  })
+
+  // 날짜 셀 클릭 시 날짜 이동(기본 이벤트 전파 제어)
   const DateCellWrapper = useCallback(
     ({ value, children }: DateCellWrapperProps) =>
       cloneElement(children, {
         onClick: (event: MouseEvent<HTMLElement>) => {
           event.stopPropagation()
+          setSelectedEventId(null)
+          setSelectedEventKey(null)
           setDate(value)
           if (typeof children.props.onClick === 'function') {
             children.props.onClick(event)
           }
         },
       }),
-    [setDate],
+    [setDate, setSelectedEventId, setSelectedEventKey],
   )
 
-  const viewEventComponent = useMemo(() => {
-    if (view === Views.MONTH) {
-      return {
-        event: (props: EventProps<CalendarEvent>) => (
-          <CustomMonthEvent
-            {...props}
-            onEventClick={handleSelectEvent}
-            onToggleTodo={toggleEventDone}
-          />
-        ),
+  // drag & drop 처리
+  const { handleEventDrop, applyEventDrop } = useCalendarDragDrop({
+    view,
+    moveEvent,
+    patchEventMutate,
+    patchTodoTiming,
+    onRequireRecurringDropConfirm: (args, target) => {
+      setRecurringDropConfirm({ isOpen: true, target, args })
+    },
+  })
+  const handleCloseRecurringDropConfirm = useCallback(() => {
+    setRecurringDropConfirm({ isOpen: false, target: 'event', args: null })
+  }, [])
+  const handleConfirmRecurringDrop = useCallback(
+    (option: EditConfirmOption) => {
+      if (!recurringDropConfirm.args) return
+      if (recurringDropConfirm.target === 'todo') {
+        const todoScope: RecurrenceTodoScope =
+          option === 'future' ? 'THIS_AND_FOLLOWING' : 'THIS_TODO'
+        applyEventDrop(recurringDropConfirm.args, { todoScope })
+        handleCloseRecurringDropConfirm()
+        return
       }
-    }
-    if (view === Views.WEEK) {
-      return {
-        event: (props: EventProps<CalendarEvent>) => (
-          <CustomWeekEvent
-            event={props.event}
-            onEventClick={handleSelectEvent}
-            onToggleTodo={toggleEventDone}
-            isSelected={props.event.id === selectedEventId}
-          />
-        ),
-      }
-    }
-    return {}
-  }, [view, handleSelectEvent, toggleEventDone, selectedEventId])
-
-  const mergedComponents = useMemo(
-    () => ({
-      toolbar: CustomToolbar,
-
-      ...(view === Views.DAY ? {} : viewConfig.components),
-      ...viewEventComponent,
-      dateCellWrapper: DateCellWrapper,
-      dateHeader: ({ label, date }: { label: string; date: Date }) => (
-        <CalendarHeader label={label} date={date} onClick={() => setSelectedDate(date)} />
-      ),
-      showMore: CustomMonthShowMore,
-    }),
-    [view, viewConfig.components, viewEventComponent, DateCellWrapper],
+      const eventScope: RecurrenceEventScope =
+        option === 'future' ? 'THIS_AND_FOLLOWING_EVENTS' : 'THIS_EVENT'
+      applyEventDrop(recurringDropConfirm.args, { eventScope })
+      handleCloseRecurringDropConfirm()
+    },
+    [
+      applyEventDrop,
+      handleCloseRecurringDropConfirm,
+      recurringDropConfirm.args,
+      recurringDropConfirm.target,
+    ],
   )
 
-  const calendarViews = useMemo(
-    () => ({
-      month: true,
-      week: CustomWeekView,
-      day: dayViewWithHandlers,
-    }),
-    [dayViewWithHandlers],
-  )
-
-  const calendarProps = useCalendarProps({
-    localizer,
-    views: calendarViews,
+  // react-big-calendar props 구성
+  const { calendarProps } = useCalendarRbcProps({
     view,
     date,
     events,
+    selectedEventKey,
+    effectiveSelectedDate: selectedDate,
     onView,
     onNavigate,
-    onSelectEvent: handleSelectEvent,
-    onEventDrop: moveEvent,
+    onSelectDate,
+    onSelectEvent: selectEvent,
+    onSelectEventOnly: selectEventOnly,
+    onDoubleClickEvent: selectEvent,
+    onDoubleClickDate: handleWeekViewCreateEvent,
+    onSelectWeekDate: handleWeekViewSelectDate,
+    onToggleTodo: handleToggleTodo,
+    onSelectSlot: handleSelectSlotWrapper,
+    onEventDrop: handleEventDrop,
     onEventResize: resizeEvent,
-    onSelectSlot: handleSelectSlot,
-    dayPropGetter,
-    components: mergedComponents,
-    viewConfig,
+    dateCellWrapper: DateCellWrapper,
+    dayViewComponent: dayViewWithHandlers,
+    localizer,
   })
 
-  /* eslint-disable react-hooks/set-state-in-effect */
-  useEffect(() => {
-    if (isInlineMode) {
-      setSelectedDate((prev) => prev ?? new Date())
-      return
+  // 모달에 넘길 이벤트 조회
+  const modalEvent = useMemo(() => {
+    if (selectedEventKey) {
+      return events.find((item) => getEventOccurrenceKey(item) === selectedEventKey) ?? null
     }
-    setSelectedDate(null)
-  }, [isInlineMode])
-  /* eslint-enable react-hooks/set-state-in-effect */
-
-  const modalEvent = useMemo(
-    () =>
-      modal.eventId == null ? null : (events.find((item) => item.id === modal.eventId) ?? null),
-    [events, modal.eventId],
+    return modal.eventId == null ? null : (events.find((item) => item.id === modal.eventId) ?? null)
+  }, [events, modal.eventId, selectedEventKey])
+  const modalMode: 'modal' | 'inline' = openedModalMode ?? (isInlineMode ? 'inline' : 'modal')
+  const isModalInlineMode = modalMode === 'inline'
+  // 이벤트 수정 핸들러 묶음
+  const eventActions = useMemo(
+    () => ({
+      onEventColorChange: updateEventColor,
+      onEventTitleConfirm: updateEventTitle,
+      onEventTypeChange: updateEventType,
+      onEventTimingChange: updateEventTiming,
+    }),
+    [updateEventColor, updateEventTitle, updateEventType, updateEventTiming],
   )
-  const modalMode: 'modal' | 'inline' = isInlineMode ? 'inline' : 'modal'
-  const eventCardDate = selectedDate ?? date
+  useEffect(() => {
+    onSelectedDateChange?.(selectedDate ?? date)
+  }, [date, onSelectedDateChange, selectedDate])
 
   return (
     <div css={{ position: 'relative', height: 'fit-content', width: '100%' }}>
+      {/* 모바일 전용 헤더 버튼 */}
       <S.MobileButtons>
         <CustomViewButton view={view} onView={onView} className="mobile-custom-view-button" />
         <button className="add-button" onClick={() => handleAddEvent()} type="button">
           <Plus height={20} width={20} color={theme.colors.primary} />
         </button>
       </S.MobileButtons>
+      {/* 캘린더 본문 */}
       <S.CalendarWrapper view={view}>
         <DragAndDropCalendar {...calendarProps} />
       </S.CalendarWrapper>
+      {/* 모달/카드 영역 */}
       <CalendarModals
         modalDate={modalDate}
         modalEventId={modal.eventId}
         modalEvent={modalEvent}
         isModalEditing={isModalEditing}
-        isModalOpen={modal.isOpen}
-        isInlineMode={isInlineMode}
+        isInlineMode={isModalInlineMode}
         modalMode={modalMode}
         modalPortalRoot={modalPortalRoot}
         cardPortalRoot={cardPortalRoot}
-        eventCardDate={eventCardDate}
-        showEventCard={selectedDate != null}
-        onCloseModal={handleCloseModal}
-        onCloseEventCard={() => setSelectedDate(null)}
-        onEventColorChange={updateEventColor}
-        onEventTitleConfirm={updateEventTitle}
-        onEventTypeChange={updateEventType}
-        onEventTimingChange={updateEventTiming}
+        onCloseModal={handleCloseModalWithCleanup}
+        eventActions={eventActions}
       />
+      {/* 반복 일정 삭제 확인 */}
+      {deleteConfirm.isOpen && deleteConfirm.eventId != null && (
+        <DeleteConfirmModal
+          onClose={handleCloseDeleteConfirm}
+          title={deleteConfirm.title}
+          target={{
+            type: 'event',
+            id: deleteConfirm.eventId,
+            occurrenceDate: deleteConfirm.occurrenceDate,
+          }}
+          mutate={deleteEventMutate}
+        />
+      )}
+      {recurringDropConfirm.isOpen && (
+        <EditConfirmModal
+          onCancel={handleCloseRecurringDropConfirm}
+          onConfirm={handleConfirmRecurringDrop}
+        />
+      )}
     </div>
   )
 }

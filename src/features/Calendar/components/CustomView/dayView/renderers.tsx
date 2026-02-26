@@ -1,10 +1,10 @@
 import moment from 'moment'
 import type { MutableRefObject, Ref } from 'react'
 
+import type { CalendarEvent } from '../../../../../shared/types/calendar/types'
 import { TIMED_SLOT_CONFIG } from '../../../domain/constants'
-import type { CalendarEvent } from '../../../domain/types'
 import { getColorPalette } from '../../../utils/colorPalette'
-import type { TimedSlotEvent } from '../../../utils/helpers/dayViewHelpers'
+import { getEventOccurrenceKey, type TimedSlotEvent } from '../../../utils/helpers/dayViewHelpers'
 import { TodoCheckbox } from '../../CustomEvent/CustomEvent.style'
 import * as S from '../dayView'
 import type { DragState, EventPointerDownHandler } from './dragHandlers'
@@ -44,7 +44,7 @@ export const renderTimeSlotRows = (
 export const renderAllDayEventBadges = (
   events: CalendarEvent[],
   onToggleTodo?: (eventId: CalendarEvent['id']) => void,
-  selectedEventId?: CalendarEvent['id'] | null,
+  selectedEventKey?: string | null,
   onEventSelect?: (event: CalendarEvent) => void,
   onEventClick?: (event: CalendarEvent) => void,
   onEventDoubleClick?: (event: CalendarEvent) => void,
@@ -56,7 +56,7 @@ export const renderAllDayEventBadges = (
         key={event.id}
         color={palette.base}
         pointColor={palette.point}
-        isSelected={selectedEventId === event.id}
+        isSelected={selectedEventKey === getEventOccurrenceKey(event)}
         onClick={() => {
           onEventSelect?.(event)
           onEventClick?.(event)
@@ -97,11 +97,13 @@ export const renderTimeOverlayColumn = ({
   dragStateRef,
   handleEventPointerDown,
   handleResizePointerDown,
+  handleResizeStartPointerDown,
   onToggleTodo,
-  selectedEventId,
+  selectedEventKey,
   onEventSelect,
   onEventClick,
   onEventDoubleClick,
+  dragThresholdPassedRef,
   gridRef,
   columnIndex,
 }: {
@@ -114,11 +116,13 @@ export const renderTimeOverlayColumn = ({
   dragStateRef: MutableRefObject<DragState | null>
   handleEventPointerDown: EventPointerDownHandler
   handleResizePointerDown: EventPointerDownHandler
+  handleResizeStartPointerDown: EventPointerDownHandler
   onToggleTodo?: (eventId: CalendarEvent['id']) => void
-  selectedEventId?: CalendarEvent['id'] | null
+  selectedEventKey?: string | null
   onEventSelect?: (event: CalendarEvent) => void
   onEventClick?: (event: CalendarEvent) => void
   onEventDoubleClick?: (event: CalendarEvent) => void
+  dragThresholdPassedRef?: MutableRefObject<boolean>
   gridRef?: MutableRefObject<HTMLDivElement | null>
   columnIndex: number
 }) => {
@@ -130,57 +134,78 @@ export const renderTimeOverlayColumn = ({
     ? Number.parseFloat(getComputedStyle(gridRef.current).columnGap || '0')
     : 0
   const columnWidth = gridRect ? (gridRect.width - columnGapPx) / 2 : 0
+  const laneGap = 6
   return (
     <S.SlotColumn key={startHour}>
       {renderTimeSlotRows(startHour, date, handleSlotDoubleClick, slotRef)}
       <S.TimeOverlay>
-        {columnEvents.map(({ event, top, height, palette, overflowTop, overflowBottom }) => {
-          const eventStart = normalizeDateValue(event.start)
-          const eventEnd = normalizeDateValue(event.end)
-          const currentDragState = dragStateRef.current
-          const isDraggingEvent = currentDragState?.event.id === event.id
-          const columnShift =
-            isDraggingEvent && currentDragState?.mode === 'move'
-              ? (currentDragState?.columnShift ?? 0)
-              : 0
-          const translateX = columnShift ? columnShift * (columnWidth + columnGapPx) : 0
-          const moveDeltaMinutes =
-            isDraggingEvent && currentDragState?.mode === 'move' ? currentDragState.deltaMinutes : 0
-          const resizeDeltaMinutes =
-            isDraggingEvent && currentDragState?.mode === 'resize'
-              ? currentDragState.deltaMinutes
-              : 0
-          const moveOffset = (moveDeltaMinutes / 60) * rowHeightForCalc
-          const resizeOffset = (resizeDeltaMinutes / 60) * rowHeightForCalc
-          const baseTop = top + moveOffset
-          const clampedTop = Math.min(Math.max(baseTop, 0), columnHeight - minHeight)
-          const baseHeight = Math.max(height + resizeOffset, minHeight)
-          const clampedHeight = Math.min(baseHeight, Math.max(columnHeight - clampedTop, minHeight))
-          const overflowTopResolved = Boolean(overflowTop) || baseTop < 0
-          const overflowBottomResolved =
-            Boolean(overflowBottom) || baseTop + baseHeight > columnHeight
-          return (
-            <S.DayEventBadge
-              key={event.id}
-              color={palette.base}
-              pointColor={palette.point}
-              isSelected={selectedEventId === event.id}
-              overflowTop={overflowTopResolved}
-              overflowBottom={overflowBottomResolved}
-              style={{
-                top: clampedTop,
-                height: clampedHeight,
-                transform: translateX ? `translateX(${translateX}px)` : undefined,
-                transition: translateX ? 'transform 120ms ease' : undefined,
-                zIndex: isDraggingEvent ? 4 : undefined,
-              }}
-              onClick={() => {
-                onEventSelect?.(event)
-                onEventClick?.(event)
-              }}
-              onDoubleClick={() => onEventDoubleClick?.(event)}
-            >
-              <S.EventRow
+        {columnEvents.map(
+          ({ event, top, height, palette, overflowTop, overflowBottom, laneIndex, laneCount }) => {
+            const eventStart = normalizeDateValue(event.start)
+            const eventEnd = normalizeDateValue(event.end)
+            const currentDragState = dragStateRef.current
+            const isDraggingEvent = currentDragState?.event.id === event.id
+            const isPreviewing = Boolean(currentDragState?.preview)
+            const columnShift =
+              isDraggingEvent && currentDragState?.mode === 'move' && !isPreviewing
+                ? (currentDragState?.columnShift ?? 0)
+                : 0
+            const translateX = columnShift ? columnShift * (columnWidth + columnGapPx) : 0
+            const moveDeltaMinutes =
+              isDraggingEvent && currentDragState?.mode === 'move' && !isPreviewing
+                ? currentDragState.deltaMinutes
+                : 0
+            const resizeDeltaMinutes =
+              isDraggingEvent && currentDragState?.mode === 'resize' && !isPreviewing
+                ? currentDragState.deltaMinutes
+                : 0
+            const moveOffset = (moveDeltaMinutes / 60) * rowHeightForCalc
+            const resizeOffset = (resizeDeltaMinutes / 60) * rowHeightForCalc
+            const baseTop = top + moveOffset
+            const clampedTop = Math.min(Math.max(baseTop, 0), columnHeight - minHeight)
+            const baseHeight = Math.max(height + resizeOffset, minHeight)
+            const clampedHeight = Math.min(
+              baseHeight,
+              Math.max(columnHeight - clampedTop, minHeight),
+            )
+            const overflowTopResolved = Boolean(overflowTop) || baseTop < 0
+            const overflowBottomResolved =
+              Boolean(overflowBottom) || baseTop + baseHeight > columnHeight
+            const lanes = Math.max(laneCount ?? 1, 1)
+            const lane = Math.max(laneIndex ?? 0, 0)
+            const totalGap = lanes > 1 ? laneGap * (lanes - 1) : 0
+            const laneWidthCss = lanes > 1 ? `calc((100% - ${totalGap}px) / ${lanes})` : '100%'
+            const laneLeftCss =
+              lanes > 1
+                ? `calc(${lane} * (100% - ${totalGap}px) / ${lanes} + ${lane * laneGap}px)`
+                : '0px'
+            return (
+              <S.DayEventBadge
+                key={event.id}
+                color={palette.base}
+                pointColor={palette.point}
+                isSelected={selectedEventKey === getEventOccurrenceKey(event)}
+                overflowTop={overflowTopResolved}
+                overflowBottom={overflowBottomResolved}
+                style={{
+                  top: clampedTop,
+                  height: clampedHeight,
+                  width: laneWidthCss,
+                  left: laneLeftCss,
+                  right: 'auto',
+                  transform: translateX ? `translateX(${translateX}px)` : undefined,
+                  transition: translateX ? 'transform 120ms ease' : undefined,
+                  zIndex: isDraggingEvent ? 4 : undefined,
+                }}
+                onClick={() => {
+                  if (dragThresholdPassedRef?.current) return
+                  onEventSelect?.(event)
+                  onEventClick?.(event)
+                }}
+                onDoubleClick={() => {
+                  if (dragThresholdPassedRef?.current) return
+                  onEventDoubleClick?.(event)
+                }}
                 onPointerDown={(pointerEvent) => {
                   onEventSelect?.(event)
                   handleEventPointerDown(
@@ -197,40 +222,58 @@ export const renderTimeOverlayColumn = ({
                   )
                 }}
               >
-                {event.type === 'todo' ? (
-                  <TodoCheckbox
-                    type="checkbox"
-                    checked={!!event.isDone}
-                    onPointerDown={(eventPointer) => eventPointer.stopPropagation()}
-                    onMouseDown={(eventMouse) => eventMouse.stopPropagation()}
-                    onClick={(eventClick) => eventClick.stopPropagation()}
-                    onDoubleClick={(eventDoubleClick) => eventDoubleClick.stopPropagation()}
-                    onChange={(eventChange) => {
-                      eventChange.stopPropagation()
-                      onToggleTodo?.(event.id)
+                <S.EventRow>
+                  {event.type === 'todo' ? (
+                    <TodoCheckbox
+                      type="checkbox"
+                      checked={!!event.isDone}
+                      onPointerDown={(eventPointer) => eventPointer.stopPropagation()}
+                      onMouseDown={(eventMouse) => eventMouse.stopPropagation()}
+                      onClick={(eventClick) => eventClick.stopPropagation()}
+                      onDoubleClick={(eventDoubleClick) => eventDoubleClick.stopPropagation()}
+                      onChange={(eventChange) => {
+                        eventChange.stopPropagation()
+                        onToggleTodo?.(event.id)
+                      }}
+                    />
+                  ) : (
+                    <S.Circle backgroundColor={palette.point} />
+                  )}
+                  <S.EventTitle>{event.title}</S.EventTitle>
+                </S.EventRow>
+                {event.location && <S.EventLocation>{event.location}</S.EventLocation>}
+                {event.type !== 'todo' && (
+                  <S.EventResizerTop
+                    onPointerDown={(pointerEvent) => {
+                      pointerEvent.stopPropagation()
+                      handleResizeStartPointerDown(
+                        pointerEvent,
+                        event,
+                        rowHeightForCalc,
+                        eventStart,
+                        eventEnd,
+                      )
                     }}
                   />
-                ) : (
-                  <S.Circle backgroundColor={palette.point} />
                 )}
-                <S.EventTitle>{event.title}</S.EventTitle>
-              </S.EventRow>
-              {event.location && <S.EventLocation>{event.location}</S.EventLocation>}
-              <S.EventResizer
-                onPointerDown={(pointerEvent) => {
-                  pointerEvent.stopPropagation()
-                  handleResizePointerDown(
-                    pointerEvent,
-                    event,
-                    rowHeightForCalc,
-                    eventStart,
-                    eventEnd,
-                  )
-                }}
-              />
-            </S.DayEventBadge>
-          )
-        })}
+                {event.type !== 'todo' && (
+                  <S.EventResizer
+                    onPointerDown={(pointerEvent) => {
+                      pointerEvent.stopPropagation()
+                      handleResizePointerDown(
+                        pointerEvent,
+                        event,
+                        rowHeightForCalc,
+                        eventStart,
+                        eventEnd,
+                      )
+                    }}
+                  />
+                )}
+              </S.DayEventBadge>
+            )
+          },
+        )}
       </S.TimeOverlay>
     </S.SlotColumn>
   )

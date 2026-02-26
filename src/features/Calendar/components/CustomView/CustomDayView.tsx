@@ -3,8 +3,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import type { NavigateAction, ViewStatic } from 'react-big-calendar'
 
 import { formatWeekday } from '@/features/Calendar/utils/formatters'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 
-import type { CalendarEvent } from '../../domain/types'
 import {
   buildTimedSlots,
   compareByStart,
@@ -21,11 +21,12 @@ interface CustomDayViewProps {
   date?: Date
   onSlotDoubleClick?: (slotDate: Date) => void
   onEventDrag?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
+  onEventDragPreview?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
   onToggleTodo?: (eventId: CalendarEvent['id']) => void
-  selectedEventId?: CalendarEvent['id'] | null
-  onEventSelect?: (event: CalendarEvent) => void
-  onEventClick?: (event: CalendarEvent) => void
-  onEventDoubleClick?: (event: CalendarEvent) => void
+  selectedEventKey?: string | null
+  onEventSelect?: (event: CalendarEvent, clickedDate?: Date) => void
+  onEventClick?: (event: CalendarEvent, clickedDate?: Date) => void
+  onEventDoubleClick?: (event: CalendarEvent, clickedDate?: Date) => void
 }
 
 //TODO: 이벤트가 차지하는 높이가 작을 때 텍스트가 넘치는 문제 해결
@@ -41,8 +42,9 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
   date = new Date(),
   onSlotDoubleClick,
   onEventDrag,
+  onEventDragPreview,
   onToggleTodo,
-  selectedEventId,
+  selectedEventKey,
   onEventSelect,
   onEventClick,
   onEventDoubleClick,
@@ -53,22 +55,27 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
   // 날짜 전체를 차지하는 이벤트만 추려서 위쪽 배너에서 보여줍니다.
   const allDayEvents = events
     .filter(
-      (event) => (event.allDay || isDateOnlyString(event.start)) && eventCoversDate(event, date),
+      (event) => (event.isAllDay || isDateOnlyString(event.start)) && eventCoversDate(event, date),
     )
     .sort(compareByStart)
 
   // 특정 시간에 시작하는 이벤트는 타임라인에 배치합니다.
   const timedEvents = events
     .filter(
-      (event) => !event.allDay && !isDateOnlyString(event.start) && eventCoversDate(event, date),
+      (event) => !event.isAllDay && !isDateOnlyString(event.start) && eventCoversDate(event, date),
     )
     .sort(compareByStart)
 
-  const timedColumns = buildTimedSlots(timedEvents)
+  const timedColumns = buildTimedSlots(timedEvents, date)
 
   const [rowHeight, setRowHeight] = useState(50)
-  const { dragStateRef, handleEventPointerDown, handleResizePointerDown } =
-    useDayViewDragHandlers(onEventDrag)
+  const {
+    dragStateRef,
+    dragThresholdPassedRef,
+    handleEventPointerDown,
+    handleResizePointerDown,
+    handleResizeStartPointerDown,
+  } = useDayViewDragHandlers(onEventDrag, onEventDragPreview)
   const slotRowRef = useRef<HTMLDivElement | null>(null)
   const gridRef = useRef<HTMLDivElement | null>(null)
 
@@ -106,7 +113,7 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
           {renderAllDayEventBadges(
             allDayEvents,
             onToggleTodo,
-            selectedEventId,
+            selectedEventKey,
             onEventSelect,
             onEventClick,
             onEventDoubleClick,
@@ -125,11 +132,13 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
               dragStateRef,
               handleEventPointerDown,
               handleResizePointerDown,
+              handleResizeStartPointerDown,
               onToggleTodo,
-              selectedEventId,
+              selectedEventKey,
               onEventSelect,
               onEventClick,
               onEventDoubleClick,
+              dragThresholdPassedRef,
               gridRef,
               columnIndex,
             }),

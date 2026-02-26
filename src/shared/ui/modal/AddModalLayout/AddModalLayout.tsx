@@ -11,21 +11,25 @@ const AddModalLayout = ({
   children,
   type,
   footerChildren,
+  onSubmit,
   submitFormId,
   handleDelete,
   headerExtras,
   mode,
   headerTitleContainerRef,
+  modalWrapperRef,
 }: {
   onClose: () => void
   children: React.ReactNode
   type: 'todo' | 'schedule'
   footerChildren?: React.ReactNode
+  onSubmit: () => void
   submitFormId?: string
   mode: 'modal' | 'inline'
   handleDelete?: () => void
   headerExtras?: React.ReactNode
   headerTitleContainerRef?: Ref<HTMLDivElement>
+  modalWrapperRef?: Ref<HTMLDivElement>
 }) => {
   const layoutContent = (
     <S.ModalInner
@@ -33,7 +37,7 @@ const AddModalLayout = ({
         event.stopPropagation()
       }}
     >
-      <S.ModalWrapper mode={mode}>
+      <S.ModalWrapper ref={modalWrapperRef} mode={mode} data-item-type={type}>
         <S.ModalHeader>
           <S.TitleWrapper>
             <S.ModalHeaderTitle>
@@ -46,10 +50,20 @@ const AddModalLayout = ({
 
         <S.ModalContent>{children}</S.ModalContent>
         <S.ModalFooter>
-          <S.FooterLeft>{type === 'schedule' && footerChildren}</S.FooterLeft>
+          <S.FooterLeft>{footerChildren}</S.FooterLeft>
           <S.FooterRight>
             <Trash onClick={handleDelete} css={{ cursor: 'pointer' }} color="#757575" />
-            <S.Button type="submit" form={submitFormId}>
+            <S.Button
+              type={submitFormId ? 'submit' : 'button'}
+              form={submitFormId}
+              onClick={
+                submitFormId
+                  ? undefined
+                  : () => {
+                      onSubmit()
+                    }
+              }
+            >
               <Check color="#ffffff" />
             </S.Button>
           </S.FooterRight>

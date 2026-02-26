@@ -12,7 +12,7 @@ import {
   TERMINATION_TYPES,
   WEEKDAY_NAMES,
   type WeekdayName,
-} from '../types/repeat'
+} from '../types/recurrence/repeat'
 export const title = yup
   .string()
   .required('제목은 필수 입력 사항입니다.')
@@ -60,6 +60,21 @@ export const repeatConfigSchema = yup.object().shape({
       ]
       return repeatType === 'custom' && customBasis === 'weekly'
         ? schema.min(1, '반복 요일을 최소 하나 선택하세요.').required('반복 요일을 선택하세요.')
+        : schema
+    }),
+  // 사용자 지정 - 매주 기준: 몇 주마다 반복할지 입력
+  customWeeklyInterval: yup
+    .number()
+    .typeError('정수를 입력하세요.')
+    .min(1, '반복 간격은 1주 이상이어야 합니다.')
+    .max(52, '최대 52주까지 설정할 수 있습니다.')
+    .when(['repeatType', 'customBasis'], (values, schema) => {
+      const [repeatType, customBasis] = values as [
+        RepeatType | undefined,
+        CustomRepeatBasis | null | undefined,
+      ]
+      return repeatType === 'custom' && customBasis === 'weekly'
+        ? schema.required('몇 주마다 반복할지 입력하세요.')
         : schema
     }),
   // 사용자 지정 - 매월 기준: 간격과 날짜/패턴을 각각 검증

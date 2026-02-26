@@ -12,7 +12,7 @@ export default function SocialCallback() {
     if (!provider || !code || !state) return
     const SERVER_URL = import.meta.env.VITE_SERVER_URL
     const upperProvider = provider.toUpperCase()
-    const callbackUrl = `${SERVER_URL}/api/v1/auth/${upperProvider}/callback?code=${code}&state=${state}`
+    const callbackUrl = `${SERVER_URL}/auth/${upperProvider}/callback?code=${code}&state=${state}`
 
     window.location.href = callbackUrl
   }, [provider, code, state])

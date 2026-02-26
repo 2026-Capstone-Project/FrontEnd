@@ -18,6 +18,8 @@ export const monthViewStyles = css`
   }
   .rbc-off-range {
     color: #d2d3d2 !important;
+    visibility: hidden;
+    pointer-events: none;
   }
   .rbc-off-range-bg {
     background-color: transparent;
@@ -27,9 +29,6 @@ export const monthViewStyles = css`
     min-height: 120px;
     ${media.down(theme.breakPoints.desktop)} {
       min-height: 100px;
-    }
-    ${media.down(theme.breakPoints.tablet)} {
-      min-height: 80px;
     }
   }
 

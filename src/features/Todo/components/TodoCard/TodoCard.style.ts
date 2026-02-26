@@ -3,19 +3,29 @@ import styled from '@emotion/styled'
 import { media } from '@/shared/styles/media'
 import { theme } from '@/shared/styles/theme'
 
-export const Wrapper = styled.div<{ $isHighlight?: boolean; $isEditing?: boolean }>`
+export const Wrapper = styled.div<{
+  $isHighlight?: boolean
+  $isEditing?: boolean
+  $isOverdue?: boolean
+}>`
   width: 100%;
   height: 88px;
   border-radius: 12px;
   padding: 26px 20px;
-  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: ${({ $isOverdue }) =>
+    $isOverdue ? '0 0 2px 0 rgba(0, 0, 0, 0.10)' : '0 0 2px 0 rgba(0, 0, 0, 0.1)'};
   box-sizing: border-box;
   border: ${({ $isEditing }) => ($isEditing ? `1.5px solid` : 'none')};
   border-color: ${({ $isEditing }) => ($isEditing ? `${theme.colors.textColor3}` : 'none')};
-  background: ${({ $isHighlight }) =>
-    $isHighlight
-      ? ' linear-gradient(90deg, #e9f4f7 0%, rgba(233, 244, 247, 0) 100%), #fff;'
-      : 'white'};
+  background: ${({ $isOverdue, $isHighlight }) => {
+    if ($isOverdue) {
+      return 'linear-gradient(90deg, #FFE9E8 0%, rgba(251, 226, 225, 0.04) 100%), #FFF'
+    }
+    if ($isHighlight) {
+      return 'linear-gradient(90deg, #e9f4f7 0%, rgba(233, 244, 247, 0) 100%), #fff'
+    }
+    return 'white'
+  }};
   display: flex;
   justify-content: space-between;
   align-items: center;

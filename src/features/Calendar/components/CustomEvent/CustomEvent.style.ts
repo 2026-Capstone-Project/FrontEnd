@@ -54,7 +54,11 @@ export const TodoCheckbox = styled.input`
     top: 2px;
   }
 `
-export const MonthEventContainer = styled.div<{ backgroundColor?: string }>`
+export const MonthEventContainer = styled.div<{
+  backgroundColor?: string
+  pointColor?: string
+  isSelected?: boolean
+}>`
   display: flex;
   flex-direction: row;
   gap: 4px;
@@ -66,6 +70,8 @@ export const MonthEventContainer = styled.div<{ backgroundColor?: string }>`
   padding: 0 5px;
   border-radius: 8px;
   height: 16px;
+  box-shadow: ${({ isSelected, pointColor }) =>
+    isSelected ? `inset 0 0 0 2px ${pointColor ?? 'transparent'}` : 'none'};
 `
 
 export const WeekEventContainer = styled.div<{

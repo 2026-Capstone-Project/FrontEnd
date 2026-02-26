@@ -1,57 +1,47 @@
-import { createPortal } from 'react-dom'
+import { useEventQuery, useTodoForCalendarQuery } from '@/shared/hooks/query/useCalendarQueries'
 
-import { mockCalendarEvents } from '../../mocks/calendarEvents'
 import EventDetailCard from '../EventDetailCard/EventDetailCard'
 import * as S from './EventsCard.style'
-const EventsCard = ({
-  selectedDate,
-  onClose,
-  mode,
-}: {
-  selectedDate: Date
-  onClose: () => void
-  mode: 'inline' | 'modal'
-}) => {
-  const startOfSelectedDay = new Date(selectedDate)
-  startOfSelectedDay.setHours(0, 0, 0, 0)
-  const endOfSelectedDay = new Date(startOfSelectedDay)
-  endOfSelectedDay.setHours(23, 59, 59, 999)
+const EventsCard = ({ selectedDate }: { selectedDate: Date }) => {
+  const editDate = new Date(selectedDate)
+  const year = editDate.getFullYear()
+  const month = String(editDate.getMonth() + 1).padStart(2, '0')
+  const day = String(editDate.getDate()).padStart(2, '0')
+  const formattedDate = `${year}-${month}-${day}`
+  const { data: eventData } = useEventQuery(formattedDate, formattedDate)
+  const { data: todoData } = useTodoForCalendarQuery(formattedDate, formattedDate)
+  const details = eventData?.result?.details ?? []
 
-  const data = mockCalendarEvents.filter((event) => {
-    const eventStart = new Date(event.start)
-    const eventEnd = new Date(event.end)
-    return eventStart <= endOfSelectedDay && eventEnd >= startOfSelectedDay
-  })
-  return createPortal(
-    <S.CardOverlay onClick={mode === 'modal' ? onClose : undefined}>
-      <S.CardWrapper
-        onClick={(event) => {
-          event.stopPropagation()
-        }}
-      >
-        <S.Card>
-          <S.Header>
-            {selectedDate.toLocaleDateString('ko-KR', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              weekday: 'long',
-            })}
-            <S.Dot />
-          </S.Header>
-          {data.length > 0 ? (
-            <S.EventCards>
-              {data.map((event) => (
-                <EventDetailCard key={event.id} event={event} type={event.type} />
-              ))}
-            </S.EventCards>
-          ) : (
-            <S.EmptyEvent>예정된 일정 없음</S.EmptyEvent>
-          )}
-        </S.Card>
-      </S.CardWrapper>
-    </S.CardOverlay>,
-    document.getElementById(mode === 'modal' ? 'modal-root' : 'desktop-card-area')!,
+  return (
+    <S.CardWrapper
+      onClick={(event) => {
+        event.stopPropagation()
+      }}
+    >
+      <S.Card mode={'inline'}>
+        <S.Header>
+          {selectedDate.toLocaleDateString('ko-KR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            weekday: 'long',
+          })}
+          <S.Dot />
+        </S.Header>
+        {details.length > 0 || (todoData?.result?.todos.length ?? 0) > 0 ? (
+          <S.EventCards>
+            {details.map((event) => (
+              <EventDetailCard key={event.id} event={event} type={'schedule'} />
+            ))}
+            {todoData?.result?.todos.map((todo) => (
+              <EventDetailCard key={todo.todoId} event={todo} type={'todo'} />
+            ))}
+          </S.EventCards>
+        ) : (
+          <S.EmptyEvent>예정된 일정 없음</S.EmptyEvent>
+        )}
+      </S.Card>
+    </S.CardWrapper>
   )
 }
 

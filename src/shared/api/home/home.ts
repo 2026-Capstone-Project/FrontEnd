@@ -3,12 +3,12 @@ import type { BriefingResponse, ReminderResponse } from '@/shared/types/home/hom
 import axiosInstance from '../axios'
 
 export const fetchTodayBriefing = async (): Promise<BriefingResponse> => {
-  const res = await axiosInstance.get<BriefingResponse>('/api/v1/briefings')
+  const res = await axiosInstance.get<BriefingResponse>('/briefings')
 
   return res.data
 }
 
 export const fetchReminders = async (): Promise<ReminderResponse> => {
-  const res = await axiosInstance.get<ReminderResponse>('/api/v1/reminders')
+  const res = await axiosInstance.get<ReminderResponse>('/reminders')
   return res.data
 }
