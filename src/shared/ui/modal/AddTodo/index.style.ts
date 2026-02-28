@@ -47,6 +47,51 @@ export const Selection = styled.div`
   flex-direction: column;
   gap: 12px;
 `
+export const PrioritySection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+`
+export const PriorityLabel = styled.span`
+  font-size: 14px;
+  color: ${theme.colors.textColor3};
+  font-weight: 500;
+`
+export const PriorityOptions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+`
+export const PriorityOptionButton = styled.button<{
+  isActive: boolean
+  baseColor: string
+  pointColor: string
+}>`
+  border: none;
+  border-radius: 999px;
+  min-width: 64px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.1s ease;
+  background-color: ${({ isActive, baseColor }) => (isActive ? baseColor : theme.colors.lightGray)};
+  color: ${({ isActive, pointColor }) => (isActive ? pointColor : theme.colors.textColor3)};
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ pointColor }) => pointColor};
+    outline-offset: 2px;
+  }
+`
 export const SelectionColumn = styled.div`
   display: flex;
   gap: 12px;

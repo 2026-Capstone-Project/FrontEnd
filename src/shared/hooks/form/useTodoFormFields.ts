@@ -8,6 +8,7 @@ import {
   type EventColorType,
   type RepeatConfigSchema,
 } from '@/shared/types/event/event'
+import type { PriorityType } from '@/shared/types/event/priority'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 
 type UseTodoFormFieldsProps = {
@@ -25,6 +26,7 @@ export type UseTodoFormFieldsResult = {
   repeatConfig: RepeatConfigSchema
   todoTitle: string | undefined
   eventColor: EventColorType
+  todoPriority: PriorityType
 }
 
 export const useTodoFormFields = ({
@@ -41,6 +43,7 @@ export const useTodoFormFields = ({
       todoEndTime: '10:00',
       isAllday,
       eventColor: 'GRAY',
+      todoPriority: 'MEDIUM',
       repeatConfig: defaultRepeatConfig as RepeatConfigSchema,
     },
   })
@@ -52,12 +55,14 @@ export const useTodoFormFields = ({
     (defaultRepeatConfig as RepeatConfigSchema)) as RepeatConfigSchema
   const todoTitle = useWatch({ control, name: 'todoTitle' })
   const eventColor = (useWatch({ control, name: 'eventColor' }) ?? 'GRAY') as EventColorType
+  const todoPriority = (useWatch({ control, name: 'todoPriority' }) ?? 'MEDIUM') as PriorityType
 
   useEffect(() => {
     register('todoDate')
     register('todoEndTime')
     register('isAllday')
     register('eventColor')
+    register('todoPriority')
     register('repeatConfig')
   }, [register])
 
@@ -80,5 +85,6 @@ export const useTodoFormFields = ({
     repeatConfig,
     todoTitle,
     eventColor,
+    todoPriority,
   }
 }

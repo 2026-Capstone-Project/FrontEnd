@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react  */
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { useFormContext } from 'react-hook-form'
 
@@ -10,6 +10,7 @@ import {
   useSchedulePatchController,
   useScheduleSubmitFlow,
 } from '@/shared/hooks/addSchedule'
+import { useUnsavedCloseGuard } from '@/shared/hooks/common/useUnsavedCloseGuard'
 import { useSyncEventTiming } from '@/shared/hooks/form'
 import type { UseAddScheduleFormResult } from '@/shared/hooks/form/useAddScheduleForm'
 import type { AddScheduleFormValues } from '@/shared/types/event/event'
@@ -63,43 +64,12 @@ const AddScheduleFormContent = ({
   } = schedule
   const { setValue, getValues, formState } = useFormContext<AddScheduleFormValues>()
   const { isDirty } = formState
-  const allowCloseRef = useRef(false)
-  const [isUnsavedConfirmOpen, setIsUnsavedConfirmOpen] = useState(false)
-
-  const requestClose = useCallback(
-    (force?: boolean) => {
-      if (force) {
-        allowCloseRef.current = true
-      }
-      onClose()
-    },
-    [onClose],
-  )
-
-  const closeGuard = useCallback(() => {
-    if (allowCloseRef.current) {
-      allowCloseRef.current = false
-      return true
-    }
-    if (!isDirty) return true
-    setIsUnsavedConfirmOpen(true)
-    return false
-  }, [isDirty])
-
-  const handleCloseUnsavedConfirm = useCallback(() => {
-    setIsUnsavedConfirmOpen(false)
-  }, [])
-
-  const handleLeaveUnsavedForm = useCallback(() => {
-    setIsUnsavedConfirmOpen(false)
-    requestClose(true)
-  }, [requestClose])
-
-  useEffect(() => {
-    if (!registerCloseGuard) return
-    registerCloseGuard(closeGuard)
-    return () => registerCloseGuard()
-  }, [closeGuard, registerCloseGuard])
+  const { isUnsavedConfirmOpen, requestClose, handleCloseUnsavedConfirm, handleLeaveUnsavedForm } =
+    useUnsavedCloseGuard({
+      isDirty,
+      onClose,
+      registerCloseGuard,
+    })
 
   // 패치 요청에 필요한 포맷/빌더/함수 묶음
   const { formatDateTime, buildDateTime, patchSchedule, createSchedule } =
@@ -130,19 +100,31 @@ const AddScheduleFormContent = ({
   // 종일 토글 처리 (시간 필드 초기화 포함)
   const handleAllDayToggle = useCallback(() => {
     const nextIsAllDay = !isAllday
+    const isExistingRecurring = initialEvent?.recurrenceGroup != null
     setIsAllday(nextIsAllDay)
     if (nextIsAllDay) {
       setValue('eventStartTime', undefined, { shouldValidate: true })
       setValue('eventEndTime', undefined, { shouldValidate: true })
     }
     if (isEditing) {
-      void patchSchedule({
-        ...getValues(),
-        isAllday: nextIsAllDay,
-        ...(nextIsAllDay ? { eventStartTime: undefined, eventEndTime: undefined } : {}),
-      })
+      void patchSchedule(
+        {
+          ...getValues(),
+          isAllday: nextIsAllDay,
+          ...(nextIsAllDay ? { eventStartTime: undefined, eventEndTime: undefined } : {}),
+        },
+        isExistingRecurring ? 'THIS_EVENT' : undefined,
+      )
     }
-  }, [getValues, isAllday, isEditing, patchSchedule, setIsAllday, setValue])
+  }, [
+    getValues,
+    initialEvent?.recurrenceGroup,
+    isAllday,
+    isEditing,
+    patchSchedule,
+    setIsAllday,
+    setValue,
+  ])
 
   const isInlineMode = mode === 'inline'
   const shouldShowModalOverlay = !isInlineMode && (activeCalendarField || isSearchPlaceOpen)

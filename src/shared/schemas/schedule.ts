@@ -23,6 +23,8 @@ const eventEndTime = yup
   .test('is-greater', '종료 시간은 시작 시간보다 늦어야 합니다.', function (value) {
     const { eventStartTime, isAllday } = this.parent
     if (isAllday) return true
+    // 스키마 평가 시점에는 value/eventStartTime이 undefined일 수 있어 안전하게 분기합니다.
+    if (typeof value !== 'string' || typeof eventStartTime !== 'string') return false
     return value > eventStartTime
   })
 

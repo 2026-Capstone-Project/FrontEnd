@@ -1,5 +1,6 @@
 import moment from 'moment'
-import React from 'react'
+import React, { type MouseEvent, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 import { getColorPalette } from '../../utils/colorPalette'
 import type { CalendarEvent } from '../CustomView/CustomDayView'
@@ -34,6 +35,58 @@ const CustomWeekEvent: React.FC<CustomWeekEventProps> = ({
   const pointColor = palette?.point
   const isTodo = 'type' in event && (event as { type?: string }).type === 'todo'
   const isDone = 'isDone' in event && (event as { isDone?: boolean }).isDone
+  const titleRef = useRef<HTMLDivElement>(null)
+  const [tooltip, setTooltip] = useState({
+    visible: false,
+    x: 0,
+    y: 0,
+  })
+
+  // 제목이 말줄임 처리된 경우에만 툴팁을 띄워 불필요한 노출을 막는다.
+  const isTitleOverflowed = () => {
+    const titleElement = titleRef.current
+    if (!titleElement) {
+      return false
+    }
+    return titleElement.scrollWidth > titleElement.clientWidth
+  }
+
+  // 주간 셀 영역에 잘리지 않도록 마우스 기준 좌표로 포털 툴팁 위치를 갱신한다.
+  const updateTooltipPosition = (eventMouse: MouseEvent<HTMLDivElement>) => {
+    if (!tooltip.visible) {
+      return
+    }
+
+    const horizontalOffset = 12
+    const verticalOffset = 14
+
+    setTooltip((previous) => ({
+      ...previous,
+      x: eventMouse.clientX + horizontalOffset,
+      y: eventMouse.clientY + verticalOffset,
+    }))
+  }
+
+  const showTooltip = (eventMouse: MouseEvent<HTMLDivElement>) => {
+    if (!isTitleOverflowed()) {
+      return
+    }
+
+    setTooltip({
+      visible: true,
+      x: eventMouse.clientX + 12,
+      y: eventMouse.clientY + 14,
+    })
+  }
+
+  const hideTooltip = () => {
+    setTooltip((previous) => ({
+      ...previous,
+      visible: false,
+    }))
+  }
+
+  const tooltipText = typeof event.title === 'string' ? event.title : ''
 
   return (
     <S.WeekEventContainer
@@ -42,10 +95,12 @@ const CustomWeekEvent: React.FC<CustomWeekEventProps> = ({
       isSelected={isSelected}
       onClick={(eventMouse) => {
         eventMouse.stopPropagation()
+        hideTooltip()
         onEventClick(event)
       }}
       onDoubleClick={(eventMouse) => {
         eventMouse.stopPropagation()
+        hideTooltip()
         onEventDoubleClick(event)
       }}
     >
@@ -65,10 +120,25 @@ const CustomWeekEvent: React.FC<CustomWeekEventProps> = ({
         ) : (
           <S.Circle backgroundColor={pointColor} />
         )}
-        <S.EventTitle>{event.title}</S.EventTitle>
+        <S.EventTitle
+          ref={titleRef}
+          onMouseEnter={showTooltip}
+          onMouseMove={updateTooltipPosition}
+          onMouseLeave={hideTooltip}
+        >
+          {event.title}
+        </S.EventTitle>
       </S.WeekEventRow>
       <S.EventWeekMeta>{formatTimeRange(event)}</S.EventWeekMeta>
       {event.location && <S.EventLocation>{event.location}</S.EventLocation>}
+      {tooltip.visible &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <S.MonthEventTooltip style={{ left: tooltip.x, top: tooltip.y }}>
+            {tooltipText}
+          </S.MonthEventTooltip>,
+          document.body,
+        )}
     </S.WeekEventContainer>
   )
 }

@@ -3,9 +3,32 @@ import { useCallback } from 'react'
 
 import type { CalendarEvent, Event } from '@/shared/types/calendar/types'
 import type { AddScheduleFormValues, RepeatConfigSchema } from '@/shared/types/event/event'
-import type { RecurrenceEventScope } from '@/shared/types/recurrence/recurrence'
+import type { RecurrenceEventScope, RecurrenceGroup } from '@/shared/types/recurrence/recurrence'
 import { mapRepeatConfigToRecurrenceGroup } from '@/shared/utils/recurrenceGroup'
-import { areRepeatConfigsEqual } from '@/shared/utils/repeatConfig'
+import {
+  isSameYmd,
+  normalizeRecurrenceGroupPayload,
+  toWeekday,
+  toWeekOfMonth,
+} from '@/shared/utils/recurrencePattern'
+
+const isMonthlyPatternWithFlexibleWeekdayRule = (group: RecurrenceGroup | null | undefined) =>
+  group?.frequency === 'MONTHLY' &&
+  group.monthlyType === 'DAY_OF_WEEK' &&
+  group.weekdayRule != null &&
+  group.weekdayRule !== 'SINGLE'
+
+const buildMonthlySinglePatternFromDate = (
+  group: RecurrenceGroup,
+  targetDate: Date,
+): RecurrenceGroup => ({
+  ...group,
+  monthlyType: 'DAY_OF_WEEK',
+  weekOfMonth: toWeekOfMonth(targetDate),
+  weekdayRule: 'SINGLE',
+  dayOfWeekInMonth: toWeekday(targetDate),
+  daysOfMonth: undefined,
+})
 
 type PatchEventMutate = (params: {
   eventId: number
@@ -60,10 +83,21 @@ export const useSchedulePatch = ({
 
       const isRecurring =
         values.repeatConfig.repeatType !== 'none' || initialEvent?.recurrenceGroup != null
-      const shouldSendRecurrenceGroup = !areRepeatConfigsEqual(
-        values.repeatConfig,
-        initialRepeatConfig,
-      )
+      const initialRecurrenceGroupPayload =
+        normalizeRecurrenceGroupPayload(initialEvent?.recurrenceGroup) ??
+        mapRepeatConfigToRecurrenceGroup(initialRepeatConfig)
+      const nextRecurrenceGroupPayload =
+        values.repeatConfig.repeatType === 'none'
+          ? null
+          : mapRepeatConfigToRecurrenceGroup(values.repeatConfig)
+      const shouldSendRecurrenceGroup =
+        JSON.stringify(nextRecurrenceGroupPayload ?? null) !==
+        JSON.stringify(initialRecurrenceGroupPayload ?? null)
+      const patchScope = shouldSendRecurrenceGroup
+        ? 'THIS_AND_FOLLOWING_EVENTS'
+        : isRecurring
+          ? (scope ?? 'THIS_EVENT')
+          : undefined
 
       const initialTitle = initialEvent?.title ?? ''
       const initialContent = initialEvent?.content ?? ''
@@ -78,6 +112,20 @@ export const useSchedulePatch = ({
       const nextContent = values.eventDescription ?? ''
       const nextStart = formatDateTime(start)
       const nextEnd = formatDateTime(end)
+      const hasStartDateChanged =
+        initialEvent?.start != null && !isSameYmd(new Date(initialEvent.start), start)
+      const shouldSendMonthlySinglePattern =
+        patchScope === 'THIS_AND_FOLLOWING_EVENTS' &&
+        !shouldSendRecurrenceGroup &&
+        hasStartDateChanged &&
+        isMonthlyPatternWithFlexibleWeekdayRule(initialRecurrenceGroupPayload)
+      const monthlySinglePatternPayload =
+        shouldSendMonthlySinglePattern && initialRecurrenceGroupPayload
+          ? buildMonthlySinglePatternFromDate(initialRecurrenceGroupPayload, start)
+          : undefined
+      const recurrenceGroupPayload = shouldSendRecurrenceGroup
+        ? nextRecurrenceGroupPayload
+        : monthlySinglePatternPayload
       // occurrenceDate 우선순위:
       // 1) 호출자가 명시적으로 전달한 occurrenceDate
       // 2) 기존 이벤트가 가진 태생 occurrenceDate
@@ -95,12 +143,9 @@ export const useSchedulePatch = ({
         ...(initialEnd && nextEnd !== initialEnd ? { endTime: nextEnd } : {}),
         ...(initialColor && values.eventColor !== initialColor ? { color: values.eventColor } : {}),
         ...(values.isAllday !== initialIsAllday ? { isAllDay: values.isAllday } : {}),
-        ...(shouldSendRecurrenceGroup
+        ...(recurrenceGroupPayload !== undefined
           ? {
-              recurrenceGroup:
-                values.repeatConfig.repeatType === 'none'
-                  ? null
-                  : mapRepeatConfigToRecurrenceGroup(values.repeatConfig),
+              recurrenceGroup: recurrenceGroupPayload,
             }
           : {}),
       }
@@ -110,7 +155,7 @@ export const useSchedulePatch = ({
         eventId,
         params: {
           occurrenceDate: nextOccurrenceDate,
-          ...(isRecurring && scope ? { scope } : {}),
+          ...(patchScope ? { scope: patchScope } : {}),
         },
         eventData,
       })

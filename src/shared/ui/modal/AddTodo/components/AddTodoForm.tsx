@@ -12,31 +12,29 @@ import {
 import { createPortal } from 'react-dom'
 import { FormProvider } from 'react-hook-form'
 
+import { useTodoSubmitFlow } from '@/shared/hooks/addTodo/useTodoSubmitFlow'
+import { useUnsavedCloseGuard } from '@/shared/hooks/common/useUnsavedCloseGuard'
 import { useSyncEventTiming } from '@/shared/hooks/form'
 import { useAddTodoForm } from '@/shared/hooks/form/useAddTodoForm'
 import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
 import { useGetDetailTodoQuery } from '@/shared/hooks/query/useTodoQueries'
-import { useRepeatChangeGuard } from '@/shared/hooks/repeat/useRepeatChangeGuard'
 import { theme } from '@/shared/styles/theme'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import { type AddTodoFormValues, type RepeatConfigSchema } from '@/shared/types/event/event'
+import type { PriorityType } from '@/shared/types/event/priority'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 import Checkbox from '@/shared/ui/common/Checkbox/Checkbox'
 import RepeatTypeGroup from '@/shared/ui/common/RepeatTypeGroup/RepeatTypeGroup'
 import TerminationPanel from '@/shared/ui/common/TerminationPanel/TerminationPanel'
 import TitleSuggestionInput from '@/shared/ui/common/TitleSuggestionInput/TitleSuggestionInput'
-import {
-  DeleteConfirmModal,
-  EditConfirmModal,
-  type EditConfirmOption,
-  UnsavedChangesConfirmModal,
-} from '@/shared/ui/modal'
+import { DeleteConfirmModal, EditConfirmModal, UnsavedChangesConfirmModal } from '@/shared/ui/modal'
 import * as S from '@/shared/ui/modal/AddTodo/index.style'
 import CustomBasisPanel from '@/shared/ui/modal/common/CustomBasisPanel/CustomBasisPanel'
 import CustomDatePicker from '@/shared/ui/modal/common/CustomDatePicker/CustomDatePicker'
 import CustomTimePicker from '@/shared/ui/modal/common/CustomTimePicker/CustomTimePicker'
 import SelectColor from '@/shared/ui/modal/common/SelectColor/SelectColor'
 import { formatDisplayDate } from '@/shared/utils/date'
+import { getPriorityColor } from '@/shared/utils/priority'
 import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/recurrenceGroup'
 
 type AddTodoFormProps = {
@@ -58,6 +56,12 @@ type AddTodoFormProps = {
     allDay: boolean,
   ) => void
 }
+
+const PRIORITY_OPTIONS: Array<{ value: PriorityType; label: string }> = [
+  { value: 'HIGH', label: '높음' },
+  { value: 'MEDIUM', label: '중간' },
+  { value: 'LOW', label: '낮음' },
+]
 
 const AddTodoForm = ({
   date,
@@ -93,14 +97,23 @@ const AddTodoForm = ({
     todoTitle,
     eventColor,
     setEventColor,
+    todoPriority,
+    setTodoPriority,
   } = useAddTodoForm({ date, id: eventId, isEditing })
   const { register, setValue, formState } = formMethods
   const { isDirty } = formState
-  const allowCloseRef = useRef(false)
-  const [isUnsavedConfirmOpen, setIsUnsavedConfirmOpen] = useState(false)
-  const occurrenceDate = useMemo(() => moment(date).format('YYYY-MM-DD'), [date])
+  const [detailOccurrenceDate, setDetailOccurrenceDate] = useState(() =>
+    moment(date).format('YYYY-MM-DD'),
+  )
+  const detailQueryAnchorRef = useRef<{ eventId: CalendarEvent['id']; date: string } | null>(null)
+  const hydratedDetailKeyRef = useRef<string | null>(null)
   const shouldFetchDetail = isEditing && eventId != null && eventId !== 0
-  const { data: detailData } = useGetDetailTodoQuery(eventId, occurrenceDate, shouldFetchDetail)
+  const { data: detailData } = useGetDetailTodoQuery(
+    eventId,
+    detailOccurrenceDate,
+    shouldFetchDetail,
+  )
+  const isPersistedTodo = isEditing && eventId != null && eventId !== 0
   const { useDeleteTodo, usePatchTodo } = useTodoMutations()
   const { mutate: deleteTodoMutate } = useDeleteTodo()
   const { mutate: patchTodoMutate } = usePatchTodo()
@@ -111,13 +124,33 @@ const AddTodoForm = ({
     return window.matchMedia(`(max-width: ${theme.breakPoints.tablet})`).matches
   })
   const startDate = formatDisplayDate(todoDate)
+  const { isUnsavedConfirmOpen, requestClose, handleCloseUnsavedConfirm, handleLeaveUnsavedForm } =
+    useUnsavedCloseGuard({
+      isDirty,
+      onClose,
+      registerCloseGuard,
+    })
+
+  useEffect(() => {
+    if (!isEditing || eventId == null || eventId === 0) return
+    const nextDate = moment(date).format('YYYY-MM-DD')
+    const anchor = detailQueryAnchorRef.current
+    if (!anchor || anchor.eventId !== eventId) {
+      detailQueryAnchorRef.current = { eventId, date: nextDate }
+      hydratedDetailKeyRef.current = null
+      setDetailOccurrenceDate(nextDate)
+    }
+  }, [date, eventId, isEditing])
 
   useEffect(() => {
     if (!isEditing) return
     const detail = detailData?.result
     if (!detail) return
+    const detailKey = `${detail.todoId}-${detail.occurrenceDate ?? ''}`
+    if (hydratedDetailKeyRef.current === detailKey) return
+    hydratedDetailKeyRef.current = detailKey
 
-    const baseDate = detail.occurrenceDate ? new Date(detail.occurrenceDate) : new Date(date)
+    const baseDate = detail.occurrenceDate ? new Date(detail.occurrenceDate) : new Date()
     const dueTime = detail.dueTime
     const parsedTime =
       typeof dueTime === 'string'
@@ -132,6 +165,7 @@ const AddTodoForm = ({
     setValue('todoDate', baseDate, { shouldValidate: true })
     setValue('todoEndTime', parsedTime, { shouldValidate: true })
     setValue('eventColor', detail.color ?? 'GRAY', { shouldValidate: true })
+    setValue('todoPriority', detail.priority ?? 'MEDIUM', { shouldValidate: true })
     setIsAllday(detail.isAllDay)
 
     const mappedRepeatConfig = mapRecurrenceGroupToRepeatConfig(detail.recurrenceGroup)
@@ -149,7 +183,7 @@ const AddTodoForm = ({
       customYearlyMonths: mappedRepeatConfig.customYearlyMonths ?? [],
     }
     setValue('repeatConfig', nextRepeatConfig, { shouldValidate: true })
-  }, [date, detailData, isEditing, setIsAllday, setValue])
+  }, [detailData, isEditing, setIsAllday, setValue])
 
   const handleCalendarButtonClick =
     (field: 'start' | 'end') => (event: ReactMouseEvent<HTMLButtonElement>) => {
@@ -189,48 +223,12 @@ const AddTodoForm = ({
 
   const isInlineMode = mode === 'inline'
   const shouldShowModalOverlay = !isInlineMode && activeCalendarField
-  const isPersistedTodo = isEditing && eventId != null && eventId !== 0
   const deleteOccurrenceDate = useMemo(() => {
     if (detailData?.result?.occurrenceDate) {
       return moment(detailData.result.occurrenceDate).format('YYYY-MM-DD')
     }
     return moment(todoDate ?? date).format('YYYY-MM-DD')
   }, [date, detailData?.result?.occurrenceDate, todoDate])
-  const requestClose = useCallback(
-    (force?: boolean) => {
-      if (force) {
-        allowCloseRef.current = true
-      }
-      onClose()
-    },
-    [onClose],
-  )
-
-  const closeGuard = useCallback(() => {
-    if (allowCloseRef.current) {
-      allowCloseRef.current = false
-      return true
-    }
-    if (!isDirty) return true
-    setIsUnsavedConfirmOpen(true)
-    return false
-  }, [isDirty])
-
-  const handleCloseUnsavedConfirm = useCallback(() => {
-    setIsUnsavedConfirmOpen(false)
-  }, [])
-
-  const handleLeaveUnsavedForm = useCallback(() => {
-    setIsUnsavedConfirmOpen(false)
-    requestClose(true)
-  }, [requestClose])
-
-  useEffect(() => {
-    if (!registerCloseGuard) return
-    registerCloseGuard(closeGuard)
-    return () => registerCloseGuard()
-  }, [closeGuard, registerCloseGuard])
-
   const renderTitleInput = () => (
     <TitleSuggestionInput
       fieldName="todoTitle"
@@ -248,18 +246,12 @@ const AddTodoForm = ({
 
   const hasExistingRecurrence = Boolean(detailData?.result?.recurrenceGroup)
   const repeatGuardEnabled = isEditing && hasExistingRecurrence
-  // 편집 모드에서 반복 변경을 가드해 확인 또는 취소가 가능하도록 합니다.
-  const {
-    isOpen: isEditConfirmOpen,
-    confirmChange,
-    revertChange,
-    requestConfirmation,
-  } = useRepeatChangeGuard({
-    repeatConfig,
-    isEditing: repeatGuardEnabled,
-    setValue,
-  })
-  const [pendingTodoValues, setPendingTodoValues] = useState<AddTodoFormValues | null>(null)
+  const patchOccurrenceDate = useMemo(() => {
+    if (detailData?.result?.occurrenceDate) {
+      return moment(detailData.result.occurrenceDate).format('YYYY-MM-DD')
+    }
+    return moment(todoDate ?? date).format('YYYY-MM-DD')
+  }, [date, detailData?.result?.occurrenceDate, todoDate])
 
   const buildDateTime = useCallback((dateValue: Date | null, timeValue?: string) => {
     const nextDate = dateValue ? new Date(dateValue) : new Date()
@@ -290,72 +282,26 @@ const AddTodoForm = ({
     },
     [buildDateTime, date, eventId, onEventTimingChange],
   )
-
-  const handleFormSubmit = handleSubmit(async (values) => {
-    if (requestConfirmation()) {
-      setPendingTodoValues(values)
-      return
-    }
-    if (eventId != null && eventId !== 0) {
-      const nextTitle = values.todoTitle ?? ''
-      if (nextTitle) {
-        onEventTitleConfirm?.(eventId, nextTitle)
-      }
-    }
-    syncEventTiming(values)
-    try {
-      await onSubmit(values)
-      requestClose(true)
-    } catch (error) {
-      console.error('[AddTodoForm] submit failed', error)
-      const message =
-        error instanceof Error
-          ? error.message
-          : '할 일 저장 중 오류가 발생했습니다. 다시 시도해주세요.'
-      alert(message)
-    }
+  const {
+    isEditConfirmOpen,
+    isApplyConfirmOpen,
+    handleFormSubmit,
+    handleConfirmedSubmit,
+    handleCancelRepeat,
+  } = useTodoSubmitFlow({
+    eventId,
+    hasExistingRecurrence,
+    repeatGuardEnabled,
+    isDetailReady: !isPersistedTodo || !shouldFetchDetail || Boolean(detailData?.result),
+    repeatConfig,
+    setValue,
+    handleSubmit,
+    patchOccurrenceDate,
+    onSubmit,
+    onClose: () => requestClose(true),
+    syncEventTiming,
+    onEventTitleConfirm,
   })
-
-  const handleConfirmedSubmit = useCallback(
-    async (option: EditConfirmOption) => {
-      void option
-      if (!pendingTodoValues) return
-      confirmChange()
-      if (eventId != null && eventId !== 0) {
-        const nextTitle = pendingTodoValues.todoTitle ?? ''
-        if (nextTitle) {
-          onEventTitleConfirm?.(eventId, nextTitle)
-        }
-      }
-      syncEventTiming(pendingTodoValues)
-      try {
-        await onSubmit(pendingTodoValues)
-        requestClose(true)
-        setPendingTodoValues(null)
-      } catch (error) {
-        console.error('[AddTodoForm] submit failed', error)
-        const message =
-          error instanceof Error
-            ? error.message
-            : '할 일 저장 중 오류가 발생했습니다. 다시 시도해주세요.'
-        alert(message)
-      }
-    },
-    [
-      confirmChange,
-      eventId,
-      onEventTitleConfirm,
-      onSubmit,
-      pendingTodoValues,
-      requestClose,
-      syncEventTiming,
-    ],
-  )
-
-  const handleCancelRepeat = useCallback(() => {
-    revertChange()
-    setPendingTodoValues(null)
-  }, [revertChange])
 
   const handleDelete = useCallback(() => {
     if (!isPersistedTodo) {
@@ -493,6 +439,27 @@ const AddTodoForm = ({
                   document.getElementById('modal-root')!,
                 )}
             </S.Selection>
+            <S.PrioritySection>
+              <S.PriorityLabel>중요도</S.PriorityLabel>
+              <S.PriorityOptions>
+                {PRIORITY_OPTIONS.map((option) => {
+                  const token = getPriorityColor(option.value)
+                  const palette = theme.colors.priority[token]
+                  return (
+                    <S.PriorityOptionButton
+                      key={option.value}
+                      type="button"
+                      isActive={todoPriority === option.value}
+                      baseColor={palette.base}
+                      pointColor={palette.point}
+                      onClick={() => setTodoPriority(option.value)}
+                    >
+                      {option.label}
+                    </S.PriorityOptionButton>
+                  )
+                })}
+              </S.PriorityOptions>
+            </S.PrioritySection>
             <Checkbox
               checked={isAllday}
               onChange={() => setIsAllday((prev) => !prev)}
@@ -554,7 +521,7 @@ const AddTodoForm = ({
           mutate={deleteTodoMutate}
         />
       )}
-      {isEditConfirmOpen && (
+      {(isEditConfirmOpen || isApplyConfirmOpen) && (
         <EditConfirmModal onCancel={handleCancelRepeat} onConfirm={handleConfirmedSubmit} />
       )}
       {isUnsavedConfirmOpen && (

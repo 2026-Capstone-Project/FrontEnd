@@ -8,8 +8,61 @@ import { resolveOccurrenceDateTime } from '@/features/Calendar/utils/helpers/day
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type {
   RecurrenceEventScope,
+  RecurrenceGroup,
   RecurrenceTodoScope,
 } from '@/shared/types/recurrence/recurrence'
+import {
+  normalizeRecurrenceGroupPayload,
+  toWeekday,
+  toWeekOfMonth,
+} from '@/shared/utils/recurrencePattern'
+
+export const buildRecurringGroupForFutureDrop = (
+  recurrenceGroup: CalendarEvent['recurrenceGroup'],
+  nextStart: Date,
+): RecurrenceGroup | undefined => {
+  const source = normalizeRecurrenceGroupPayload(recurrenceGroup)
+  if (!source) return undefined
+  const weekday = toWeekday(nextStart)
+  const nextWeekOfMonth = toWeekOfMonth(nextStart)
+  const nextDayOfMonth = nextStart.getDate()
+
+  const nextGroup: RecurrenceGroup = {
+    ...source,
+  }
+
+  if (source.frequency === 'WEEKLY') {
+    nextGroup.daysOfWeek = [weekday]
+  }
+
+  if (source.frequency === 'MONTHLY') {
+    if (source.monthlyType === 'DAY_OF_WEEK') {
+      nextGroup.weekOfMonth = nextWeekOfMonth
+      nextGroup.weekdayRule = 'SINGLE'
+      nextGroup.dayOfWeekInMonth = weekday
+    } else {
+      nextGroup.daysOfMonth = [nextDayOfMonth]
+      nextGroup.weekOfMonth = undefined
+      nextGroup.weekdayRule = undefined
+      nextGroup.dayOfWeekInMonth = undefined
+    }
+  }
+
+  if (source.frequency === 'YEARLY') {
+    nextGroup.monthOfYear = nextStart.getMonth() + 1
+    if (source.weekOfMonth != null || source.weekdayRule != null) {
+      nextGroup.weekOfMonth = nextWeekOfMonth
+      if (source.weekdayRule && source.weekdayRule !== 'SINGLE') {
+        nextGroup.dayOfWeekInMonth = null
+      } else {
+        nextGroup.weekdayRule = 'SINGLE'
+        nextGroup.dayOfWeekInMonth = weekday
+      }
+    }
+  }
+
+  return nextGroup
+}
 
 type UseCalendarDragDropArgs = {
   view: View
@@ -18,11 +71,13 @@ type UseCalendarDragDropArgs = {
     eventId: number
     params: {
       occurrenceDate: string
+      scope?: RecurrenceEventScope
     }
     eventData: {
       startTime: string
       endTime: string
       isAllDay: boolean
+      recurrenceGroup?: RecurrenceGroup
     }
   }) => void
   patchTodoTiming: (
@@ -77,6 +132,14 @@ export const useCalendarDragDrop = ({
           startTime: nextStart,
           endTime: nextEnd,
           isAllDay: event.isAllDay ?? false,
+          ...(options?.eventScope === 'THIS_AND_FOLLOWING_EVENTS'
+            ? {
+                recurrenceGroup: buildRecurringGroupForFutureDrop(
+                  event.recurrenceGroup,
+                  start as Date,
+                ),
+              }
+            : {}),
         },
       })
     },

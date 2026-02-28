@@ -13,6 +13,7 @@ import {
 export const normalizeDate = (value: Date | string): Date =>
   typeof value === 'string' ? new Date(value) : value
 
+// 로컬에서 임시로 생성하는 이벤트 id 충돌을 줄이기 위해 timestamp + index를 사용한다.
 const buildEventId = (prevCount: number, date: Date) => date.valueOf() + prevCount
 
 /** 기본 제목/기간을 가지는 새 캘린더 이벤트를 생성합니다. */

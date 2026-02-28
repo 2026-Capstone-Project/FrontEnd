@@ -98,7 +98,7 @@ export const WeekEventContainer = styled.div<{
 export const EventTitle = styled.div`
   font-weight: 400;
   font-size: 12px;
-  width: 100%;
+  width: 45px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -108,7 +108,7 @@ export const EventMeta = styled.div`
   font-size: 8px;
   color: ${({ theme }) => theme.colors.black};
   white-space: nowrap;
-  width: fit-content;
+  min-width: fit-content;
 `
 export const EventWeekMeta = styled.div`
   font-size: 10px;
@@ -145,4 +145,20 @@ export const MonthShowMore = styled.div`
   font-size: 8px;
   color: ${theme.colors.textColor2};
   background-color: ${theme.colors.lightGray};
+`
+
+export const MonthEventTooltip = styled.div`
+  position: fixed;
+  z-index: 10010;
+  pointer-events: none;
+  padding: 6px 8px;
+  border-radius: 6px;
+  max-width: 240px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: ${theme.colors.white};
+  background-color: rgba(25, 25, 25, 0.92);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  white-space: normal;
+  word-break: break-word;
 `

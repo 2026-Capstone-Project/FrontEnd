@@ -74,62 +74,41 @@ export const useScheduleSubmitFlow = ({
     setIsApplyConfirmOpen(false)
   }, [])
 
-  // 폼 제출 처리(일반/반복 분기)
-  const handleFormSubmit = handleSubmit(async (values) => {
-    if (isExistingRecurring && requestConfirmation()) {
-      setPendingScheduleValues(values)
-      return
-    }
-    if (isExistingRecurring) {
-      openApplyConfirm(values)
-      return
-    }
-    if (eventId != null && eventId !== 0) {
+  const confirmTitle = useCallback(
+    (values: AddScheduleFormValues) => {
+      if (eventId == null || eventId === 0) return
       const nextTitle = values.eventTitle ?? ''
       if (nextTitle) {
         handleTitleConfirm(nextTitle)
       }
-    }
-    syncEventTiming(values)
-    try {
-      if (isEditing) {
-        await patchSchedule(values)
-      } else {
-        await createSchedule(values)
-      }
-      onClose()
-    } catch (error) {
-      console.error('[AddScheduleForm] submit failed', error)
-      const message =
-        error instanceof Error
-          ? error.message
-          : '일정 저장 중 오류가 발생했습니다. 다시 시도해주세요.'
-      alert(message)
-    }
-  })
+    },
+    [eventId, handleTitleConfirm],
+  )
 
-  // 반복 일정 수정 범위를 확인 후 제출 처리
-  const handleConfirmedSubmit = useCallback(
-    async (option: EditConfirmOption) => {
-      void option
-      if (!pendingScheduleValues) return
-      if (isEditConfirmOpen) {
+  // 일반 생성/일반 수정/반복 수정(범위 선택) 모두 이 경로를 통해 제출합니다.
+  // 분기마다 흩어진 try/catch를 모아 에러 처리 정책을 일관되게 유지합니다.
+  const submitScheduleValues = useCallback(
+    async (
+      values: AddScheduleFormValues,
+      options: {
+        mode: 'create' | 'patch'
+        scope?: RecurrenceEventScope
+        occurrenceDate?: string
+        shouldConfirmChange?: boolean
+      },
+    ) => {
+      if (options.shouldConfirmChange) {
         confirmChange()
       }
-      if (eventId != null && eventId !== 0) {
-        const nextTitle = pendingScheduleValues.eventTitle ?? ''
-        if (nextTitle) {
-          handleTitleConfirm(nextTitle)
-        }
-      }
-      const startDate = pendingScheduleValues.eventStartDate ?? new Date(date)
-      const occurrenceDate = formatDateTime(
-        buildDateTime(startDate, pendingScheduleValues.eventStartTime),
-      )
-      const scope = option === 'future' ? 'THIS_AND_FOLLOWING_EVENTS' : 'THIS_EVENT'
-      syncEventTiming(pendingScheduleValues)
+      confirmTitle(values)
+      syncEventTiming(values)
+
       try {
-        await patchSchedule(pendingScheduleValues, scope, occurrenceDate)
+        if (options.mode === 'patch') {
+          await patchSchedule(values, options.scope, options.occurrenceDate)
+        } else {
+          await createSchedule(values)
+        }
         onClose()
         clearApplyConfirm()
       } catch (error) {
@@ -142,18 +121,60 @@ export const useScheduleSubmitFlow = ({
       }
     },
     [
-      buildDateTime,
       clearApplyConfirm,
       confirmChange,
-      date,
-      eventId,
-      formatDateTime,
-      handleTitleConfirm,
-      isEditConfirmOpen,
+      confirmTitle,
+      createSchedule,
       onClose,
       patchSchedule,
-      pendingScheduleValues,
       syncEventTiming,
+    ],
+  )
+
+  // 폼 제출 처리(일반/반복 분기)
+  const handleFormSubmit = handleSubmit(async (values) => {
+    if (isExistingRecurring && requestConfirmation()) {
+      setPendingScheduleValues(values)
+      return
+    }
+    if (isExistingRecurring) {
+      openApplyConfirm(values)
+      return
+    }
+    await submitScheduleValues(values, {
+      mode: isEditing ? 'patch' : 'create',
+    })
+  })
+
+  // 반복 일정 수정 범위를 확인 후 제출 처리
+  const handleConfirmedSubmit = useCallback(
+    async (option: EditConfirmOption) => {
+      if (!pendingScheduleValues) return
+      const fallbackStartDate = pendingScheduleValues.eventStartDate ?? new Date(date)
+      const fallbackOccurrenceDate = formatDateTime(
+        buildDateTime(fallbackStartDate, pendingScheduleValues.eventStartTime),
+      )
+      // occurrenceDate를 현재 수정 중인 인스턴스로 고정해,
+      // 반복 일정에서도 사용자가 연 occurrence를 기준으로 patch 요청을 보냅니다.
+      const occurrenceDate = initialEvent?.occurrenceDate
+        ? formatDateTime(new Date(initialEvent.occurrenceDate))
+        : fallbackOccurrenceDate
+      const scope = option === 'future' ? 'THIS_AND_FOLLOWING_EVENTS' : 'THIS_EVENT'
+      await submitScheduleValues(pendingScheduleValues, {
+        mode: 'patch',
+        scope,
+        occurrenceDate,
+        shouldConfirmChange: isEditConfirmOpen,
+      })
+    },
+    [
+      buildDateTime,
+      date,
+      formatDateTime,
+      initialEvent,
+      isEditConfirmOpen,
+      pendingScheduleValues,
+      submitScheduleValues,
     ],
   )
 
