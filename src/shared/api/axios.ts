@@ -43,7 +43,7 @@ axiosInstance.interceptors.response.use(
 
       try {
         await axios.post(
-          `${import.meta.env.VITE_API_BASE_URL}/api/v1/security/reissue-cookie`,
+          `${import.meta.env.VITE_API_SERVER_URL}/security/reissue-cookie`,
           {},
           { withCredentials: true },
         )
