@@ -33,4 +33,28 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error),
 )
 
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true
+
+      try {
+        await axios.post(
+          `${import.meta.env.VITE_API_SERVER_URL}/security/reissue-cookie`,
+          {},
+          { withCredentials: true },
+        )
+
+        return axiosInstance(originalRequest)
+      } catch (reissueError) {
+        return Promise.reject(reissueError)
+      }
+    }
+    return Promise.reject(error)
+  },
+)
+
 export default axiosInstance
