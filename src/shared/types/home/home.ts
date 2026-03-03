@@ -1,6 +1,6 @@
 import type { TCommonResponse } from '../common/common'
 import type { BriefingTime } from '../settings/settings'
-export type BriefingReason = 'AVAILABLE' | 'DISABLED' | 'NOT_EVENT_TODAY'
+export type BriefingReason = 'AVAILABLE' | 'DISABLED' | 'TIME_NOT_REACHED' | 'NOT_EVENT_TODAY'
 
 export type TargetType = 'EVENT' | 'TODO'
 

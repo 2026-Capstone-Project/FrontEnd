@@ -21,7 +21,7 @@ const App = () => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const response = await axiosInstance.get('/api/v1/members/me')
+        const response = await axiosInstance.get('/members/me')
 
         if (response.data.isSuccess) {
           login()

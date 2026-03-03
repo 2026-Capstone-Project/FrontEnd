@@ -30,6 +30,7 @@ export default function HomePage() {
   const getEmptyMessage = (reason?: string) => {
     if (reason === 'DISABLED') return '브리핑 기능이 비활성화 상태입니다'
     if (reason === 'NOT_EVENT_TODAY') return '오늘 예정된 일정이 없습니다'
+    if (reason === 'TIME_NOT_REACHED') return '브리핑 생성 시간이 되지 않았습니다'
     return ''
   }
 
