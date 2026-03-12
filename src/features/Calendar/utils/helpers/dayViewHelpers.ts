@@ -45,8 +45,12 @@ export const eventCoversDate = (event: CalendarEvent, date: Date) => {
 }
 
 // 이벤트를 오전/오후 컬럼 단위 시각 슬롯으로 변환하고 겹침 레이아웃 정보를 계산한다.
-export const buildTimedSlots = (events: CalendarEvent[], date: Date) => {
-  const { SLOT_HEIGHT, MIN_HEIGHT, MAX_VISUAL_HOURS, COLUMNS } = TIMED_SLOT_CONFIG
+export const buildTimedSlots = (
+  events: CalendarEvent[],
+  date: Date,
+  slotHeight = TIMED_SLOT_CONFIG.SLOT_HEIGHT,
+) => {
+  const { MIN_HEIGHT, MAX_VISUAL_HOURS, COLUMNS } = TIMED_SLOT_CONFIG
   const columns: TimedSlotEvent[][] = COLUMNS.map(() => [])
 
   const dayStart = moment(date).startOf('day')
@@ -69,10 +73,10 @@ export const buildTimedSlots = (events: CalendarEvent[], date: Date) => {
       const columnIndex = segmentStart.hour() < 12 ? 0 : 1
       const columnStart = dayStart.clone().add(COLUMNS[columnIndex], 'hours')
       const minutesSinceColumnStart = segmentStart.diff(columnStart, 'minutes')
-      const top = (minutesSinceColumnStart / 60) * SLOT_HEIGHT
+      const top = (minutesSinceColumnStart / 60) * slotHeight
       const durationMinutes = Math.max(segmentEnd.diff(segmentStart, 'minutes'), 15)
-      const calculatedHeight = (durationMinutes / 60) * SLOT_HEIGHT
-      const height = Math.min(calculatedHeight, SLOT_HEIGHT * (MAX_VISUAL_HOURS - 1) - top)
+      const calculatedHeight = (durationMinutes / 60) * slotHeight
+      const height = Math.min(calculatedHeight, slotHeight * (MAX_VISUAL_HOURS - 1) - top)
 
       columns[columnIndex].push({
         event,
