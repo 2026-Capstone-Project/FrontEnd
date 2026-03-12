@@ -9,7 +9,7 @@ export const Card = styled.div`
   background: ${theme.colors.white};
   padding: 40px 40px 30px 40px;
   box-sizing: border-box;
-
+  box-shadow: 0 0 100px 40px rgba(0, 0, 0, 0.1);
   ${media.down(theme.breakPoints.tablet)} {
     width: min(90vw, 426px);
   }

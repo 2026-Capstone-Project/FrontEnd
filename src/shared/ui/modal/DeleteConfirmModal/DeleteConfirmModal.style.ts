@@ -7,7 +7,7 @@ export const ModalWrapper = styled.div`
   background-color: #fff;
   padding: 40px 50px 20px 50px;
   border-radius: 20px;
-  box-shadow: 0 0 100px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 100px 40px rgba(0, 0, 0, 0.1);
   width: fit-content;
   min-width: 400px;
   gap: 28px;
