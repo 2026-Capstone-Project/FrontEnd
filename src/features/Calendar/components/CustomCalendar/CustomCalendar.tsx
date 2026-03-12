@@ -24,7 +24,6 @@ import {
   useCalendarKeyDelete,
   useCalendarModal,
   useCalendarNavigation,
-  useCalendarPortals,
   useCalendarRbcProps,
   useCalendarResponsive,
   useCalendarSelection,
@@ -192,7 +191,6 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
   // 반응형 레이아웃 판단
   const isDesktop = useCalendarResponsive()
   const isInlineMode = isDesktop
-  const { modalPortalRoot, cardPortalRoot } = useCalendarPortals()
   // 일정 삭제(반복 여부 포함)
   const handleRemoveEvent = useCallback(
     (eventId: CalendarEvent['id'], occurrenceDate: string, isRecurring: boolean) => {
@@ -235,17 +233,6 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
       removeEvent: handleRemoveEvent,
       isRecurring,
     })
-  const [openedModalMode, setOpenedModalMode] = useState<'modal' | 'inline' | null>(null)
-
-  useEffect(() => {
-    if (!modal.isOpen) {
-      setOpenedModalMode(null)
-      return
-    }
-    if (openedModalMode == null) {
-      setOpenedModalMode(isInlineMode ? 'inline' : 'modal')
-    }
-  }, [isInlineMode, modal.isOpen, openedModalMode])
 
   // 선택 상태 관리
   const {
@@ -491,8 +478,7 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
     }
     return modal.eventId == null ? null : (events.find((item) => item.id === modal.eventId) ?? null)
   }, [events, modal.eventId, selectedEventKey])
-  const modalMode: 'modal' | 'inline' = openedModalMode ?? (isInlineMode ? 'inline' : 'modal')
-  const isModalInlineMode = modalMode === 'inline'
+  const modalMode: 'modal' | 'inline' = isInlineMode ? 'inline' : 'modal'
   // 이벤트 수정 핸들러 묶음
   const eventActions = useMemo(
     () => ({
@@ -526,10 +512,7 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
         modalEventId={modal.eventId}
         modalEvent={modalEvent}
         isModalEditing={isModalEditing}
-        isInlineMode={isModalInlineMode}
         modalMode={modalMode}
-        modalPortalRoot={modalPortalRoot}
-        cardPortalRoot={cardPortalRoot}
         onCloseModal={handleCloseModalWithCleanup}
         eventActions={eventActions}
       />
