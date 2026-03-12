@@ -27,6 +27,7 @@ export type AddScheduleFormContextValue = {
   handleAllDayToggle: () => void
   mapButtonRef: RefObject<HTMLButtonElement | null>
   handleMapButtonClick: (event: MouseEvent<HTMLButtonElement>) => void
+  closeSearchPlace: () => void
   isSearchPlaceOpen: boolean
   searchPortalPosition: { top: number; left: number } | null
   searchPortalStyle?: CSSProperties
@@ -98,6 +99,7 @@ export const useAddScheduleFormContextValue = ({
       handleAllDayToggle,
       mapButtonRef: portal.mapButtonRef,
       handleMapButtonClick: portal.handleMapButtonClick,
+      closeSearchPlace: schedule.closeSearchPlace,
       isSearchPlaceOpen: schedule.isSearchPlaceOpen,
       searchPortalPosition: portal.searchPortalPosition,
       searchPortalStyle: portal.searchPortalStyle,
@@ -121,6 +123,7 @@ export const useAddScheduleFormContextValue = ({
       portal.portalPosition,
       portal.searchPortalPosition,
       portal.searchPortalStyle,
+      schedule.closeSearchPlace,
       schedule.activeCalendarField,
       schedule.calendarRef,
       schedule.eventEndDate,

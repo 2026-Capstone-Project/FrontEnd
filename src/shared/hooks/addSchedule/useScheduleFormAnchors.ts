@@ -19,7 +19,6 @@ export const useScheduleFormAnchors = ({
   const CALENDAR_PORTAL_HEIGHT = 360
   const VIEWPORT_MARGIN = 12
   const [calendarAnchor, setCalendarAnchor] = useState<DOMRect | null>(null)
-  const [mapAnchor, setMapAnchor] = useState<DOMRect | null>(null)
   const mapButtonRef = useRef<HTMLButtonElement | null>(null)
   const [isMobileLayout, setIsMobileLayout] = useState(() => {
     if (typeof window === 'undefined') return false
@@ -35,28 +34,9 @@ export const useScheduleFormAnchors = ({
     }
 
   // 장소 버튼 클릭 시 앵커 위치 계산
-  const handleMapButtonClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
+  const handleMapButtonClick = () => {
     openSearchPlace()
-    const target = event.currentTarget
-    setMapAnchor(target.getBoundingClientRect())
   }
-
-  // 검색 포털 열릴 때 앵커 위치 갱신
-  useEffect(() => {
-    if (!isSearchPlaceOpen) return undefined
-    const updateAnchor = () => {
-      const target = mapButtonRef.current
-      if (!target) return
-      setMapAnchor(target.getBoundingClientRect())
-    }
-    updateAnchor()
-    window.addEventListener('scroll', updateAnchor, true)
-    window.addEventListener('resize', updateAnchor)
-    return () => {
-      window.removeEventListener('scroll', updateAnchor, true)
-      window.removeEventListener('resize', updateAnchor)
-    }
-  }, [isSearchPlaceOpen])
 
   // 달력 포털 위치 계산
   const portalPosition = useMemo(() => {
@@ -90,15 +70,9 @@ export const useScheduleFormAnchors = ({
 
   // 장소 검색 포털 위치 계산
   const searchPortalPosition = useMemo(() => {
-    if (!mapAnchor) return null
-    if (typeof window === 'undefined') return null
-    const scrollY = window.scrollY || 0
-    const scrollX = window.scrollX || 0
-    return {
-      top: mapAnchor.bottom + scrollY + 8,
-      left: mapAnchor.left + scrollX,
-    }
-  }, [mapAnchor])
+    if (!isSearchPlaceOpen) return null
+    return { top: 0, left: 0 }
+  }, [isSearchPlaceOpen])
 
   // 모바일 레이아웃 감지
   useEffect(() => {
@@ -114,12 +88,8 @@ export const useScheduleFormAnchors = ({
 
   // 장소 검색 포털 스타일
   const searchPortalStyle = useMemo(() => {
-    if (!searchPortalPosition || isMobileLayout) return undefined
-    return {
-      top: searchPortalPosition.top,
-      left: searchPortalPosition.left,
-    }
-  }, [searchPortalPosition, isMobileLayout])
+    return undefined
+  }, [])
 
   // 달력 포털 스타일
   const calendarPortalStyle = useMemo(() => {

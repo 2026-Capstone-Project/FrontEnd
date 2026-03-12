@@ -43,6 +43,13 @@ const eventColor = yup
 export const addScheduleSchema = yup.object().shape({
   eventTitle: scheduleTitle,
   eventDescription: description,
+  location: yup.string().trim().max(100, '장소는 최대 100자까지 입력 가능합니다.').default(''),
+  address: yup
+    .string()
+    .trim()
+    .nullable()
+    .max(255, '주소는 최대 255자까지 입력 가능합니다.')
+    .default(null),
   eventStartDate: DateSchema,
   eventEndDate: DateSchema,
   eventStartTime,
