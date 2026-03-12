@@ -7,6 +7,14 @@ export const Logo = styled.img`
   height: 50px;
   width: auto;
   cursor: pointer;
+
+  image-rendering: -webkit-optimize-contrast;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+
+  ${media.down(theme.breakPoints.tablet)} {
+    height: 40px;
+  }
 `
 
 const Wrapper = styled.div`

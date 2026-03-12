@@ -46,6 +46,8 @@ export const SocialButton = styled.button`
   border: none;
   margin-bottom: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  gap: 8px;
+  padding: 20px;
 
   display: flex;
   align-items: center;
@@ -65,6 +67,14 @@ export const SocialButton = styled.button`
 export const ButtonText = styled.span`
   flex: 1;
   text-align: center;
+  color: inherit;
+  text-decoration: none;
+  &:visited,
+  &:active,
+  &:link {
+    color: inherit;
+    text-decoration: none;
+  }
 `
 
 export const IconWrapper = styled.span`
@@ -73,7 +83,6 @@ export const IconWrapper = styled.span`
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 16px;
 `
 
 export const Google = styled(SocialButton)`
