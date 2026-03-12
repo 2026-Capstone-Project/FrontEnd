@@ -17,7 +17,14 @@ const CustomToolbar = <TEvent extends object>({
   return (
     <S.ToolbarWrapper>
       <CustomViewButton view={view} onView={onView} className="view-buttons" />
-      <div className="date-label">{formattedLabel}</div>
+      <button
+        type="button"
+        className="date-label"
+        onClick={() => onNavigate('TODAY')}
+        title="오늘로 이동"
+      >
+        {formattedLabel}
+      </button>
       <div className="nav-buttons">
         <button onClick={() => onNavigate('PREV')}>
           <Arrow className="back" color={theme.colors.black} />
