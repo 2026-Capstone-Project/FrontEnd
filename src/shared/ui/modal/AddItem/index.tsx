@@ -48,6 +48,7 @@ const AddItemModal = ({
   const [footerChildren, setFooterChildren] = useState<ReactNode | null>(null)
   const [deleteHandler, setDeleteHandler] = useState<() => void>(() => () => undefined)
   const [closeGuard, setCloseGuard] = useState<null | (() => boolean)>(null)
+  const [modalWrapperElement, setModalWrapperElement] = useState<HTMLDivElement | null>(null)
   const modalWrapperRef = useRef<HTMLDivElement | null>(null)
   const noopDeleteHandler = useCallback(() => undefined, [])
 
@@ -129,6 +130,10 @@ const AddItemModal = ({
   const handleHeaderTitleRef = useCallback((node: HTMLDivElement | null) => {
     setHeaderTitlePortalTarget(node)
   }, [])
+  const handleModalWrapperRef = useCallback((node: HTMLDivElement | null) => {
+    modalWrapperRef.current = node
+    setModalWrapperElement((prev) => (prev === node ? prev : node))
+  }, [])
   const layout = (
     <AddModalLayout
       mode={mode}
@@ -140,7 +145,7 @@ const AddItemModal = ({
       footerChildren={footerChildren}
       headerExtras={tabsVisible ? tabs : undefined}
       headerTitleContainerRef={handleHeaderTitleRef}
-      modalWrapperRef={modalWrapperRef}
+      modalWrapperRef={handleModalWrapperRef}
     >
       {activeType === 'todo' ? (
         <AddTodoForm
@@ -163,6 +168,7 @@ const AddItemModal = ({
           eventId={eventId}
           mode={mode}
           onClose={handleClose}
+          modalWrapperElement={modalWrapperElement}
           registerDeleteHandler={registerDeleteHandler}
           registerFooterChildren={registerFooterChildren}
           registerCloseGuard={registerCloseGuard}

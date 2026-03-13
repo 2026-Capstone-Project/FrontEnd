@@ -1,6 +1,16 @@
+import { keyframes } from '@emotion/react'
 import styled from '@emotion/styled'
 
 import { theme } from '@/shared/styles/theme'
+
+const spin = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+`
 
 export const Wrapper = styled.div`
   width: 100%;
@@ -11,7 +21,7 @@ export const Wrapper = styled.div`
   color: ${theme.colors.textColor3};
 `
 
-export const InputForm = styled.form`
+export const InputForm = styled.div`
   width: 100%;
   display: flex;
   align-items: center;
@@ -197,6 +207,7 @@ export const EmptyState = styled.div`
 `
 
 export const MapWrapper = styled.div`
+  position: relative;
   width: 100%;
   height: 220px;
   border-radius: 12px;
@@ -214,6 +225,34 @@ export const MapFallback = styled.div`
   text-align: center;
   color: ${theme.colors.textColor3};
   background-color: rgba(255, 255, 255, 0.96);
+`
+
+export const MapLoadingOverlay = styled.div`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: rgba(255, 255, 255, 0.76);
+  backdrop-filter: blur(4px);
+  z-index: 1;
+`
+
+export const Spinner = styled.div`
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 3px solid rgba(19, 138, 172, 0.18);
+  border-top-color: ${theme.colors.primary2};
+  animation: ${spin} 0.8s linear infinite;
+`
+
+export const LoadingLabel = styled.span`
+  color: ${theme.colors.textColor2};
+  font-size: 13px;
+  font-weight: 500;
 `
 
 export const MarkerLabel = styled.div`

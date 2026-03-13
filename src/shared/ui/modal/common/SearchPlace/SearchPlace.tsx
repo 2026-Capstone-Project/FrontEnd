@@ -50,21 +50,29 @@ const SearchPlace = ({ selectedLocation = '', onSelectLocation }: SearchPlacePro
     : kakaoLoaderError
       ? '카카오맵 SDK를 불러오지 못했습니다.'
       : null
+  const mapLoadingMessage = isKakaoLoading ? '지도를 불러오는 중...' : '장소 정보를 불러오는 중...'
 
   return (
     <S.Wrapper>
-      <S.InputForm onSubmit={handleSubmit}>
+      <S.InputForm role="search" aria-label="장소 검색">
         <S.InputWrapper>
           <S.SearchInput
             type="text"
             value={keyword}
-            placeholder="예: 성수 카페, 강남역 맛집"
+            placeholder="예: 강남역 2번 출구"
             onChange={(event) => handleKeywordChange(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key !== 'Enter') return
+              event.preventDefault()
+              event.stopPropagation()
+              handleSubmit()
+            }}
           />
           <S.InputActions>
             <S.SearchButton
-              type="submit"
+              type="button"
               disabled={isSearching || isKakaoLoading || !kakaoAppKey || !trimmedKeyword}
+              onClick={handleSubmit}
               aria-label="장소 검색"
               title="장소 검색"
             >
@@ -101,22 +109,34 @@ const SearchPlace = ({ selectedLocation = '', onSelectLocation }: SearchPlacePro
         {mapFallbackMessage ? (
           <S.MapFallback>{mapFallbackMessage}</S.MapFallback>
         ) : (
-          <Map
-            center={DEFAULT_CENTER}
-            style={{ width: '100%', height: '100%' }}
-            level={4}
-            onCreate={handleMapCreate}
-          >
-            {markers.map((marker) => (
-              <MapMarker
-                key={marker.id}
-                position={marker.position}
-                onClick={() => handleMarkerClick(marker.id)}
+          <>
+            {!isKakaoLoading && (
+              <Map
+                center={DEFAULT_CENTER}
+                style={{ width: '100%', height: '100%' }}
+                level={4}
+                onCreate={handleMapCreate}
               >
-                {selectedPlaceId === marker.id && <S.MarkerLabel>{marker.placeName}</S.MarkerLabel>}
-              </MapMarker>
-            ))}
-          </Map>
+                {markers.map((marker) => (
+                  <MapMarker
+                    key={marker.id}
+                    position={marker.position}
+                    onClick={() => handleMarkerClick(marker.id)}
+                  >
+                    {selectedPlaceId === marker.id && (
+                      <S.MarkerLabel>{marker.placeName}</S.MarkerLabel>
+                    )}
+                  </MapMarker>
+                ))}
+              </Map>
+            )}
+            {(isKakaoLoading || isSearching) && (
+              <S.MapLoadingOverlay role="status" aria-live="polite">
+                <S.Spinner aria-hidden="true" />
+                <S.LoadingLabel>{mapLoadingMessage}</S.LoadingLabel>
+              </S.MapLoadingOverlay>
+            )}
+          </>
         )}
       </S.MapWrapper>
     </S.Wrapper>

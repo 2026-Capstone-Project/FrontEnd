@@ -1,4 +1,4 @@
-import { type FormEvent, useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type {
   PlaceMarker,
@@ -223,25 +223,21 @@ const useSearchPlace = ({
     onSelectLocation(trimmedKeyword, { closeAfterSelect: true, address: null })
   }, [onSelectLocation, saveRecentSearch, trimmedKeyword])
 
-  const handleSubmit = useCallback(
-    (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault()
-      if (!trimmedKeyword) return
+  const handleSubmit = useCallback(() => {
+    if (!trimmedKeyword) return
 
-      if (
-        lastRequestedKeywordRef.current === trimmedKeyword &&
-        (searchState === 'success' || searchState === 'zero')
-      ) {
-        saveRecentSearch(trimmedKeyword)
-        setResultsView('expanded')
-        return
-      }
-
+    if (
+      lastRequestedKeywordRef.current === trimmedKeyword &&
+      (searchState === 'success' || searchState === 'zero')
+    ) {
       saveRecentSearch(trimmedKeyword)
-      searchPlaces(trimmedKeyword, { view: 'expanded' })
-    },
-    [saveRecentSearch, searchPlaces, searchState, trimmedKeyword],
-  )
+      setResultsView('expanded')
+      return
+    }
+
+    saveRecentSearch(trimmedKeyword)
+    searchPlaces(trimmedKeyword, { view: 'expanded' })
+  }, [saveRecentSearch, searchPlaces, searchState, trimmedKeyword])
 
   const handleMarkerClick = useCallback(
     (markerId: string) => {

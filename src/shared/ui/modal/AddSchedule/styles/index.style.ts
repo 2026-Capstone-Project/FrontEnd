@@ -100,8 +100,8 @@ export const CalendarPortal = styled.div`
   }
 `
 
-export const SearchPlacePortal = styled.div`
-  position: fixed;
+export const SearchPlacePortal = styled.div<{ $placement?: 'container' | 'viewport' }>`
+  position: ${({ $placement }) => ($placement === 'container' ? 'absolute' : 'fixed')};
   width: min(380px, 100%);
   max-height: min(620px, calc(100vh - 24px));
   overflow-y: auto;

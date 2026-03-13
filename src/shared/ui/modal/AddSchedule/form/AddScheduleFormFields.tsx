@@ -18,6 +18,8 @@ const AddScheduleFormFields = () => {
   const { register, setValue, watch } = useFormContext<AddScheduleFormValues>()
   const {
     headerTitlePortalTarget,
+    searchPlacePortalTarget,
+    searchPlacePortalPlacement,
     isAllday,
     startDate,
     endDate,
@@ -125,8 +127,13 @@ const AddScheduleFormFields = () => {
             </S.FieldMap>
             {isSearchPlaceOpen &&
               searchPortalPosition &&
+              searchPlacePortalTarget &&
               createPortal(
-                <S.SearchPlacePortal ref={mapRef} style={searchPortalStyle}>
+                <S.SearchPlacePortal
+                  ref={mapRef}
+                  style={searchPortalStyle}
+                  $placement={searchPlacePortalPlacement}
+                >
                   <SearchPlace
                     selectedLocation={location}
                     onSelectLocation={(nextLocation, options) => {
@@ -144,7 +151,7 @@ const AddScheduleFormFields = () => {
                     }}
                   />
                 </S.SearchPlacePortal>,
-                document.getElementById('modal-root')!,
+                searchPlacePortalTarget,
               )}
           </S.FieldRow>
         </S.BottomSection>

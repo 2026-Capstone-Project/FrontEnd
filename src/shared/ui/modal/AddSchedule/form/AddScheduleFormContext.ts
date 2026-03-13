@@ -8,6 +8,8 @@ import type { RepeatConfig, RepeatType } from '@/shared/types/recurrence/repeat'
 
 export type AddScheduleFormContextValue = {
   headerTitlePortalTarget?: HTMLElement | null
+  searchPlacePortalTarget: Element | DocumentFragment | null
+  searchPlacePortalPlacement: 'container' | 'viewport'
   isAllday: boolean
   startDate: string
   endDate: string
@@ -65,6 +67,8 @@ type AddScheduleFormContextInput = {
     handleMapButtonClick: (event: MouseEvent<HTMLButtonElement>) => void
     searchPortalPosition: { top: number; left: number } | null
     searchPortalStyle?: CSSProperties
+    searchPlacePortalTarget: Element | DocumentFragment | null
+    searchPlacePortalPlacement: 'container' | 'viewport'
   }
   handleAllDayToggle: () => void
   onTitleConfirm: (value: string) => void
@@ -82,6 +86,8 @@ export const useAddScheduleFormContextValue = ({
   return useMemo<AddScheduleFormContextValue>(
     () => ({
       headerTitlePortalTarget,
+      searchPlacePortalTarget: portal.searchPlacePortalTarget,
+      searchPlacePortalPlacement: portal.searchPlacePortalPlacement,
       isAllday: schedule.isAllday,
       startDate,
       endDate,
@@ -121,6 +127,8 @@ export const useAddScheduleFormContextValue = ({
       portal.handleTimeChange,
       portal.mapButtonRef,
       portal.portalPosition,
+      portal.searchPlacePortalPlacement,
+      portal.searchPlacePortalTarget,
       portal.searchPortalPosition,
       portal.searchPortalStyle,
       schedule.closeSearchPlace,

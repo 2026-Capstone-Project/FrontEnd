@@ -36,6 +36,7 @@ const AddScheduleFormContent = ({
   registerFooterChildren,
   isEditing = false,
   headerTitlePortalTarget,
+  modalWrapperElement,
   initialEvent,
   eventId,
   onEventColorChange,
@@ -128,6 +129,13 @@ const AddScheduleFormContent = ({
 
   const isInlineMode = mode === 'inline'
   const shouldShowModalOverlay = !isInlineMode && (activeCalendarField || isSearchPlaceOpen)
+  const searchPlacePortalTarget =
+    typeof document === 'undefined'
+      ? null
+      : isInlineMode
+        ? (modalWrapperElement ?? null)
+        : document.getElementById('modal-root')
+  const searchPlacePortalPlacement = isInlineMode ? 'container' : 'viewport'
 
   // 로컬 이벤트 동기화(타이틀/시간)
   const { syncEventTiming, handleTitleConfirm } = useScheduleEventSync({
@@ -206,6 +214,8 @@ const AddScheduleFormContent = ({
       handleMapButtonClick,
       searchPortalPosition,
       searchPortalStyle,
+      searchPlacePortalTarget,
+      searchPlacePortalPlacement,
     },
     handleAllDayToggle,
     onTitleConfirm: handleTitleConfirm,
