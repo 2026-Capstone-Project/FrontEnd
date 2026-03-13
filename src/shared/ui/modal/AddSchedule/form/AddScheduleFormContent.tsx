@@ -90,12 +90,9 @@ const AddScheduleFormContent = ({
     handleCalendarButtonClick,
     handleMapButtonClick,
     portalPosition,
-    searchPortalPosition,
-    searchPortalStyle,
     calendarPortalStyle,
   } = useScheduleFormAnchors({
     handleCalendarOpen,
-    isSearchPlaceOpen,
     openSearchPlace,
   })
   // 종일 토글 처리 (시간 필드 초기화 포함)
@@ -212,8 +209,6 @@ const AddScheduleFormContent = ({
       handleTimeChange,
       mapButtonRef,
       handleMapButtonClick,
-      searchPortalPosition,
-      searchPortalStyle,
       searchPlacePortalTarget,
       searchPlacePortalPlacement,
     },

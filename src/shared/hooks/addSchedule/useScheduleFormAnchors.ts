@@ -6,13 +6,11 @@ import type { DatePickerField } from '@/shared/types/event/event'
 
 type UseScheduleFormAnchorsProps = {
   handleCalendarOpen: (field: DatePickerField) => void
-  isSearchPlaceOpen: boolean
   openSearchPlace: () => void
 }
 
 export const useScheduleFormAnchors = ({
   handleCalendarOpen,
-  isSearchPlaceOpen,
   openSearchPlace,
 }: UseScheduleFormAnchorsProps) => {
   const CALENDAR_PORTAL_WIDTH = 330
@@ -68,12 +66,6 @@ export const useScheduleFormAnchors = ({
     }
   }, [calendarAnchor])
 
-  // 장소 검색 포털 위치 계산
-  const searchPortalPosition = useMemo(() => {
-    if (!isSearchPlaceOpen) return null
-    return { top: 0, left: 0 }
-  }, [isSearchPlaceOpen])
-
   // 모바일 레이아웃 감지
   useEffect(() => {
     if (typeof window === 'undefined') return undefined
@@ -84,11 +76,6 @@ export const useScheduleFormAnchors = ({
     }
     mediaQuery.addEventListener('change', handler)
     return () => mediaQuery.removeEventListener('change', handler)
-  }, [])
-
-  // 장소 검색 포털 스타일
-  const searchPortalStyle = useMemo(() => {
-    return undefined
   }, [])
 
   // 달력 포털 스타일
@@ -105,8 +92,6 @@ export const useScheduleFormAnchors = ({
     handleCalendarButtonClick,
     handleMapButtonClick,
     portalPosition,
-    searchPortalPosition,
-    searchPortalStyle,
     calendarPortalStyle,
   }
 }

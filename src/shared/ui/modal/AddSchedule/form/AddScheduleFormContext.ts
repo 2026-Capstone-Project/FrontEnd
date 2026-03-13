@@ -31,8 +31,6 @@ export type AddScheduleFormContextValue = {
   handleMapButtonClick: (event: MouseEvent<HTMLButtonElement>) => void
   closeSearchPlace: () => void
   isSearchPlaceOpen: boolean
-  searchPortalPosition: { top: number; left: number } | null
-  searchPortalStyle?: CSSProperties
   mapRef: RefObject<HTMLDivElement | null>
   repeatConfig: RepeatConfigSchema
   updateConfig: (changes: Partial<RepeatConfig>) => void
@@ -65,8 +63,6 @@ type AddScheduleFormContextInput = {
     handleTimeChange: (field: TimePickerField, value: string) => void
     mapButtonRef: RefObject<HTMLButtonElement | null>
     handleMapButtonClick: (event: MouseEvent<HTMLButtonElement>) => void
-    searchPortalPosition: { top: number; left: number } | null
-    searchPortalStyle?: CSSProperties
     searchPlacePortalTarget: Element | DocumentFragment | null
     searchPlacePortalPlacement: 'container' | 'viewport'
   }
@@ -107,8 +103,6 @@ export const useAddScheduleFormContextValue = ({
       handleMapButtonClick: portal.handleMapButtonClick,
       closeSearchPlace: schedule.closeSearchPlace,
       isSearchPlaceOpen: schedule.isSearchPlaceOpen,
-      searchPortalPosition: portal.searchPortalPosition,
-      searchPortalStyle: portal.searchPortalStyle,
       mapRef: schedule.mapRef,
       repeatConfig: schedule.repeatConfig,
       updateConfig: schedule.updateConfig,
@@ -129,8 +123,6 @@ export const useAddScheduleFormContextValue = ({
       portal.portalPosition,
       portal.searchPlacePortalPlacement,
       portal.searchPlacePortalTarget,
-      portal.searchPortalPosition,
-      portal.searchPortalStyle,
       schedule.closeSearchPlace,
       schedule.activeCalendarField,
       schedule.calendarRef,

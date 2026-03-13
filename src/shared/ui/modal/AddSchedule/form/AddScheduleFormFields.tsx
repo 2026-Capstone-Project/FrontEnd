@@ -39,8 +39,6 @@ const AddScheduleFormFields = () => {
     handleMapButtonClick,
     closeSearchPlace,
     isSearchPlaceOpen,
-    searchPortalPosition,
-    searchPortalStyle,
     mapRef,
     repeatConfig,
     updateConfig,
@@ -126,14 +124,9 @@ const AddScheduleFormFields = () => {
               {location || '장소 추가'}
             </S.FieldMap>
             {isSearchPlaceOpen &&
-              searchPortalPosition &&
               searchPlacePortalTarget &&
               createPortal(
-                <S.SearchPlacePortal
-                  ref={mapRef}
-                  style={searchPortalStyle}
-                  $placement={searchPlacePortalPlacement}
-                >
+                <S.SearchPlacePortal ref={mapRef} $placement={searchPlacePortalPlacement}>
                   <SearchPlace
                     selectedLocation={location}
                     onSelectLocation={(nextLocation, options) => {
