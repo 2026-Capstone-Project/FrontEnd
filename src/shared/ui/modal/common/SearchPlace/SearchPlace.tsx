@@ -62,16 +62,6 @@ const SearchPlace = ({ selectedLocation = '', onSelectLocation }: SearchPlacePro
             onChange={(event) => handleKeywordChange(event.target.value)}
           />
           <S.InputActions>
-            <S.ConfirmButton
-              type="button"
-              disabled={!trimmedKeyword}
-              $isActive={isTypedLocationSelected}
-              onClick={handleUseTypedLocation}
-              aria-label="입력한 장소 저장"
-              title="입력한 장소 저장"
-            >
-              <Check width={16} height={16} />
-            </S.ConfirmButton>
             <S.SearchButton
               type="submit"
               disabled={isSearching || isKakaoLoading || !kakaoAppKey || !trimmedKeyword}
@@ -82,6 +72,16 @@ const SearchPlace = ({ selectedLocation = '', onSelectLocation }: SearchPlacePro
             </S.SearchButton>
           </S.InputActions>
         </S.InputWrapper>
+        <S.ConfirmButton
+          type="button"
+          disabled={!trimmedKeyword}
+          $isActive={isTypedLocationSelected}
+          onClick={handleUseTypedLocation}
+          aria-label="입력한 장소 저장"
+          title="입력한 장소 저장"
+        >
+          <Check width={16} height={16} />
+        </S.ConfirmButton>
       </S.InputForm>
       <SearchPlacePanel
         panelTitle={panelTitle}

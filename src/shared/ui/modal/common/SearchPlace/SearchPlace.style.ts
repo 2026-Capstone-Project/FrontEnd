@@ -13,6 +13,9 @@ export const Wrapper = styled.div`
 
 export const InputForm = styled.form`
   width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 `
 
 export const InputWrapper = styled.div`
@@ -24,7 +27,7 @@ export const SearchInput = styled.input`
   width: 100%;
   border-radius: 12px;
   padding: 12px 84px 12px 14px;
-  border: 1px solid rgba(19, 138, 172, 0.2);
+  border: 1px solid #acacac;
   background-color: ${theme.colors.white};
   color: ${theme.colors.textColor2};
   transition:
@@ -59,7 +62,6 @@ const InputActionButton = styled.button`
   border-radius: 10px;
   display: grid;
   place-items: center;
-  background-color: ${theme.colors.sub};
   color: ${theme.colors.primary2};
   cursor: pointer;
   transition:
@@ -78,10 +80,8 @@ const InputActionButton = styled.button`
 `
 
 export const ConfirmButton = styled(InputActionButton)<{ $isActive?: boolean }>`
-  background-color: ${({ $isActive }) =>
-    $isActive ? theme.colors.black : 'rgba(17, 24, 39, 0.08)'};
   color: ${({ $isActive }) => ($isActive ? theme.colors.white : theme.colors.textPrimary)};
-
+  background-color: ${({ $isActive }) => ($isActive ? theme.colors.primary2 : theme.colors.sub)};
   &:not(:disabled):hover {
     background-color: ${theme.colors.black};
     color: ${theme.colors.white};
