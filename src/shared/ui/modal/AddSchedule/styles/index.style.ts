@@ -113,7 +113,7 @@ export const SearchPlacePortal = styled.div<{ $placement?: 'container' | 'viewpo
   border-radius: 16px;
   padding: 24px;
   height: fit-content;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 0 100px 40px rgba(0, 0, 0, 0.1);
   z-index: 10100;
   ${media.down(theme.breakPoints.tablet)} {
     width: min(90vw, 360px);
