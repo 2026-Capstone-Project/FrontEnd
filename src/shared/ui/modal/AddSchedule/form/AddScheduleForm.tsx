@@ -13,6 +13,7 @@ const AddScheduleForm = ({ date, initialEvent, isEditing, ...rest }: AddSchedule
         {...rest}
         date={date}
         initialEvent={initialEvent}
+        isEditing={isEditing}
         schedule={schedule}
       />
     </FormProvider>

@@ -5,6 +5,7 @@ import type { NavigateAction, ViewStatic } from 'react-big-calendar'
 import { formatWeekday } from '@/features/Calendar/utils/formatters'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 
+import { TIMED_SLOT_CONFIG } from '../../domain/constants'
 import {
   buildTimedSlots,
   compareByStart,
@@ -66,9 +67,8 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
     )
     .sort(compareByStart)
 
-  const timedColumns = buildTimedSlots(timedEvents, date)
-
-  const [rowHeight, setRowHeight] = useState(50)
+  const [rowHeight, setRowHeight] = useState(TIMED_SLOT_CONFIG.SLOT_HEIGHT)
+  const timedColumns = buildTimedSlots(timedEvents, date, rowHeight)
   const {
     dragStateRef,
     dragThresholdPassedRef,

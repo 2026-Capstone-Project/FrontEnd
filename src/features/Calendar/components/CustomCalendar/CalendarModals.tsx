@@ -1,6 +1,5 @@
 import moment from 'moment'
 import { useMemo } from 'react'
-import { createPortal } from 'react-dom'
 
 import { useDetailEventQuery } from '@/shared/hooks/query/useCalendarQueries'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
@@ -12,10 +11,7 @@ type CalendarModalsProps = {
   modalEventId: CalendarEvent['id'] | null
   modalEvent: CalendarEvent | null
   isModalEditing: boolean
-  isInlineMode: boolean
   modalMode: 'modal' | 'inline'
-  modalPortalRoot: HTMLElement | null
-  cardPortalRoot: HTMLElement | null
   onCloseModal: () => void
   eventActions: {
     onEventColorChange: (eventId: CalendarEvent['id'], color: CalendarEvent['color']) => void
@@ -35,10 +31,7 @@ const CalendarModals = ({
   modalEventId,
   modalEvent,
   isModalEditing,
-  isInlineMode,
   modalMode,
-  modalPortalRoot,
-  cardPortalRoot,
   onCloseModal,
   eventActions,
 }: CalendarModalsProps) => {
@@ -68,82 +61,35 @@ const CalendarModals = ({
   }, [data, safeDetailEventId])
   return (
     <>
-      {shouldRenderModal &&
-        isTodoModal &&
-        modalPortalRoot &&
-        !isInlineMode &&
-        createPortal(
-          <AddTodo
-            date={modalDate}
-            onClose={onCloseModal}
-            mode={modalMode}
-            eventId={modalEventId}
-            tabsVisible={!isModalEditing}
-            onEventColorChange={eventActions.onEventColorChange}
-            onEventTitleConfirm={eventActions.onEventTitleConfirm}
-            onEventTimingChange={eventActions.onEventTimingChange}
-            isEditing={isModalEditing}
-          />,
-          modalPortalRoot,
-        )}
-      {shouldRenderModal &&
-        isTodoModal &&
-        isInlineMode &&
-        cardPortalRoot &&
-        createPortal(
-          <AddTodo
-            date={modalDate}
-            onClose={onCloseModal}
-            mode={modalMode}
-            eventId={modalEventId}
-            tabsVisible={!isModalEditing}
-            onEventColorChange={eventActions.onEventColorChange}
-            onEventTitleConfirm={eventActions.onEventTitleConfirm}
-            onEventTimingChange={eventActions.onEventTimingChange}
-            isEditing={isModalEditing}
-          />,
-          cardPortalRoot,
-        )}
-      {shouldRenderModal &&
-        !isTodoModal &&
-        modalPortalRoot &&
-        !isInlineMode &&
-        createPortal(
-          <AddSchedule
-            date={modalDate}
-            onClose={onCloseModal}
-            mode={modalMode}
-            eventId={modalEventId}
-            event={detailEvent}
-            isEditing={isModalEditing}
-            tabsVisible={!isModalEditing}
-            onEventColorChange={eventActions.onEventColorChange}
-            onEventTitleConfirm={eventActions.onEventTitleConfirm}
-            onEventTypeChange={eventActions.onEventTypeChange}
-            onEventTimingChange={eventActions.onEventTimingChange}
-          />,
-          modalPortalRoot,
-        )}
-      {shouldRenderModal &&
-        !isTodoModal &&
-        isInlineMode &&
-        cardPortalRoot &&
-        createPortal(
-          <AddSchedule
-            date={modalDate}
-            onClose={onCloseModal}
-            mode={modalMode}
-            eventId={modalEventId}
-            event={detailEvent ?? modalEvent}
-            isEditing={isModalEditing}
-            tabsVisible={!isModalEditing}
-            onEventColorChange={eventActions.onEventColorChange}
-            onEventTitleConfirm={eventActions.onEventTitleConfirm}
-            onEventTypeChange={eventActions.onEventTypeChange}
-            onEventTimingChange={eventActions.onEventTimingChange}
-          />,
-          cardPortalRoot,
-        )}
+      {/* AddItemModal 내부 포털을 그대로 사용해, 리사이즈 시 같은 폼 상태로 루트만 이동합니다. */}
+      {shouldRenderModal && isTodoModal && (
+        <AddTodo
+          date={modalDate}
+          onClose={onCloseModal}
+          mode={modalMode}
+          eventId={modalEventId}
+          tabsVisible={!isModalEditing}
+          onEventColorChange={eventActions.onEventColorChange}
+          onEventTitleConfirm={eventActions.onEventTitleConfirm}
+          onEventTimingChange={eventActions.onEventTimingChange}
+          isEditing={isModalEditing}
+        />
+      )}
+      {shouldRenderModal && !isTodoModal && (
+        <AddSchedule
+          date={modalDate}
+          onClose={onCloseModal}
+          mode={modalMode}
+          eventId={modalEventId}
+          event={detailEvent ?? modalEvent}
+          isEditing={isModalEditing}
+          tabsVisible={!isModalEditing}
+          onEventColorChange={eventActions.onEventColorChange}
+          onEventTitleConfirm={eventActions.onEventTitleConfirm}
+          onEventTypeChange={eventActions.onEventTypeChange}
+          onEventTimingChange={eventActions.onEventTimingChange}
+        />
+      )}
     </>
   )
 }

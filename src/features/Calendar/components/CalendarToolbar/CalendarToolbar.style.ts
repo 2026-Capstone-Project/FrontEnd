@@ -20,9 +20,20 @@ export const ToolbarWrapper = styled.div`
   }
 
   .date-label {
+    border: none;
+    background: none;
+    padding: 0;
     font-size: 24px;
     font-weight: 700;
     color: #202124;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid ${theme.colors.primary2};
+      outline-offset: 6px;
+      border-radius: 10px;
+    }
+
     ${media.down(theme.breakPoints.desktop)} {
       font-size: 20px;
     }
