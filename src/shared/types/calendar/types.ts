@@ -10,6 +10,7 @@ export type Event = {
   start: string
   end: string
   location: string | null
+  address?: string | null
   isAllDay: boolean
   color: EventColorType
   recurrenceGroup: RecurrenceGroup | null

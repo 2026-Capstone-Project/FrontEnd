@@ -8,6 +8,8 @@ import type { RepeatConfig, RepeatType } from '@/shared/types/recurrence/repeat'
 
 export type AddScheduleFormContextValue = {
   headerTitlePortalTarget?: HTMLElement | null
+  searchPlacePortalTarget: Element | DocumentFragment | null
+  searchPlacePortalPlacement: 'container' | 'viewport'
   isAllday: boolean
   startDate: string
   endDate: string
@@ -27,9 +29,8 @@ export type AddScheduleFormContextValue = {
   handleAllDayToggle: () => void
   mapButtonRef: RefObject<HTMLButtonElement | null>
   handleMapButtonClick: (event: MouseEvent<HTMLButtonElement>) => void
+  closeSearchPlace: () => void
   isSearchPlaceOpen: boolean
-  searchPortalPosition: { top: number; left: number } | null
-  searchPortalStyle?: CSSProperties
   mapRef: RefObject<HTMLDivElement | null>
   repeatConfig: RepeatConfigSchema
   updateConfig: (changes: Partial<RepeatConfig>) => void
@@ -62,8 +63,8 @@ type AddScheduleFormContextInput = {
     handleTimeChange: (field: TimePickerField, value: string) => void
     mapButtonRef: RefObject<HTMLButtonElement | null>
     handleMapButtonClick: (event: MouseEvent<HTMLButtonElement>) => void
-    searchPortalPosition: { top: number; left: number } | null
-    searchPortalStyle?: CSSProperties
+    searchPlacePortalTarget: Element | DocumentFragment | null
+    searchPlacePortalPlacement: 'container' | 'viewport'
   }
   handleAllDayToggle: () => void
   onTitleConfirm: (value: string) => void
@@ -81,6 +82,8 @@ export const useAddScheduleFormContextValue = ({
   return useMemo<AddScheduleFormContextValue>(
     () => ({
       headerTitlePortalTarget,
+      searchPlacePortalTarget: portal.searchPlacePortalTarget,
+      searchPlacePortalPlacement: portal.searchPlacePortalPlacement,
       isAllday: schedule.isAllday,
       startDate,
       endDate,
@@ -98,9 +101,8 @@ export const useAddScheduleFormContextValue = ({
       handleAllDayToggle,
       mapButtonRef: portal.mapButtonRef,
       handleMapButtonClick: portal.handleMapButtonClick,
+      closeSearchPlace: schedule.closeSearchPlace,
       isSearchPlaceOpen: schedule.isSearchPlaceOpen,
-      searchPortalPosition: portal.searchPortalPosition,
-      searchPortalStyle: portal.searchPortalStyle,
       mapRef: schedule.mapRef,
       repeatConfig: schedule.repeatConfig,
       updateConfig: schedule.updateConfig,
@@ -119,8 +121,9 @@ export const useAddScheduleFormContextValue = ({
       portal.handleTimeChange,
       portal.mapButtonRef,
       portal.portalPosition,
-      portal.searchPortalPosition,
-      portal.searchPortalStyle,
+      portal.searchPlacePortalPlacement,
+      portal.searchPlacePortalTarget,
+      schedule.closeSearchPlace,
       schedule.activeCalendarField,
       schedule.calendarRef,
       schedule.eventEndDate,

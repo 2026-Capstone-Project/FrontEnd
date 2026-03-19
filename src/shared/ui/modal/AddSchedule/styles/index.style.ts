@@ -100,27 +100,26 @@ export const CalendarPortal = styled.div`
   }
 `
 
-export const SearchPlacePortal = styled.div`
-  position: fixed;
+export const SearchPlacePortal = styled.div<{ $placement?: 'container' | 'viewport' }>`
+  position: ${({ $placement }) => ($placement === 'container' ? 'absolute' : 'fixed')};
   width: min(380px, 100%);
+  max-height: min(620px, calc(100vh - 24px));
+  overflow-y: auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   background-color: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(16px);
   border-radius: 16px;
   padding: 24px;
   height: fit-content;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 0 100px 40px rgba(0, 0, 0, 0.1);
   z-index: 10100;
   ${media.down(theme.breakPoints.tablet)} {
     width: min(90vw, 360px);
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
   }
   ${media.down(theme.breakPoints.mobile)} {
     width: min(90vw, 320px);
-    top: 55%;
-    left: 50%;
-    transform: translate(-50%, -50%);
   }
 `
 
@@ -154,18 +153,21 @@ export const TextareaHeader = styled.div`
   display: flex;
 `
 
-export const FieldMap = styled.button`
+export const FieldMap = styled.button<{ $hasValue?: boolean }>`
   flex: 1;
   height: 43px;
   border-radius: 8px;
   padding: 10px;
   background-color: ${theme.colors.inputColor};
   font-size: 14px;
-  color: ${theme.colors.textColor3};
+  color: ${({ $hasValue }) => ($hasValue ? theme.colors.textPrimary : theme.colors.textColor3)};
   display: flex;
   justify-content: flex-start;
   align-items: center;
   cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `
 
 export const PortalDarkLayer = styled.div`

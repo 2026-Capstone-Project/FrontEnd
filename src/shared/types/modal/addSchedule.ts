@@ -7,6 +7,7 @@ export type AddScheduleFormProps = {
   registerDeleteHandler?: (handler?: () => void) => void
   registerCloseGuard?: (guard?: (() => boolean) | null) => void
   registerFooterChildren?: (node: ReactNode | null) => void
+  modalWrapperElement?: HTMLDivElement | null
   date: string
   mode?: 'modal' | 'inline'
   eventId: CalendarEvent['id']

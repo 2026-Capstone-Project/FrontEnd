@@ -15,9 +15,11 @@ import CustomTimePicker from '@/shared/ui/modal/common/CustomTimePicker/CustomTi
 import SearchPlace from '@/shared/ui/modal/common/SearchPlace/SearchPlace'
 
 const AddScheduleFormFields = () => {
-  const { register } = useFormContext<AddScheduleFormValues>()
+  const { register, setValue, watch } = useFormContext<AddScheduleFormValues>()
   const {
     headerTitlePortalTarget,
+    searchPlacePortalTarget,
+    searchPlacePortalPlacement,
     isAllday,
     startDate,
     endDate,
@@ -35,15 +37,15 @@ const AddScheduleFormFields = () => {
     handleAllDayToggle,
     mapButtonRef,
     handleMapButtonClick,
+    closeSearchPlace,
     isSearchPlaceOpen,
-    searchPortalPosition,
-    searchPortalStyle,
     mapRef,
     repeatConfig,
     updateConfig,
     handleRepeatType,
     onTitleConfirm,
   } = useAddScheduleFormContext()
+  const location = watch('location') ?? ''
 
   // 폼 본문 UI 렌더링
   return (
@@ -112,16 +114,37 @@ const AddScheduleFormFields = () => {
             <S.Textarea {...register('eventDescription')} />
           </S.TextareaWrapper>
           <S.FieldRow css={{ width: '100%' }}>
-            <S.FieldMap ref={mapButtonRef} type="button" onClick={handleMapButtonClick}>
-              장소 추가
+            <S.FieldMap
+              ref={mapButtonRef}
+              type="button"
+              onClick={handleMapButtonClick}
+              $hasValue={Boolean(location)}
+              title={location || '장소 추가'}
+            >
+              {location || '장소 추가'}
             </S.FieldMap>
             {isSearchPlaceOpen &&
-              searchPortalPosition &&
+              searchPlacePortalTarget &&
               createPortal(
-                <S.SearchPlacePortal ref={mapRef} style={searchPortalStyle}>
-                  <SearchPlace />
+                <S.SearchPlacePortal ref={mapRef} $placement={searchPlacePortalPlacement}>
+                  <SearchPlace
+                    selectedLocation={location}
+                    onSelectLocation={(nextLocation, options) => {
+                      setValue('location', nextLocation, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      })
+                      setValue('address', options?.address ?? null, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      })
+                      if (options?.closeAfterSelect !== false) {
+                        closeSearchPlace()
+                      }
+                    }}
+                  />
                 </S.SearchPlacePortal>,
-                document.getElementById('modal-root')!,
+                searchPlacePortalTarget,
               )}
           </S.FieldRow>
         </S.BottomSection>

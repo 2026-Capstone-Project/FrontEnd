@@ -89,6 +89,8 @@ export const useSchedulePatchController = ({
       return postEventMutation({
         title: values.eventTitle?.trim() || '새 일정',
         content: values.eventDescription ?? '',
+        location: values.location?.trim() || undefined,
+        address: values.address?.trim() || null,
         startTime: formatDateTime(start),
         endTime: formatDateTime(end),
         isAllDay: values.isAllday,

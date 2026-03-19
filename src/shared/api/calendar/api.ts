@@ -34,6 +34,7 @@ export const postEvents = async (eventData: {
   startTime: string
   endTime: string
   location?: string
+  address?: string | null
   color?: EventColorType
   isAllDay?: boolean
   recurrenceGroup?: RecurrenceGroup
@@ -47,6 +48,8 @@ export const patchEvent = async (
   eventData: {
     title?: string
     content?: string
+    location?: string
+    address?: string | null
     startTime?: string
     endTime?: string
     color?: EventColorType

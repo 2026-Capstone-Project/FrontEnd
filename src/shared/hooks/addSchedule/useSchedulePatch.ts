@@ -39,6 +39,8 @@ type PatchEventMutate = (params: {
   eventData: {
     title?: string
     content?: string
+    location?: string
+    address?: string | null
     startTime?: string
     endTime?: string
     color?: Event['color']
@@ -101,6 +103,8 @@ export const useSchedulePatch = ({
 
       const initialTitle = initialEvent?.title ?? ''
       const initialContent = initialEvent?.content ?? ''
+      const initialLocation = initialEvent?.location ?? ''
+      const initialAddress = initialEvent?.address ?? null
       const initialColor = initialEvent?.color
       const initialIsAllday = initialEvent?.isAllDay ?? false
       const initialStart =
@@ -110,6 +114,8 @@ export const useSchedulePatch = ({
 
       const nextTitle = values.eventTitle?.trim() || '새 일정'
       const nextContent = values.eventDescription ?? ''
+      const nextLocation = values.location?.trim() || ''
+      const nextAddress = values.address?.trim() || null
       const nextStart = formatDateTime(start)
       const nextEnd = formatDateTime(end)
       const hasStartDateChanged =
@@ -139,6 +145,8 @@ export const useSchedulePatch = ({
       const eventData: Parameters<PatchEventMutate>[0]['eventData'] = {
         ...(nextTitle !== initialTitle ? { title: nextTitle } : {}),
         ...(nextContent !== initialContent ? { content: nextContent } : {}),
+        ...(nextLocation !== initialLocation ? { location: nextLocation } : {}),
+        ...(nextAddress !== initialAddress ? { address: nextAddress } : {}),
         ...(initialStart && nextStart !== initialStart ? { startTime: nextStart } : {}),
         ...(initialEnd && nextEnd !== initialEnd ? { endTime: nextEnd } : {}),
         ...(initialColor && values.eventColor !== initialColor ? { color: values.eventColor } : {}),

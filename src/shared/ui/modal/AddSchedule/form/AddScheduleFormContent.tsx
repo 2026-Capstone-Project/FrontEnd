@@ -36,6 +36,7 @@ const AddScheduleFormContent = ({
   registerFooterChildren,
   isEditing = false,
   headerTitlePortalTarget,
+  modalWrapperElement,
   initialEvent,
   eventId,
   onEventColorChange,
@@ -89,12 +90,9 @@ const AddScheduleFormContent = ({
     handleCalendarButtonClick,
     handleMapButtonClick,
     portalPosition,
-    searchPortalPosition,
-    searchPortalStyle,
     calendarPortalStyle,
   } = useScheduleFormAnchors({
     handleCalendarOpen,
-    isSearchPlaceOpen,
     openSearchPlace,
   })
   // 종일 토글 처리 (시간 필드 초기화 포함)
@@ -128,6 +126,13 @@ const AddScheduleFormContent = ({
 
   const isInlineMode = mode === 'inline'
   const shouldShowModalOverlay = !isInlineMode && (activeCalendarField || isSearchPlaceOpen)
+  const searchPlacePortalTarget =
+    typeof document === 'undefined'
+      ? null
+      : isInlineMode
+        ? (modalWrapperElement ?? null)
+        : document.getElementById('modal-root')
+  const searchPlacePortalPlacement = isInlineMode ? 'container' : 'viewport'
 
   // 로컬 이벤트 동기화(타이틀/시간)
   const { syncEventTiming, handleTitleConfirm } = useScheduleEventSync({
@@ -204,8 +209,8 @@ const AddScheduleFormContent = ({
       handleTimeChange,
       mapButtonRef,
       handleMapButtonClick,
-      searchPortalPosition,
-      searchPortalStyle,
+      searchPlacePortalTarget,
+      searchPlacePortalPlacement,
     },
     handleAllDayToggle,
     onTitleConfirm: handleTitleConfirm,

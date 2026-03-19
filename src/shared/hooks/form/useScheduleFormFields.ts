@@ -53,6 +53,8 @@ export const useScheduleFormFields = ({
   const defaultEndTime = formatTimeFromDate(defaultEnd)
   const initialTitle = initialEvent?.title === '새 일정' ? '' : (initialEvent?.title ?? '')
   const initialDescription = initialEvent?.content ?? ''
+  const initialLocation = initialEvent?.location ?? ''
+  const initialAddress = initialEvent?.address ?? null
   const initialColor = initialEvent?.color ?? 'BLUE'
   const initialIsAllDay = initialEvent?.isAllDay ?? isAllday
   const formMethods = useForm<AddScheduleFormValues>({
@@ -60,6 +62,8 @@ export const useScheduleFormFields = ({
     defaultValues: {
       eventTitle: initialTitle,
       eventDescription: initialDescription,
+      location: initialLocation,
+      address: initialAddress,
       eventStartDate: defaultStart,
       eventEndDate: defaultEnd,
       eventStartTime: defaultStartTime,
@@ -85,6 +89,8 @@ export const useScheduleFormFields = ({
     register('eventEndDate')
     register('eventStartTime')
     register('eventEndTime')
+    register('location')
+    register('address')
     register('isAllday')
     register('repeatConfig')
     register('eventColor')
@@ -108,6 +114,8 @@ export const useScheduleFormFields = ({
     const nextTitle = initialEvent?.title ?? ''
     setValue('eventTitle', nextTitle === '새 일정' ? '' : nextTitle)
     setValue('eventDescription', initialEvent?.content ?? '')
+    setValue('location', initialEvent?.location ?? '')
+    setValue('address', initialEvent?.address ?? null)
     setValue('eventColor', initialEvent?.color ?? 'BLUE')
     const mappedRepeatConfig = mapRecurrenceGroupToRepeatConfig(initialEvent?.recurrenceGroup)
     const nextRepeatConfig: RepeatConfigSchema = {
