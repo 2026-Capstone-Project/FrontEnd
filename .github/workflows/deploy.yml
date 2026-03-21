@@ -23,6 +23,9 @@ jobs:
 
       - name: 빌드
         run: npm run build
+        env:
+          VITE_SERVER_URL: ${{ secrets.VITE_SERVER_URL }}
+          VITE_KAKAO_API: ${{ secrets.VITE_KAKAO_API }}
 
       - name: AWS 로그인
         uses: aws-actions/configure-aws-credentials@v2
