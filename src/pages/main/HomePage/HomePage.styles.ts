@@ -39,6 +39,8 @@ export const SubTitle = styled.p`
 export const CardHeader = styled.div`
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
 `
 
 export const Card = styled.div`
@@ -149,13 +151,17 @@ export const TodoText = styled.p`
 `
 
 export const Tag = styled.span<{ type?: 'remind' | 'ai' }>`
-  display: block;
-  font-size: 14px;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 16px;
-  padding: 4px 8px;
-  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 16px;
+  font-weight: 800;
+  padding: 8px 18px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  width: fit-content;
+  line-height: 1;
 
   ${(props) =>
     props.type === 'remind'
@@ -164,19 +170,17 @@ export const Tag = styled.span<{ type?: 'remind' | 'ai' }>`
       `
       : `
         position: relative;
-        color: #4684C1; 
-        
-
         background: linear-gradient(90deg, #4684C1 0%, #00DCCC 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        background-clip: text;
 
         &::before {
           content: "";
           position: absolute;
           inset: 0;
-          border-radius: 12px; 
-          padding: 1px; 
+          border-radius: 20px; 
+          padding: 2px; 
           background: linear-gradient(90deg, #4684C1 0%, #00DCCC 100%);
           -webkit-mask: 
              linear-gradient(#fff 0 0) content-box, 
@@ -187,7 +191,6 @@ export const Tag = styled.span<{ type?: 'remind' | 'ai' }>`
         }
       `}
 `
-
 export const CardText = styled.p`
   font-size: 17px;
   font-weight: 600;
