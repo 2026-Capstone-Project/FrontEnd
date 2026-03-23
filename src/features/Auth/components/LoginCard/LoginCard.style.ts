@@ -67,12 +67,12 @@ export const SocialButton = styled.button`
 export const ButtonText = styled.span`
   flex: 1;
   text-align: center;
-  color: inherit;
+  color: black;
   text-decoration: none;
   &:visited,
   &:active,
   &:link {
-    color: inherit;
+    color: black;
     text-decoration: none;
   }
 `
