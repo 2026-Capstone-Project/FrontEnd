@@ -240,3 +240,35 @@ export const IconWrapper = styled.div`
   top: 16px;
   right: 16px;
 `
+// --- 개발용 임시 버튼 스타일 --- 끝나면 지울 예정 ---
+export const DevButtonWrapper = styled.div`
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px dashed #ced4da;
+  border-radius: 12px;
+  background-color: #f8f9fa;
+
+  button {
+    flex: 1;
+    padding: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #495057;
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background-color: #e9ecef;
+      border-color: #adb5bd;
+    }
+
+    &:active {
+      background-color: #dee2e6;
+    }
+  }
+`
