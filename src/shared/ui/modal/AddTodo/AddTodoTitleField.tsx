@@ -1,0 +1,48 @@
+import { createPortal } from 'react-dom'
+import { useFormContext, useWatch } from 'react-hook-form'
+
+import { useThrottledValue } from '@/shared/hooks/common/useThrottledValue'
+import { useGetTodoTitleHistoryQuery } from '@/shared/hooks/query/useTodoQueries'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
+import type { AddTodoFormValues } from '@/shared/types/event/event'
+import TitleSuggestionInput from '@/shared/ui/common/TitleSuggestionInput/TitleSuggestionInput'
+
+type AddTodoTitleFieldProps = {
+  eventId: CalendarEvent['id']
+  portalTarget?: HTMLElement | null
+  onEventTitleConfirm?: (eventId: CalendarEvent['id'], title: string) => void
+}
+
+const AddTodoTitleField = ({
+  eventId,
+  portalTarget,
+  onEventTitleConfirm,
+}: AddTodoTitleFieldProps) => {
+  const { control } = useFormContext<AddTodoFormValues>()
+  const todoTitleKeyword = (useWatch({ control, name: 'todoTitle' }) ?? '').trim()
+  const throttledTodoTitleKeyword = useThrottledValue(todoTitleKeyword, 150)
+  const { data: todoTitleHistoryData } = useGetTodoTitleHistoryQuery(
+    throttledTodoTitleKeyword,
+    Boolean(throttledTodoTitleKeyword),
+  )
+  const suggestions = todoTitleHistoryData?.result.titleHistory ?? []
+
+  const titleField = (
+    <TitleSuggestionInput
+      fieldName="todoTitle"
+      placeholder="새로운 할 일"
+      autoFocus
+      suggestions={suggestions}
+      onLiveChange={(value) => {
+        if (eventId != null && eventId !== 0) {
+          onEventTitleConfirm?.(eventId, value)
+        }
+      }}
+      onConfirm={(value) => onEventTitleConfirm?.(eventId, value)}
+    />
+  )
+
+  return portalTarget ? createPortal(titleField, portalTarget) : titleField
+}
+
+export default AddTodoTitleField

@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import AddModalLayout from '@/shared/ui/modal/AddModalLayout/AddModalLayout'
 import AddScheduleForm from '@/shared/ui/modal/AddSchedule/AddScheduleForm'
-import AddTodoForm from '@/shared/ui/modal/AddTodo/components/AddTodoForm'
+import AddTodoForm from '@/shared/ui/modal/AddTodo/AddTodoForm'
 
 import * as S from './AddItem.style'
 
