@@ -14,7 +14,6 @@ import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/recurrenceGroup
 
 type UseScheduleFormFieldsProps = {
   date: string
-  isAllday: boolean
   initialEvent?: CalendarEvent | null
   isEditing: boolean
 }
@@ -28,6 +27,7 @@ export type UseScheduleFormFieldsResult = {
   eventEndDate: Date | null
   eventStartTime: string | undefined
   eventEndTime: string | undefined
+  isAllday: boolean
   repeatConfig: RepeatConfigSchema
   eventColor: EventColorType
   eventTitle: string | undefined
@@ -39,7 +39,6 @@ const formatTimeFromDate = (value: Date) => `${pad2(value.getHours())}:${pad2(va
 
 export const useScheduleFormFields = ({
   date,
-  isAllday,
   initialEvent,
   isEditing,
 }: UseScheduleFormFieldsProps): UseScheduleFormFieldsResult => {
@@ -56,7 +55,7 @@ export const useScheduleFormFields = ({
   const initialLocation = initialEvent?.location ?? ''
   const initialAddress = initialEvent?.address ?? null
   const initialColor = initialEvent?.color ?? 'BLUE'
-  const initialIsAllDay = initialEvent?.isAllDay ?? isAllday
+  const initialIsAllDay = initialEvent?.isAllDay ?? false
   const formMethods = useForm<AddScheduleFormValues>({
     resolver,
     defaultValues: {
@@ -79,6 +78,7 @@ export const useScheduleFormFields = ({
   const eventEndDate = useWatch({ control, name: 'eventEndDate' })
   const eventStartTime = useWatch({ control, name: 'eventStartTime' })
   const eventEndTime = useWatch({ control, name: 'eventEndTime' })
+  const isAllday = useWatch({ control, name: 'isAllday' }) ?? initialIsAllDay
   const repeatConfig = (useWatch({ control, name: 'repeatConfig' }) ??
     (defaultRepeatConfig as RepeatConfigSchema)) as RepeatConfigSchema
   const eventColor = (useWatch({ control, name: 'eventColor' }) ?? 'BLUE') as EventColorType
@@ -97,10 +97,6 @@ export const useScheduleFormFields = ({
   }, [register])
 
   useEffect(() => {
-    setValue('isAllday', isAllday)
-  }, [isAllday, setValue])
-
-  useEffect(() => {
     if (!isEditing || !initialEvent) return
     const start = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
     const end =
@@ -116,6 +112,7 @@ export const useScheduleFormFields = ({
     setValue('eventDescription', initialEvent?.content ?? '')
     setValue('location', initialEvent?.location ?? '')
     setValue('address', initialEvent?.address ?? null)
+    setValue('isAllday', initialEvent?.isAllDay ?? false)
     setValue('eventColor', initialEvent?.color ?? 'BLUE')
     const mappedRepeatConfig = mapRecurrenceGroupToRepeatConfig(initialEvent?.recurrenceGroup)
     const nextRepeatConfig: RepeatConfigSchema = {
@@ -137,6 +134,7 @@ export const useScheduleFormFields = ({
     eventEndDate,
     eventStartTime,
     eventEndTime,
+    isAllday,
     repeatConfig,
     eventColor,
     eventTitle,
