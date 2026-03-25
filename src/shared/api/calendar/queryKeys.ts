@@ -1,6 +1,11 @@
 import { createQueryKeys } from '@lukemorales/query-key-factory'
 
-import { getDetailEvent, getEvents, getTodoForCalendar } from '../calendar/api'
+import {
+  getDetailEvent,
+  getEvents,
+  getEventTitleHistory,
+  getTodoForCalendar,
+} from '../calendar/api'
 
 export const calendarKeys = createQueryKeys('calendar', {
   events: (startDate: string, endDate: string) => ({
@@ -14,5 +19,9 @@ export const calendarKeys = createQueryKeys('calendar', {
   todos: (startDate: string, endDate: string) => ({
     queryKey: [{ startDate, endDate }],
     queryFn: () => getTodoForCalendar(startDate, endDate),
+  }),
+  titleHistory: (keyword: string) => ({
+    queryKey: [{ keyword }],
+    queryFn: () => getEventTitleHistory(keyword),
   }),
 })

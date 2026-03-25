@@ -2,6 +2,8 @@
 import { createPortal } from 'react-dom'
 import { useFormContext } from 'react-hook-form'
 
+import { useThrottledValue } from '@/shared/hooks/common/useThrottledValue'
+import { useEventTitleHistoryQuery } from '@/shared/hooks/query/useCalendarQueries'
 import type { AddScheduleFormValues } from '@/shared/types/event/event'
 import Checkbox from '@/shared/ui/common/Checkbox/Checkbox'
 import RepeatTypeGroup from '@/shared/ui/common/RepeatTypeGroup/RepeatTypeGroup'
@@ -46,6 +48,13 @@ const AddScheduleFormFields = () => {
     onTitleConfirm,
   } = useAddScheduleFormContext()
   const location = watch('location') ?? ''
+  const eventTitleKeyword = (watch('eventTitle') ?? '').trim()
+  const throttledEventTitleKeyword = useThrottledValue(eventTitleKeyword, 150)
+  const { data: eventTitleHistoryData } = useEventTitleHistoryQuery(
+    throttledEventTitleKeyword,
+    Boolean(throttledEventTitleKeyword),
+  )
+  const eventTitleSuggestions = eventTitleHistoryData?.result.titleHistory ?? []
 
   // 폼 본문 UI 렌더링
   return (
@@ -56,6 +65,7 @@ const AddScheduleFormFields = () => {
             fieldName="eventTitle"
             placeholder="새로운 일정"
             autoFocus
+            suggestions={eventTitleSuggestions}
             onLiveChange={onTitleConfirm}
             onConfirm={onTitleConfirm}
           />
@@ -176,6 +186,7 @@ const AddScheduleFormFields = () => {
             fieldName="eventTitle"
             placeholder="새로운 일정"
             autoFocus
+            suggestions={eventTitleSuggestions}
             onLiveChange={onTitleConfirm}
             onConfirm={onTitleConfirm}
           />,

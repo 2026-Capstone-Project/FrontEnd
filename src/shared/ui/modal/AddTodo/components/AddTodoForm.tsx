@@ -13,11 +13,15 @@ import { createPortal } from 'react-dom'
 import { FormProvider } from 'react-hook-form'
 
 import { useTodoSubmitFlow } from '@/shared/hooks/addTodo/useTodoSubmitFlow'
+import { useThrottledValue } from '@/shared/hooks/common/useThrottledValue'
 import { useUnsavedCloseGuard } from '@/shared/hooks/common/useUnsavedCloseGuard'
 import { useSyncEventTiming } from '@/shared/hooks/form'
 import { useAddTodoForm } from '@/shared/hooks/form/useAddTodoForm'
 import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
-import { useGetDetailTodoQuery } from '@/shared/hooks/query/useTodoQueries'
+import {
+  useGetDetailTodoQuery,
+  useGetTodoTitleHistoryQuery,
+} from '@/shared/hooks/query/useTodoQueries'
 import { theme } from '@/shared/styles/theme'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import { type AddTodoFormValues, type RepeatConfigSchema } from '@/shared/types/event/event'
@@ -229,12 +233,20 @@ const AddTodoForm = ({
     }
     return moment(todoDate ?? date).format('YYYY-MM-DD')
   }, [date, detailData?.result?.occurrenceDate, todoDate])
+  const titleKeyword = todoTitle?.trim() ?? ''
+  const throttledTitleKeyword = useThrottledValue(titleKeyword, 150)
+  const { data: todoTitleHistoryData } = useGetTodoTitleHistoryQuery(
+    throttledTitleKeyword,
+    Boolean(throttledTitleKeyword),
+  )
+  const todoTitleSuggestions = todoTitleHistoryData?.result.titleHistory ?? []
   const renderTitleInput = () => (
     <TitleSuggestionInput
       fieldName="todoTitle"
       placeholder="새로운 할 일"
       autoFocus
       formController={formMethods}
+      suggestions={todoTitleSuggestions}
       onLiveChange={(value) => {
         if (eventId != null && eventId !== 0) {
           onEventTitleConfirm?.(eventId, value)
@@ -499,6 +511,7 @@ const AddTodoForm = ({
               placeholder="새로운 할 일"
               autoFocus
               formController={formMethods}
+              suggestions={todoTitleSuggestions}
               onLiveChange={(value) => {
                 if (eventId != null && eventId !== 0) {
                   onEventTitleConfirm?.(eventId, value)

@@ -2,7 +2,7 @@ import { createQueryKeys } from '@lukemorales/query-key-factory'
 
 import type { TodoFilter } from '@/shared/types/todo/types'
 
-import { getDetailTodo, getTodoProgress, getTodos } from './api'
+import { getDetailTodo, getTodoProgress, getTodos, getTodoTitleHistory } from './api'
 
 export const todoKeys = createQueryKeys('todo', {
   list: (filter: TodoFilter) => ({
@@ -16,5 +16,9 @@ export const todoKeys = createQueryKeys('todo', {
   progress: (date: string) => ({
     queryKey: [date],
     queryFn: () => getTodoProgress(date),
+  }),
+  titleHistory: (keyword: string) => ({
+    queryKey: [{ keyword }],
+    queryFn: () => getTodoTitleHistory(keyword),
   }),
 })

@@ -1,4 +1,4 @@
-import type { TCommonResponse } from '@/shared/types/common/common'
+import type { TCommonResponse, TitleHistoryResponseDTO } from '@/shared/types/common/common'
 import type { RecurrenceTodoScope } from '@/shared/types/recurrence/recurrence'
 import type {
   GetDetailTodoResponseDTO,
@@ -77,6 +77,18 @@ export const getTodoProgress = async (
 ): Promise<TCommonResponse<GetTodoProgressResponseDTO>> => {
   const { data } = await axiosInstance.get('/todos/progress', {
     params: { date },
+  })
+  return data
+}
+
+export const getTodoTitleHistory = async (
+  keyword?: string,
+): Promise<TCommonResponse<TitleHistoryResponseDTO>> => {
+  const normalizedKeyword = keyword?.trim()
+  const { data } = await axiosInstance.get('/todos/history/titles', {
+    params: {
+      keyword: normalizedKeyword || undefined,
+    },
   })
   return data
 }

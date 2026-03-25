@@ -1,6 +1,6 @@
 import axiosInstance from '@/shared/api/axios'
 import type { GetEventDetailResponseDTO, GetEventsResponseDTO } from '@/shared/types/calendar/types'
-import type { TCommonResponse } from '@/shared/types/common/common'
+import type { TCommonResponse, TitleHistoryResponseDTO } from '@/shared/types/common/common'
 import type { EventColorType } from '@/shared/types/event/event'
 import type { RecurrenceEventScope, RecurrenceGroup } from '@/shared/types/recurrence/recurrence'
 import type { GetTodoForCalendarResponseDTO } from '@/shared/types/todo/types'
@@ -82,6 +82,18 @@ export const getTodoForCalendar = async (
 ): Promise<TCommonResponse<GetTodoForCalendarResponseDTO>> => {
   const { data } = await axiosInstance.get(`/todos/calendar`, {
     params: { startDate, endDate },
+  })
+  return data
+}
+
+export const getEventTitleHistory = async (
+  keyword?: string,
+): Promise<TCommonResponse<TitleHistoryResponseDTO>> => {
+  const normalizedKeyword = keyword?.trim()
+  const { data } = await axiosInstance.get('/events/history/titles', {
+    params: {
+      keyword: normalizedKeyword || undefined,
+    },
   })
   return data
 }
