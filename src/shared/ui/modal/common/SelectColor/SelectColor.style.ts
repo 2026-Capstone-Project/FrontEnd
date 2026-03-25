@@ -43,7 +43,9 @@ export const ColorDropdown = styled.div`
   cursor: pointer;
 `
 export const ColorOptions = styled.div`
-  position: fixed;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   row-gap: 10px;
