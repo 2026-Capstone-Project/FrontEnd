@@ -158,6 +158,7 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
         {...registerProps}
         ref={handleInputRef}
         placeholder={placeholder}
+        autoComplete="off"
         onFocus={() => {
           setIsInputActive(true)
           setDismissedTitleQuery(null)

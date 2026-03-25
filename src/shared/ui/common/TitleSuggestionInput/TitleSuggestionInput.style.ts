@@ -41,8 +41,7 @@ export const SuggestionList = styled.div`
 `
 
 export const SuggestionItem = styled.button`
-  display: inline-flex;
-  align-items: center;
+  display: block;
   padding: 12px 16px;
   border-bottom: 1px solid #e8e8e8;
   font-size: 16px;
