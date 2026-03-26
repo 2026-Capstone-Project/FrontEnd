@@ -1,3 +1,4 @@
+// 일정 반복 규칙과 종료 조건을 편집하는 섹션입니다.
 import { useFormContext, useWatch } from 'react-hook-form'
 
 import type { RepeatConfigSchema, ScheduleEditorFormValues } from '@/shared/types/event/event'

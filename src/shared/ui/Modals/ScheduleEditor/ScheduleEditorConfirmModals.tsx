@@ -1,3 +1,4 @@
+// 일정 편집 중 필요한 삭제 확인과 반복 수정 범위 확인 모달을 모아둔 컴포넌트입니다.
 import moment from 'moment'
 
 import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'

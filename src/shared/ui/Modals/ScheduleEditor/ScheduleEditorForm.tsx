@@ -1,3 +1,4 @@
+// 일정 편집 폼 상태를 만들고 FormProvider로 하위 섹션에 전달합니다.
 import { FormProvider } from 'react-hook-form'
 
 import { useScheduleEditorForm } from '@/shared/hooks/form/useScheduleEditorForm'

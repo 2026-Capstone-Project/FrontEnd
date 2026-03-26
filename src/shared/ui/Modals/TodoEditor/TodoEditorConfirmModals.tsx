@@ -1,3 +1,4 @@
+// 할 일 편집 중 필요한 삭제 확인과 반복 수정 범위 확인 모달을 모아둔 컴포넌트입니다.
 import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import { DeleteConfirmModal, EditConfirmModal, type EditConfirmOption } from '@/shared/ui/Modals'

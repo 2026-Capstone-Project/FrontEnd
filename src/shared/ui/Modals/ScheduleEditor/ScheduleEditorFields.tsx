@@ -1,3 +1,4 @@
+// 일정 편집 화면의 제목, 날짜, 상세, 반복 섹션을 배치하는 조합 컴포넌트입니다.
 import type { ScheduleEditorFormProps } from '@/shared/types/modal/scheduleEditor'
 import type { RepeatConfig, RepeatType } from '@/shared/types/recurrence/repeat'
 import * as S from '@/shared/ui/Modals/ScheduleEditor/index.style'

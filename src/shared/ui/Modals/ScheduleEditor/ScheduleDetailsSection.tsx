@@ -1,3 +1,4 @@
+// 일정 메모와 장소 검색/선택 UI를 담당하는 상세 정보 섹션입니다.
 import { createPortal } from 'react-dom'
 import { useFormContext, useWatch } from 'react-hook-form'
 

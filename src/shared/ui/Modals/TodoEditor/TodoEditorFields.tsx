@@ -1,3 +1,4 @@
+// 할 일 편집 화면의 제목, 날짜, 중요도, 메모, 반복 섹션을 배치합니다.
 import type { TodoEditorFormProps } from '@/shared/types/modal/todoEditor'
 import type { RepeatConfig, RepeatType } from '@/shared/types/recurrence/repeat'
 import * as S from '@/shared/ui/Modals/TodoEditor/index.style'

@@ -1,3 +1,4 @@
+// 할 일 메모를 입력하는 섹션입니다.
 import { useFormContext } from 'react-hook-form'
 
 import type { TodoEditorFormValues } from '@/shared/types/event/event'

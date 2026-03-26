@@ -1,3 +1,4 @@
+// 할 일 편집 모달에서 사용하는 전용 스타일 정의입니다.
 import styled from '@emotion/styled'
 
 import { media } from '@/shared/styles/media'
