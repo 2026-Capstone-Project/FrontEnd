@@ -46,8 +46,8 @@ import type {
   RecurrenceEventScope,
   RecurrenceTodoScope,
 } from '@/shared/types/recurrence/recurrence'
-import { EditConfirmModal, type EditConfirmOption } from '@/shared/ui/modal'
-import DeleteConfirmModal from '@/shared/ui/modal/DeleteConfirmModal/DeleteConfirmModal'
+import { EditConfirmModal, type EditConfirmOption } from '@/shared/ui/Modals'
+import DeleteConfirmModal from '@/shared/ui/Modals/DeleteConfirmModal/DeleteConfirmModal'
 
 import { CustomViewButton } from '../CustomViewButton/CustomViewButton'
 import CalendarModals from './CalendarModals'

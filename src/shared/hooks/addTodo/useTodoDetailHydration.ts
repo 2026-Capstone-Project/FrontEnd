@@ -4,7 +4,7 @@ import type { UseFormSetValue } from 'react-hook-form'
 
 import { useGetDetailTodoQuery } from '@/shared/hooks/query/useTodoQueries'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
-import { type AddTodoFormValues, type RepeatConfigSchema } from '@/shared/types/event/event'
+import { type RepeatConfigSchema, type TodoEditorFormValues } from '@/shared/types/event/event'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/index'
 
@@ -13,7 +13,7 @@ type UseTodoDetailHydrationProps = {
   eventId: CalendarEvent['id']
   isEditing: boolean
   todoDate: Date | null
-  setValue: UseFormSetValue<AddTodoFormValues>
+  setValue: UseFormSetValue<TodoEditorFormValues>
 }
 
 export const useTodoDetailHydration = ({

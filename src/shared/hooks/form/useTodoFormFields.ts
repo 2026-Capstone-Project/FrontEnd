@@ -4,9 +4,9 @@ import { type Control, type Resolver, useForm, type UseFormReturn, useWatch } fr
 
 import { addTodoSchema } from '@/shared/schemas/todo'
 import {
-  type AddTodoFormValues,
   type EventColorType,
   type RepeatConfigSchema,
+  type TodoEditorFormValues,
 } from '@/shared/types/event/event'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 
@@ -15,10 +15,10 @@ type UseTodoFormFieldsProps = {
 }
 
 export type UseTodoFormFieldsResult = {
-  formMethods: UseFormReturn<AddTodoFormValues>
-  control: Control<AddTodoFormValues>
-  setValue: UseFormReturn<AddTodoFormValues>['setValue']
-  handleSubmit: UseFormReturn<AddTodoFormValues>['handleSubmit']
+  formMethods: UseFormReturn<TodoEditorFormValues>
+  control: Control<TodoEditorFormValues>
+  setValue: UseFormReturn<TodoEditorFormValues>['setValue']
+  handleSubmit: UseFormReturn<TodoEditorFormValues>['handleSubmit']
   todoDate: Date | null
   todoEndTime: string | undefined
   isAllday: boolean
@@ -28,8 +28,8 @@ export type UseTodoFormFieldsResult = {
 }
 
 export const useTodoFormFields = ({ date }: UseTodoFormFieldsProps): UseTodoFormFieldsResult => {
-  const resolver = yupResolver(addTodoSchema) as Resolver<AddTodoFormValues>
-  const formMethods = useForm<AddTodoFormValues>({
+  const resolver = yupResolver(addTodoSchema) as Resolver<TodoEditorFormValues>
+  const formMethods = useForm<TodoEditorFormValues>({
     resolver,
     defaultValues: {
       todoTitle: '',

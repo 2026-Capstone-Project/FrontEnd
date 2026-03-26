@@ -3,8 +3,8 @@ import { useMemo } from 'react'
 
 import { useDetailEventQuery } from '@/shared/hooks/query/useCalendarQueries'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
-import AddSchedule from '@/shared/ui/modal/AddSchedule'
-import AddTodo from '@/shared/ui/modal/AddTodo'
+import ScheduleEditorModal from '@/shared/ui/Modals/ScheduleEditor'
+import TodoEditorModal from '@/shared/ui/Modals/TodoEditor'
 
 type CalendarModalsProps = {
   modalDate: string
@@ -61,14 +61,14 @@ const CalendarModals = ({
   }, [data, safeDetailEventId])
   return (
     <>
-      {/* AddItemModal 내부 포털을 그대로 사용해, 리사이즈 시 같은 폼 상태로 루트만 이동합니다. */}
+      {/* ItemEditorModal 내부 포털을 그대로 사용해, 리사이즈 시 같은 폼 상태로 루트만 이동합니다. */}
       {shouldRenderModal && isTodoModal && (
-        <AddTodo
+        <TodoEditorModal
           date={modalDate}
           onClose={onCloseModal}
           mode={modalMode}
           eventId={modalEventId}
-          tabsVisible={!isModalEditing}
+          showTypeTabs={!isModalEditing}
           onEventColorChange={eventActions.onEventColorChange}
           onEventTitleConfirm={eventActions.onEventTitleConfirm}
           onEventTimingChange={eventActions.onEventTimingChange}
@@ -76,14 +76,14 @@ const CalendarModals = ({
         />
       )}
       {shouldRenderModal && !isTodoModal && (
-        <AddSchedule
+        <ScheduleEditorModal
           date={modalDate}
           onClose={onCloseModal}
           mode={modalMode}
           eventId={modalEventId}
           event={detailEvent ?? modalEvent}
           isEditing={isModalEditing}
-          tabsVisible={!isModalEditing}
+          showTypeTabs={!isModalEditing}
           onEventColorChange={eventActions.onEventColorChange}
           onEventTitleConfirm={eventActions.onEventTitleConfirm}
           onEventTypeChange={eventActions.onEventTypeChange}

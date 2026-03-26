@@ -4,13 +4,13 @@ import type { UseFormSetValue } from 'react-hook-form'
 
 import { theme } from '@/shared/styles/theme'
 import type {
-  AddTodoFormValues,
   DatePickerField,
   TimePickerField,
+  TodoEditorFormValues,
 } from '@/shared/types/event/event'
 
 type UseTodoCalendarOverlayProps = {
-  setValue: UseFormSetValue<AddTodoFormValues>
+  setValue: UseFormSetValue<TodoEditorFormValues>
 }
 
 export const useTodoCalendarOverlay = ({ setValue }: UseTodoCalendarOverlayProps) => {

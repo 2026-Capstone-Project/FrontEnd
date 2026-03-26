@@ -17,13 +17,13 @@ export type TimePickerRenderProps = {
   onChange: (value: string) => void
 }
 
-export type AddScheduleFormValues = InferType<typeof addScheduleSchema>
-export type RepeatConfigSchema = AddScheduleFormValues['repeatConfig']
+export type ScheduleEditorFormValues = InferType<typeof addScheduleSchema>
+export type RepeatConfigSchema = ScheduleEditorFormValues['repeatConfig']
 
 export type EventColorType = 'PINK' | 'GREEN' | 'BLUE' | 'PURPLE' | 'YELLOW' | 'GRAY'
 export type WeekDaysSingleChar = 'S' | 'M' | 'T' | 'W' | 'T' | 'F'
 
-export type AddTodoFormValues = InferType<typeof addTodoSchema>
+export type TodoEditorFormValues = InferType<typeof addTodoSchema>
 
 export type Week =
   | 'SUNDAY'

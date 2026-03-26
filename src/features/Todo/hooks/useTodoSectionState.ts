@@ -5,17 +5,17 @@ import type { TodoFilter } from '@/shared/types/todo/types'
 
 import { getIsoDateWithOffset } from '../utils/todoDate'
 
-type OpenTodoModalArgs = {
+type OpenTodoEditorArgs = {
   date?: string
   isEditing?: boolean
   id?: number
   occurrenceDate?: string
 }
 
-type TodoModalState = {
+type TodoEditorState = {
   id: number | undefined
   open: boolean
-  isEdit: boolean
+  isEditing: boolean
   occurrenceDate?: string
 }
 
@@ -26,42 +26,47 @@ export const useTodoSectionState = () => {
     return window.matchMedia(`(min-width: ${theme.breakPoints.desktop})`).matches
   })
 
-  const [todoModalState, setTodoModalState] = useState<TodoModalState>({
+  const [todoEditorState, setTodoEditorState] = useState<TodoEditorState>({
     id: undefined,
     open: false,
-    isEdit: false,
+    isEditing: false,
     occurrenceDate: undefined,
   })
-  const [addTodoDate, setAddTodoDate] = useState(() => getIsoDateWithOffset(0))
+  const [todoEditorDate, setTodoEditorDate] = useState(() => getIsoDateWithOffset(0))
 
   // 반복 할 일은 같은 id라도 occurrenceDate가 다를 수 있어서,
   // 카드 편집 강조 기준을 id + occurrenceDate 조합으로 고정합니다.
   const editingCardKey = useMemo(() => {
-    if (!todoModalState.open || !todoModalState.isEdit) return undefined
-    if (todoModalState.id == null || !todoModalState.occurrenceDate) return undefined
-    return `${todoModalState.id}-${todoModalState.occurrenceDate}`
-  }, [todoModalState.id, todoModalState.isEdit, todoModalState.occurrenceDate, todoModalState.open])
+    if (!todoEditorState.open || !todoEditorState.isEditing) return undefined
+    if (todoEditorState.id == null || !todoEditorState.occurrenceDate) return undefined
+    return `${todoEditorState.id}-${todoEditorState.occurrenceDate}`
+  }, [
+    todoEditorState.id,
+    todoEditorState.isEditing,
+    todoEditorState.occurrenceDate,
+    todoEditorState.open,
+  ])
 
-  const openAddTodoModal = ({
+  const openTodoEditor = ({
     date,
     isEditing = true,
     id,
     occurrenceDate,
-  }: OpenTodoModalArgs = {}) => {
-    setAddTodoDate(date ?? getIsoDateWithOffset(0))
-    setTodoModalState({
+  }: OpenTodoEditorArgs = {}) => {
+    setTodoEditorDate(date ?? getIsoDateWithOffset(0))
+    setTodoEditorState({
       id,
       open: true,
-      isEdit: isEditing,
+      isEditing,
       occurrenceDate,
     })
   }
 
-  const closeAddTodoModal = () => {
-    setTodoModalState({
+  const closeTodoEditor = () => {
+    setTodoEditorState({
       id: undefined,
       open: false,
-      isEdit: false,
+      isEditing: false,
       occurrenceDate: undefined,
     })
   }
@@ -80,10 +85,10 @@ export const useTodoSectionState = () => {
     todoFilter,
     setTodoFilter,
     isDesktop,
-    addTodoDate,
-    todoModalState,
+    todoEditorDate,
+    todoEditorState,
     editingCardKey,
-    openAddTodoModal,
-    closeAddTodoModal,
+    openTodoEditor,
+    closeTodoEditor,
   }
 }

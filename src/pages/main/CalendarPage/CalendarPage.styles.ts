@@ -29,7 +29,7 @@ export const PageWrapper = styled.div`
   }
 `
 
-export const AddScheduleModalOverlay = styled.div`
+export const ScheduleEditorOverlay = styled.div`
   position: fixed;
   inset: 0;
   display: flex;
@@ -40,7 +40,7 @@ export const AddScheduleModalOverlay = styled.div`
   padding: 16px;
 `
 
-export const AddScheduleModalInner = styled.div`
+export const ScheduleEditorInner = styled.div`
   width: 100%;
   max-width: 100%;
 `

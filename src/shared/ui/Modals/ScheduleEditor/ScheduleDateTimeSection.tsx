@@ -1,0 +1,106 @@
+import { createPortal } from 'react-dom'
+import { useFormContext, useWatch } from 'react-hook-form'
+
+import { useScheduleCalendarOverlay } from '@/shared/hooks/addSchedule'
+import { useCalendarFieldPicker } from '@/shared/hooks/form/useCalendarFieldPicker'
+import type { ScheduleEditorFormValues } from '@/shared/types/event/event'
+import type { ScheduleEditorFormProps } from '@/shared/types/modal/scheduleEditor'
+import Checkbox from '@/shared/ui/common/Checkbox/Checkbox'
+import CustomDatePicker from '@/shared/ui/common/CustomDatePicker/CustomDatePicker'
+import CustomTimePicker from '@/shared/ui/common/CustomTimePicker/CustomTimePicker'
+import * as S from '@/shared/ui/Modals/ScheduleEditor/index.style'
+import { formatDisplayDate } from '@/shared/utils/date'
+
+type ScheduleDateTimeSectionProps = Pick<ScheduleEditorFormProps, 'mode'> & {
+  handleAllDayToggle: () => void
+}
+
+const ScheduleDateTimeSection = ({
+  mode = 'modal',
+  handleAllDayToggle,
+}: ScheduleDateTimeSectionProps) => {
+  const { control, setValue } = useFormContext<ScheduleEditorFormValues>()
+  const isAllday = useWatch({ control, name: 'isAllday' }) ?? false
+  const eventStartDate = useWatch({ control, name: 'eventStartDate' }) ?? null
+  const eventEndDate = useWatch({ control, name: 'eventEndDate' }) ?? null
+  const eventStartTime = useWatch({ control, name: 'eventStartTime' })
+  const eventEndTime = useWatch({ control, name: 'eventEndTime' })
+  const startDate = formatDisplayDate(eventStartDate)
+  const endDate = formatDisplayDate(eventEndDate)
+  const {
+    activeCalendarField,
+    calendarRef,
+    handleCalendarOpen,
+    handleDateSelect,
+    handleTimeChange,
+  } = useCalendarFieldPicker({
+    setValue,
+    eventStartDate,
+    eventEndDate,
+    eventStartTime,
+    eventEndTime,
+  })
+  const { calendarPortalStyle, handleCalendarButtonClick, hasCalendarPortal } =
+    useScheduleCalendarOverlay({
+      handleCalendarOpen,
+    })
+  const shouldShowOverlay = mode !== 'inline' && activeCalendarField != null
+
+  return (
+    <>
+      {shouldShowOverlay &&
+        typeof document !== 'undefined' &&
+        createPortal(<S.PortalDarkLayer />, document.getElementById('modal-root')!)}
+      <S.Selection>
+        <S.SelectionColumn isAllday={isAllday}>
+          <S.FieldRow isAllday={isAllday}>
+            <S.DateFieldButton type="button" onClick={handleCalendarButtonClick('start')}>
+              {startDate}
+            </S.DateFieldButton>
+            {!isAllday && (
+              <CustomTimePicker
+                field="start"
+                value={eventStartTime ?? ''}
+                onChange={(value) => handleTimeChange('start', value)}
+              />
+            )}
+          </S.FieldRow>
+          {isAllday && '-'}
+          <S.FieldRow isAllday={isAllday}>
+            <S.DateFieldButton type="button" onClick={handleCalendarButtonClick('end')}>
+              {endDate}
+            </S.DateFieldButton>
+            {!isAllday && (
+              <CustomTimePicker
+                field="end"
+                value={eventEndTime ?? ''}
+                onChange={(value) => handleTimeChange('end', value)}
+              />
+            )}
+          </S.FieldRow>
+        </S.SelectionColumn>
+        {activeCalendarField &&
+          hasCalendarPortal &&
+          typeof document !== 'undefined' &&
+          createPortal(
+            <S.CalendarPortal ref={calendarRef} style={calendarPortalStyle}>
+              <CustomDatePicker
+                key={activeCalendarField}
+                field={activeCalendarField}
+                selectedDate={
+                  activeCalendarField === 'start'
+                    ? (eventStartDate ?? null)
+                    : (eventEndDate ?? null)
+                }
+                onSelectDate={handleDateSelect}
+              />
+            </S.CalendarPortal>,
+            document.getElementById('modal-root')!,
+          )}
+      </S.Selection>
+      <Checkbox checked={isAllday} onChange={handleAllDayToggle} label="종일" />
+    </>
+  )
+}
+
+export default ScheduleDateTimeSection
