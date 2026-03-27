@@ -1,11 +1,9 @@
-import { useMutation } from '@tanstack/react-query'
-
 import BellIcon from '@/assets/icons/bell.svg?react'
 import AIChatModal from '@/features/Common/AIChatModal'
 import { SparkleIcon } from '@/features/Home/Icon/SparkleIcon'
-import { queryClient } from '@/shared/api'
-import { fetchReminders, fetchTodayBriefing, suggestionApi } from '@/shared/api/home/home'
+import { fetchReminders, fetchTodayBriefing } from '@/shared/api/home/home'
 import { useCustomQuery } from '@/shared/hooks/common/customQuery'
+import { useSuggestions } from '@/shared/hooks/query/useSuggestion'
 
 import * as S from './HomePage.styles'
 
@@ -43,21 +41,7 @@ export default function HomePage() {
     if (parts.length < 2) return timeStr
     return `${parts[0]}:${parts[1]}`
   }
-
-  const { data: suggestions = [] } = useCustomQuery(['suggestions'], suggestionApi.getSuggestions, {
-    select: (response) => response.result.details,
-    refetchInterval: 60000,
-  })
-
-  const { mutate: handleAccept } = useMutation({
-    mutationFn: suggestionApi.acceptSuggestion,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['suggestions'] }),
-  })
-
-  const { mutate: handleReject } = useMutation({
-    mutationFn: suggestionApi.rejectSuggestion,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['suggestions'] }),
-  })
+  const { suggestions, handleAccept, handleReject } = useSuggestions()
 
   return (
     <S.Container>
@@ -117,45 +101,21 @@ export default function HomePage() {
           )
         })}
 
-        {suggestions.map((suggestion) => (
-          <S.Card key={suggestion.id}>
+        {suggestions.map((item) => (
+          <S.Card key={item.id}>
             <S.CardHeader>
               <S.Tag type="ai">AI 제안</S.Tag>
               <SparkleIcon startColor="#4684C1" endColor="#00DCCC" size={42} />
             </S.CardHeader>
 
-            <S.CardText>{suggestion.content}</S.CardText>
+            <S.CardText>{item.content}</S.CardText>
 
             <S.ButtonRow>
-              <S.GhostButton onClick={() => handleReject(suggestion.id)}>거절</S.GhostButton>
-              <S.PrimaryButton onClick={() => handleAccept(suggestion.id)}>등록</S.PrimaryButton>
+              <S.GhostButton onClick={() => handleReject(item.id)}>거절</S.GhostButton>
+              <S.PrimaryButton onClick={() => handleAccept(item.id)}>등록</S.PrimaryButton>
             </S.ButtonRow>
           </S.Card>
         ))}
-
-        {/* --- 개발용 임시 버튼 추가 영역  개발 끝나면 지울게요 --- */}
-        {import.meta.env.VITE_DEV_MODE === 'true' && (
-          <S.DevButtonWrapper>
-            <button
-              onClick={() =>
-                suggestionApi
-                  .createSuggestion()
-                  .then(() => queryClient.invalidateQueries({ queryKey: ['suggestions'] }))
-              }
-            >
-              제안 생성 (임시)
-            </button>
-            <button
-              onClick={() =>
-                suggestionApi
-                  .deleteSuggestion()
-                  .then(() => queryClient.invalidateQueries({ queryKey: ['suggestions'] }))
-              }
-            >
-              전체 삭제 (임시)
-            </button>
-          </S.DevButtonWrapper>
-        )}
       </S.Left>
       <AIChatModal />
     </S.Container>
