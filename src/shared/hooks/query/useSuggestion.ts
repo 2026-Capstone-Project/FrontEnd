@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { suggestionApi } from '@/shared/api/home/home'
-import { suggestionKeys } from '@/shared/keys/suggestionkey'
+import { suggestionKeys } from '@/shared/keys/suggestionKeys'
 
 import { useCustomQuery } from '../common/customQuery'
 
