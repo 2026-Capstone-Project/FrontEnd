@@ -1,5 +1,5 @@
 // 일정 편집 본문을 조합하고 제출, 패치, 삭제, 닫기 보호 흐름을 연결합니다.
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import {
@@ -54,10 +54,26 @@ const ScheduleEditorContent = ({
   } = schedule
   const { setValue, getValues, formState } = useFormContext<ScheduleEditorFormValues>()
   const { isDirty } = formState
+  const originalTitleRef = useRef('')
+
+  useEffect(() => {
+    if (!isEditing) {
+      originalTitleRef.current = ''
+      return
+    }
+    originalTitleRef.current = initialEvent?.title ?? ''
+  }, [eventId, initialEvent?.occurrenceDate, initialEvent?.start, isEditing])
+
+  const handleDiscardDraftTitle = useCallback(() => {
+    if (!isEditing || eventId == null || eventId === 0) return
+    onEventTitleConfirm?.(eventId, originalTitleRef.current)
+  }, [eventId, isEditing, onEventTitleConfirm])
+
   const { isUnsavedConfirmOpen, requestClose, handleCloseUnsavedConfirm, handleLeaveUnsavedForm } =
     useUnsavedCloseGuard({
       isDirty,
       onClose,
+      onDiscard: handleDiscardDraftTitle,
       registerCloseGuard,
     })
 
@@ -160,6 +176,7 @@ const ScheduleEditorContent = ({
       <form id="add-schedule-form" onSubmit={handleFormSubmit}>
         <ScheduleEditorFields
           headerTitlePortalTarget={headerTitlePortalTarget}
+          isEditing={isEditing}
           modalWrapperElement={modalWrapperElement}
           mode={mode}
           handleAllDayToggle={handleAllDayToggle}

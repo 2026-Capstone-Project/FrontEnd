@@ -1,5 +1,5 @@
 // 할 일 편집 본문을 조합하고 상세 조회, 제출, 삭제, 닫기 보호 흐름을 연결합니다.
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
 import { useTodoDetailHydration, useTodoFooter, useTodoSubmitFlow } from '@/shared/hooks/addTodo'
 import { useUnsavedCloseGuard } from '@/shared/hooks/common/useUnsavedCloseGuard'
@@ -24,6 +24,7 @@ const TodoEditorContent = ({
   registerCloseGuard,
   registerFooterChildren,
   isEditing = false,
+  initialEvent,
   headerTitlePortalTarget,
   onEventTitleConfirm,
   onEventColorChange,
@@ -32,7 +33,7 @@ const TodoEditorContent = ({
 }: TodoEditorContentProps) => {
   const { setValue, formState } = todo.formMethods
   const { isDirty } = formState
-  const { hasExistingRecurrence, isDetailReady, isPersistedTodo, occurrenceDate } =
+  const { detailData, hasExistingRecurrence, isDetailReady, isPersistedTodo, occurrenceDate } =
     useTodoDetailHydration({
       date,
       eventId,
@@ -40,10 +41,32 @@ const TodoEditorContent = ({
       todoDate: todo.todoDate,
       setValue,
     })
+  const originalTitleRef = useRef('')
+
+  useEffect(() => {
+    if (!isEditing) {
+      originalTitleRef.current = ''
+      return
+    }
+    originalTitleRef.current = initialEvent?.title ?? ''
+  }, [eventId, initialEvent?.occurrenceDate, initialEvent?.start, isEditing])
+
+  useEffect(() => {
+    if (!isEditing) return
+    if (detailData?.result?.title == null) return
+    originalTitleRef.current = detailData.result.title
+  }, [detailData?.result?.title, isEditing])
+
+  const handleDiscardDraftTitle = useCallback(() => {
+    if (!isEditing || eventId == null || eventId === 0) return
+    onEventTitleConfirm?.(eventId, originalTitleRef.current)
+  }, [eventId, isEditing, onEventTitleConfirm])
+
   const { isUnsavedConfirmOpen, requestClose, handleCloseUnsavedConfirm, handleLeaveUnsavedForm } =
     useUnsavedCloseGuard({
       isDirty,
       onClose,
+      onDiscard: handleDiscardDraftTitle,
       registerCloseGuard,
     })
   const repeatGuardEnabled = isEditing && hasExistingRecurrence
@@ -130,6 +153,7 @@ const TodoEditorContent = ({
         <TodoEditorFields
           eventId={eventId}
           headerTitlePortalTarget={headerTitlePortalTarget}
+          isEditing={isEditing}
           mode={mode}
           onEventTitleConfirm={onEventTitleConfirm}
           updateConfig={todo.updateConfig}

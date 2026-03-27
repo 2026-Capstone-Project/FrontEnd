@@ -11,10 +11,16 @@ import TitleSuggestionInput from '@/shared/ui/common/TitleSuggestionInput/TitleS
 type TodoTitleFieldProps = {
   eventId: CalendarEvent['id']
   portalTarget?: HTMLElement | null
+  autoFocus?: boolean
   onEventTitleConfirm?: (eventId: CalendarEvent['id'], title: string) => void
 }
 
-const TodoTitleField = ({ eventId, portalTarget, onEventTitleConfirm }: TodoTitleFieldProps) => {
+const TodoTitleField = ({
+  eventId,
+  portalTarget,
+  autoFocus = true,
+  onEventTitleConfirm,
+}: TodoTitleFieldProps) => {
   const { control } = useFormContext<TodoEditorFormValues>()
   const todoTitleKeyword = (useWatch({ control, name: 'todoTitle' }) ?? '').trim()
   const throttledTodoTitleKeyword = useThrottledValue(todoTitleKeyword, 150)
@@ -28,7 +34,7 @@ const TodoTitleField = ({ eventId, portalTarget, onEventTitleConfirm }: TodoTitl
     <TitleSuggestionInput
       fieldName="todoTitle"
       placeholder="새로운 할 일"
-      autoFocus
+      autoFocus={autoFocus}
       suggestions={suggestions}
       onLiveChange={(value) => {
         if (eventId != null && eventId !== 0) {

@@ -9,7 +9,7 @@ import ScheduleTitleField from '@/shared/ui/Modals/ScheduleEditor/ScheduleTitleF
 
 type ScheduleEditorFieldsProps = Pick<
   ScheduleEditorFormProps,
-  'headerTitlePortalTarget' | 'modalWrapperElement' | 'mode'
+  'headerTitlePortalTarget' | 'isEditing' | 'modalWrapperElement' | 'mode'
 > & {
   updateConfig: (changes: Partial<RepeatConfig>) => void
   handleRepeatType: (value: RepeatType) => void
@@ -19,6 +19,7 @@ type ScheduleEditorFieldsProps = Pick<
 
 const ScheduleEditorFields = ({
   headerTitlePortalTarget,
+  isEditing = false,
   modalWrapperElement,
   mode = 'modal',
   updateConfig,
@@ -31,6 +32,7 @@ const ScheduleEditorFields = ({
       <S.FormContent>
         <ScheduleTitleField
           portalTarget={headerTitlePortalTarget}
+          autoFocus={!isEditing}
           onTitleConfirm={onTitleConfirm}
         />
         <ScheduleDateTimeSection mode={mode} handleAllDayToggle={handleAllDayToggle} />

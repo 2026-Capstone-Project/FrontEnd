@@ -3,12 +3,14 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 type UseUnsavedCloseGuardArgs = {
   isDirty: boolean
   onClose: () => void
+  onDiscard?: () => void
   registerCloseGuard?: (guard?: (() => boolean) | null) => void
 }
 
 export const useUnsavedCloseGuard = ({
   isDirty,
   onClose,
+  onDiscard,
   registerCloseGuard,
 }: UseUnsavedCloseGuardArgs) => {
   const allowCloseRef = useRef(false)
@@ -42,8 +44,9 @@ export const useUnsavedCloseGuard = ({
 
   const handleLeaveUnsavedForm = useCallback(() => {
     setIsUnsavedConfirmOpen(false)
+    onDiscard?.()
     requestClose(true)
-  }, [requestClose])
+  }, [onDiscard, requestClose])
 
   useEffect(() => {
     if (!registerCloseGuard) return

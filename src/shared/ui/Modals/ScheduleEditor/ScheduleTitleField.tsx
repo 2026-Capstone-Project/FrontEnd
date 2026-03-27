@@ -9,10 +9,15 @@ import TitleSuggestionInput from '@/shared/ui/common/TitleSuggestionInput/TitleS
 
 type ScheduleTitleFieldProps = {
   portalTarget?: HTMLElement | null
+  autoFocus?: boolean
   onTitleConfirm: (value: string) => void
 }
 
-const ScheduleTitleField = ({ portalTarget, onTitleConfirm }: ScheduleTitleFieldProps) => {
+const ScheduleTitleField = ({
+  portalTarget,
+  autoFocus = true,
+  onTitleConfirm,
+}: ScheduleTitleFieldProps) => {
   const { control } = useFormContext<ScheduleEditorFormValues>()
   const eventTitleKeyword = (useWatch({ control, name: 'eventTitle' }) ?? '').trim()
   const throttledEventTitleKeyword = useThrottledValue(eventTitleKeyword, 150)
@@ -26,7 +31,7 @@ const ScheduleTitleField = ({ portalTarget, onTitleConfirm }: ScheduleTitleField
     <TitleSuggestionInput
       fieldName="eventTitle"
       placeholder="새로운 일정"
-      autoFocus
+      autoFocus={autoFocus}
       suggestions={suggestions}
       onLiveChange={onTitleConfirm}
       onConfirm={onTitleConfirm}

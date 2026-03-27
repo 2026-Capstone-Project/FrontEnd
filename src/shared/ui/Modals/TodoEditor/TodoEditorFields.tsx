@@ -10,7 +10,7 @@ import TodoTitleField from '@/shared/ui/Modals/TodoEditor/TodoTitleField'
 
 type TodoEditorFieldsProps = Pick<
   TodoEditorFormProps,
-  'eventId' | 'headerTitlePortalTarget' | 'mode' | 'onEventTitleConfirm'
+  'eventId' | 'headerTitlePortalTarget' | 'isEditing' | 'mode' | 'onEventTitleConfirm'
 > & {
   updateConfig: (changes: Partial<RepeatConfig>) => void
   handleRepeatType: (value: RepeatType) => void
@@ -19,6 +19,7 @@ type TodoEditorFieldsProps = Pick<
 const TodoEditorFields = ({
   eventId,
   headerTitlePortalTarget,
+  isEditing = false,
   mode = 'modal',
   onEventTitleConfirm,
   updateConfig,
@@ -30,6 +31,7 @@ const TodoEditorFields = ({
         <TodoTitleField
           eventId={eventId}
           portalTarget={headerTitlePortalTarget}
+          autoFocus={!isEditing}
           onEventTitleConfirm={onEventTitleConfirm}
         />
         <TodoDateTimeSection mode={mode} />
