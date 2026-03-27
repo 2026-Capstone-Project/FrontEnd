@@ -5,8 +5,14 @@ import { useTodoEditorForm } from '@/shared/hooks/form/useTodoEditorForm'
 import type { TodoEditorFormProps } from '@/shared/types/modal/todoEditor'
 import TodoEditorContent from '@/shared/ui/Modals/TodoEditor/TodoEditorContent'
 
-const TodoEditorForm = ({ date, eventId, isEditing, ...rest }: TodoEditorFormProps) => {
-  const todo = useTodoEditorForm({ date, id: eventId, isEditing })
+const TodoEditorForm = ({
+  date,
+  eventId,
+  initialEvent,
+  isEditing,
+  ...rest
+}: TodoEditorFormProps) => {
+  const todo = useTodoEditorForm({ date, id: eventId, initialEvent, isEditing })
 
   return (
     <FormProvider {...todo.formMethods}>
@@ -14,6 +20,7 @@ const TodoEditorForm = ({ date, eventId, isEditing, ...rest }: TodoEditorFormPro
         {...rest}
         date={date}
         eventId={eventId}
+        initialEvent={initialEvent}
         isEditing={isEditing}
         todo={todo}
       />

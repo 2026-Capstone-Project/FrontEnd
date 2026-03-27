@@ -19,6 +19,7 @@ import { useTodoFormFields } from './useTodoFormFields'
 type UseTodoEditorFormProps = {
   date: string
   id: CalendarEvent['id']
+  initialEvent?: CalendarEvent | null
   isEditing?: boolean
 }
 
@@ -54,6 +55,7 @@ const parseYmd = (value?: string) => {
 export const useTodoEditorForm = ({
   date,
   id,
+  initialEvent,
   isEditing = false,
 }: UseTodoEditorFormProps): UseTodoEditorFormResult => {
   const { usePostTodo, usePatchTodo } = useTodoMutations()
@@ -71,7 +73,7 @@ export const useTodoEditorForm = ({
     repeatConfig,
     todoTitle,
     eventColor,
-  } = useTodoFormFields({ date })
+  } = useTodoFormFields({ date, initialEvent, isEditing })
 
   const handleRepeatType = useCallback(
     (value: RepeatType) => {

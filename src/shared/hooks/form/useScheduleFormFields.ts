@@ -125,6 +125,26 @@ export const useScheduleFormFields = ({
     setValue('repeatConfig', nextRepeatConfig, { shouldValidate: true })
   }, [date, initialEvent, isEditing, setValue])
 
+  useEffect(() => {
+    if (isEditing) return
+    const start = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
+    const end =
+      initialEvent?.end && initialEvent.end !== initialEvent?.start
+        ? new Date(initialEvent.end)
+        : new Date(start)
+    const nextIsAllDay = initialEvent?.isAllDay ?? false
+    setValue('eventStartDate', start)
+    setValue('eventEndDate', end)
+    setValue('isAllday', nextIsAllDay)
+    if (nextIsAllDay) {
+      setValue('eventStartTime', undefined)
+      setValue('eventEndTime', undefined)
+      return
+    }
+    setValue('eventStartTime', formatTimeFromDate(start))
+    setValue('eventEndTime', formatTimeFromDate(end))
+  }, [date, initialEvent?.end, initialEvent?.isAllDay, initialEvent?.start, isEditing, setValue])
+
   return {
     formMethods,
     control,

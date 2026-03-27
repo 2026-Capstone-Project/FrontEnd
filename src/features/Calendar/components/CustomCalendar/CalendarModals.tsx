@@ -64,10 +64,12 @@ const CalendarModals = ({
       {/* ItemEditorModal 내부 포털을 그대로 사용해, 리사이즈 시 같은 폼 상태로 루트만 이동합니다. */}
       {shouldRenderModal && isTodoModal && (
         <TodoEditorModal
+          key={`todo-${String(modalEventId)}-${isModalEditing ? 'edit' : 'create'}`}
           date={modalDate}
           onClose={onCloseModal}
           mode={modalMode}
           eventId={modalEventId}
+          event={modalEvent}
           showTypeTabs={!isModalEditing}
           onEventColorChange={eventActions.onEventColorChange}
           onEventTitleConfirm={eventActions.onEventTitleConfirm}
@@ -77,6 +79,7 @@ const CalendarModals = ({
       )}
       {shouldRenderModal && !isTodoModal && (
         <ScheduleEditorModal
+          key={`schedule-${String(modalEventId)}-${isModalEditing ? 'edit' : 'create'}`}
           date={modalDate}
           onClose={onCloseModal}
           mode={modalMode}

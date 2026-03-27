@@ -234,6 +234,16 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
       isRecurring,
     })
 
+  const handleOpenEventFromCalendar = useCallback(
+    (event: CalendarEvent) => {
+      if (!isModalEditing && modal.isOpen && modal.eventId != null) {
+        removeEvent(modal.eventId)
+      }
+      handleEventClick(event)
+    },
+    [handleEventClick, isModalEditing, modal.eventId, modal.isOpen, removeEvent],
+  )
+
   // 선택 상태 관리
   const {
     selectedDate,
@@ -246,7 +256,7 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
     selectEvent,
     selectEventOnly,
   } = useCalendarSelection({
-    onOpenEvent: handleEventClick,
+    onOpenEvent: handleOpenEventFromCalendar,
   })
 
   // 모달 닫힘 시 임시 이벤트 정리
@@ -261,6 +271,50 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
     if (!modal.isOpen || isModalEditing || modal.eventId == null) return
     removeEvent(modal.eventId)
   }, [isModalEditing, modal.eventId, modal.isOpen, removeEvent])
+
+  const enqueueDraftEvent = useCallback(
+    (start: Date, allDay = false) => {
+      if (modal.isOpen && !isModalEditing && modal.eventId != null) {
+        const draftEvent = events.find((eventItem) => eventItem.id === modal.eventId)
+        if (draftEvent) {
+          const currentStart = moment(draftEvent.start)
+          const currentEnd = moment(draftEvent.end)
+          const shouldKeepAllDay = draftEvent.isAllDay ?? allDay
+          const durationMs = Math.max(currentEnd.diff(currentStart), 0)
+          const nextStart = shouldKeepAllDay ? moment(start).startOf('day') : moment(start)
+          const nextEnd = shouldKeepAllDay
+            ? (() => {
+                const spanDays = Math.max(
+                  currentEnd
+                    .clone()
+                    .startOf('day')
+                    .diff(currentStart.clone().startOf('day'), 'days') + 1,
+                  1,
+                )
+                return nextStart
+                  .clone()
+                  .add(spanDays - 1, 'days')
+                  .endOf('day')
+              })()
+            : nextStart.clone().add(durationMs, 'milliseconds')
+          updateEventTiming(draftEvent.id, nextStart.toDate(), nextEnd.toDate(), shouldKeepAllDay)
+          return draftEvent.id
+        }
+      }
+
+      clearPendingDraftEvent()
+      return enqueueEvent(start, allDay)
+    },
+    [
+      clearPendingDraftEvent,
+      enqueueEvent,
+      events,
+      isModalEditing,
+      modal.eventId,
+      modal.isOpen,
+      updateEventTiming,
+    ],
+  )
 
   // 반복 삭제 확인 모달 닫기
   const handleCloseDeleteConfirm = useCallback(() => {
@@ -346,23 +400,21 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
   // 슬롯 선택 및 일간 뷰 생성 처리
   const { handleDayViewCreateEvent, handleSelectSlotWrapper } = useCalendarCreateHandlers({
     view,
-    enqueueEvent,
+    enqueueEvent: enqueueDraftEvent,
     onAddEvent: handleAddEvent,
-    onBeforeCreate: clearPendingDraftEvent,
     setSelectedDate,
     setSelectedEventId,
     setSelectedEventKey,
   })
   const handleWeekViewCreateEvent = useCallback(
     (slotDate: Date) => {
-      clearPendingDraftEvent()
       const start = moment(slotDate).startOf('day').set({ hour: 9, minute: 0, second: 0 }).toDate()
-      const createdId = enqueueEvent(start, false)
+      const createdId = enqueueDraftEvent(start, false)
       if (createdId != null) {
         handleAddEvent(start, createdId)
       }
     },
-    [clearPendingDraftEvent, enqueueEvent, handleAddEvent],
+    [enqueueDraftEvent, handleAddEvent],
   )
   const handleWeekViewSelectDate = useCallback(
     (nextDate: Date) => {
@@ -471,12 +523,18 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
 
   // 모달에 넘길 이벤트 조회
   const modalEvent = useMemo(() => {
-    if (selectedEventKey) {
-      const selectedOccurrenceEvent =
-        events.find((item) => getEventOccurrenceKey(item) === selectedEventKey) ?? null
-      if (selectedOccurrenceEvent) return selectedOccurrenceEvent
+    if (modal.eventId == null) return null
+
+    const selectedOccurrenceEvent =
+      selectedEventKey != null
+        ? (events.find((item) => getEventOccurrenceKey(item) === selectedEventKey) ?? null)
+        : null
+
+    if (selectedOccurrenceEvent && selectedOccurrenceEvent.id === modal.eventId) {
+      return selectedOccurrenceEvent
     }
-    return modal.eventId == null ? null : (events.find((item) => item.id === modal.eventId) ?? null)
+
+    return events.find((item) => item.id === modal.eventId) ?? null
   }, [events, modal.eventId, selectedEventKey])
   const modalMode: 'modal' | 'inline' = isInlineMode ? 'inline' : 'modal'
   // 이벤트 수정 핸들러 묶음

@@ -153,6 +153,7 @@ const ItemEditorModal = ({
           eventId={eventId}
           mode={mode}
           onClose={handleClose}
+          initialEvent={initialEvent}
           registerDeleteHandler={registerDeleteHandler}
           registerCloseGuard={registerCloseGuard}
           registerFooterChildren={registerFooterChildren}

@@ -11,6 +11,7 @@ export type TodoEditorFormProps = {
   eventId: CalendarEvent['id']
   onClose: () => void
   isEditing?: boolean
+  initialEvent?: CalendarEvent | null
   headerTitlePortalTarget?: HTMLElement | null
   onEventTitleConfirm?: (eventId: CalendarEvent['id'], title: string) => void
   onEventColorChange?: (eventId: CalendarEvent['id'], color: CalendarEvent['color']) => void
