@@ -3,6 +3,7 @@ import AIChatModal from '@/features/Common/AIChatModal'
 import { SparkleIcon } from '@/features/Home/Icon/SparkleIcon'
 import { fetchReminders, fetchTodayBriefing } from '@/shared/api/home/home'
 import { useCustomQuery } from '@/shared/hooks/common/customQuery'
+import { useSuggestions } from '@/shared/hooks/query/useSuggestion'
 
 import * as S from './HomePage.styles'
 
@@ -40,6 +41,7 @@ export default function HomePage() {
     if (parts.length < 2) return timeStr
     return `${parts[0]}:${parts[1]}`
   }
+  const { suggestions, handleAccept, handleReject } = useSuggestions()
 
   return (
     <S.Container>
@@ -99,38 +101,21 @@ export default function HomePage() {
           )
         })}
 
-        <S.Card>
-          <S.CardHeader>
-            <S.Tag type="ai">AI 제안</S.Tag>
-            <SparkleIcon startColor="#4684C1" endColor="#00DCCC" size={42} />
-          </S.CardHeader>
+        {suggestions.map((item) => (
+          <S.Card key={item.id}>
+            <S.CardHeader>
+              <S.Tag type="ai">AI 제안</S.Tag>
+              <SparkleIcon startColor="#4684C1" endColor="#00DCCC" size={42} />
+            </S.CardHeader>
 
-          <S.CardText>
-            4주에 한 번 미용실 가셨는데, 이번 주가 4주차예요!
-            <br />
-            이번주 토요일에 미용실 일정을 등록할까요?
-          </S.CardText>
-          <S.ButtonRow>
-            <S.GhostButton>거절</S.GhostButton>
-            <S.PrimaryButton>등록</S.PrimaryButton>
-          </S.ButtonRow>
-        </S.Card>
+            <S.CardText>{item.content}</S.CardText>
 
-        <S.Card>
-          <S.CardHeader>
-            <S.Tag type="ai">AI 제안</S.Tag>
-            <SparkleIcon startColor="#4684C1" endColor="#00DCCC" size={42} />
-          </S.CardHeader>
-          <S.CardText>
-            매주 목요일 22시에 졸프 회의를 하셨네요.
-            <br />
-            다음 주 목요일 22시에 졸프 회의 일정을 등록할까요?
-          </S.CardText>
-          <S.ButtonRow>
-            <S.GhostButton>거절</S.GhostButton>
-            <S.PrimaryButton>등록</S.PrimaryButton>
-          </S.ButtonRow>
-        </S.Card>
+            <S.ButtonRow>
+              <S.GhostButton onClick={() => handleReject(item.id)}>거절</S.GhostButton>
+              <S.PrimaryButton onClick={() => handleAccept(item.id)}>등록</S.PrimaryButton>
+            </S.ButtonRow>
+          </S.Card>
+        ))}
       </S.Left>
       <AIChatModal />
     </S.Container>

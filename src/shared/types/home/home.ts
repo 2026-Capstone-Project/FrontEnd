@@ -31,3 +31,17 @@ export interface Reminder {
 }
 
 export type ReminderResponse = TCommonResponse<Reminder[]>
+
+export interface Suggestion {
+  id: number
+  content: string
+}
+
+export interface SuggestionListResponse {
+  isSuccess: boolean
+  code: string
+  message: string
+  result: {
+    details: Suggestion[]
+  }
+}
