@@ -1,0 +1,56 @@
+name: Calio Daily Article Generator
+
+on:
+  schedule:
+    - cron: "0 15 * * *" # 한국 시간 기준 매일 자정 (UTC 15:00)
+  workflow_dispatch: # 수동 실행 버튼
+
+concurrency:
+  group: daily-article-auto-daily-log
+  cancel-in-progress: false
+
+jobs:
+  generate-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: auto-daily-log
+          fetch-depth: 0 # 모든 브랜치 이력을 가져옴
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install Dependencies
+        run: |
+          pip install PyGithub google-generativeai python-dotenv
+
+      - name: Run Generator
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          REPO_NAME: ${{ github.repository }}
+        run: python scripts/generate_article.py
+
+      - name: Set Date Environment Variable
+        run: |
+          echo "CURRENT_DATE=$(TZ='Asia/Seoul' date +'%Y-%m-%d')" >> $GITHUB_ENV
+          echo "CURRENT_DATETIME=$(TZ='Asia/Seoul' date +'%Y-%m-%d %H:%M KST')" >> $GITHUB_ENV
+
+      - name: Commit & Push to auto-daily-log
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "docs: 📝 [Calio] 개발 일지 생성 (${{ env.CURRENT_DATE }})"
+          git push origin HEAD:auto-daily-log

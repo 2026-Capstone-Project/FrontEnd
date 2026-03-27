@@ -1,0 +1,83 @@
+import { type CalendarProps, type View, Views } from 'react-big-calendar'
+import type { withDragAndDropProps } from 'react-big-calendar/lib/addons/dragAndDrop'
+
+import { normalizeDate } from '@/features/Calendar/utils/helpers/calendarPageHelpers'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
+
+type CalendarDndProps = CalendarProps<CalendarEvent, object> &
+  withDragAndDropProps<CalendarEvent, object>
+
+type CalendarConfigArgs = {
+  localizer: CalendarDndProps['localizer']
+  views: CalendarDndProps['views']
+  view: View
+  date: Date
+  events: CalendarEvent[]
+  onView: (view: View) => void
+  onNavigate: (date: Date) => void
+  onSelectEvent: CalendarDndProps['onSelectEvent']
+  onDoubleClickEvent: CalendarDndProps['onDoubleClickEvent']
+  onEventDrop: CalendarDndProps['onEventDrop']
+  onEventResize: CalendarDndProps['onEventResize']
+  onSelectSlot: CalendarDndProps['onSelectSlot']
+  dayPropGetter: CalendarDndProps['dayPropGetter']
+  eventPropGetter?: CalendarDndProps['eventPropGetter']
+  components: CalendarDndProps['components']
+  viewConfig: {
+    formats?: CalendarDndProps['formats']
+    allDayAccessor?: (event: CalendarEvent) => boolean
+  }
+}
+
+export const buildCalendarConfig = ({
+  localizer,
+  views,
+  view,
+  date,
+  events,
+  onView,
+  onNavigate,
+  onSelectEvent,
+  onDoubleClickEvent,
+  onEventDrop,
+  onEventResize,
+  onSelectSlot,
+  dayPropGetter,
+  eventPropGetter,
+  components,
+  viewConfig,
+}: CalendarConfigArgs): CalendarDndProps => {
+  const allDayAccessorProps = viewConfig.allDayAccessor
+    ? { allDayAccessor: viewConfig.allDayAccessor }
+    : {}
+
+  return {
+    localizer,
+    culture: 'ko',
+    views,
+    defaultView: Views.MONTH,
+    view,
+    date,
+    events,
+    startAccessor: (event) => normalizeDate(event.start),
+    endAccessor: (event) => normalizeDate(event.end),
+    onView,
+    onNavigate,
+    onSelectEvent,
+    onDoubleClickEvent,
+    onEventDrop,
+    onEventResize,
+    draggableAccessor: () => true,
+    onSelectSlot,
+    dayPropGetter,
+    eventPropGetter,
+    components,
+    formats: view === Views.DAY ? {} : viewConfig.formats,
+    ...allDayAccessorProps,
+    drilldownView: null,
+    style: { height: '100%', width: '100%' },
+    selectable: true,
+    popup: true,
+    resizable: true,
+  }
+}
