@@ -40,7 +40,6 @@ export const ModalWrapper = styled.div<{ mode: 'modal' | 'inline' }>`
   background-color: ${theme.colors.white};
   border-radius: 20px;
   box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);
-  gap: 16px;
   display: flex;
   flex-direction: column;
   position: absolute;
@@ -95,7 +94,6 @@ export const ModalTitle = styled.h2`
 `
 export const ModalContent = styled.div`
   display: flex;
-  padding: 10px 0;
   flex-direction: column;
   overflow-y: scroll;
   scrollbar-gutter: stable both-edges;
