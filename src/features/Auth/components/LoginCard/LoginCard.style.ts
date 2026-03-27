@@ -67,7 +67,6 @@ export const SocialButton = styled.button`
 export const ButtonText = styled.span`
   flex: 1;
   text-align: center;
-  color: black;
   text-decoration: none;
   &:visited,
   &:active,
@@ -87,11 +86,13 @@ export const IconWrapper = styled.span`
 
 export const Google = styled(SocialButton)`
   background: white;
+  color: black;
   border: 1px solid white;
 `
 
 export const Kakao = styled(SocialButton)`
   background: #fee500;
+  color: black;
 `
 
 export const Naver = styled(SocialButton)`
