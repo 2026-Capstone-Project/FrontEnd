@@ -6,7 +6,6 @@ import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { ScheduleEditorFormValues } from '@/shared/types/event/event'
 import type { RecurrenceEventScope } from '@/shared/types/recurrence/recurrence'
 import type { EditConfirmOption } from '@/shared/ui/Modals'
-import { useToastStore } from '@/store/useToastStore'
 
 type UseScheduleSubmitFlowProps = {
   date: string
@@ -45,7 +44,6 @@ export const useScheduleSubmitFlow = ({
   formatDateTime,
   repeatConfig,
 }: UseScheduleSubmitFlowProps) => {
-  const showToast = useToastStore((state) => state.showToast)
   // 반복 변경 시 편집 확인 모달을 띄우는 guard 훅
   const {
     isOpen: isEditConfirmOpen,
@@ -62,20 +60,6 @@ export const useScheduleSubmitFlow = ({
     useState<ScheduleEditorFormValues | null>(null)
   const [isApplyConfirmOpen, setIsApplyConfirmOpen] = useState(false)
   const isExistingRecurring = initialEvent?.recurrenceGroup != null
-
-  const getSuccessToastContent = useCallback((mode: 'create' | 'patch') => {
-    if (mode === 'patch') {
-      return {
-        title: '일정이 수정되었습니다',
-        message: '변경 사항이 정상적으로 반영되었어요.',
-      }
-    }
-
-    return {
-      title: '일정이 저장되었습니다',
-      message: '새 일정이 정상적으로 등록되었어요.',
-    }
-  }, [])
 
   // 반복 일정 적용 범위 모달 열기
   const openApplyConfirm = useCallback((values: ScheduleEditorFormValues) => {
@@ -124,20 +108,10 @@ export const useScheduleSubmitFlow = ({
         } else {
           await createSchedule(values)
         }
-        const successToast = getSuccessToastContent(options.mode)
-        showToast({
-          ...successToast,
-          toastType: 'success',
-        })
         onClose()
         clearApplyConfirm()
       } catch (error) {
         console.error('[ScheduleEditorForm] submit failed', error)
-        const message =
-          error instanceof Error
-            ? error.message
-            : '일정 저장 중 오류가 발생했습니다. 다시 시도해주세요.'
-        alert(message)
       }
     },
     [
@@ -145,10 +119,8 @@ export const useScheduleSubmitFlow = ({
       confirmChange,
       confirmTitle,
       createSchedule,
-      getSuccessToastContent,
       onClose,
       patchSchedule,
-      showToast,
       syncEventTiming,
     ],
   )

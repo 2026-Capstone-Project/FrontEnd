@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { deleteTodo, patchTodo, patchTodoComplete, postTodo } from '@/shared/api/todo/api'
 import type { RecurrenceTodoScope } from '@/shared/types/recurrence/recurrence'
 import type { PatchTodoRequestDTO } from '@/shared/types/todo/types'
+import { useToastStore } from '@/store/useToastStore'
 
 import { useCustomMutation } from '../common/customQuery'
 
@@ -40,7 +41,21 @@ const useInvalidateTodoQueries = () => {
 export function usePostTodoMutation() {
   const invalidateTodoQueries = useInvalidateTodoQueries()
   return useCustomMutation(postTodo, {
-    onSuccess: invalidateTodoQueries,
+    onSuccess: () => {
+      invalidateTodoQueries()
+      useToastStore.getState().showToast({
+        title: '할 일이 저장되었습니다',
+        message: '새 할 일이 정상적으로 등록되었어요.',
+        toastType: 'success',
+      })
+    },
+    onError: () => {
+      useToastStore.getState().showToast({
+        title: '할 일 저장에 실패했습니다',
+        message: '잠시 후 다시 시도해주세요.',
+        toastType: 'error',
+      })
+    },
   })
 }
 
@@ -50,7 +65,21 @@ export function useDeleteTodoMutation() {
     ({ todoId, occurrenceDate, scope }: DeleteTodoVariables) =>
       deleteTodo(todoId, occurrenceDate, scope),
     {
-      onSuccess: invalidateTodoQueries,
+      onSuccess: () => {
+        invalidateTodoQueries()
+        useToastStore.getState().showToast({
+          title: '할 일이 삭제되었습니다',
+          message: '선택한 할 일이 정상적으로 삭제되었어요.',
+          toastType: 'success',
+        })
+      },
+      onError: () => {
+        useToastStore.getState().showToast({
+          title: '할 일 삭제에 실패했습니다',
+          message: '잠시 후 다시 시도해주세요.',
+          toastType: 'error',
+        })
+      },
     },
   )
 }
@@ -61,7 +90,21 @@ export function usePatchTodoMutation() {
     ({ todoId, requestBody, occurrenceDate, scope }: PatchTodoVariables) =>
       patchTodo(todoId, requestBody, occurrenceDate, scope),
     {
-      onSuccess: invalidateTodoQueries,
+      onSuccess: () => {
+        invalidateTodoQueries()
+        useToastStore.getState().showToast({
+          title: '할 일이 수정되었습니다',
+          message: '변경 사항이 정상적으로 반영되었어요.',
+          toastType: 'success',
+        })
+      },
+      onError: () => {
+        useToastStore.getState().showToast({
+          title: '할 일 수정에 실패했습니다',
+          message: '잠시 후 다시 시도해주세요.',
+          toastType: 'error',
+        })
+      },
     },
   )
 }
@@ -72,7 +115,29 @@ export function usePatchCompleteTodoMutation() {
     ({ todoId, occurrenceDate, isCompleted }: PatchCompleteTodoVariables) =>
       patchTodoComplete(todoId, occurrenceDate, isCompleted),
     {
-      onSuccess: invalidateTodoQueries,
+      onSuccess: (_data, variables) => {
+        invalidateTodoQueries()
+        useToastStore.getState().showToast(
+          variables.isCompleted
+            ? {
+                title: '할 일이 완료되었습니다',
+                message: '변경 사항이 정상적으로 반영되었어요.',
+                toastType: 'success',
+              }
+            : {
+                title: '할 일 완료가 해제되었습니다',
+                message: '변경 사항이 정상적으로 반영되었어요.',
+                toastType: 'info',
+              },
+        )
+      },
+      onError: () => {
+        useToastStore.getState().showToast({
+          title: '완료 상태 변경에 실패했습니다',
+          message: '잠시 후 다시 시도해주세요.',
+          toastType: 'error',
+        })
+      },
     },
   )
 }

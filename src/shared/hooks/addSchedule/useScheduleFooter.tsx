@@ -9,7 +9,6 @@ import type { EventColorType, ScheduleEditorFormValues } from '@/shared/types/ev
 import type { RecurrenceEventScope } from '@/shared/types/recurrence/recurrence'
 import type { RepeatConfig } from '@/shared/types/recurrence/repeat'
 import SelectColor from '@/shared/ui/common/SelectColor/SelectColor'
-import { useToastStore } from '@/store/useToastStore'
 
 type UseScheduleFooterProps = {
   repeatConfig: RepeatConfig
@@ -49,7 +48,6 @@ export const useScheduleFooter = ({
   const [deleteWarningVisible, setDeleteWarningVisible] = useState(false)
   const { useDeleteEvent } = useCalendarMutation()
   const { mutate: deleteEventMutate } = useDeleteEvent()
-  const showToast = useToastStore((state) => state.showToast)
   const repeatConfigRef = useRef(repeatConfig)
   const eventIdRef = useRef(eventId)
   const occurrenceDateRef = useRef(occurrenceDate)
@@ -118,11 +116,6 @@ export const useScheduleFooter = ({
       void (async () => {
         try {
           await patchSchedule(nextValues, isExistingRecurring ? 'THIS_EVENT' : undefined)
-          showToast({
-            title: '일정이 수정되었습니다',
-            message: '변경 사항이 정상적으로 반영되었어요.',
-            toastType: 'success',
-          })
         } catch (error) {
           setEventColor(previousColor)
           if (eventId != null && eventId !== 0) {
@@ -141,7 +134,6 @@ export const useScheduleFooter = ({
       onEventColorChange,
       patchSchedule,
       setEventColor,
-      showToast,
     ],
   )
 

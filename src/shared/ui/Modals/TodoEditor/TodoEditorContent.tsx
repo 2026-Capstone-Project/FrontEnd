@@ -109,7 +109,6 @@ const TodoEditorContent = ({
     handleCancelRepeat,
   } = useTodoSubmitFlow({
     eventId,
-    isEditing,
     hasExistingRecurrence,
     repeatGuardEnabled,
     isDetailReady,

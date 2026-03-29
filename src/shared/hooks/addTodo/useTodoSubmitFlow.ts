@@ -6,11 +6,9 @@ import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { TodoEditorFormValues } from '@/shared/types/event/event'
 import type { RecurrenceTodoScope } from '@/shared/types/recurrence/recurrence'
 import type { EditConfirmOption } from '@/shared/ui/Modals'
-import { useToastStore } from '@/store/useToastStore'
 
 type UseTodoSubmitFlowProps = {
   eventId: CalendarEvent['id']
-  isEditing: boolean
   hasExistingRecurrence: boolean
   repeatGuardEnabled: boolean
   isDetailReady: boolean
@@ -29,7 +27,6 @@ type UseTodoSubmitFlowProps = {
 
 export const useTodoSubmitFlow = ({
   eventId,
-  isEditing,
   hasExistingRecurrence,
   repeatGuardEnabled,
   isDetailReady,
@@ -42,7 +39,6 @@ export const useTodoSubmitFlow = ({
   syncEventTiming,
   onEventTitleConfirm,
 }: UseTodoSubmitFlowProps) => {
-  const showToast = useToastStore((state) => state.showToast)
   const {
     isOpen: isEditConfirmOpen,
     confirmChange,
@@ -55,20 +51,6 @@ export const useTodoSubmitFlow = ({
   })
   const [isApplyConfirmOpen, setIsApplyConfirmOpen] = useState(false)
   const [pendingTodoValues, setPendingTodoValues] = useState<TodoEditorFormValues | null>(null)
-
-  const getSuccessToastContent = useCallback(() => {
-    if (isEditing) {
-      return {
-        title: '할 일이 수정되었습니다',
-        message: '변경 사항이 정상적으로 반영되었어요.',
-      }
-    }
-
-    return {
-      title: '할 일이 저장되었습니다',
-      message: '새 할 일이 정상적으로 등록되었어요.',
-    }
-  }, [isEditing])
 
   const confirmTitle = useCallback(
     (values: TodoEditorFormValues) => {
@@ -105,31 +87,19 @@ export const useTodoSubmitFlow = ({
 
       try {
         await onSubmit(values, submitOptions)
-        const successToast = getSuccessToastContent()
-        showToast({
-          ...successToast,
-          toastType: 'success',
-        })
         onClose()
         clearApplyConfirm()
       } catch (error) {
         console.error('[TodoEditorForm] submit failed', error)
-        const message =
-          error instanceof Error
-            ? error.message
-            : '할 일 저장 중 오류가 발생했습니다. 다시 시도해주세요.'
-        alert(message)
       }
     },
     [
       clearApplyConfirm,
       confirmChange,
       confirmTitle,
-      getSuccessToastContent,
       onClose,
       onSubmit,
       patchOccurrenceDate,
-      showToast,
       syncEventTiming,
     ],
   )
