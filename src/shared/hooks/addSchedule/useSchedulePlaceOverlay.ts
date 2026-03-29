@@ -1,7 +1,7 @@
 import { useSearchPlaceToggle } from '@/shared/hooks/form/useSearchPlaceToggle'
-import type { AddScheduleFormProps } from '@/shared/types/modal/addSchedule'
+import type { ScheduleEditorFormProps } from '@/shared/types/modal/scheduleEditor'
 
-type UseSchedulePlaceOverlayProps = Pick<AddScheduleFormProps, 'modalWrapperElement' | 'mode'>
+type UseSchedulePlaceOverlayProps = Pick<ScheduleEditorFormProps, 'modalWrapperElement' | 'mode'>
 
 export const useSchedulePlaceOverlay = ({
   modalWrapperElement,

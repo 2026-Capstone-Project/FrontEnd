@@ -4,9 +4,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { EventColorType } from '@/shared/types/event/event'
-import type { AddTodoFormProps } from '@/shared/types/modal/addTodo'
+import type { TodoEditorFormProps } from '@/shared/types/modal/todoEditor'
 import type { RepeatConfig } from '@/shared/types/recurrence/repeat'
-import SelectColor from '@/shared/ui/modal/common/SelectColor/SelectColor'
+import SelectColor from '@/shared/ui/common/SelectColor/SelectColor'
 
 type UseTodoFooterProps = {
   repeatConfig: RepeatConfig
@@ -17,9 +17,9 @@ type UseTodoFooterProps = {
   hasExistingRecurrence: boolean
   eventColor: EventColorType
   setEventColor: (value: EventColorType) => void
-  onEventColorChange?: AddTodoFormProps['onEventColorChange']
+  onEventColorChange?: TodoEditorFormProps['onEventColorChange']
   registerFooterChildren?: (node: ReactNode | null) => void
-  registerDeleteHandler?: AddTodoFormProps['registerDeleteHandler']
+  registerDeleteHandler?: TodoEditorFormProps['registerDeleteHandler']
   closeModal: () => void
 }
 

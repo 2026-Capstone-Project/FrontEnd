@@ -3,29 +3,29 @@ import type { UseFormHandleSubmit, UseFormSetValue } from 'react-hook-form'
 
 import { useRepeatChangeGuard } from '@/shared/hooks/repeat/useRepeatChangeGuard'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
-import type { AddScheduleFormValues } from '@/shared/types/event/event'
+import type { ScheduleEditorFormValues } from '@/shared/types/event/event'
 import type { RecurrenceEventScope } from '@/shared/types/recurrence/recurrence'
-import type { EditConfirmOption } from '@/shared/ui/modal'
+import type { EditConfirmOption } from '@/shared/ui/Modals'
 
 type UseScheduleSubmitFlowProps = {
   date: string
   eventId: CalendarEvent['id']
   initialEvent?: CalendarEvent | null
   isEditing: boolean
-  handleSubmit: UseFormHandleSubmit<AddScheduleFormValues>
+  handleSubmit: UseFormHandleSubmit<ScheduleEditorFormValues>
   onClose: () => void
-  setValue: UseFormSetValue<AddScheduleFormValues>
+  setValue: UseFormSetValue<ScheduleEditorFormValues>
   patchSchedule: (
-    values: AddScheduleFormValues,
+    values: ScheduleEditorFormValues,
     scope?: RecurrenceEventScope,
     occurrenceDate?: string,
   ) => Promise<unknown>
-  createSchedule: (values: AddScheduleFormValues) => Promise<unknown>
-  syncEventTiming: (values: AddScheduleFormValues) => void
+  createSchedule: (values: ScheduleEditorFormValues) => Promise<unknown>
+  syncEventTiming: (values: ScheduleEditorFormValues) => void
   handleTitleConfirm: (value: string) => void
   buildDateTime: (dateValue: Date | null, timeValue?: string) => Date
   formatDateTime: (value: Date) => string
-  repeatConfig: AddScheduleFormValues['repeatConfig']
+  repeatConfig: ScheduleEditorFormValues['repeatConfig']
 }
 
 export const useScheduleSubmitFlow = ({
@@ -56,14 +56,13 @@ export const useScheduleSubmitFlow = ({
     setValue,
   })
 
-  const [pendingScheduleValues, setPendingScheduleValues] = useState<AddScheduleFormValues | null>(
-    null,
-  )
+  const [pendingScheduleValues, setPendingScheduleValues] =
+    useState<ScheduleEditorFormValues | null>(null)
   const [isApplyConfirmOpen, setIsApplyConfirmOpen] = useState(false)
   const isExistingRecurring = initialEvent?.recurrenceGroup != null
 
   // 반복 일정 적용 범위 모달 열기
-  const openApplyConfirm = useCallback((values: AddScheduleFormValues) => {
+  const openApplyConfirm = useCallback((values: ScheduleEditorFormValues) => {
     setPendingScheduleValues(values)
     setIsApplyConfirmOpen(true)
   }, [])
@@ -75,7 +74,7 @@ export const useScheduleSubmitFlow = ({
   }, [])
 
   const confirmTitle = useCallback(
-    (values: AddScheduleFormValues) => {
+    (values: ScheduleEditorFormValues) => {
       if (eventId == null || eventId === 0) return
       const nextTitle = values.eventTitle ?? ''
       if (nextTitle) {
@@ -89,7 +88,7 @@ export const useScheduleSubmitFlow = ({
   // 분기마다 흩어진 try/catch를 모아 에러 처리 정책을 일관되게 유지합니다.
   const submitScheduleValues = useCallback(
     async (
-      values: AddScheduleFormValues,
+      values: ScheduleEditorFormValues,
       options: {
         mode: 'create' | 'patch'
         scope?: RecurrenceEventScope
@@ -112,7 +111,7 @@ export const useScheduleSubmitFlow = ({
         onClose()
         clearApplyConfirm()
       } catch (error) {
-        console.error('[AddScheduleForm] submit failed', error)
+        console.error('[ScheduleEditorForm] submit failed', error)
         const message =
           error instanceof Error
             ? error.message

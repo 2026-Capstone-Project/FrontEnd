@@ -5,9 +5,9 @@ import { type Control, type Resolver, useForm, type UseFormReturn, useWatch } fr
 import { addScheduleSchema } from '@/shared/schemas/schedule'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import {
-  type AddScheduleFormValues,
   type EventColorType,
   type RepeatConfigSchema,
+  type ScheduleEditorFormValues,
 } from '@/shared/types/event/event'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/recurrenceGroup'
@@ -19,10 +19,10 @@ type UseScheduleFormFieldsProps = {
 }
 
 export type UseScheduleFormFieldsResult = {
-  formMethods: UseFormReturn<AddScheduleFormValues>
-  control: Control<AddScheduleFormValues>
-  setValue: UseFormReturn<AddScheduleFormValues>['setValue']
-  handleSubmit: UseFormReturn<AddScheduleFormValues>['handleSubmit']
+  formMethods: UseFormReturn<ScheduleEditorFormValues>
+  control: Control<ScheduleEditorFormValues>
+  setValue: UseFormReturn<ScheduleEditorFormValues>['setValue']
+  handleSubmit: UseFormReturn<ScheduleEditorFormValues>['handleSubmit']
   eventStartDate: Date | null
   eventEndDate: Date | null
   eventStartTime: string | undefined
@@ -42,7 +42,7 @@ export const useScheduleFormFields = ({
   initialEvent,
   isEditing,
 }: UseScheduleFormFieldsProps): UseScheduleFormFieldsResult => {
-  const resolver = yupResolver(addScheduleSchema) as Resolver<AddScheduleFormValues>
+  const resolver = yupResolver(addScheduleSchema) as Resolver<ScheduleEditorFormValues>
   const defaultStart = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
   const defaultEnd =
     initialEvent?.end && initialEvent.end !== initialEvent?.start
@@ -56,7 +56,7 @@ export const useScheduleFormFields = ({
   const initialAddress = initialEvent?.address ?? null
   const initialColor = initialEvent?.color ?? 'BLUE'
   const initialIsAllDay = initialEvent?.isAllDay ?? false
-  const formMethods = useForm<AddScheduleFormValues>({
+  const formMethods = useForm<ScheduleEditorFormValues>({
     resolver,
     defaultValues: {
       eventTitle: initialTitle,
@@ -124,6 +124,26 @@ export const useScheduleFormFields = ({
     } as RepeatConfigSchema
     setValue('repeatConfig', nextRepeatConfig, { shouldValidate: true })
   }, [date, initialEvent, isEditing, setValue])
+
+  useEffect(() => {
+    if (isEditing) return
+    const start = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
+    const end =
+      initialEvent?.end && initialEvent.end !== initialEvent?.start
+        ? new Date(initialEvent.end)
+        : new Date(start)
+    const nextIsAllDay = initialEvent?.isAllDay ?? false
+    setValue('eventStartDate', start)
+    setValue('eventEndDate', end)
+    setValue('isAllday', nextIsAllDay)
+    if (nextIsAllDay) {
+      setValue('eventStartTime', undefined)
+      setValue('eventEndTime', undefined)
+      return
+    }
+    setValue('eventStartTime', formatTimeFromDate(start))
+    setValue('eventEndTime', formatTimeFromDate(end))
+  }, [date, initialEvent?.end, initialEvent?.isAllDay, initialEvent?.start, isEditing, setValue])
 
   return {
     formMethods,

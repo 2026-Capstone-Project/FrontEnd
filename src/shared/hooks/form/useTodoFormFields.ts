@@ -3,22 +3,25 @@ import { useEffect } from 'react'
 import { type Control, type Resolver, useForm, type UseFormReturn, useWatch } from 'react-hook-form'
 
 import { addTodoSchema } from '@/shared/schemas/todo'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 import {
-  type AddTodoFormValues,
   type EventColorType,
   type RepeatConfigSchema,
+  type TodoEditorFormValues,
 } from '@/shared/types/event/event'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 
 type UseTodoFormFieldsProps = {
   date: string
+  initialEvent?: CalendarEvent | null
+  isEditing?: boolean
 }
 
 export type UseTodoFormFieldsResult = {
-  formMethods: UseFormReturn<AddTodoFormValues>
-  control: Control<AddTodoFormValues>
-  setValue: UseFormReturn<AddTodoFormValues>['setValue']
-  handleSubmit: UseFormReturn<AddTodoFormValues>['handleSubmit']
+  formMethods: UseFormReturn<TodoEditorFormValues>
+  control: Control<TodoEditorFormValues>
+  setValue: UseFormReturn<TodoEditorFormValues>['setValue']
+  handleSubmit: UseFormReturn<TodoEditorFormValues>['handleSubmit']
   todoDate: Date | null
   todoEndTime: string | undefined
   isAllday: boolean
@@ -27,17 +30,27 @@ export type UseTodoFormFieldsResult = {
   eventColor: EventColorType
 }
 
-export const useTodoFormFields = ({ date }: UseTodoFormFieldsProps): UseTodoFormFieldsResult => {
-  const resolver = yupResolver(addTodoSchema) as Resolver<AddTodoFormValues>
-  const formMethods = useForm<AddTodoFormValues>({
+const pad2 = (value: number) => String(value).padStart(2, '0')
+
+const formatTimeFromDate = (value: Date) => `${pad2(value.getHours())}:${pad2(value.getMinutes())}`
+
+export const useTodoFormFields = ({
+  date,
+  initialEvent,
+  isEditing = false,
+}: UseTodoFormFieldsProps): UseTodoFormFieldsResult => {
+  const resolver = yupResolver(addTodoSchema) as Resolver<TodoEditorFormValues>
+  const defaultTodoDate = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
+  const defaultTodoTime = initialEvent?.start ? formatTimeFromDate(defaultTodoDate) : '10:00'
+  const formMethods = useForm<TodoEditorFormValues>({
     resolver,
     defaultValues: {
       todoTitle: '',
       todoDescription: '',
-      todoDate: new Date(date),
-      todoEndTime: '10:00',
-      isAllday: false,
-      eventColor: 'GRAY',
+      todoDate: defaultTodoDate,
+      todoEndTime: defaultTodoTime,
+      isAllday: initialEvent?.isAllDay ?? false,
+      eventColor: initialEvent?.color ?? 'GRAY',
       todoPriority: 'MEDIUM',
       repeatConfig: defaultRepeatConfig as RepeatConfigSchema,
     },
@@ -62,9 +75,14 @@ export const useTodoFormFields = ({ date }: UseTodoFormFieldsProps): UseTodoForm
   }, [register])
 
   useEffect(() => {
-    const baseDate = new Date(date)
-    setValue('todoDate', baseDate)
-  }, [date, setValue])
+    if (isEditing) return
+    const nextDate = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
+    setValue('todoDate', nextDate)
+    setValue('isAllday', initialEvent?.isAllDay ?? false)
+    if (!(initialEvent?.isAllDay ?? false)) {
+      setValue('todoEndTime', formatTimeFromDate(nextDate))
+    }
+  }, [date, initialEvent?.isAllDay, initialEvent?.start, isEditing, setValue])
 
   return {
     formMethods,

@@ -4,7 +4,7 @@ import { useCallback, useMemo } from 'react'
 import { useSchedulePatch } from '@/shared/hooks/addSchedule/useSchedulePatch'
 import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
-import type { AddScheduleFormValues, RepeatConfigSchema } from '@/shared/types/event/event'
+import type { RepeatConfigSchema, ScheduleEditorFormValues } from '@/shared/types/event/event'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 import {
   mapRecurrenceGroupToRepeatConfig,
@@ -68,7 +68,7 @@ export const useSchedulePatchController = ({
   })
 
   const createSchedule = useCallback(
-    (values: AddScheduleFormValues) => {
+    (values: ScheduleEditorFormValues) => {
       const startDate = values.eventStartDate ?? new Date(date)
       const endDate = values.eventEndDate ?? startDate
       const [start, end] = values.isAllday

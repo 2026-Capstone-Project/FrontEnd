@@ -5,20 +5,20 @@ import { type UseFormGetValues } from 'react-hook-form'
 
 import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
-import type { AddScheduleFormValues, EventColorType } from '@/shared/types/event/event'
+import type { EventColorType, ScheduleEditorFormValues } from '@/shared/types/event/event'
 import type { RecurrenceEventScope } from '@/shared/types/recurrence/recurrence'
 import type { RepeatConfig } from '@/shared/types/recurrence/repeat'
-import SelectColor from '@/shared/ui/modal/common/SelectColor/SelectColor'
+import SelectColor from '@/shared/ui/common/SelectColor/SelectColor'
 
 type UseScheduleFooterProps = {
   repeatConfig: RepeatConfig
   eventId: CalendarEvent['id']
   initialEvent?: CalendarEvent | null
   isEditing: boolean
-  getValues: UseFormGetValues<AddScheduleFormValues>
+  getValues: UseFormGetValues<ScheduleEditorFormValues>
   setEventColor: (value: EventColorType) => void
   patchSchedule: (
-    values: AddScheduleFormValues,
+    values: ScheduleEditorFormValues,
     scope?: RecurrenceEventScope,
     occurrenceDate?: string,
   ) => Promise<unknown>
