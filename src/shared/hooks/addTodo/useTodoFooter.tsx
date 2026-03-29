@@ -7,6 +7,7 @@ import type { EventColorType } from '@/shared/types/event/event'
 import type { TodoEditorFormProps } from '@/shared/types/modal/todoEditor'
 import type { RepeatConfig } from '@/shared/types/recurrence/repeat'
 import SelectColor from '@/shared/ui/common/SelectColor/SelectColor'
+import { useToastStore } from '@/store/useToastStore'
 
 type UseTodoFooterProps = {
   repeatConfig: RepeatConfig
@@ -41,6 +42,7 @@ export const useTodoFooter = ({
   const { useDeleteTodo, usePatchTodo } = useTodoMutations()
   const { mutate: deleteTodoMutate } = useDeleteTodo()
   const { mutate: patchTodoMutate } = usePatchTodo()
+  const showToast = useToastStore((state) => state.showToast)
 
   const handleDelete = useCallback(() => {
     if (eventId == null || eventId === 0 || !isPersistedTodo) {
@@ -94,6 +96,13 @@ export const useTodoFooter = ({
           },
         },
         {
+          onSuccess: () => {
+            showToast({
+              title: '할 일이 수정되었습니다',
+              message: '변경 사항이 정상적으로 반영되었어요.',
+              toastType: 'success',
+            })
+          },
           onError: () => {
             setEventColor(previousColor)
             onEventColorChange?.(eventId, previousColor)
@@ -110,6 +119,7 @@ export const useTodoFooter = ({
       onEventColorChange,
       patchTodoMutate,
       setEventColor,
+      showToast,
     ],
   )
 
