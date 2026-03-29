@@ -8,12 +8,10 @@ import {
   type EventColorType,
   type RepeatConfigSchema,
 } from '@/shared/types/event/event'
-import type { PriorityType } from '@/shared/types/event/priority'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 
 type UseTodoFormFieldsProps = {
   date: string
-  isAllday: boolean
 }
 
 export type UseTodoFormFieldsResult = {
@@ -23,16 +21,13 @@ export type UseTodoFormFieldsResult = {
   handleSubmit: UseFormReturn<AddTodoFormValues>['handleSubmit']
   todoDate: Date | null
   todoEndTime: string | undefined
+  isAllday: boolean
   repeatConfig: RepeatConfigSchema
   todoTitle: string | undefined
   eventColor: EventColorType
-  todoPriority: PriorityType
 }
 
-export const useTodoFormFields = ({
-  date,
-  isAllday,
-}: UseTodoFormFieldsProps): UseTodoFormFieldsResult => {
+export const useTodoFormFields = ({ date }: UseTodoFormFieldsProps): UseTodoFormFieldsResult => {
   const resolver = yupResolver(addTodoSchema) as Resolver<AddTodoFormValues>
   const formMethods = useForm<AddTodoFormValues>({
     resolver,
@@ -41,7 +36,7 @@ export const useTodoFormFields = ({
       todoDescription: '',
       todoDate: new Date(date),
       todoEndTime: '10:00',
-      isAllday,
+      isAllday: false,
       eventColor: 'GRAY',
       todoPriority: 'MEDIUM',
       repeatConfig: defaultRepeatConfig as RepeatConfigSchema,
@@ -51,11 +46,11 @@ export const useTodoFormFields = ({
 
   const todoDate = useWatch({ control, name: 'todoDate' })
   const todoEndTime = useWatch({ control, name: 'todoEndTime' })
+  const isAllday = useWatch({ control, name: 'isAllday' }) ?? false
   const repeatConfig = (useWatch({ control, name: 'repeatConfig' }) ??
     (defaultRepeatConfig as RepeatConfigSchema)) as RepeatConfigSchema
   const todoTitle = useWatch({ control, name: 'todoTitle' })
   const eventColor = (useWatch({ control, name: 'eventColor' }) ?? 'GRAY') as EventColorType
-  const todoPriority = (useWatch({ control, name: 'todoPriority' }) ?? 'MEDIUM') as PriorityType
 
   useEffect(() => {
     register('todoDate')
@@ -65,10 +60,6 @@ export const useTodoFormFields = ({
     register('todoPriority')
     register('repeatConfig')
   }, [register])
-
-  useEffect(() => {
-    setValue('isAllday', isAllday)
-  }, [isAllday, setValue])
 
   useEffect(() => {
     const baseDate = new Date(date)
@@ -82,9 +73,9 @@ export const useTodoFormFields = ({
     setValue,
     todoDate,
     todoEndTime,
+    isAllday,
     repeatConfig,
     todoTitle,
     eventColor,
-    todoPriority,
   }
 }

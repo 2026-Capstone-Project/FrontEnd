@@ -1,12 +1,9 @@
-/** @jsxImportSource @emotion/react  */
 import { useCallback } from 'react'
-import { createPortal } from 'react-dom'
 import { useFormContext } from 'react-hook-form'
 
 import {
   useScheduleEventSync,
   useScheduleFooter,
-  useScheduleFormAnchors,
   useSchedulePatchController,
   useScheduleSubmitFlow,
 } from '@/shared/hooks/addSchedule'
@@ -16,12 +13,8 @@ import type { UseAddScheduleFormResult } from '@/shared/hooks/form/useAddSchedul
 import type { AddScheduleFormValues } from '@/shared/types/event/event'
 import type { AddScheduleFormProps } from '@/shared/types/modal/addSchedule'
 import { UnsavedChangesConfirmModal } from '@/shared/ui/modal'
-import AddScheduleFormConfirmModals from '@/shared/ui/modal/AddSchedule/form/AddScheduleFormConfirmModals'
-import { useAddScheduleFormContextValue } from '@/shared/ui/modal/AddSchedule/form/AddScheduleFormContext'
-import AddScheduleFormFields from '@/shared/ui/modal/AddSchedule/form/AddScheduleFormFields'
-import { AddScheduleFormProvider } from '@/shared/ui/modal/AddSchedule/form/AddScheduleFormProvider'
-import * as S from '@/shared/ui/modal/AddSchedule/styles/index.style'
-import { formatDisplayDate } from '@/shared/utils/date'
+import AddScheduleFormConfirmModals from '@/shared/ui/modal/AddSchedule/AddScheduleFormConfirmModals'
+import AddScheduleFormFields from '@/shared/ui/modal/AddSchedule/AddScheduleFormFields'
 
 type AddScheduleFormContentProps = AddScheduleFormProps & {
   schedule: UseAddScheduleFormResult
@@ -45,7 +38,6 @@ const AddScheduleFormContent = ({
   schedule,
 }: AddScheduleFormContentProps) => {
   const {
-    activeCalendarField,
     eventStartDate,
     eventEndDate,
     eventStartTime,
@@ -53,14 +45,10 @@ const AddScheduleFormContent = ({
     eventColor,
     isAllday,
     repeatConfig,
-    handleCalendarOpen,
-    handleDateSelect,
-    handleTimeChange,
+    handleRepeatType,
     handleSubmit,
-    setIsAllday,
+    updateConfig,
     setEventColor,
-    isSearchPlaceOpen,
-    openSearchPlace,
     eventTitle,
   } = schedule
   const { setValue, getValues, formState } = useFormContext<AddScheduleFormValues>()
@@ -80,29 +68,17 @@ const AddScheduleFormContent = ({
       initialEvent,
     })
 
-  // UI 표시용 날짜 문자열
-  const startDate = formatDisplayDate(eventStartDate)
-  const endDate = formatDisplayDate(eventEndDate)
-
-  // 포털/앵커 위치 계산
-  const {
-    mapButtonRef,
-    handleCalendarButtonClick,
-    handleMapButtonClick,
-    portalPosition,
-    calendarPortalStyle,
-  } = useScheduleFormAnchors({
-    handleCalendarOpen,
-    openSearchPlace,
-  })
   // 종일 토글 처리 (시간 필드 초기화 포함)
   const handleAllDayToggle = useCallback(() => {
     const nextIsAllDay = !isAllday
     const isExistingRecurring = initialEvent?.recurrenceGroup != null
-    setIsAllday(nextIsAllDay)
+    setValue('isAllday', nextIsAllDay, {
+      shouldDirty: true,
+      shouldValidate: true,
+    })
     if (nextIsAllDay) {
-      setValue('eventStartTime', undefined, { shouldValidate: true })
-      setValue('eventEndTime', undefined, { shouldValidate: true })
+      setValue('eventStartTime', undefined, { shouldDirty: true, shouldValidate: true })
+      setValue('eventEndTime', undefined, { shouldDirty: true, shouldValidate: true })
     }
     if (isEditing) {
       void patchSchedule(
@@ -114,25 +90,7 @@ const AddScheduleFormContent = ({
         isExistingRecurring ? 'THIS_EVENT' : undefined,
       )
     }
-  }, [
-    getValues,
-    initialEvent?.recurrenceGroup,
-    isAllday,
-    isEditing,
-    patchSchedule,
-    setIsAllday,
-    setValue,
-  ])
-
-  const isInlineMode = mode === 'inline'
-  const shouldShowModalOverlay = !isInlineMode && (activeCalendarField || isSearchPlaceOpen)
-  const searchPlacePortalTarget =
-    typeof document === 'undefined'
-      ? null
-      : isInlineMode
-        ? (modalWrapperElement ?? null)
-        : document.getElementById('modal-root')
-  const searchPlacePortalPlacement = isInlineMode ? 'container' : 'viewport'
+  }, [getValues, initialEvent?.recurrenceGroup, isAllday, isEditing, patchSchedule, setValue])
 
   // 로컬 이벤트 동기화(타이틀/시간)
   const { syncEventTiming, handleTitleConfirm } = useScheduleEventSync({
@@ -196,37 +154,19 @@ const AddScheduleFormContent = ({
     occurrenceDate: initialEvent?.occurrenceDate ?? date,
   })
 
-  const contextValue = useAddScheduleFormContextValue({
-    schedule,
-    headerTitlePortalTarget,
-    startDate,
-    endDate,
-    portal: {
-      portalPosition,
-      calendarPortalStyle,
-      handleCalendarButtonClick,
-      handleDateSelect,
-      handleTimeChange,
-      mapButtonRef,
-      handleMapButtonClick,
-      searchPlacePortalTarget,
-      searchPlacePortalPlacement,
-    },
-    handleAllDayToggle,
-    onTitleConfirm: handleTitleConfirm,
-  })
-
   return (
     <>
-      {!isInlineMode &&
-        shouldShowModalOverlay &&
-        typeof document !== 'undefined' &&
-        createPortal(<S.PortalDarkLayer />, document.getElementById('modal-root')!)}
-      <AddScheduleFormProvider value={contextValue}>
-        <form id="add-schedule-form" onSubmit={handleFormSubmit}>
-          <AddScheduleFormFields />
-        </form>
-      </AddScheduleFormProvider>
+      <form id="add-schedule-form" onSubmit={handleFormSubmit}>
+        <AddScheduleFormFields
+          headerTitlePortalTarget={headerTitlePortalTarget}
+          modalWrapperElement={modalWrapperElement}
+          mode={mode}
+          handleAllDayToggle={handleAllDayToggle}
+          updateConfig={updateConfig}
+          handleRepeatType={handleRepeatType}
+          onTitleConfirm={handleTitleConfirm}
+        />
+      </form>
       <AddScheduleFormConfirmModals
         deleteWarningVisible={deleteWarningVisible}
         eventTitle={eventTitle}

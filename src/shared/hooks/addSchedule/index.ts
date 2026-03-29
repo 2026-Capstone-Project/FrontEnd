@@ -1,6 +1,7 @@
+export { useScheduleCalendarOverlay } from './useScheduleCalendarOverlay'
 export { useScheduleEventSync } from './useScheduleEventSync'
 export { useScheduleFooter } from './useScheduleFooter'
-export { useScheduleFormAnchors } from './useScheduleFormAnchors'
 export { useSchedulePatch } from './useSchedulePatch'
 export { useSchedulePatchController } from './useSchedulePatchController'
+export { useSchedulePlaceOverlay } from './useSchedulePlaceOverlay'
 export { useScheduleSubmitFlow } from './useScheduleSubmitFlow'

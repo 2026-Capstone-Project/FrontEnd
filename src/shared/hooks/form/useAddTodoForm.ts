@@ -1,16 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback } from 'react'
 import { type Control, type UseFormReturn } from 'react-hook-form'
 
 import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type {
   AddTodoFormValues,
-  DatePickerField,
   EventColorType,
   RepeatConfigSchema,
-  TimePickerField,
 } from '@/shared/types/event/event'
-import type { PriorityType } from '@/shared/types/event/priority'
 import type { RecurrenceTodoScope } from '@/shared/types/recurrence/recurrence'
 import type { CustomRepeatBasis, RepeatConfig, RepeatType } from '@/shared/types/recurrence/repeat'
 import { formatIsoDate } from '@/shared/utils/date'
@@ -28,17 +25,11 @@ type UseAddTodoProps = {
 export type UseAddTodoFormResult = {
   control: Control<AddTodoFormValues>
   formMethods: UseFormReturn<AddTodoFormValues>
-  activeCalendarField: DatePickerField | null
   isAllday: boolean
-  calendarRef: React.RefObject<HTMLDivElement | null>
   todoDate: Date | null
   todoEndTime: string | undefined
   repeatConfig: RepeatConfigSchema
   eventColor: EventColorType
-  todoPriority: PriorityType
-  handleCalendarOpen: (field: DatePickerField) => void
-  handleDateSelect: (selectedDate: Date) => void
-  handleTimeChange: (field: TimePickerField, value: string) => void
   handleRepeatType: (value: RepeatType) => void
   updateConfig: (changes: Partial<RepeatConfig>) => void
   handleSubmit: UseFormReturn<AddTodoFormValues>['handleSubmit']
@@ -46,11 +37,8 @@ export type UseAddTodoFormResult = {
     values: AddTodoFormValues,
     options?: { occurrenceDate?: string; scope?: RecurrenceTodoScope },
   ) => Promise<unknown>
-  setIsAllday: React.Dispatch<React.SetStateAction<boolean>>
   setEventColor: (value: EventColorType) => void
-  setTodoPriority: (value: PriorityType) => void
   todoTitle: string | undefined
-  repeatEndDate: Date | null
 }
 
 const isCustomBasis = (value: RepeatType): value is CustomRepeatBasis =>
@@ -68,7 +56,6 @@ export const useAddTodoForm = ({
   id,
   isEditing = false,
 }: UseAddTodoProps): UseAddTodoFormResult => {
-  const [isAllday, setIsAllday] = useState(false)
   const { usePostTodo, usePatchTodo } = useTodoMutations()
   const { mutateAsync: postTodoMutate } = usePostTodo()
   const { mutateAsync: patchTodoMutate } = usePatchTodo()
@@ -80,49 +67,11 @@ export const useAddTodoForm = ({
     setValue,
     todoDate,
     todoEndTime,
+    isAllday,
     repeatConfig,
     todoTitle,
     eventColor,
-    todoPriority,
-  } = useTodoFormFields({ date, isAllday })
-
-  const calendarRef = useRef<HTMLDivElement | null>(null)
-  const [activeCalendarField, setActiveCalendarField] = useState<DatePickerField | null>(null)
-
-  const handleCalendarOpen = useCallback((field: DatePickerField) => {
-    setActiveCalendarField(field)
-  }, [])
-
-  const handleCalendarClose = useCallback(() => {
-    setActiveCalendarField(null)
-  }, [])
-
-  const handleDateSelect = useCallback(
-    (selectedDate: Date) => {
-      if (!activeCalendarField) return
-      setValue('todoDate', selectedDate, { shouldValidate: true })
-      handleCalendarClose()
-    },
-    [activeCalendarField, handleCalendarClose, setValue],
-  )
-
-  const handleTimeChange = useCallback(
-    (_field: TimePickerField, value: string) => {
-      setValue('todoEndTime', value, { shouldValidate: true })
-    },
-    [setValue],
-  )
-
-  useEffect(() => {
-    if (!activeCalendarField) return undefined
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node
-      if (calendarRef.current?.contains(target)) return
-      handleCalendarClose()
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [activeCalendarField, handleCalendarClose])
+  } = useTodoFormFields({ date })
 
   const handleRepeatType = useCallback(
     (value: RepeatType) => {
@@ -169,23 +118,9 @@ export const useAddTodoForm = ({
     [repeatConfig, setValue],
   )
 
-  const repeatEndDate = useMemo(() => {
-    if (!todoDate) return null
-    const clone = new Date(todoDate)
-    clone.setHours(0, 0, 0, 0)
-    return clone
-  }, [todoDate])
-
   const setEventColor = useCallback(
     (value: EventColorType) => {
       setValue('eventColor', value, { shouldValidate: true })
-    },
-    [setValue],
-  )
-
-  const setTodoPriority = useCallback(
-    (value: PriorityType) => {
-      setValue('todoPriority', value, { shouldValidate: true, shouldDirty: true })
     },
     [setValue],
   )
@@ -248,23 +183,14 @@ export const useAddTodoForm = ({
     control,
     updateConfig,
     handleRepeatType,
-    activeCalendarField,
     isAllday,
-    calendarRef,
     todoDate,
     todoEndTime,
     repeatConfig,
     eventColor,
-    todoPriority,
-    handleCalendarOpen,
-    handleDateSelect,
-    handleTimeChange,
     handleSubmit,
     onSubmit,
-    setIsAllday,
     setEventColor,
-    setTodoPriority,
     todoTitle,
-    repeatEndDate,
   }
 }

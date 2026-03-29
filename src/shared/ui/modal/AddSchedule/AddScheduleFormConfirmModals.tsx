@@ -1,9 +1,8 @@
 import moment from 'moment'
 
+import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
-import type { EditConfirmOption } from '@/shared/ui/modal'
-
-import ScheduleConfirmModals from './ScheduleConfirmModals'
+import { DeleteConfirmModal, EditConfirmModal, type EditConfirmOption } from '@/shared/ui/modal'
 
 type AddScheduleFormConfirmModalsProps = {
   deleteWarningVisible: boolean
@@ -28,24 +27,26 @@ const AddScheduleFormConfirmModals = ({
   onCancelEdit,
   onConfirmEdit,
 }: AddScheduleFormConfirmModalsProps) => {
+  const { useDeleteEvent } = useCalendarMutation()
+  const { mutate: deleteEventMutate } = useDeleteEvent()
   const normalizedOccurrenceDate = occurrenceDate
     ? moment(occurrenceDate).format('YYYY-MM-DDTHH:mm:ss')
     : ''
 
   return (
-    <ScheduleConfirmModals
-      deleteWarningVisible={deleteWarningVisible}
-      // 반복 일정 적용 모달에 보여줄 타이틀
-      eventTitle={eventTitle}
-      // 반복 일정 삭제/수정 시 기준이 되는 태생 occurrenceDate
-      occurrenceDate={normalizedOccurrenceDate}
-      eventId={eventId}
-      isEditConfirmOpen={isEditConfirmOpen}
-      isApplyConfirmOpen={isApplyConfirmOpen}
-      onCloseDelete={onCloseDelete}
-      onCancelEdit={onCancelEdit}
-      onConfirmEdit={onConfirmEdit}
-    />
+    <>
+      {deleteWarningVisible && (
+        <DeleteConfirmModal
+          title={eventTitle || '새로운 이벤트'}
+          onClose={onCloseDelete}
+          target={{ type: 'event', id: eventId, occurrenceDate: normalizedOccurrenceDate }}
+          mutate={deleteEventMutate}
+        />
+      )}
+      {(isEditConfirmOpen || isApplyConfirmOpen) && (
+        <EditConfirmModal onCancel={onCancelEdit} onConfirm={onConfirmEdit} />
+      )}
+    </>
   )
 }
 

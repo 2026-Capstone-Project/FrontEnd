@@ -4,3 +4,7 @@ export type TCommonResponse<T> = {
   message: string
   result: T
 }
+
+export type TitleHistoryResponseDTO = {
+  titleHistory: string[]
+}
