@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 
 import CheckIcon from '@/assets/icons/check.svg?react'
 import WarningIcon from '@/assets/icons/exclamation.svg?react'
+import FolderIcon from '@/assets/icons/folder.svg?react'
 import InfoIcon from '@/assets/icons/uil_info.svg?react'
 import CloseIcon from '@/shared/assets/icons/close.svg?react'
 
@@ -18,19 +19,18 @@ type ToastProps = {
   autoCloseDuration?: number
 }
 
-const ICON_SIZE: Record<Exclude<ToastType, 'error'>, number> = {
-  success: 24,
-  warning: 24,
-  info: 22,
+const ICON_SIZE: Record<ToastType, number> = {
+  success: 20,
+  warning: 20,
+  info: 18,
+  error: 18,
 }
 
-const ICON_COMPONENTS: Record<
-  Exclude<ToastType, 'error'>,
-  ComponentType<SVGProps<SVGSVGElement>>
-> = {
+const ICON_COMPONENTS: Record<ToastType, ComponentType<SVGProps<SVGSVGElement>>> = {
   success: CheckIcon,
   warning: WarningIcon,
   info: InfoIcon,
+  error: FolderIcon,
 }
 
 const Toast = ({
