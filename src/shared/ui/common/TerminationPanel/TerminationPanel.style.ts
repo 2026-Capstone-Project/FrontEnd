@@ -30,6 +30,7 @@ export const RepeatDetail = styled.div`
   flex-direction: column;
   gap: 12px;
   position: relative;
+  margin-bottom: 20px;
 `
 
 export const CalendarTrigger = styled.button`

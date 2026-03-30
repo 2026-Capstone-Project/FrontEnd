@@ -68,14 +68,6 @@ const Toast = ({
   }
 
   const renderStatusIcon = () => {
-    if (toastType === 'error') {
-      return (
-        <S.ErrorChip>
-          <CloseIcon />
-        </S.ErrorChip>
-      )
-    }
-
     const StatusIcon = ICON_COMPONENTS[toastType]
 
     return <StatusIcon width={ICON_SIZE[toastType]} height={ICON_SIZE[toastType]} />
