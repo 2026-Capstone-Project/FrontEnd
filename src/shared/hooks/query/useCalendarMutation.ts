@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 
 import { deleteEvent, patchEvent, postEvents } from '@/shared/api/calendar/api'
 import type { RecurrenceEventScope } from '@/shared/types/recurrence/recurrence'
+import { getErrorMessage } from '@/shared/utils'
 import { useToastStore } from '@/store/useToastStore'
 
 import { useCustomMutation } from '../common/customQuery'
@@ -22,10 +23,10 @@ export function useCalendarMutation() {
           toastType: 'success',
         })
       },
-      onError: () => {
+      onError: (error: unknown) => {
         useToastStore.getState().showToast({
           title: '일정 저장에 실패했습니다',
-          message: '잠시 후 다시 시도해주세요.',
+          message: getErrorMessage(error),
           toastType: 'error',
         })
       },
@@ -51,10 +52,10 @@ export function useCalendarMutation() {
             toastType: 'success',
           })
         },
-        onError: () => {
+        onError: (error: unknown) => {
           useToastStore.getState().showToast({
             title: '일정 수정에 실패했습니다',
-            message: '잠시 후 다시 시도해주세요.',
+            message: getErrorMessage(error),
             toastType: 'error',
           })
         },
@@ -82,10 +83,10 @@ export function useCalendarMutation() {
             toastType: 'success',
           })
         },
-        onError: () => {
+        onError: (error: unknown) => {
           useToastStore.getState().showToast({
             title: '일정 삭제에 실패했습니다',
-            message: '잠시 후 다시 시도해주세요.',
+            message: getErrorMessage(error),
             toastType: 'error',
           })
         },

@@ -6,6 +6,8 @@ import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { ScheduleEditorFormValues } from '@/shared/types/event/event'
 import type { RecurrenceEventScope } from '@/shared/types/recurrence/recurrence'
 import type { EditConfirmOption } from '@/shared/ui/Modals'
+import { getFormErrorMessage } from '@/shared/utils'
+import { useToastStore } from '@/store/useToastStore'
 
 type UseScheduleSubmitFlowProps = {
   date: string
@@ -73,6 +75,8 @@ export const useScheduleSubmitFlow = ({
     setIsApplyConfirmOpen(false)
   }, [])
 
+  const showToast = useToastStore.getState().showToast
+
   const confirmTitle = useCallback(
     (values: ScheduleEditorFormValues) => {
       if (eventId == null || eventId === 0) return
@@ -126,19 +130,28 @@ export const useScheduleSubmitFlow = ({
   )
 
   // 폼 제출 처리(일반/반복 분기)
-  const handleFormSubmit = handleSubmit(async (values) => {
-    if (isExistingRecurring && requestConfirmation()) {
-      setPendingScheduleValues(values)
-      return
-    }
-    if (isExistingRecurring) {
-      openApplyConfirm(values)
-      return
-    }
-    await submitScheduleValues(values, {
-      mode: isEditing ? 'patch' : 'create',
-    })
-  })
+  const handleFormSubmit = handleSubmit(
+    async (values) => {
+      if (isExistingRecurring && requestConfirmation()) {
+        setPendingScheduleValues(values)
+        return
+      }
+      if (isExistingRecurring) {
+        openApplyConfirm(values)
+        return
+      }
+      await submitScheduleValues(values, {
+        mode: isEditing ? 'patch' : 'create',
+      })
+    },
+    (errors) => {
+      showToast({
+        title: '일정 입력을 확인해주세요',
+        message: getFormErrorMessage(errors, '필수 입력 항목을 다시 확인해주세요.'),
+        toastType: 'warning',
+      })
+    },
+  )
 
   // 반복 일정 수정 범위를 확인 후 제출 처리
   const handleConfirmedSubmit = useCallback(

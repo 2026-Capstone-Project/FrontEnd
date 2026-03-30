@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { deleteTodo, patchTodo, patchTodoComplete, postTodo } from '@/shared/api/todo/api'
 import type { RecurrenceTodoScope } from '@/shared/types/recurrence/recurrence'
 import type { PatchTodoRequestDTO } from '@/shared/types/todo/types'
+import { getErrorMessage } from '@/shared/utils'
 import { useToastStore } from '@/store/useToastStore'
 
 import { useCustomMutation } from '../common/customQuery'
@@ -49,10 +50,10 @@ export function usePostTodoMutation() {
         toastType: 'success',
       })
     },
-    onError: () => {
+    onError: (error: unknown) => {
       useToastStore.getState().showToast({
         title: '할 일 저장에 실패했습니다',
-        message: '잠시 후 다시 시도해주세요.',
+        message: getErrorMessage(error),
         toastType: 'error',
       })
     },
@@ -73,10 +74,10 @@ export function useDeleteTodoMutation() {
           toastType: 'success',
         })
       },
-      onError: () => {
+      onError: (error: unknown) => {
         useToastStore.getState().showToast({
           title: '할 일 삭제에 실패했습니다',
-          message: '잠시 후 다시 시도해주세요.',
+          message: getErrorMessage(error),
           toastType: 'error',
         })
       },
@@ -98,10 +99,10 @@ export function usePatchTodoMutation() {
           toastType: 'success',
         })
       },
-      onError: () => {
+      onError: (error: unknown) => {
         useToastStore.getState().showToast({
           title: '할 일 수정에 실패했습니다',
-          message: '잠시 후 다시 시도해주세요.',
+          message: getErrorMessage(error),
           toastType: 'error',
         })
       },
@@ -131,10 +132,10 @@ export function usePatchCompleteTodoMutation() {
               },
         )
       },
-      onError: () => {
+      onError: (error: unknown) => {
         useToastStore.getState().showToast({
           title: '완료 상태 변경에 실패했습니다',
-          message: '잠시 후 다시 시도해주세요.',
+          message: getErrorMessage(error),
           toastType: 'error',
         })
       },
