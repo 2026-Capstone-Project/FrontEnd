@@ -53,43 +53,19 @@ export const useTodoFooter = ({
   const hasExistingRecurrenceRef = useRef(hasExistingRecurrence)
   const onEventColorChangeRef = useRef(onEventColorChange)
   const setEventColorRef = useRef(setEventColor)
-
-  useEffect(() => {
-    eventIdRef.current = eventId
-  }, [eventId])
-  useEffect(() => {
-    isPersistedTodoRef.current = isPersistedTodo
-  }, [isPersistedTodo])
-  useEffect(() => {
-    repeatTypeRef.current = repeatConfig.repeatType
-  }, [repeatConfig.repeatType])
-  useEffect(() => {
-    occurrenceDateRef.current = occurrenceDate
-  }, [occurrenceDate])
-  useEffect(() => {
-    closeModalRef.current = closeModal
-  }, [closeModal])
-  useEffect(() => {
-    deleteTodoMutateRef.current = deleteTodoMutate
-  }, [deleteTodoMutate])
-  useEffect(() => {
-    patchTodoMutateRef.current = patchTodoMutate
-  }, [patchTodoMutate])
-  useEffect(() => {
-    eventColorRef.current = eventColor
-  }, [eventColor])
-  useEffect(() => {
-    isEditingRef.current = isEditing
-  }, [isEditing])
-  useEffect(() => {
-    hasExistingRecurrenceRef.current = hasExistingRecurrence
-  }, [hasExistingRecurrence])
-  useEffect(() => {
-    onEventColorChangeRef.current = onEventColorChange
-  }, [onEventColorChange])
-  useEffect(() => {
-    setEventColorRef.current = setEventColor
-  }, [setEventColor])
+  // 최신 값을 유지하기 위해 렌더 단계에서 ref를 직접 동기화합니다.
+  eventIdRef.current = eventId
+  isPersistedTodoRef.current = isPersistedTodo
+  repeatTypeRef.current = repeatConfig.repeatType
+  occurrenceDateRef.current = occurrenceDate
+  closeModalRef.current = closeModal
+  deleteTodoMutateRef.current = deleteTodoMutate
+  patchTodoMutateRef.current = patchTodoMutate
+  eventColorRef.current = eventColor
+  isEditingRef.current = isEditing
+  hasExistingRecurrenceRef.current = hasExistingRecurrence
+  onEventColorChangeRef.current = onEventColorChange
+  setEventColorRef.current = setEventColor
 
   const handleDelete = useCallback(() => {
     if (eventIdRef.current == null || eventIdRef.current === 0 || !isPersistedTodoRef.current) {

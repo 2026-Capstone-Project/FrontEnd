@@ -1,9 +1,15 @@
+import { useShallow } from 'zustand/react/shallow'
+
 import Toast from '@/shared/ui/common/Toast/Toast'
 import { useToastStore } from '@/store/useToastStore'
 
 const ToastViewport = () => {
-  const toast = useToastStore((state) => state.toast)
-  const hideToast = useToastStore((state) => state.hideToast)
+  const { toast, hideToast } = useToastStore(
+    useShallow((state) => ({
+      toast: state.toast,
+      hideToast: state.hideToast,
+    })),
+  )
 
   if (!toast) return null
 

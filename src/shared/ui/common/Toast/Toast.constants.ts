@@ -1,4 +1,4 @@
-export type ToastType = 'success' | 'error' | 'warning' | 'info'
+import type { ToastType } from '@/shared/types/common/toast'
 
 export type ToastVariant = {
   background: string

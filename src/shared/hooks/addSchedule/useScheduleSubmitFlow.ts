@@ -6,7 +6,7 @@ import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { ScheduleEditorFormValues } from '@/shared/types/event/event'
 import type { RecurrenceEventScope } from '@/shared/types/recurrence/recurrence'
 import type { EditConfirmOption } from '@/shared/ui/Modals'
-import { getFormErrorMessage } from '@/shared/utils'
+import { getErrorMessage, getFormErrorMessage, hasHandledErrorToast } from '@/shared/utils'
 import { useToastStore } from '@/store/useToastStore'
 
 type UseScheduleSubmitFlowProps = {
@@ -116,6 +116,12 @@ export const useScheduleSubmitFlow = ({
         clearApplyConfirm()
       } catch (error) {
         console.error('[ScheduleEditorForm] submit failed', error)
+        if (hasHandledErrorToast(error)) return
+        showToast({
+          title: options.mode === 'patch' ? '일정 수정에 실패했습니다' : '일정 저장에 실패했습니다',
+          message: getErrorMessage(error),
+          toastType: 'error',
+        })
       }
     },
     [
@@ -125,6 +131,7 @@ export const useScheduleSubmitFlow = ({
       createSchedule,
       onClose,
       patchSchedule,
+      showToast,
       syncEventTiming,
     ],
   )

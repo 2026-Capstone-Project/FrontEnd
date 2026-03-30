@@ -4,6 +4,8 @@ type ErrorResponseData = {
   message?: string
 }
 
+const handledToastErrors = new WeakSet<object>()
+
 export const getErrorMessage = (error: unknown, fallbackMessage = '잠시 후 다시 시도해주세요.') => {
   if (axios.isAxiosError<ErrorResponseData>(error)) {
     const responseMessage = error.response?.data?.message?.trim()
@@ -20,3 +22,11 @@ export const getErrorMessage = (error: unknown, fallbackMessage = '잠시 후 �
 
   return fallbackMessage
 }
+
+export const markErrorToastHandled = (error: unknown) => {
+  if (typeof error !== 'object' || error == null) return
+  handledToastErrors.add(error)
+}
+
+export const hasHandledErrorToast = (error: unknown) =>
+  typeof error === 'object' && error != null && handledToastErrors.has(error)

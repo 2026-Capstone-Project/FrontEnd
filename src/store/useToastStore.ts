@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import type { ToastType } from '@/shared/ui/common/Toast/Toast.constants'
+import type { ToastType } from '@/shared/types/common/toast'
 
 type ToastPayload = {
   title: string

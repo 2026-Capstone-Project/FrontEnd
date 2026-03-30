@@ -6,8 +6,9 @@ import WarningIcon from '@/assets/icons/exclamation.svg?react'
 import FolderIcon from '@/assets/icons/folder.svg?react'
 import InfoIcon from '@/assets/icons/uil_info.svg?react'
 import CloseIcon from '@/shared/assets/icons/close.svg?react'
+import type { ToastType } from '@/shared/types/common/toast'
 
-import { TOAST_VARIANTS, type ToastType } from './Toast.constants'
+import { TOAST_VARIANTS } from './Toast.constants'
 import * as S from './Toast.style'
 
 type ToastProps = {

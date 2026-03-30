@@ -78,22 +78,6 @@ export const StatusBadge = styled.div`
   }
 `
 
-export const ErrorChip = styled.div`
-  width: 24px;
-  height: 24px;
-  border-radius: 7px;
-  background: #b84e40;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  svg {
-    width: 13px;
-    height: 13px;
-    color: ${theme.colors.white};
-  }
-`
-
 export const CloseButton = styled.button<{ $color: string }>`
   width: 20px;
   height: 20px;

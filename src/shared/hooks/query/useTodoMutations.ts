@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { deleteTodo, patchTodo, patchTodoComplete, postTodo } from '@/shared/api/todo/api'
 import type { RecurrenceTodoScope } from '@/shared/types/recurrence/recurrence'
 import type { PatchTodoRequestDTO } from '@/shared/types/todo/types'
-import { getErrorMessage } from '@/shared/utils'
+import { getErrorMessage, markErrorToastHandled } from '@/shared/utils'
 import { useToastStore } from '@/store/useToastStore'
 
 import { useCustomMutation } from '../common/customQuery'
@@ -56,6 +56,7 @@ export function usePostTodoMutation() {
         message: getErrorMessage(error),
         toastType: 'error',
       })
+      markErrorToastHandled(error)
     },
   })
 }
@@ -80,6 +81,7 @@ export function useDeleteTodoMutation() {
           message: getErrorMessage(error),
           toastType: 'error',
         })
+        markErrorToastHandled(error)
       },
     },
   )
@@ -105,6 +107,7 @@ export function usePatchTodoMutation() {
           message: getErrorMessage(error),
           toastType: 'error',
         })
+        markErrorToastHandled(error)
       },
     },
   )
@@ -138,6 +141,7 @@ export function usePatchCompleteTodoMutation() {
           message: getErrorMessage(error),
           toastType: 'error',
         })
+        markErrorToastHandled(error)
       },
     },
   )

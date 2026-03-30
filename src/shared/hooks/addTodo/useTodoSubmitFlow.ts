@@ -6,7 +6,7 @@ import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { TodoEditorFormValues } from '@/shared/types/event/event'
 import type { RecurrenceTodoScope } from '@/shared/types/recurrence/recurrence'
 import type { EditConfirmOption } from '@/shared/ui/Modals'
-import { getFormErrorMessage } from '@/shared/utils'
+import { getErrorMessage, getFormErrorMessage, hasHandledErrorToast } from '@/shared/utils'
 import { useToastStore } from '@/store/useToastStore'
 
 type UseTodoSubmitFlowProps = {
@@ -95,6 +95,12 @@ export const useTodoSubmitFlow = ({
         clearApplyConfirm()
       } catch (error) {
         console.error('[TodoEditorForm] submit failed', error)
+        if (hasHandledErrorToast(error)) return
+        showToast({
+          title: '할 일 처리에 실패했습니다',
+          message: getErrorMessage(error),
+          toastType: 'error',
+        })
       }
     },
     [
@@ -104,6 +110,7 @@ export const useTodoSubmitFlow = ({
       onClose,
       onSubmit,
       patchOccurrenceDate,
+      showToast,
       syncEventTiming,
     ],
   )

@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 
 import { deleteEvent, patchEvent, postEvents } from '@/shared/api/calendar/api'
 import type { RecurrenceEventScope } from '@/shared/types/recurrence/recurrence'
-import { getErrorMessage } from '@/shared/utils'
+import { getErrorMessage, markErrorToastHandled } from '@/shared/utils'
 import { useToastStore } from '@/store/useToastStore'
 
 import { useCustomMutation } from '../common/customQuery'
@@ -29,6 +29,7 @@ export function useCalendarMutation() {
           message: getErrorMessage(error),
           toastType: 'error',
         })
+        markErrorToastHandled(error)
       },
     })
   }
@@ -58,6 +59,7 @@ export function useCalendarMutation() {
             message: getErrorMessage(error),
             toastType: 'error',
           })
+          markErrorToastHandled(error)
         },
       },
     )
@@ -89,6 +91,7 @@ export function useCalendarMutation() {
             message: getErrorMessage(error),
             toastType: 'error',
           })
+          markErrorToastHandled(error)
         },
       },
     )
