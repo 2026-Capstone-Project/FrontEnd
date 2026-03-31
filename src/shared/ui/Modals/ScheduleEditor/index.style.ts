@@ -141,6 +141,7 @@ export const Section = styled.div`
   flex-direction: column;
   padding: 0 20px;
   gap: 20px;
+  margin-top: 24px;
 `
 export const TextareaWrapper = styled.div`
   width: 100%;

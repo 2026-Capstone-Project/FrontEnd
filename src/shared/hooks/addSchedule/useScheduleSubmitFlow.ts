@@ -6,6 +6,8 @@ import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { ScheduleEditorFormValues } from '@/shared/types/event/event'
 import type { RecurrenceEventScope } from '@/shared/types/recurrence/recurrence'
 import type { EditConfirmOption } from '@/shared/ui/Modals'
+import { getErrorMessage, getFormErrorMessage, hasHandledErrorToast } from '@/shared/utils'
+import { useToastStore } from '@/store/useToastStore'
 
 type UseScheduleSubmitFlowProps = {
   date: string
@@ -73,6 +75,8 @@ export const useScheduleSubmitFlow = ({
     setIsApplyConfirmOpen(false)
   }, [])
 
+  const showToast = useToastStore.getState().showToast
+
   const confirmTitle = useCallback(
     (values: ScheduleEditorFormValues) => {
       if (eventId == null || eventId === 0) return
@@ -112,11 +116,12 @@ export const useScheduleSubmitFlow = ({
         clearApplyConfirm()
       } catch (error) {
         console.error('[ScheduleEditorForm] submit failed', error)
-        const message =
-          error instanceof Error
-            ? error.message
-            : '일정 저장 중 오류가 발생했습니다. 다시 시도해주세요.'
-        alert(message)
+        if (hasHandledErrorToast(error)) return
+        showToast({
+          title: options.mode === 'patch' ? '일정 수정에 실패했습니다' : '일정 저장에 실패했습니다',
+          message: getErrorMessage(error),
+          toastType: 'error',
+        })
       }
     },
     [
@@ -126,24 +131,34 @@ export const useScheduleSubmitFlow = ({
       createSchedule,
       onClose,
       patchSchedule,
+      showToast,
       syncEventTiming,
     ],
   )
 
   // 폼 제출 처리(일반/반복 분기)
-  const handleFormSubmit = handleSubmit(async (values) => {
-    if (isExistingRecurring && requestConfirmation()) {
-      setPendingScheduleValues(values)
-      return
-    }
-    if (isExistingRecurring) {
-      openApplyConfirm(values)
-      return
-    }
-    await submitScheduleValues(values, {
-      mode: isEditing ? 'patch' : 'create',
-    })
-  })
+  const handleFormSubmit = handleSubmit(
+    async (values) => {
+      if (isExistingRecurring && requestConfirmation()) {
+        setPendingScheduleValues(values)
+        return
+      }
+      if (isExistingRecurring) {
+        openApplyConfirm(values)
+        return
+      }
+      await submitScheduleValues(values, {
+        mode: isEditing ? 'patch' : 'create',
+      })
+    },
+    (errors) => {
+      showToast({
+        title: '일정 입력을 확인해주세요',
+        message: getFormErrorMessage(errors, '필수 입력 항목을 다시 확인해주세요.'),
+        toastType: 'warning',
+      })
+    },
+  )
 
   // 반복 일정 수정 범위를 확인 후 제출 처리
   const handleConfirmedSubmit = useCallback(

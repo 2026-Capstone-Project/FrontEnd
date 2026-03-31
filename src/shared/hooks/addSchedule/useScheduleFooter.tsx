@@ -104,6 +104,7 @@ export const useScheduleFooter = ({
 
   const handleColorChange = useCallback(
     (value: EventColorType) => {
+      const previousColor = eventColor
       setEventColor(value)
       if (eventId != null && eventId !== 0) {
         onEventColorChange?.(eventId, value)
@@ -112,9 +113,20 @@ export const useScheduleFooter = ({
         return
       }
       const nextValues = { ...getValues(), eventColor: value }
-      void patchSchedule(nextValues, isExistingRecurring ? 'THIS_EVENT' : undefined)
+      void (async () => {
+        try {
+          await patchSchedule(nextValues, isExistingRecurring ? 'THIS_EVENT' : undefined)
+        } catch (error) {
+          setEventColor(previousColor)
+          if (eventId != null && eventId !== 0) {
+            onEventColorChange?.(eventId, previousColor)
+          }
+          console.error('[ScheduleEditorForm] color patch failed', error)
+        }
+      })()
     },
     [
+      eventColor,
       eventId,
       getValues,
       isEditing,

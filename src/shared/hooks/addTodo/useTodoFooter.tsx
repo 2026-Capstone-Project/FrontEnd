@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
@@ -41,77 +41,85 @@ export const useTodoFooter = ({
   const { useDeleteTodo, usePatchTodo } = useTodoMutations()
   const { mutate: deleteTodoMutate } = useDeleteTodo()
   const { mutate: patchTodoMutate } = usePatchTodo()
+  const eventIdRef = useRef(eventId)
+  const isPersistedTodoRef = useRef(isPersistedTodo)
+  const repeatTypeRef = useRef(repeatConfig.repeatType)
+  const occurrenceDateRef = useRef(occurrenceDate)
+  const closeModalRef = useRef(closeModal)
+  const deleteTodoMutateRef = useRef(deleteTodoMutate)
+  const patchTodoMutateRef = useRef(patchTodoMutate)
+  const eventColorRef = useRef(eventColor)
+  const isEditingRef = useRef(isEditing)
+  const hasExistingRecurrenceRef = useRef(hasExistingRecurrence)
+  const onEventColorChangeRef = useRef(onEventColorChange)
+  const setEventColorRef = useRef(setEventColor)
+  // 최신 값을 유지하기 위해 렌더 단계에서 ref를 직접 동기화합니다.
+  eventIdRef.current = eventId
+  isPersistedTodoRef.current = isPersistedTodo
+  repeatTypeRef.current = repeatConfig.repeatType
+  occurrenceDateRef.current = occurrenceDate
+  closeModalRef.current = closeModal
+  deleteTodoMutateRef.current = deleteTodoMutate
+  patchTodoMutateRef.current = patchTodoMutate
+  eventColorRef.current = eventColor
+  isEditingRef.current = isEditing
+  hasExistingRecurrenceRef.current = hasExistingRecurrence
+  onEventColorChangeRef.current = onEventColorChange
+  setEventColorRef.current = setEventColor
 
   const handleDelete = useCallback(() => {
-    if (eventId == null || eventId === 0 || !isPersistedTodo) {
-      closeModal()
+    if (eventIdRef.current == null || eventIdRef.current === 0 || !isPersistedTodoRef.current) {
+      closeModalRef.current()
       return
     }
-    if (repeatConfig.repeatType !== 'none') {
+    if (repeatTypeRef.current !== 'none') {
       setDeleteWarningVisible(true)
       return
     }
-    deleteTodoMutate(
+    deleteTodoMutateRef.current(
       {
-        todoId: eventId,
-        occurrenceDate,
+        todoId: eventIdRef.current,
+        occurrenceDate: occurrenceDateRef.current,
       },
       {
-        onSuccess: () => closeModal(),
+        onSuccess: () => closeModalRef.current(),
       },
     )
-  }, [
-    closeModal,
-    deleteTodoMutate,
-    eventId,
-    isPersistedTodo,
-    occurrenceDate,
-    repeatConfig.repeatType,
-  ])
+  }, [])
 
   useEffect(() => {
     registerDeleteHandler?.(handleDelete)
     return () => registerDeleteHandler?.()
   }, [handleDelete, registerDeleteHandler])
 
-  const handleColorChange = useCallback(
-    (value: EventColorType) => {
-      const previousColor = eventColor
-      setEventColor(value)
-      if (eventId != null && eventId !== 0) {
-        onEventColorChange?.(eventId, value)
-      }
-      if (!isEditing || eventId == null || eventId === 0) {
-        return
-      }
-      patchTodoMutate(
-        {
-          todoId: eventId,
-          occurrenceDate,
-          ...(hasExistingRecurrence ? { scope: 'THIS_TODO' as const } : {}),
-          requestBody: {
-            color: value,
-          },
+  const handleColorChange = useCallback((value: EventColorType) => {
+    const previousColor = eventColorRef.current
+    setEventColorRef.current(value)
+    if (eventIdRef.current != null && eventIdRef.current !== 0) {
+      onEventColorChangeRef.current?.(eventIdRef.current, value)
+    }
+    if (!isEditingRef.current || eventIdRef.current == null || eventIdRef.current === 0) {
+      return
+    }
+    patchTodoMutateRef.current(
+      {
+        todoId: eventIdRef.current,
+        occurrenceDate: occurrenceDateRef.current,
+        ...(hasExistingRecurrenceRef.current ? { scope: 'THIS_TODO' as const } : {}),
+        requestBody: {
+          color: value,
         },
-        {
-          onError: () => {
-            setEventColor(previousColor)
-            onEventColorChange?.(eventId, previousColor)
-          },
+      },
+      {
+        onError: () => {
+          setEventColorRef.current(previousColor)
+          if (eventIdRef.current != null && eventIdRef.current !== 0) {
+            onEventColorChangeRef.current?.(eventIdRef.current, previousColor)
+          }
         },
-      )
-    },
-    [
-      eventColor,
-      eventId,
-      hasExistingRecurrence,
-      isEditing,
-      occurrenceDate,
-      onEventColorChange,
-      patchTodoMutate,
-      setEventColor,
-    ],
-  )
+      },
+    )
+  }, [])
 
   const footerNode = useMemo(
     () => <SelectColor value={eventColor} onChange={handleColorChange} />,

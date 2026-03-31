@@ -49,7 +49,7 @@ const TodoEditorContent = ({
       return
     }
     originalTitleRef.current = initialEvent?.title ?? ''
-  }, [eventId, initialEvent?.occurrenceDate, initialEvent?.start, isEditing])
+  }, [eventId, initialEvent?.occurrenceDate, initialEvent?.start, initialEvent?.title, isEditing])
 
   useEffect(() => {
     if (!isEditing) return
