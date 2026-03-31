@@ -15,14 +15,20 @@ jobs:
       - name: PR을 프로젝트에 추가하고 스프린트 설정
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.PROJECT_PAT }}
+          github-token: ${{ env.PROJECT_PAT }}
           script: |
             const projectId = process.env.PROJECT_ID;
             const iterationFieldId = process.env.ITERATION_FIELD_ID;
+            const statusFieldId = process.env.STATUS_FIELD_ID;
+            const inReviewOptionId = process.env.IN_REVIEW_OPTION_ID;
+            const projectPat = process.env.PROJECT_PAT;
 
             for (const [name, value] of Object.entries({
+              PROJECT_PAT: projectPat,
               PROJECT_ID: projectId,
-              ITERATION_FIELD_ID: iterationFieldId
+              ITERATION_FIELD_ID: iterationFieldId,
+              STATUS_FIELD_ID: statusFieldId,
+              IN_REVIEW_OPTION_ID: inReviewOptionId
             })) {
               if (!value) {
                 core.setFailed(`${name} secret이 설정되지 않았습니다.`);
@@ -41,7 +47,6 @@ jobs:
                 repository(owner:$owner, name:$repo) {
                   pullRequest(number:$number) {
                     id
-                    createdAt
                   }
                 }
               }
@@ -58,10 +63,14 @@ jobs:
 
             // 2) 프로젝트 내 기존 아이템 조회
             const existingItemQuery = `
-              query($projectId:ID!) {
+              query($projectId:ID!, $after:String) {
                 node(id: $projectId) {
                   ... on ProjectV2 {
-                    items(first: 100) {
+                    items(first: 100, after: $after) {
+                      pageInfo {
+                        hasNextPage
+                        endCursor
+                      }
                       nodes {
                         id
                         content {
@@ -76,11 +85,23 @@ jobs:
               }
             `;
 
-            const existingItemRes = await github.graphql(existingItemQuery, {
-              projectId
-            });
+            let itemId;
+            let after = null;
 
-            let itemId = existingItemRes.node.items.nodes.find(item => item.content?.id === prId)?.id;
+            while (!itemId) {
+              const existingItemRes = await github.graphql(existingItemQuery, {
+                projectId,
+                after
+              });
+              const items = existingItemRes.node.items;
+
+              itemId = items.nodes.find(item => item.content?.id === prId)?.id;
+              if (itemId || !items.pageInfo.hasNextPage) {
+                break;
+              }
+
+              after = items.pageInfo.endCursor;
+            }
 
             // 3) 프로젝트에 PR 추가
             const addMutation = `
@@ -153,7 +174,7 @@ jobs:
             });
 
             if (!iteration) {
-              core.setFailed(`생성일 ${targetDate}에 해당하는 iteration을 찾지 못했습니다.`);
+              core.setFailed(`${targetDate}에 해당하는 iteration을 찾지 못했습니다.`);
               return;
             }
 
@@ -180,7 +201,33 @@ jobs:
               iterationId: iteration.id
             });
 
-            core.info(`PR #${prNumber} -> 스프린트 "${iteration.title}" 설정 완료`);
+            // 6) Status를 In Review로 설정
+            const setStatusMutation = `
+              mutation($projectId:ID!, $itemId:ID!, $fieldId:ID!, $optionId:String!) {
+                updateProjectV2ItemFieldValue(input: {
+                  projectId: $projectId,
+                  itemId: $itemId,
+                  fieldId: $fieldId,
+                  value: { singleSelectOptionId: $optionId }
+                }) {
+                  projectV2Item {
+                    id
+                  }
+                }
+              }
+            `;
+
+            await github.graphql(setStatusMutation, {
+              projectId,
+              itemId,
+              fieldId: statusFieldId,
+              optionId: inReviewOptionId
+            });
+
+            core.info(`PR #${prNumber} -> 스프린트 "${iteration.title}" 및 상태 "In Review" 설정 완료`);
         env:
+          PROJECT_PAT: ${{ secrets.PROJECT_PAT }}
           PROJECT_ID: ${{ secrets.PROJECT_ID }}
           ITERATION_FIELD_ID: ${{ secrets.ITERATION_FIELD_ID }}
+          STATUS_FIELD_ID: ${{ secrets.STATUS_FIELD_ID }}
+          IN_REVIEW_OPTION_ID: ${{ secrets.IN_REVIEW_OPTION_ID }}
