@@ -1,0 +1,186 @@
+name: PR을 프로젝트에 추가하고 스프린트 지정
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+
+jobs:
+  add-to-project:
+    permissions:
+      contents: read
+      pull-requests: read
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: PR을 프로젝트에 추가하고 스프린트 설정
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJECT_PAT }}
+          script: |
+            const projectId = process.env.PROJECT_ID;
+            const iterationFieldId = process.env.ITERATION_FIELD_ID;
+
+            for (const [name, value] of Object.entries({
+              PROJECT_ID: projectId,
+              ITERATION_FIELD_ID: iterationFieldId
+            })) {
+              if (!value) {
+                core.setFailed(`${name} secret이 설정되지 않았습니다.`);
+                return;
+              }
+            }
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = context.payload.pull_request.number;
+            const eventDate = context.payload.pull_request.updated_at ?? context.payload.pull_request.created_at;
+
+            // 1) PR node id 조회
+            const prQuery = `
+              query($owner:String!, $repo:String!, $number:Int!) {
+                repository(owner:$owner, name:$repo) {
+                  pullRequest(number:$number) {
+                    id
+                    createdAt
+                  }
+                }
+              }
+            `;
+
+            const prRes = await github.graphql(prQuery, {
+              owner,
+              repo,
+              number: prNumber
+            });
+
+            const prId = prRes.repository.pullRequest.id;
+            const targetDate = new Date(eventDate).toISOString().slice(0, 10);
+
+            // 2) 프로젝트 내 기존 아이템 조회
+            const existingItemQuery = `
+              query($projectId:ID!) {
+                node(id: $projectId) {
+                  ... on ProjectV2 {
+                    items(first: 100) {
+                      nodes {
+                        id
+                        content {
+                          ... on PullRequest {
+                            id
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            const existingItemRes = await github.graphql(existingItemQuery, {
+              projectId
+            });
+
+            let itemId = existingItemRes.node.items.nodes.find(item => item.content?.id === prId)?.id;
+
+            // 3) 프로젝트에 PR 추가
+            const addMutation = `
+              mutation($projectId:ID!, $contentId:ID!) {
+                addProjectV2ItemById(input: {
+                  projectId: $projectId,
+                  contentId: $contentId
+                }) {
+                  item {
+                    id
+                  }
+                }
+              }
+            `;
+
+            if (!itemId) {
+              const addRes = await github.graphql(addMutation, {
+                projectId,
+                contentId: prId
+              });
+
+              itemId = addRes.addProjectV2ItemById.item.id;
+            }
+
+            // 4) Iteration 설정값 조회
+            const fieldsQuery = `
+              query($projectId:ID!) {
+                node(id:$projectId) {
+                  ... on ProjectV2 {
+                    fields(first:50) {
+                      nodes {
+                        ... on ProjectV2IterationField {
+                          id
+                          name
+                          configuration {
+                            iterations {
+                              id
+                              title
+                              startDate
+                              duration
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            const fieldRes = await github.graphql(fieldsQuery, { projectId });
+            const fields = fieldRes.node.fields.nodes;
+            const iterationField = fields.find(f => f.id === iterationFieldId);
+
+            if (!iterationField) {
+              core.setFailed("Iteration field를 찾지 못했습니다.");
+              return;
+            }
+
+            function addDays(dateStr, days) {
+              const d = new Date(dateStr + "T00:00:00Z");
+              d.setUTCDate(d.getUTCDate() + days);
+              return d.toISOString().slice(0, 10);
+            }
+
+            const iteration = iterationField.configuration.iterations.find(it => {
+              const start = it.startDate;
+              const endExclusive = addDays(start, it.duration);
+              return targetDate >= start && targetDate < endExclusive;
+            });
+
+            if (!iteration) {
+              core.setFailed(`생성일 ${targetDate}에 해당하는 iteration을 찾지 못했습니다.`);
+              return;
+            }
+
+            // 5) Iteration 설정
+            const setIterationMutation = `
+              mutation($projectId:ID!, $itemId:ID!, $fieldId:ID!, $iterationId:String!) {
+                updateProjectV2ItemFieldValue(input: {
+                  projectId: $projectId,
+                  itemId: $itemId,
+                  fieldId: $fieldId,
+                  value: { iterationId: $iterationId }
+                }) {
+                  projectV2Item {
+                    id
+                  }
+                }
+              }
+            `;
+
+            await github.graphql(setIterationMutation, {
+              projectId,
+              itemId,
+              fieldId: iterationFieldId,
+              iterationId: iteration.id
+            });
+
+            core.info(`PR #${prNumber} -> 스프린트 "${iteration.title}" 설정 완료`);
+        env:
+          PROJECT_ID: ${{ secrets.PROJECT_ID }}
+          ITERATION_FIELD_ID: ${{ secrets.ITERATION_FIELD_ID }}
