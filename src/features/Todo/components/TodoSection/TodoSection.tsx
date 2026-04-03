@@ -1,6 +1,6 @@
 import Plus from '@/shared/assets/icons/plus.svg?react'
 import { useGetTodoQuery } from '@/shared/hooks/query/useTodoQueries'
-import AddTodoModal from '@/shared/ui/modal/AddTodo'
+import TodoEditorModal from '@/shared/ui/Modals/TodoEditor'
 
 import { useTodoSectionState } from '../../hooks/useTodoSectionState'
 import {
@@ -18,11 +18,11 @@ const TodoSection = () => {
     todoFilter,
     setTodoFilter,
     isDesktop,
-    addTodoDate,
-    todoModalState,
+    todoEditorDate,
+    todoEditorState,
     editingCardKey,
-    openAddTodoModal,
-    closeAddTodoModal,
+    openTodoEditor,
+    closeTodoEditor,
   } = useTodoSectionState()
   const { data } = useGetTodoQuery(todoFilter)
 
@@ -37,7 +37,7 @@ const TodoSection = () => {
           <button
             className="add-button"
             type="button"
-            onClick={() => openAddTodoModal({ date: todayIso, isEditing: false })}
+            onClick={() => openTodoEditor({ date: todayIso, isEditing: false })}
           >
             <label>할 일 추가</label> <Plus color="white" width={15} height={15} />
           </button>
@@ -59,7 +59,7 @@ const TodoSection = () => {
               priority={todo.priority}
               isRecurring={todo.isRecurring}
               onDoubleClick={() =>
-                openAddTodoModal({
+                openTodoEditor({
                   date: todo.occurrenceDate,
                   isEditing: true,
                   id: todo.todoId,
@@ -71,13 +71,13 @@ const TodoSection = () => {
           ))}
         </S.CardList>
       </S.Section>
-      {todoModalState.open && (
-        <AddTodoModal
-          date={addTodoDate}
-          onClose={closeAddTodoModal}
-          eventId={todoModalState.id ?? 0}
-          tabsVisible={false}
-          isEditing={todoModalState.isEdit}
+      {todoEditorState.open && (
+        <TodoEditorModal
+          date={todoEditorDate}
+          onClose={closeTodoEditor}
+          eventId={todoEditorState.id ?? 0}
+          showTypeTabs={false}
+          isEditing={todoEditorState.isEditing}
           mode={isDesktop ? 'inline' : 'modal'}
         />
       )}

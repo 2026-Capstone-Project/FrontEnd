@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { UseFormReturn } from 'react-hook-form'
 
-import type { AddScheduleFormValues, RepeatConfigSchema } from '@/shared/types/event/event'
+import type { RepeatConfigSchema, ScheduleEditorFormValues } from '@/shared/types/event/event'
 import { areRepeatConfigsEqual } from '@/shared/utils/repeatConfig'
 
 type SetRepeatConfigValue = (
   name: 'repeatConfig',
   value: RepeatConfigSchema,
-  options?: Parameters<UseFormReturn<AddScheduleFormValues>['setValue']>[2],
+  options?: Parameters<UseFormReturn<ScheduleEditorFormValues>['setValue']>[2],
 ) => void
 
 type UseRepeatChangeGuardProps = {

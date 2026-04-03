@@ -2,7 +2,6 @@ import {
   type MouseEvent as ReactMouseEvent,
   type RefCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from 'react'
@@ -17,17 +16,6 @@ import type {
 import { useFormContext } from 'react-hook-form'
 
 import * as S from './TitleSuggestionInput.style'
-
-const defaultSuggestions = [
-  '동아리 스터디 참여',
-  '동아리 회의 참여',
-  '동아리 OT 참석',
-  '동아리 행사 준비',
-  '동아리 벚꽃 사진 촬영',
-  '동아리 회식 자리',
-  '동아리 MT 계획',
-  '동아리 세미나 참여',
-]
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
@@ -74,7 +62,7 @@ type TitleSuggestionInputProps<TFieldValues extends FieldValues> = {
 const TitleSuggestionInput = <TFieldValues extends FieldValues>({
   fieldName,
   placeholder = '새로운 일정',
-  suggestions = defaultSuggestions,
+  suggestions = [],
   autoFocus = false,
   formController,
   onConfirm,
@@ -91,14 +79,10 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
 
   const rawTitle = watchFn(fieldName) as PathValue<TFieldValues, typeof fieldName>
   const normalizedTitleQuery = typeof rawTitle === 'string' ? rawTitle.trim() : ''
-  const filteredSuggestions = useMemo(() => {
-    if (!normalizedTitleQuery) return []
-    const lowerQuery = normalizedTitleQuery.toLowerCase()
-    return suggestions.filter((item) => item.toLowerCase().includes(lowerQuery))
-  }, [normalizedTitleQuery, suggestions])
   const wrapperRef = useRef<HTMLDivElement | null>(null)
   const [suggestionsVisible, setSuggestionsVisible] = useState(false)
   const [dismissedTitleQuery, setDismissedTitleQuery] = useState<string | null>(null)
+  const [isInputActive, setIsInputActive] = useState(false)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const { ref: registerRef, ...registerProps } = registerFn(fieldName)
   const handleInputRef: RefCallback<HTMLInputElement | null> = (element) => {
@@ -108,28 +92,38 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
 
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
-    if (!normalizedTitleQuery || filteredSuggestions.length === 0) {
+    if (!isInputActive || !normalizedTitleQuery || suggestions.length === 0) {
       setSuggestionsVisible(false)
-      setDismissedTitleQuery(null)
       return
     }
     if (dismissedTitleQuery === normalizedTitleQuery) {
       return
     }
     setSuggestionsVisible(true)
-  }, [filteredSuggestions.length, normalizedTitleQuery, dismissedTitleQuery])
+  }, [dismissedTitleQuery, isInputActive, normalizedTitleQuery, suggestions.length])
   /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
     if (!suggestionsVisible) return undefined
-    const handleClickOutside = (event: globalThis.MouseEvent) => {
-      const target = event.target as Node
+    const handleCloseSuggestions = (target: EventTarget | null) => {
+      if (!(target instanceof Node)) return
       if (wrapperRef.current?.contains(target)) return
       setSuggestionsVisible(false)
+      setIsInputActive(false)
       setDismissedTitleQuery(normalizedTitleQuery)
     }
+    const handleClickOutside = (event: globalThis.MouseEvent) => {
+      handleCloseSuggestions(event.target)
+    }
+    const handleFocusOutside = (event: FocusEvent) => {
+      handleCloseSuggestions(event.target)
+    }
+    document.addEventListener('focusin', handleFocusOutside)
     document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('focusin', handleFocusOutside)
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
   }, [suggestionsVisible, normalizedTitleQuery])
 
   useEffect(() => {
@@ -141,10 +135,14 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
 
   const handleSelectSuggestion = (value: string) => {
     setValueFn(fieldName, value as PathValue<TFieldValues, typeof fieldName>, {
+      shouldDirty: true,
+      shouldTouch: true,
       shouldValidate: true,
     })
+    onLiveChange?.(value)
     setSuggestionsVisible(false)
     setDismissedTitleQuery(value.trim())
+    setIsInputActive(false)
   }
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -160,18 +158,25 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
         {...registerProps}
         ref={handleInputRef}
         placeholder={placeholder}
+        autoComplete="off"
+        onFocus={() => {
+          setIsInputActive(true)
+          setDismissedTitleQuery(null)
+        }}
         onChange={(event) => {
           registerProps.onChange?.(event)
+          setDismissedTitleQuery(null)
+          setIsInputActive(true)
           onLiveChange?.(event.target.value)
         }}
         onKeyDown={handleKeyDown}
       />
-      {suggestionsVisible && filteredSuggestions.length > 0 && (
+      {suggestionsVisible && suggestions.length > 0 && (
         <S.SuggestionList>
-          {filteredSuggestions.map((item) => (
+          {suggestions.map((item, index) => (
             <S.SuggestionItem
               type="button"
-              key={item}
+              key={`${item}-${index}`}
               onClick={(event: ReactMouseEvent<HTMLButtonElement>) => {
                 event.preventDefault()
                 handleSelectSuggestion(item)

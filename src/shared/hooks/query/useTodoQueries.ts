@@ -17,3 +17,8 @@ export function useGetTodoProgressQuery(date: string) {
   const query = todoKeys.progress(date)
   return useCustomQuery(query.queryKey, query.queryFn)
 }
+
+export function useGetTodoTitleHistoryQuery(keyword: string, enabled = true) {
+  const query = todoKeys.titleHistory(keyword)
+  return useCustomQuery(query.queryKey, query.queryFn, { enabled })
+}

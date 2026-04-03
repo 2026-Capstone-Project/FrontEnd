@@ -3,25 +3,27 @@ import type { UseFormHandleSubmit, UseFormSetValue } from 'react-hook-form'
 
 import { useRepeatChangeGuard } from '@/shared/hooks/repeat/useRepeatChangeGuard'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
-import type { AddTodoFormValues } from '@/shared/types/event/event'
+import type { TodoEditorFormValues } from '@/shared/types/event/event'
 import type { RecurrenceTodoScope } from '@/shared/types/recurrence/recurrence'
-import type { EditConfirmOption } from '@/shared/ui/modal'
+import type { EditConfirmOption } from '@/shared/ui/Modals'
+import { getErrorMessage, getFormErrorMessage, hasHandledErrorToast } from '@/shared/utils'
+import { useToastStore } from '@/store/useToastStore'
 
 type UseTodoSubmitFlowProps = {
   eventId: CalendarEvent['id']
   hasExistingRecurrence: boolean
   repeatGuardEnabled: boolean
   isDetailReady: boolean
-  repeatConfig: AddTodoFormValues['repeatConfig']
-  setValue: UseFormSetValue<AddTodoFormValues>
-  handleSubmit: UseFormHandleSubmit<AddTodoFormValues>
+  repeatConfig: TodoEditorFormValues['repeatConfig']
+  setValue: UseFormSetValue<TodoEditorFormValues>
+  handleSubmit: UseFormHandleSubmit<TodoEditorFormValues>
   patchOccurrenceDate: string
   onSubmit: (
-    values: AddTodoFormValues,
+    values: TodoEditorFormValues,
     options?: { occurrenceDate?: string; scope?: RecurrenceTodoScope },
   ) => Promise<unknown>
   onClose: () => void
-  syncEventTiming: (values: AddTodoFormValues) => void
+  syncEventTiming: (values: TodoEditorFormValues) => void
   onEventTitleConfirm?: (eventId: CalendarEvent['id'], title: string) => void
 }
 
@@ -50,10 +52,10 @@ export const useTodoSubmitFlow = ({
     setValue,
   })
   const [isApplyConfirmOpen, setIsApplyConfirmOpen] = useState(false)
-  const [pendingTodoValues, setPendingTodoValues] = useState<AddTodoFormValues | null>(null)
+  const [pendingTodoValues, setPendingTodoValues] = useState<TodoEditorFormValues | null>(null)
 
   const confirmTitle = useCallback(
-    (values: AddTodoFormValues) => {
+    (values: TodoEditorFormValues) => {
       if (eventId == null || eventId === 0) return
       const nextTitle = values.todoTitle ?? ''
       if (nextTitle) {
@@ -68,10 +70,12 @@ export const useTodoSubmitFlow = ({
     setIsApplyConfirmOpen(false)
   }, [])
 
+  const showToast = useToastStore.getState().showToast
+
   // 제출 경로를 하나로 모아 반복/단건 모두 동일한 에러 처리 정책을 사용합니다.
   const submitTodoValues = useCallback(
     async (
-      values: AddTodoFormValues,
+      values: TodoEditorFormValues,
       options?: { scope?: RecurrenceTodoScope; shouldConfirmChange?: boolean },
     ) => {
       if (options?.shouldConfirmChange) {
@@ -90,12 +94,13 @@ export const useTodoSubmitFlow = ({
         onClose()
         clearApplyConfirm()
       } catch (error) {
-        console.error('[AddTodoForm] submit failed', error)
-        const message =
-          error instanceof Error
-            ? error.message
-            : '할 일 저장 중 오류가 발생했습니다. 다시 시도해주세요.'
-        alert(message)
+        console.error('[TodoEditorForm] submit failed', error)
+        if (hasHandledErrorToast(error)) return
+        showToast({
+          title: '할 일 처리에 실패했습니다',
+          message: getErrorMessage(error),
+          toastType: 'error',
+        })
       }
     },
     [
@@ -105,28 +110,42 @@ export const useTodoSubmitFlow = ({
       onClose,
       onSubmit,
       patchOccurrenceDate,
+      showToast,
       syncEventTiming,
     ],
   )
 
-  const handleFormSubmit = handleSubmit(async (values) => {
-    // 편집 모달에서 상세 데이터가 아직 hydrate 되지 않았다면
-    // recurrence/occurrenceDate 판단이 틀어질 수 있어 제출을 잠시 막습니다.
-    if (!isDetailReady) {
-      alert('할 일 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.')
-      return
-    }
-    if (requestConfirmation()) {
-      setPendingTodoValues(values)
-      return
-    }
-    if (hasExistingRecurrence) {
-      setPendingTodoValues(values)
-      setIsApplyConfirmOpen(true)
-      return
-    }
-    await submitTodoValues(values)
-  })
+  const handleFormSubmit = handleSubmit(
+    async (values) => {
+      // 편집 모달에서 상세 데이터가 아직 hydrate 되지 않았다면
+      // recurrence/occurrenceDate 판단이 틀어질 수 있어 제출을 잠시 막습니다.
+      if (!isDetailReady) {
+        showToast({
+          title: '할 일 정보를 불러오는 중입니다',
+          message: '잠시 후 다시 시도해주세요.',
+          toastType: 'warning',
+        })
+        return
+      }
+      if (requestConfirmation()) {
+        setPendingTodoValues(values)
+        return
+      }
+      if (hasExistingRecurrence) {
+        setPendingTodoValues(values)
+        setIsApplyConfirmOpen(true)
+        return
+      }
+      await submitTodoValues(values)
+    },
+    (errors) => {
+      showToast({
+        title: '할 일 입력을 확인해주세요',
+        message: getFormErrorMessage(errors, '필수 입력 항목을 다시 확인해주세요.'),
+        toastType: 'warning',
+      })
+    },
+  )
 
   const handleConfirmedSubmit = useCallback(
     async (option: EditConfirmOption) => {

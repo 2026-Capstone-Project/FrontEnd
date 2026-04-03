@@ -27,3 +27,8 @@ export function useTodoForCalendarQuery(startDate: string, endDate: string) {
   const query = calendarKeys.todos(startDate, endDate)
   return useCustomQuery(query.queryKey, query.queryFn)
 }
+
+export function useEventTitleHistoryQuery(keyword: string, enabled = true) {
+  const query = calendarKeys.titleHistory(keyword)
+  return useCustomQuery(query.queryKey, query.queryFn, { enabled })
+}

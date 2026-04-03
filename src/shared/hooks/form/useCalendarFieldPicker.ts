@@ -2,14 +2,14 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { UseFormSetValue } from 'react-hook-form'
 
 import type {
-  AddScheduleFormValues,
   DatePickerField,
+  ScheduleEditorFormValues,
   TimePickerField,
 } from '@/shared/types/event/event'
 import { formatMinutes, toMinutes } from '@/shared/utils/timeUtils'
 
 type UseCalendarFieldPickerProps = {
-  setValue: UseFormSetValue<AddScheduleFormValues>
+  setValue: UseFormSetValue<ScheduleEditorFormValues>
   eventStartDate: Date | null
   eventEndDate: Date | null
   eventStartTime?: string

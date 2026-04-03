@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 
 import type { CalendarEvent } from '@/shared/types/calendar/types'
-import type { AddScheduleFormValues } from '@/shared/types/event/event'
+import type { ScheduleEditorFormValues } from '@/shared/types/event/event'
 
 type UseScheduleEventSyncProps = {
   eventId: CalendarEvent['id']
@@ -25,7 +25,7 @@ export const useScheduleEventSync = ({
 }: UseScheduleEventSyncProps) => {
   // 로컬 이벤트 시간 동기화
   const syncEventTiming = useCallback(
-    (values: AddScheduleFormValues) => {
+    (values: ScheduleEditorFormValues) => {
       if (eventId == null || eventId === 0) return
       if (!onEventTimingChange) return
       const startDate = values.eventStartDate ?? new Date(date)

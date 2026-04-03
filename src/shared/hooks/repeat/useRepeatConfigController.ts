@@ -2,9 +2,9 @@ import { useCallback } from 'react'
 import { type UseFormReturn } from 'react-hook-form'
 
 import {
-  type AddScheduleFormValues,
   type EventColorType,
   type RepeatConfigSchema,
+  type ScheduleEditorFormValues,
 } from '@/shared/types/event/event'
 import {
   type CustomRepeatBasis,
@@ -14,7 +14,7 @@ import {
 
 type UseRepeatConfigControllerProps = {
   repeatConfig: RepeatConfigSchema
-  setValue: UseFormReturn<AddScheduleFormValues>['setValue']
+  setValue: UseFormReturn<ScheduleEditorFormValues>['setValue']
 }
 
 export type UseRepeatConfigControllerResult = {

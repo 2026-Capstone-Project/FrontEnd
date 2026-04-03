@@ -2,7 +2,7 @@
 import { useCallback } from 'react'
 
 import type { CalendarEvent, Event } from '@/shared/types/calendar/types'
-import type { AddScheduleFormValues, RepeatConfigSchema } from '@/shared/types/event/event'
+import type { RepeatConfigSchema, ScheduleEditorFormValues } from '@/shared/types/event/event'
 import type { RecurrenceEventScope, RecurrenceGroup } from '@/shared/types/recurrence/recurrence'
 import { mapRepeatConfigToRecurrenceGroup } from '@/shared/utils/recurrenceGroup'
 import {
@@ -69,7 +69,7 @@ export const useSchedulePatch = ({
   buildDateTime,
 }: UseSchedulePatchArgs) =>
   useCallback(
-    (values: AddScheduleFormValues, scope?: RecurrenceEventScope, occurrenceDate?: string) => {
+    (values: ScheduleEditorFormValues, scope?: RecurrenceEventScope, occurrenceDate?: string) => {
       if (eventId == null || eventId === 0) return Promise.resolve()
       const startDate = values.eventStartDate ?? new Date(date)
       const endDate = values.eventEndDate ?? startDate

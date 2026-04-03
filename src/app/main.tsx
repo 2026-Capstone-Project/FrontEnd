@@ -9,6 +9,7 @@ import { authRouter, mainRouter } from '@/routes/Router'
 import axiosInstance from '@/shared/api/axios'
 import GlobalStyle from '@/shared/styles/GlobalStyle'
 import { theme } from '@/shared/styles/theme'
+import ToastViewport from '@/shared/ui/common/Toast/ToastViewport'
 import { useAuthStore } from '@/store/useAuthStore'
 
 import { queryClient } from '../shared/api/queryClient'
@@ -51,6 +52,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         {import.meta.env.VITE_DEV_MODE === 'true' && <ReactQueryDevtools initialIsOpen={false} />}
         <GlobalStyle />
         <App />
+        <ToastViewport />
       </ThemeProvider>
     </QueryClientProvider>
   </React.StrictMode>,

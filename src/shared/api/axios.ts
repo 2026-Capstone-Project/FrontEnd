@@ -42,7 +42,7 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true
 
       try {
-        await axios.post(
+        await axiosInstance.post(
           `${import.meta.env.VITE_SERVER_URL}/security/reissue-cookie`,
           {},
           { withCredentials: true },
