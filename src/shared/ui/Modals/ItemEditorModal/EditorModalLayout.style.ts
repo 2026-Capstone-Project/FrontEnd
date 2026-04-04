@@ -18,6 +18,14 @@ export const ModalOverlay = styled.div`
     z-index: 1000;
     height: 100vh;
   }
+
+  ${media.down(theme.breakPoints.tablet)} {
+    position: fixed;
+    align-self: center;
+    justify-self: center;
+    margin-top: 60px;
+    gap: 0;
+  }
 `
 
 export const ModalInner = styled.div`
@@ -50,6 +58,7 @@ export const ModalWrapper = styled.div<{ mode: 'modal' | 'inline' }>`
     position: fixed;
     align-self: center;
     justify-self: center;
+    margin-top: 60px;
     gap: 0;
   }
 `

@@ -6,9 +6,9 @@ import Header from '@/shared/ui/Header/Header'
 import DefaultAppLayout from './defaultAppLayout'
 
 const Wrapper = styled.div`
-  min-height: 100vh;
-  height: 100vh;
-  max-height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
   display: flex;
   flex-direction: column;
   width: 100%;
