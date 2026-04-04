@@ -18,13 +18,13 @@ export const resetAuthRecoveryState = () => {
   refreshBlocked = false
 }
 
-const getCookieValue = (name: string) => {
-  if (typeof document === 'undefined') return ''
+const fetchCsrfToken = async () => {
+  const { data } = await axios.get(`${import.meta.env.VITE_SERVER_URL}/security/csrf`, {
+    withCredentials: true,
+  })
+  const resultString = data.result || ''
 
-  const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const match = document.cookie.match(new RegExp(`(?:^|; )${escapedName}=([^;]*)`))
-
-  return match ? decodeURIComponent(match[1]) : ''
+  return resultString.replace('CSRF 토큰이 쿠키로 발급되었습니다.', '').trim()
 }
 
 const getRequestPath = (url?: string) => {
@@ -56,17 +56,13 @@ axiosInstance.interceptors.request.use(
   async (config) => {
     if (['post', 'put', 'patch', 'delete'].includes(config.method?.toLowerCase() || '')) {
       try {
-        const { data } = await axios.get(`${import.meta.env.VITE_SERVER_URL}/security/csrf`, {
-          withCredentials: true,
-        })
-        const resultString = data.result || ''
-        const csrfToken = resultString.replace('CSRF 토큰이 쿠키로 발급되었습니다.', '').trim()
+        const csrfToken = await fetchCsrfToken()
 
         if (csrfToken) {
           config.headers = config.headers ?? {}
           config.headers['X-XSRF-TOKEN'] = csrfToken
         } else {
-          console.error('[CSRF] 토큰 추출 실패. 응답 확인:', resultString)
+          console.error('[CSRF] 토큰 추출 실패: 빈 토큰 응답')
         }
       } catch (error) {
         console.error('CSRF 토큰 갱신 실패:', error)
@@ -94,7 +90,7 @@ axiosInstance.interceptors.response.use(
 
       try {
         if (!refreshPromise) {
-          const csrfToken = getCookieValue('XSRF-TOKEN')
+          const csrfToken = await fetchCsrfToken()
 
           refreshPromise = axios
             .post(
