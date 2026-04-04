@@ -14,6 +14,10 @@ export const axiosInstance = axios.create({
 let refreshPromise: Promise<void> | null = null
 let refreshBlocked = false
 
+export const resetAuthRecoveryState = () => {
+  refreshBlocked = false
+}
+
 const getRequestPath = (url?: string) => {
   if (!url) return ''
   if (url.startsWith('http')) {
@@ -86,7 +90,9 @@ axiosInstance.interceptors.response.use(
               {},
               { withCredentials: true },
             )
-            .then(() => undefined)
+            .then(() => {
+              resetAuthRecoveryState()
+            })
             .catch((reissueError) => {
               handleAuthFailure()
               throw reissueError

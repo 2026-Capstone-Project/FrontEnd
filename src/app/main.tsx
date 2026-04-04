@@ -7,6 +7,7 @@ import { RouterProvider } from 'react-router-dom'
 
 import { authRouter, mainRouter } from '@/routes/Router'
 import axiosInstance from '@/shared/api/axios'
+import { resetAuthRecoveryState } from '@/shared/api/axios'
 import GlobalStyle from '@/shared/styles/GlobalStyle'
 import { theme } from '@/shared/styles/theme'
 import ToastViewport from '@/shared/ui/common/Toast/ToastViewport'
@@ -25,6 +26,7 @@ const App = () => {
         const response = await axiosInstance.get('/members/me')
 
         if (response.data.isSuccess) {
+          resetAuthRecoveryState()
           login()
         } else {
           logout()
