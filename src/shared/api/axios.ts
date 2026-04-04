@@ -18,6 +18,15 @@ export const resetAuthRecoveryState = () => {
   refreshBlocked = false
 }
 
+const getCookieValue = (name: string) => {
+  if (typeof document === 'undefined') return ''
+
+  const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const match = document.cookie.match(new RegExp(`(?:^|; )${escapedName}=([^;]*)`))
+
+  return match ? decodeURIComponent(match[1]) : ''
+}
+
 const getRequestPath = (url?: string) => {
   if (!url) return ''
   if (url.startsWith('http')) {
@@ -54,6 +63,7 @@ axiosInstance.interceptors.request.use(
         const csrfToken = resultString.replace('CSRF 토큰이 쿠키로 발급되었습니다.', '').trim()
 
         if (csrfToken) {
+          config.headers = config.headers ?? {}
           config.headers['X-XSRF-TOKEN'] = csrfToken
         } else {
           console.error('[CSRF] 토큰 추출 실패. 응답 확인:', resultString)
@@ -84,11 +94,16 @@ axiosInstance.interceptors.response.use(
 
       try {
         if (!refreshPromise) {
+          const csrfToken = getCookieValue('XSRF-TOKEN')
+
           refreshPromise = axios
             .post(
               `${import.meta.env.VITE_SERVER_URL}/security/reissue-cookie`,
               {},
-              { withCredentials: true },
+              {
+                withCredentials: true,
+                headers: csrfToken ? { 'X-XSRF-TOKEN': csrfToken } : undefined,
+              },
             )
             .then(() => {
               resetAuthRecoveryState()
