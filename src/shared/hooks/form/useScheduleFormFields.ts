@@ -37,12 +37,18 @@ const pad2 = (value: number) => String(value).padStart(2, '0')
 
 const formatTimeFromDate = (value: Date) => `${pad2(value.getHours())}:${pad2(value.getMinutes())}`
 
-const getDefaultEndDate = (defaultStart: Date, initialEvent?: CalendarEvent | null) => {
-  if (initialEvent?.end && initialEvent.end !== initialEvent.start) {
-    return new Date(initialEvent.end)
-  }
-  if (initialEvent?.start) {
-    return new Date(defaultStart)
+const toDate = (value: string | Date) => new Date(value)
+
+const isSameDateTime = (left: string | Date, right: string | Date) =>
+  toDate(left).getTime() === toDate(right).getTime()
+
+const getDefaultEndDate = (
+  defaultStart: Date,
+  initialStart?: CalendarEvent['start'],
+  initialEnd?: CalendarEvent['end'],
+) => {
+  if (initialEnd && initialStart && !isSameDateTime(initialEnd, initialStart)) {
+    return toDate(initialEnd)
   }
   return new Date(defaultStart.getTime() + 60 * 60 * 1000)
 }
@@ -53,8 +59,11 @@ export const useScheduleFormFields = ({
   isEditing,
 }: UseScheduleFormFieldsProps): UseScheduleFormFieldsResult => {
   const resolver = yupResolver(addScheduleSchema) as Resolver<ScheduleEditorFormValues>
+  const initialStart = initialEvent?.start
+  const initialEnd = initialEvent?.end
+  const initialRecurrenceGroup = initialEvent?.recurrenceGroup
   const defaultStart = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
-  const defaultEnd = getDefaultEndDate(defaultStart, initialEvent)
+  const defaultEnd = getDefaultEndDate(defaultStart, initialStart, initialEnd)
   const defaultStartTime = formatTimeFromDate(defaultStart)
   const defaultEndTime = formatTimeFromDate(defaultEnd)
   const initialTitle = initialEvent?.title === '새 일정' ? '' : (initialEvent?.title ?? '')
@@ -104,24 +113,21 @@ export const useScheduleFormFields = ({
   }, [register])
 
   useEffect(() => {
-    if (!isEditing || !initialEvent) return
-    const start = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
-    const end =
-      initialEvent?.end && initialEvent.end !== initialEvent?.start
-        ? new Date(initialEvent.end)
-        : new Date(start)
+    if (!isEditing || !initialStart) return
+    const start = initialStart ? toDate(initialStart) : new Date(date)
+    const end = getDefaultEndDate(start, initialStart, initialEnd)
     setValue('eventStartDate', start)
     setValue('eventEndDate', end)
     setValue('eventStartTime', formatTimeFromDate(start))
     setValue('eventEndTime', formatTimeFromDate(end))
-    const nextTitle = initialEvent?.title ?? ''
+    const nextTitle = initialTitle
     setValue('eventTitle', nextTitle === '새 일정' ? '' : nextTitle)
-    setValue('eventDescription', initialEvent?.content ?? '')
-    setValue('location', initialEvent?.location ?? '')
-    setValue('address', initialEvent?.address ?? null)
-    setValue('isAllday', initialEvent?.isAllDay ?? false)
-    setValue('eventColor', initialEvent?.color ?? 'BLUE')
-    const mappedRepeatConfig = mapRecurrenceGroupToRepeatConfig(initialEvent?.recurrenceGroup)
+    setValue('eventDescription', initialDescription)
+    setValue('location', initialLocation)
+    setValue('address', initialAddress)
+    setValue('isAllday', initialIsAllDay)
+    setValue('eventColor', initialColor)
+    const mappedRepeatConfig = mapRecurrenceGroupToRepeatConfig(initialRecurrenceGroup)
     const nextRepeatConfig: RepeatConfigSchema = {
       ...defaultRepeatConfig,
       ...mappedRepeatConfig,
@@ -130,13 +136,26 @@ export const useScheduleFormFields = ({
       customYearlyMonths: mappedRepeatConfig.customYearlyMonths ?? [],
     } as RepeatConfigSchema
     setValue('repeatConfig', nextRepeatConfig, { shouldValidate: true })
-  }, [date, initialEvent, isEditing, setValue])
+  }, [
+    date,
+    initialAddress,
+    initialColor,
+    initialDescription,
+    initialEnd,
+    initialIsAllDay,
+    initialLocation,
+    initialRecurrenceGroup,
+    initialStart,
+    initialTitle,
+    isEditing,
+    setValue,
+  ])
 
   useEffect(() => {
     if (isEditing) return
-    const start = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
-    const end = getDefaultEndDate(start, initialEvent)
-    const nextIsAllDay = initialEvent?.isAllDay ?? false
+    const start = initialStart ? toDate(initialStart) : new Date(date)
+    const end = getDefaultEndDate(start, initialStart, initialEnd)
+    const nextIsAllDay = initialIsAllDay
     setValue('eventStartDate', start)
     setValue('eventEndDate', end)
     setValue('isAllday', nextIsAllDay)
@@ -147,7 +166,7 @@ export const useScheduleFormFields = ({
     }
     setValue('eventStartTime', formatTimeFromDate(start))
     setValue('eventEndTime', formatTimeFromDate(end))
-  }, [date, initialEvent, isEditing, setValue])
+  }, [date, initialEnd, initialIsAllDay, initialStart, isEditing, setValue])
 
   return {
     formMethods,

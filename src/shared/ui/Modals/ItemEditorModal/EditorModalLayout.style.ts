@@ -21,9 +21,9 @@ export const ModalOverlay = styled.div`
 
   ${media.down(theme.breakPoints.tablet)} {
     position: fixed;
-    align-self: center;
-    justify-self: center;
-    margin-top: 60px;
+    align-items: flex-start;
+    padding-top: 60px;
+    box-sizing: border-box;
     gap: 0;
   }
 `

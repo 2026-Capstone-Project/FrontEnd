@@ -26,11 +26,18 @@ const CustomCalendarMobileActions = ({
   <S.MobileButtons>
     <CustomViewButton view={view} onView={onView} className="mobile-custom-view-button" />
     <button
+      aria-label="새 일정 추가"
       className="add-button"
       onClick={() => onAddEvent(buildDefaultAddEventDate(currentDate))}
       type="button"
     >
-      <Plus height={20} width={20} color={theme.colors.primary} />
+      <Plus
+        aria-hidden="true"
+        focusable="false"
+        height={20}
+        width={20}
+        color={theme.colors.primary}
+      />
     </button>
   </S.MobileButtons>
 )
