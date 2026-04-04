@@ -20,6 +20,7 @@ import {
   useCalendarApiEvents,
   useCalendarCreateHandlers,
   useCalendarDateRange,
+  useCalendarDraftEvent,
   useCalendarDragDrop,
   useCalendarKeyDelete,
   useCalendarModal,
@@ -37,21 +38,19 @@ import {
   resolveOccurrenceDateTime,
 } from '@/features/Calendar/utils/helpers/dayViewHelpers'
 import { getDetailTodo } from '@/shared/api/todo/api'
-import Plus from '@/shared/assets/icons/plus.svg?react'
 import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
 import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
-import { theme } from '@/shared/styles/theme'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type {
   RecurrenceEventScope,
   RecurrenceTodoScope,
 } from '@/shared/types/recurrence/recurrence'
-import { EditConfirmModal, type EditConfirmOption } from '@/shared/ui/Modals'
-import DeleteConfirmModal from '@/shared/ui/Modals/DeleteConfirmModal/DeleteConfirmModal'
+import type { EditConfirmOption } from '@/shared/ui/Modals'
 
-import { CustomViewButton } from '../CustomViewButton/CustomViewButton'
 import CalendarModals from './CalendarModals'
 import * as S from './CustomCalendar.style'
+import CustomCalendarDialogs from './CustomCalendarDialogs'
+import CustomCalendarMobileActions from './CustomCalendarMobileActions'
 
 moment.locale('ko')
 const localizer = momentLocalizer(moment)
@@ -259,62 +258,15 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
     onOpenEvent: handleOpenEventFromCalendar,
   })
 
-  // 모달 닫힘 시 임시 이벤트 정리
-  const handleCloseModalWithCleanup = useCallback(() => {
-    if (!isModalEditing && modal.eventId != null) {
-      removeEvent(modal.eventId)
-    }
-    handleCloseModal()
-  }, [handleCloseModal, isModalEditing, modal.eventId, removeEvent])
-
-  const clearPendingDraftEvent = useCallback(() => {
-    if (!modal.isOpen || isModalEditing || modal.eventId == null) return
-    removeEvent(modal.eventId)
-  }, [isModalEditing, modal.eventId, modal.isOpen, removeEvent])
-
-  const enqueueDraftEvent = useCallback(
-    (start: Date, allDay = false) => {
-      if (modal.isOpen && !isModalEditing && modal.eventId != null) {
-        const draftEvent = events.find((eventItem) => eventItem.id === modal.eventId)
-        if (draftEvent) {
-          const currentStart = moment(draftEvent.start)
-          const currentEnd = moment(draftEvent.end)
-          const shouldKeepAllDay = draftEvent.isAllDay ?? allDay
-          const durationMs = Math.max(currentEnd.diff(currentStart), 0)
-          const nextStart = shouldKeepAllDay ? moment(start).startOf('day') : moment(start)
-          const nextEnd = shouldKeepAllDay
-            ? (() => {
-                const spanDays = Math.max(
-                  currentEnd
-                    .clone()
-                    .startOf('day')
-                    .diff(currentStart.clone().startOf('day'), 'days') + 1,
-                  1,
-                )
-                return nextStart
-                  .clone()
-                  .add(spanDays - 1, 'days')
-                  .endOf('day')
-              })()
-            : nextStart.clone().add(durationMs, 'milliseconds')
-          updateEventTiming(draftEvent.id, nextStart.toDate(), nextEnd.toDate(), shouldKeepAllDay)
-          return draftEvent.id
-        }
-      }
-
-      clearPendingDraftEvent()
-      return enqueueEvent(start, allDay)
-    },
-    [
-      clearPendingDraftEvent,
-      enqueueEvent,
-      events,
-      isModalEditing,
-      modal.eventId,
-      modal.isOpen,
-      updateEventTiming,
-    ],
-  )
+  const { handleCloseModalWithCleanup, enqueueDraftEvent } = useCalendarDraftEvent({
+    events,
+    isModalEditing,
+    modal,
+    removeEvent,
+    handleCloseModal,
+    enqueueEvent,
+    updateEventTiming,
+  })
 
   // 반복 삭제 확인 모달 닫기
   const handleCloseDeleteConfirm = useCallback(() => {
@@ -553,18 +505,15 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
 
   return (
     <div css={{ position: 'relative', height: 'fit-content', width: '100%' }}>
-      {/* 모바일 전용 헤더 버튼 */}
-      <S.MobileButtons>
-        <CustomViewButton view={view} onView={onView} className="mobile-custom-view-button" />
-        <button className="add-button" onClick={() => handleAddEvent()} type="button">
-          <Plus height={20} width={20} color={theme.colors.primary} />
-        </button>
-      </S.MobileButtons>
-      {/* 캘린더 본문 */}
+      <CustomCalendarMobileActions
+        view={view}
+        onView={onView}
+        currentDate={date}
+        onAddEvent={handleAddEvent}
+      />
       <S.CalendarWrapper view={view}>
         <DragAndDropCalendar {...calendarProps} />
       </S.CalendarWrapper>
-      {/* 모달/카드 영역 */}
       <CalendarModals
         modalDate={modalDate}
         modalEventId={modal.eventId}
@@ -574,25 +523,14 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
         onCloseModal={handleCloseModalWithCleanup}
         eventActions={eventActions}
       />
-      {/* 반복 일정 삭제 확인 */}
-      {deleteConfirm.isOpen && deleteConfirm.eventId != null && (
-        <DeleteConfirmModal
-          onClose={handleCloseDeleteConfirm}
-          title={deleteConfirm.title}
-          target={{
-            type: 'event',
-            id: deleteConfirm.eventId,
-            occurrenceDate: deleteConfirm.occurrenceDate,
-          }}
-          mutate={deleteEventMutate}
-        />
-      )}
-      {recurringDropConfirm.isOpen && (
-        <EditConfirmModal
-          onCancel={handleCloseRecurringDropConfirm}
-          onConfirm={handleConfirmRecurringDrop}
-        />
-      )}
+      <CustomCalendarDialogs
+        deleteConfirm={deleteConfirm}
+        onCloseDeleteConfirm={handleCloseDeleteConfirm}
+        deleteEventMutate={deleteEventMutate}
+        recurringDropConfirm={recurringDropConfirm}
+        onCloseRecurringDropConfirm={handleCloseRecurringDropConfirm}
+        onConfirmRecurringDrop={handleConfirmRecurringDrop}
+      />
     </div>
   )
 }

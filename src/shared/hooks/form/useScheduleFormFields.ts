@@ -37,6 +37,16 @@ const pad2 = (value: number) => String(value).padStart(2, '0')
 
 const formatTimeFromDate = (value: Date) => `${pad2(value.getHours())}:${pad2(value.getMinutes())}`
 
+const getDefaultEndDate = (defaultStart: Date, initialEvent?: CalendarEvent | null) => {
+  if (initialEvent?.end && initialEvent.end !== initialEvent.start) {
+    return new Date(initialEvent.end)
+  }
+  if (initialEvent?.start) {
+    return new Date(defaultStart)
+  }
+  return new Date(defaultStart.getTime() + 60 * 60 * 1000)
+}
+
 export const useScheduleFormFields = ({
   date,
   initialEvent,
@@ -44,10 +54,7 @@ export const useScheduleFormFields = ({
 }: UseScheduleFormFieldsProps): UseScheduleFormFieldsResult => {
   const resolver = yupResolver(addScheduleSchema) as Resolver<ScheduleEditorFormValues>
   const defaultStart = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
-  const defaultEnd =
-    initialEvent?.end && initialEvent.end !== initialEvent?.start
-      ? new Date(initialEvent.end)
-      : new Date(defaultStart)
+  const defaultEnd = getDefaultEndDate(defaultStart, initialEvent)
   const defaultStartTime = formatTimeFromDate(defaultStart)
   const defaultEndTime = formatTimeFromDate(defaultEnd)
   const initialTitle = initialEvent?.title === '새 일정' ? '' : (initialEvent?.title ?? '')
@@ -128,10 +135,7 @@ export const useScheduleFormFields = ({
   useEffect(() => {
     if (isEditing) return
     const start = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
-    const end =
-      initialEvent?.end && initialEvent.end !== initialEvent?.start
-        ? new Date(initialEvent.end)
-        : new Date(start)
+    const end = getDefaultEndDate(start, initialEvent)
     const nextIsAllDay = initialEvent?.isAllDay ?? false
     setValue('eventStartDate', start)
     setValue('eventEndDate', end)
@@ -143,7 +147,7 @@ export const useScheduleFormFields = ({
     }
     setValue('eventStartTime', formatTimeFromDate(start))
     setValue('eventEndTime', formatTimeFromDate(end))
-  }, [date, initialEvent?.end, initialEvent?.isAllDay, initialEvent?.start, isEditing, setValue])
+  }, [date, initialEvent, isEditing, setValue])
 
   return {
     formMethods,
