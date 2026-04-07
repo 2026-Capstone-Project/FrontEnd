@@ -56,6 +56,7 @@ export const ModalWrapper = styled.div<{ mode: 'modal' | 'inline' }>`
   inset: 0;
   ${media.down(theme.breakPoints.desktop)} {
     position: fixed;
+    padding-top: 60px;
     align-self: center;
     justify-self: center;
     gap: 0;
