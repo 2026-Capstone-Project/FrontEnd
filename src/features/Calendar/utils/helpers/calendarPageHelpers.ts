@@ -42,8 +42,8 @@ export const updateEventRange = (
   eventId: CalendarEvent['id'],
   start: Date,
   end: Date,
-  occurrenceDate?: CalendarEvent['occurrenceDate'],
   type?: CalendarEvent['type'],
+  occurrenceDate?: CalendarEvent['occurrenceDate'],
 ) =>
   events.map((item) =>
     item.id === eventId &&

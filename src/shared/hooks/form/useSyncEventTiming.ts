@@ -49,7 +49,7 @@ export const useSyncEventTiming = ({
       start.setHours(0, 0, 0, 0)
       const end = new Date(baseEndDate)
       end.setHours(23, 59, 59, 999)
-      const signature = `${eventId}:1:${start.getTime()}:${end.getTime()}`
+      const signature = `${eventId}:${occurrenceDate ?? fallbackDate}:1:${start.getTime()}:${end.getTime()}`
       if (lastSignatureRef.current === signature) return
       lastSignatureRef.current = signature
       onEventTimingChange(eventId, start, end, true, occurrenceDate)
@@ -58,7 +58,7 @@ export const useSyncEventTiming = ({
 
     const start = buildDateTime(baseStartDate, startTime)
     const end = singlePointTime ? start : buildDateTime(baseEndDate, endTime)
-    const signature = `${eventId}:0:${start.getTime()}:${end.getTime()}`
+    const signature = `${eventId}:${occurrenceDate ?? fallbackDate}:0:${start.getTime()}:${end.getTime()}`
     if (lastSignatureRef.current === signature) return
     lastSignatureRef.current = signature
     onEventTimingChange(eventId, start, end, false, occurrenceDate)
@@ -68,6 +68,7 @@ export const useSyncEventTiming = ({
     buildDateTime,
     endTime,
     eventId,
+    fallbackDate,
     isAllDay,
     occurrenceDate,
     onEventTimingChange,

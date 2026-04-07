@@ -37,12 +37,7 @@ const getDefaultDraft = (
     startDate: baseStart,
     endDate: baseEnd,
     startTime: formatTimeFromDate(baseStart),
-    endTime:
-      initialType === 'todo'
-        ? formatTimeFromDate(baseStart)
-        : initialEvent?.end
-          ? formatTimeFromDate(baseEnd)
-          : formatTimeFromDate(baseEnd),
+    endTime: initialType === 'todo' ? formatTimeFromDate(baseStart) : formatTimeFromDate(baseEnd),
     isAllday: initialEvent?.isAllDay ?? false,
     eventColor: initialEvent?.color ?? (initialType === 'todo' ? 'GRAY' : 'BLUE'),
     repeatConfig: defaultRepeatConfig as RepeatConfigSchema,

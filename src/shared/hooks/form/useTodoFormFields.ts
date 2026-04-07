@@ -1,5 +1,5 @@
 import { yupResolver } from '@hookform/resolvers/yup'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { type Control, type Resolver, useForm, type UseFormReturn, useWatch } from 'react-hook-form'
 
 import { addTodoSchema } from '@/shared/schemas/todo'
@@ -37,6 +37,30 @@ const pad2 = (value: number) => String(value).padStart(2, '0')
 
 const formatTimeFromDate = (value: Date) => `${pad2(value.getHours())}:${pad2(value.getMinutes())}`
 
+const buildTodoDefaultValues = ({
+  date,
+  initialEvent,
+  draftValues,
+}: {
+  date: string
+  initialEvent?: CalendarEvent | null
+  draftValues?: ItemEditorDraft | null
+}): TodoEditorFormValues => {
+  const defaultTodoDate = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
+  const defaultTodoTime = initialEvent?.start ? formatTimeFromDate(defaultTodoDate) : '10:00'
+
+  return {
+    todoTitle: draftValues?.title ?? '',
+    todoDescription: draftValues?.description ?? '',
+    todoDate: draftValues?.startDate ?? defaultTodoDate,
+    todoEndTime: draftValues?.endTime ?? draftValues?.startTime ?? defaultTodoTime,
+    isAllday: draftValues?.isAllday ?? initialEvent?.isAllDay ?? false,
+    eventColor: draftValues?.eventColor ?? initialEvent?.color ?? 'GRAY',
+    todoPriority: 'MEDIUM',
+    repeatConfig: draftValues?.repeatConfig ?? (defaultRepeatConfig as RepeatConfigSchema),
+  }
+}
+
 export const useTodoFormFields = ({
   date,
   initialEvent,
@@ -45,22 +69,15 @@ export const useTodoFormFields = ({
   onDraftChange,
 }: UseTodoFormFieldsProps): UseTodoFormFieldsResult => {
   const resolver = yupResolver(addTodoSchema) as Resolver<TodoEditorFormValues>
-  const defaultTodoDate = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
-  const defaultTodoTime = initialEvent?.start ? formatTimeFromDate(defaultTodoDate) : '10:00'
+  const initialValues = useMemo(
+    () => buildTodoDefaultValues({ date, initialEvent, draftValues }),
+    [date, draftValues, initialEvent],
+  )
   const formMethods = useForm<TodoEditorFormValues>({
     resolver,
-    defaultValues: {
-      todoTitle: draftValues?.title ?? '',
-      todoDescription: draftValues?.description ?? '',
-      todoDate: draftValues?.startDate ?? defaultTodoDate,
-      todoEndTime: draftValues?.endTime ?? draftValues?.startTime ?? defaultTodoTime,
-      isAllday: draftValues?.isAllday ?? initialEvent?.isAllDay ?? false,
-      eventColor: draftValues?.eventColor ?? initialEvent?.color ?? 'GRAY',
-      todoPriority: 'MEDIUM',
-      repeatConfig: draftValues?.repeatConfig ?? (defaultRepeatConfig as RepeatConfigSchema),
-    },
+    defaultValues: initialValues,
   })
-  const { control, register, setValue, handleSubmit } = formMethods
+  const { control, register, reset, setValue, handleSubmit } = formMethods
 
   const todoDate = useWatch({ control, name: 'todoDate' })
   const todoEndTime = useWatch({ control, name: 'todoEndTime' })
@@ -81,34 +98,8 @@ export const useTodoFormFields = ({
 
   useEffect(() => {
     if (isEditing) return
-    const nextDate =
-      draftValues?.startDate ??
-      (initialEvent?.start ? new Date(initialEvent.start) : new Date(date))
-    const nextIsAllDay = draftValues?.isAllday ?? initialEvent?.isAllDay ?? false
-    setValue('todoDate', nextDate)
-    setValue('isAllday', nextIsAllDay)
-    setValue('eventColor', draftValues?.eventColor ?? initialEvent?.color ?? 'GRAY')
-    setValue('todoTitle', draftValues?.title ?? '')
-    setValue('todoDescription', draftValues?.description ?? '')
-    setValue(
-      'repeatConfig',
-      draftValues?.repeatConfig ?? (defaultRepeatConfig as RepeatConfigSchema),
-    )
-    if (!nextIsAllDay) {
-      setValue(
-        'todoEndTime',
-        draftValues?.endTime ?? draftValues?.startTime ?? formatTimeFromDate(nextDate),
-      )
-    }
-  }, [
-    date,
-    draftValues,
-    initialEvent?.color,
-    initialEvent?.isAllDay,
-    initialEvent?.start,
-    isEditing,
-    setValue,
-  ])
+    reset(initialValues)
+  }, [date, initialValues, isEditing, reset])
 
   useEffect(() => {
     if (isEditing || !onDraftChange) return

@@ -58,7 +58,6 @@ export const ModalWrapper = styled.div<{ mode: 'modal' | 'inline' }>`
     position: fixed;
     align-self: center;
     justify-self: center;
-    margin-top: 60px;
     gap: 0;
   }
 `

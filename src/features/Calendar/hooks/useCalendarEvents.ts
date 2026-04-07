@@ -43,8 +43,8 @@ export const useCalendarEvents = (options: UseCalendarEventsOptions = {}) => {
         event.id,
         normalizedStart,
         normalizedEnd,
-        event.occurrenceDate,
         event.type,
+        event.occurrenceDate,
       ),
     )
   }, [])
@@ -60,8 +60,8 @@ export const useCalendarEvents = (options: UseCalendarEventsOptions = {}) => {
         event.id,
         normalizedStart,
         normalizedEnd,
-        event.occurrenceDate,
         event.type,
+        event.occurrenceDate,
       ),
     )
   }, [])
@@ -72,10 +72,10 @@ export const useCalendarEvents = (options: UseCalendarEventsOptions = {}) => {
       eventId: CalendarEvent['id'],
       start: Date,
       end: Date,
-      occurrenceDate?: CalendarEvent['occurrenceDate'],
       type?: CalendarEvent['type'],
+      occurrenceDate?: CalendarEvent['occurrenceDate'],
     ) => {
-      setEvents((prev) => updateEventRange(prev, eventId, start, end, occurrenceDate, type))
+      setEvents((prev) => updateEventRange(prev, eventId, start, end, type, occurrenceDate))
     },
     [],
   )
