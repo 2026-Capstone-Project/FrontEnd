@@ -74,6 +74,7 @@ const CalendarModals = ({
           onEventColorChange={eventActions.onEventColorChange}
           onEventTitleConfirm={eventActions.onEventTitleConfirm}
           onEventTimingChange={eventActions.onEventTimingChange}
+          onEventTypeChange={eventActions.onEventTypeChange}
           isEditing={isModalEditing}
         />
       )}
