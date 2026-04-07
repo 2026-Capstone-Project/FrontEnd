@@ -13,7 +13,13 @@ type UseCalendarDraftEventArgs = {
   removeEvent: (eventId: CalendarEvent['id']) => void
   handleCloseModal: () => void
   enqueueEvent: (startDate: Date, isAllDay: boolean) => CalendarEvent['id'] | null
-  updateEventTiming: (eventId: CalendarEvent['id'], start: Date, end: Date, allDay: boolean) => void
+  updateEventTiming: (
+    eventId: CalendarEvent['id'],
+    start: Date,
+    end: Date,
+    allDay: boolean,
+    occurrenceDate?: CalendarEvent['occurrenceDate'],
+  ) => void
 }
 
 export const useCalendarDraftEvent = ({

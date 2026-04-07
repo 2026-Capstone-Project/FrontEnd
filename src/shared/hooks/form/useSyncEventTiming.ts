@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 
 type UseSyncEventTimingArgs = {
   eventId: number | null
+  occurrenceDate?: string
   fallbackDate: string
   isAllDay: boolean
   startDate?: Date | null
@@ -10,11 +11,18 @@ type UseSyncEventTimingArgs = {
   endTime?: string
   singlePointTime?: boolean
   buildDateTime: (dateValue: Date | null, timeValue?: string) => Date
-  onEventTimingChange?: (eventId: number, start: Date, end: Date, allDay: boolean) => void
+  onEventTimingChange?: (
+    eventId: number,
+    start: Date,
+    end: Date,
+    allDay: boolean,
+    occurrenceDate?: string,
+  ) => void
 }
 
 export const useSyncEventTiming = ({
   eventId,
+  occurrenceDate,
   fallbackDate,
   isAllDay,
   startDate,
@@ -44,7 +52,7 @@ export const useSyncEventTiming = ({
       const signature = `${eventId}:1:${start.getTime()}:${end.getTime()}`
       if (lastSignatureRef.current === signature) return
       lastSignatureRef.current = signature
-      onEventTimingChange(eventId, start, end, true)
+      onEventTimingChange(eventId, start, end, true, occurrenceDate)
       return
     }
 
@@ -53,7 +61,7 @@ export const useSyncEventTiming = ({
     const signature = `${eventId}:0:${start.getTime()}:${end.getTime()}`
     if (lastSignatureRef.current === signature) return
     lastSignatureRef.current = signature
-    onEventTimingChange(eventId, start, end, false)
+    onEventTimingChange(eventId, start, end, false, occurrenceDate)
   }, [
     baseEndDate,
     baseStartDate,
@@ -61,6 +69,7 @@ export const useSyncEventTiming = ({
     endTime,
     eventId,
     isAllDay,
+    occurrenceDate,
     onEventTimingChange,
     singlePointTime,
     startTime,

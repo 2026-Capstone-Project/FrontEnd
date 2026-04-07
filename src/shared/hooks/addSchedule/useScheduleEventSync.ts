@@ -6,11 +6,13 @@ import type { ScheduleEditorFormValues } from '@/shared/types/event/event'
 type UseScheduleEventSyncProps = {
   eventId: CalendarEvent['id']
   date: string
+  occurrenceDate?: CalendarEvent['occurrenceDate']
   onEventTimingChange?: (
     eventId: CalendarEvent['id'],
     start: Date,
     end: Date,
     allDay: boolean,
+    occurrenceDate?: CalendarEvent['occurrenceDate'],
   ) => void
   onEventTitleConfirm?: (eventId: CalendarEvent['id'], title: string) => void
   buildDateTime: (dateValue: Date | null, timeValue?: string) => Date
@@ -19,6 +21,7 @@ type UseScheduleEventSyncProps = {
 export const useScheduleEventSync = ({
   eventId,
   date,
+  occurrenceDate,
   onEventTimingChange,
   onEventTitleConfirm,
   buildDateTime,
@@ -35,14 +38,14 @@ export const useScheduleEventSync = ({
         start.setHours(0, 0, 0, 0)
         const end = new Date(endDate)
         end.setHours(23, 59, 59, 999)
-        onEventTimingChange(eventId, start, end, true)
+        onEventTimingChange(eventId, start, end, true, occurrenceDate)
         return
       }
       const start = buildDateTime(startDate, values.eventStartTime)
       const end = buildDateTime(endDate, values.eventEndTime)
-      onEventTimingChange(eventId, start, end, false)
+      onEventTimingChange(eventId, start, end, false, occurrenceDate)
     },
-    [buildDateTime, date, eventId, onEventTimingChange],
+    [buildDateTime, date, eventId, occurrenceDate, onEventTimingChange],
   )
 
   // 제목 확정 처리(로컬 이벤트에 반영)
