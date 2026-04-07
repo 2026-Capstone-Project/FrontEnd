@@ -9,9 +9,17 @@ const ScheduleEditorForm = ({
   date,
   initialEvent,
   isEditing,
+  draftValues,
+  onDraftChange,
   ...rest
 }: ScheduleEditorFormProps) => {
-  const schedule = useScheduleEditorForm({ date, initialEvent, isEditing })
+  const schedule = useScheduleEditorForm({
+    date,
+    initialEvent,
+    isEditing,
+    draftValues,
+    onDraftChange,
+  })
 
   return (
     <FormProvider {...schedule.formMethods}>

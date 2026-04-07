@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { EventColorType } from '@/shared/types/event/event'
+import type { ItemEditorDraft } from '@/shared/types/modal/itemEditor'
 
 export type ScheduleEditorFormProps = {
   registerDeleteHandler?: (handler?: () => void) => void
@@ -22,5 +23,8 @@ export type ScheduleEditorFormProps = {
     start: Date,
     end: Date,
     allDay: boolean,
+    occurrenceDate?: CalendarEvent['occurrenceDate'],
   ) => void
+  draftValues?: ItemEditorDraft | null
+  onDraftChange?: (draft: ItemEditorDraft) => void
 }

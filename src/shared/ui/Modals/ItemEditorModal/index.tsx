@@ -2,6 +2,9 @@ import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } fro
 import { createPortal } from 'react-dom'
 
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import type { RepeatConfigSchema } from '@/shared/types/event/event'
+import type { ItemEditorDraft } from '@/shared/types/modal/itemEditor'
+import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 import ScheduleEditorForm from '@/shared/ui/Modals/ScheduleEditor/ScheduleEditorForm'
 import TodoEditorForm from '@/shared/ui/Modals/TodoEditor/TodoEditorForm'
 
@@ -9,6 +12,44 @@ import EditorModalLayout from './EditorModalLayout'
 import * as S from './ItemEditorModal.style'
 
 type ItemType = 'todo' | 'schedule'
+
+const pad2 = (value: number) => String(value).padStart(2, '0')
+
+const formatTimeFromDate = (value: Date) => `${pad2(value.getHours())}:${pad2(value.getMinutes())}`
+
+const getDefaultDraft = (
+  date: string,
+  initialType: ItemType,
+  initialEvent?: CalendarEvent | null,
+): ItemEditorDraft => {
+  const baseStart = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
+  const baseEnd =
+    initialEvent?.end && new Date(initialEvent.end).getTime() !== baseStart.getTime()
+      ? new Date(initialEvent.end)
+      : new Date(baseStart.getTime() + 60 * 60 * 1000)
+
+  return {
+    title:
+      initialType === 'schedule' && initialEvent?.title === '새 일정'
+        ? ''
+        : (initialEvent?.title ?? ''),
+    description: initialEvent?.content ?? '',
+    startDate: baseStart,
+    endDate: baseEnd,
+    startTime: formatTimeFromDate(baseStart),
+    endTime:
+      initialType === 'todo'
+        ? formatTimeFromDate(baseStart)
+        : initialEvent?.end
+          ? formatTimeFromDate(baseEnd)
+          : formatTimeFromDate(baseEnd),
+    isAllday: initialEvent?.isAllDay ?? false,
+    eventColor: initialEvent?.color ?? (initialType === 'todo' ? 'GRAY' : 'BLUE'),
+    repeatConfig: defaultRepeatConfig as RepeatConfigSchema,
+    location: initialEvent?.location ?? '',
+    address: initialEvent?.address ?? null,
+  }
+}
 
 type ItemEditorModalProps = {
   onClose: () => void
@@ -27,6 +68,7 @@ type ItemEditorModalProps = {
     start: Date,
     end: Date,
     allDay: boolean,
+    occurrenceDate?: CalendarEvent['occurrenceDate'],
   ) => void
 }
 
@@ -45,6 +87,9 @@ const ItemEditorModal = ({
   onEventTimingChange,
 }: ItemEditorModalProps) => {
   const [activeType, setActiveType] = useState<ItemType>(initialType)
+  const [draftValues, setDraftValues] = useState<ItemEditorDraft | null>(() =>
+    isEditing ? null : getDefaultDraft(date, initialType, initialEvent),
+  )
   const [footerChildren, setFooterChildren] = useState<ReactNode | null>(null)
   const [deleteHandler, setDeleteHandler] = useState<() => void>(() => () => undefined)
   const [closeGuard, setCloseGuard] = useState<null | (() => boolean)>(null)
@@ -78,6 +123,10 @@ const ItemEditorModal = ({
   useEffect(() => {
     setActiveType(initialType)
   }, [initialType])
+
+  useEffect(() => {
+    setDraftValues(isEditing ? null : getDefaultDraft(date, initialType, initialEvent))
+  }, [date, initialEvent, initialType, isEditing])
 
   useEffect(() => {
     if (eventId == null || eventId === 0) return
@@ -154,6 +203,8 @@ const ItemEditorModal = ({
           mode={mode}
           onClose={handleClose}
           initialEvent={initialEvent}
+          draftValues={draftValues}
+          onDraftChange={setDraftValues}
           registerDeleteHandler={registerDeleteHandler}
           registerCloseGuard={registerCloseGuard}
           registerFooterChildren={registerFooterChildren}
@@ -170,6 +221,8 @@ const ItemEditorModal = ({
           mode={mode}
           onClose={handleClose}
           modalWrapperElement={modalWrapperElement}
+          draftValues={draftValues}
+          onDraftChange={setDraftValues}
           registerDeleteHandler={registerDeleteHandler}
           registerFooterChildren={registerFooterChildren}
           registerCloseGuard={registerCloseGuard}

@@ -9,12 +9,15 @@ import {
   type RepeatConfigSchema,
   type TodoEditorFormValues,
 } from '@/shared/types/event/event'
+import type { ItemEditorDraft } from '@/shared/types/modal/itemEditor'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 
 type UseTodoFormFieldsProps = {
   date: string
   initialEvent?: CalendarEvent | null
   isEditing?: boolean
+  draftValues?: ItemEditorDraft | null
+  onDraftChange?: (draft: ItemEditorDraft) => void
 }
 
 export type UseTodoFormFieldsResult = {
@@ -38,6 +41,8 @@ export const useTodoFormFields = ({
   date,
   initialEvent,
   isEditing = false,
+  draftValues,
+  onDraftChange,
 }: UseTodoFormFieldsProps): UseTodoFormFieldsResult => {
   const resolver = yupResolver(addTodoSchema) as Resolver<TodoEditorFormValues>
   const defaultTodoDate = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
@@ -45,14 +50,14 @@ export const useTodoFormFields = ({
   const formMethods = useForm<TodoEditorFormValues>({
     resolver,
     defaultValues: {
-      todoTitle: '',
-      todoDescription: '',
-      todoDate: defaultTodoDate,
-      todoEndTime: defaultTodoTime,
-      isAllday: initialEvent?.isAllDay ?? false,
-      eventColor: initialEvent?.color ?? 'GRAY',
+      todoTitle: draftValues?.title ?? '',
+      todoDescription: draftValues?.description ?? '',
+      todoDate: draftValues?.startDate ?? defaultTodoDate,
+      todoEndTime: draftValues?.endTime ?? draftValues?.startTime ?? defaultTodoTime,
+      isAllday: draftValues?.isAllday ?? initialEvent?.isAllDay ?? false,
+      eventColor: draftValues?.eventColor ?? initialEvent?.color ?? 'GRAY',
       todoPriority: 'MEDIUM',
-      repeatConfig: defaultRepeatConfig as RepeatConfigSchema,
+      repeatConfig: draftValues?.repeatConfig ?? (defaultRepeatConfig as RepeatConfigSchema),
     },
   })
   const { control, register, setValue, handleSubmit } = formMethods
@@ -76,13 +81,57 @@ export const useTodoFormFields = ({
 
   useEffect(() => {
     if (isEditing) return
-    const nextDate = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
+    const nextDate =
+      draftValues?.startDate ??
+      (initialEvent?.start ? new Date(initialEvent.start) : new Date(date))
+    const nextIsAllDay = draftValues?.isAllday ?? initialEvent?.isAllDay ?? false
     setValue('todoDate', nextDate)
-    setValue('isAllday', initialEvent?.isAllDay ?? false)
-    if (!(initialEvent?.isAllDay ?? false)) {
-      setValue('todoEndTime', formatTimeFromDate(nextDate))
+    setValue('isAllday', nextIsAllDay)
+    setValue('eventColor', draftValues?.eventColor ?? initialEvent?.color ?? 'GRAY')
+    setValue('todoTitle', draftValues?.title ?? '')
+    setValue('todoDescription', draftValues?.description ?? '')
+    setValue(
+      'repeatConfig',
+      draftValues?.repeatConfig ?? (defaultRepeatConfig as RepeatConfigSchema),
+    )
+    if (!nextIsAllDay) {
+      setValue(
+        'todoEndTime',
+        draftValues?.endTime ?? draftValues?.startTime ?? formatTimeFromDate(nextDate),
+      )
     }
-  }, [date, initialEvent?.isAllDay, initialEvent?.start, isEditing, setValue])
+  }, [
+    date,
+    draftValues,
+    initialEvent?.color,
+    initialEvent?.isAllDay,
+    initialEvent?.start,
+    isEditing,
+    setValue,
+  ])
+
+  useEffect(() => {
+    if (isEditing || !onDraftChange) return
+    const subscription = formMethods.watch((values) => {
+      onDraftChange({
+        title: values.todoTitle ?? '',
+        description: values.todoDescription ?? '',
+        startDate: values.todoDate ?? null,
+        endDate: values.todoDate ?? null,
+        startTime: values.todoEndTime,
+        endTime: values.todoEndTime,
+        isAllday: values.isAllday ?? false,
+        eventColor: (values.eventColor ?? 'GRAY') as EventColorType,
+        repeatConfig:
+          (values.repeatConfig as RepeatConfigSchema | undefined) ??
+          (defaultRepeatConfig as RepeatConfigSchema),
+        location: '',
+        address: null,
+      })
+    })
+
+    return () => subscription.unsubscribe()
+  }, [formMethods, isEditing, onDraftChange])
 
   return {
     formMethods,

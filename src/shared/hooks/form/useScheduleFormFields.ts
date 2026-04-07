@@ -9,6 +9,7 @@ import {
   type RepeatConfigSchema,
   type ScheduleEditorFormValues,
 } from '@/shared/types/event/event'
+import type { ItemEditorDraft } from '@/shared/types/modal/itemEditor'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/recurrenceGroup'
 
@@ -16,6 +17,8 @@ type UseScheduleFormFieldsProps = {
   date: string
   initialEvent?: CalendarEvent | null
   isEditing: boolean
+  draftValues?: ItemEditorDraft | null
+  onDraftChange?: (draft: ItemEditorDraft) => void
 }
 
 export type UseScheduleFormFieldsResult = {
@@ -57,6 +60,8 @@ export const useScheduleFormFields = ({
   date,
   initialEvent,
   isEditing,
+  draftValues,
+  onDraftChange,
 }: UseScheduleFormFieldsProps): UseScheduleFormFieldsResult => {
   const resolver = yupResolver(addScheduleSchema) as Resolver<ScheduleEditorFormValues>
   const initialStart = initialEvent?.start
@@ -75,17 +80,17 @@ export const useScheduleFormFields = ({
   const formMethods = useForm<ScheduleEditorFormValues>({
     resolver,
     defaultValues: {
-      eventTitle: initialTitle,
-      eventDescription: initialDescription,
-      location: initialLocation,
-      address: initialAddress,
-      eventStartDate: defaultStart,
-      eventEndDate: defaultEnd,
-      eventStartTime: defaultStartTime,
-      eventEndTime: defaultEndTime,
-      isAllday: initialIsAllDay,
-      eventColor: initialColor,
-      repeatConfig: defaultRepeatConfig as RepeatConfigSchema,
+      eventTitle: draftValues?.title ?? initialTitle,
+      eventDescription: draftValues?.description ?? initialDescription,
+      location: draftValues?.location ?? initialLocation,
+      address: draftValues?.address ?? initialAddress,
+      eventStartDate: draftValues?.startDate ?? defaultStart,
+      eventEndDate: draftValues?.endDate ?? defaultEnd,
+      eventStartTime: draftValues?.startTime ?? defaultStartTime,
+      eventEndTime: draftValues?.endTime ?? defaultEndTime,
+      isAllday: draftValues?.isAllday ?? initialIsAllDay,
+      eventColor: draftValues?.eventColor ?? initialColor,
+      repeatConfig: draftValues?.repeatConfig ?? (defaultRepeatConfig as RepeatConfigSchema),
     },
   })
   const { control, register, setValue, handleSubmit } = formMethods
@@ -158,7 +163,13 @@ export const useScheduleFormFields = ({
     const nextIsAllDay = initialIsAllDay
     setValue('eventStartDate', start)
     setValue('eventEndDate', end)
+    setValue('eventTitle', initialTitle)
+    setValue('eventDescription', initialDescription)
+    setValue('location', initialLocation)
+    setValue('address', initialAddress)
     setValue('isAllday', nextIsAllDay)
+    setValue('eventColor', initialColor)
+    setValue('repeatConfig', defaultRepeatConfig as RepeatConfigSchema)
     if (nextIsAllDay) {
       setValue('eventStartTime', undefined)
       setValue('eventEndTime', undefined)
@@ -166,7 +177,42 @@ export const useScheduleFormFields = ({
     }
     setValue('eventStartTime', formatTimeFromDate(start))
     setValue('eventEndTime', formatTimeFromDate(end))
-  }, [date, initialEnd, initialIsAllDay, initialStart, isEditing, setValue])
+  }, [
+    date,
+    initialAddress,
+    initialColor,
+    initialDescription,
+    initialEnd,
+    initialIsAllDay,
+    initialLocation,
+    initialStart,
+    initialTitle,
+    isEditing,
+    setValue,
+  ])
+
+  useEffect(() => {
+    if (isEditing || !onDraftChange) return
+    const subscription = formMethods.watch((values) => {
+      onDraftChange({
+        title: values.eventTitle ?? '',
+        description: values.eventDescription ?? '',
+        startDate: values.eventStartDate ?? null,
+        endDate: values.eventEndDate ?? values.eventStartDate ?? null,
+        startTime: values.eventStartTime,
+        endTime: values.eventEndTime,
+        isAllday: values.isAllday ?? false,
+        eventColor: (values.eventColor ?? 'BLUE') as EventColorType,
+        repeatConfig:
+          (values.repeatConfig as RepeatConfigSchema | undefined) ??
+          (defaultRepeatConfig as RepeatConfigSchema),
+        location: values.location ?? '',
+        address: values.address ?? null,
+      })
+    })
+
+    return () => subscription.unsubscribe()
+  }, [formMethods, isEditing, onDraftChange])
 
   return {
     formMethods,

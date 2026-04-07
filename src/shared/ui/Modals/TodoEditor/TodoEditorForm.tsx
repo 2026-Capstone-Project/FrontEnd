@@ -10,9 +10,18 @@ const TodoEditorForm = ({
   eventId,
   initialEvent,
   isEditing,
+  draftValues,
+  onDraftChange,
   ...rest
 }: TodoEditorFormProps) => {
-  const todo = useTodoEditorForm({ date, id: eventId, initialEvent, isEditing })
+  const todo = useTodoEditorForm({
+    date,
+    id: eventId,
+    initialEvent,
+    isEditing,
+    draftValues,
+    onDraftChange,
+  })
 
   return (
     <FormProvider {...todo.formMethods}>
