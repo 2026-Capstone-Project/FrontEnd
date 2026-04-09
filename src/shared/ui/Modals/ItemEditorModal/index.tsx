@@ -17,6 +17,18 @@ const pad2 = (value: number) => String(value).padStart(2, '0')
 
 const formatTimeFromDate = (value: Date) => `${pad2(value.getHours())}:${pad2(value.getMinutes())}`
 
+const buildDateTime = (fallbackDate: string, dateValue?: Date | null, timeValue?: string) => {
+  const nextDate = dateValue ? new Date(dateValue) : new Date(fallbackDate)
+  if (!timeValue) {
+    nextDate.setHours(0, 0, 0, 0)
+    return nextDate
+  }
+
+  const [hour, minute] = timeValue.split(':').map((value) => Number.parseInt(value, 10))
+  nextDate.setHours(Number.isNaN(hour) ? 0 : hour, Number.isNaN(minute) ? 0 : minute, 0, 0)
+  return nextDate
+}
+
 const getDefaultDraft = (
   date: string,
   initialType: ItemType,
@@ -65,6 +77,8 @@ type ItemEditorModalProps = {
     allDay: boolean,
     occurrenceDate?: CalendarEvent['occurrenceDate'],
   ) => void
+  draftValues?: ItemEditorDraft | null
+  onDraftChange?: (draft: ItemEditorDraft | null) => void
 }
 
 const ItemEditorModal = ({
@@ -80,16 +94,30 @@ const ItemEditorModal = ({
   onEventTitleConfirm,
   onEventTypeChange,
   onEventTimingChange,
+  draftValues: externalDraftValues,
+  onDraftChange: onExternalDraftChange,
 }: ItemEditorModalProps) => {
   const [activeType, setActiveType] = useState<ItemType>(initialType)
-  const [draftValues, setDraftValues] = useState<ItemEditorDraft | null>(() =>
+  const [internalDraftValues, setInternalDraftValues] = useState<ItemEditorDraft | null>(() =>
     isEditing ? null : getDefaultDraft(date, initialType, initialEvent),
+  )
+  const draftValues = externalDraftValues ?? internalDraftValues
+  const setDraftValues = useCallback(
+    (draft: ItemEditorDraft | null) => {
+      if (onExternalDraftChange) {
+        onExternalDraftChange(draft)
+        return
+      }
+      setInternalDraftValues(draft)
+    },
+    [onExternalDraftChange],
   )
   const [footerChildren, setFooterChildren] = useState<ReactNode | null>(null)
   const [deleteHandler, setDeleteHandler] = useState<() => void>(() => () => undefined)
   const [closeGuard, setCloseGuard] = useState<null | (() => boolean)>(null)
   const [modalWrapperElement, setModalWrapperElement] = useState<HTMLDivElement | null>(null)
   const modalWrapperRef = useRef<HTMLDivElement | null>(null)
+  const previousActiveTypeRef = useRef(activeType)
   const noopDeleteHandler = useCallback(() => undefined, [])
 
   const registerDeleteHandler = useCallback(
@@ -120,13 +148,68 @@ const ItemEditorModal = ({
   }, [initialType])
 
   useEffect(() => {
-    setDraftValues(isEditing ? null : getDefaultDraft(date, initialType, initialEvent))
-  }, [date, initialEvent, initialType, isEditing])
+    if (externalDraftValues !== undefined) return
+    setInternalDraftValues(isEditing ? null : getDefaultDraft(date, initialType, initialEvent))
+  }, [date, externalDraftValues, initialEvent, initialType, isEditing])
 
   useEffect(() => {
     if (eventId == null || eventId === 0) return
     onEventTypeChange?.(eventId, activeType)
   }, [activeType, eventId, onEventTypeChange])
+
+  useEffect(() => {
+    if (!showTypeTabs) return
+    if (previousActiveTypeRef.current === activeType) return
+    previousActiveTypeRef.current = activeType
+    if (eventId == null || eventId === 0) return
+    if (!onEventTimingChange) return
+
+    const startDate =
+      draftValues?.startDate ?? (initialEvent?.start ? new Date(initialEvent.start) : null)
+    const endDate =
+      draftValues?.endDate ?? (initialEvent?.end ? new Date(initialEvent.end) : startDate)
+    const isAllDay = draftValues?.isAllday ?? initialEvent?.isAllDay ?? false
+    const occurrenceDate = initialEvent?.occurrenceDate
+
+    if (activeType === 'todo') {
+      if (isAllDay) {
+        const start = new Date(startDate ?? new Date(date))
+        start.setHours(0, 0, 0, 0)
+        const end = new Date(start)
+        end.setHours(23, 59, 59, 999)
+        onEventTimingChange(eventId, start, end, true, occurrenceDate)
+        return
+      }
+
+      const point = buildDateTime(date, startDate, draftValues?.endTime ?? draftValues?.startTime)
+      onEventTimingChange(eventId, point, point, false, occurrenceDate)
+      return
+    }
+
+    if (isAllDay) {
+      const start = new Date(startDate ?? new Date(date))
+      start.setHours(0, 0, 0, 0)
+      const end = new Date(endDate ?? start)
+      end.setHours(23, 59, 59, 999)
+      onEventTimingChange(eventId, start, end, true, occurrenceDate)
+      return
+    }
+
+    const start = buildDateTime(date, startDate, draftValues?.startTime)
+    const end = buildDateTime(date, endDate ?? startDate, draftValues?.endTime)
+    onEventTimingChange(eventId, start, end, false, occurrenceDate)
+  }, [
+    activeType,
+    date,
+    draftValues,
+    eventId,
+    initialEvent?.end,
+    initialEvent?.isAllDay,
+    initialEvent?.occurrenceDate,
+    initialEvent?.start,
+    onEventTimingChange,
+    showTypeTabs,
+  ])
 
   const handleSubmit = useCallback(() => {
     const submitFormId = activeType === 'todo' ? 'add-todo-form' : 'add-schedule-form'

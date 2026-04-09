@@ -1,5 +1,5 @@
 import { yupResolver } from '@hookform/resolvers/yup'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { type Control, type Resolver, useForm, type UseFormReturn, useWatch } from 'react-hook-form'
 
 import { addTodoSchema } from '@/shared/schemas/todo'
@@ -73,6 +73,7 @@ export const useTodoFormFields = ({
     () => buildTodoDefaultValues({ date, initialEvent, draftValues }),
     [date, draftValues, initialEvent],
   )
+  const previousResetKeyRef = useRef(`${date}::${String(initialEvent?.id ?? 'new')}`)
   const formMethods = useForm<TodoEditorFormValues>({
     resolver,
     defaultValues: initialValues,
@@ -98,8 +99,11 @@ export const useTodoFormFields = ({
 
   useEffect(() => {
     if (isEditing) return
+    const nextResetKey = `${date}::${String(initialEvent?.id ?? 'new')}`
+    if (previousResetKeyRef.current === nextResetKey) return
+    previousResetKeyRef.current = nextResetKey
     reset(initialValues)
-  }, [date, initialValues, isEditing, reset])
+  }, [date, initialEvent?.id, initialValues, isEditing, reset])
 
   useEffect(() => {
     if (isEditing || !onDraftChange) return

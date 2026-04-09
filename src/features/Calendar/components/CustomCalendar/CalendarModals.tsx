@@ -1,8 +1,11 @@
 import moment from 'moment'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 import { useDetailEventQuery } from '@/shared/hooks/query/useCalendarQueries'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import type { RepeatConfigSchema } from '@/shared/types/event/event'
+import type { ItemEditorDraft } from '@/shared/types/modal/itemEditor'
+import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 import ScheduleEditorModal from '@/shared/ui/Modals/ScheduleEditor'
 import TodoEditorModal from '@/shared/ui/Modals/TodoEditor'
 
@@ -25,6 +28,107 @@ type CalendarModalsProps = {
       occurrenceDate?: CalendarEvent['occurrenceDate'],
     ) => void
   }
+}
+
+const pad2 = (value: number) => String(value).padStart(2, '0')
+
+const formatTimeFromDate = (value: Date) => `${pad2(value.getHours())}:${pad2(value.getMinutes())}`
+
+const getDefaultDraft = (
+  date: string,
+  initialType: 'todo' | 'schedule',
+  initialEvent?: CalendarEvent | null,
+): ItemEditorDraft => {
+  const baseStart = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
+  const baseEnd =
+    initialEvent?.end && new Date(initialEvent.end).getTime() !== baseStart.getTime()
+      ? new Date(initialEvent.end)
+      : new Date(baseStart.getTime() + 60 * 60 * 1000)
+
+  return {
+    title:
+      initialType === 'schedule' && initialEvent?.title === '새 일정'
+        ? ''
+        : (initialEvent?.title ?? ''),
+    description: initialEvent?.content ?? '',
+    startDate: baseStart,
+    endDate: baseEnd,
+    startTime: formatTimeFromDate(baseStart),
+    endTime: initialType === 'todo' ? formatTimeFromDate(baseStart) : formatTimeFromDate(baseEnd),
+    isAllday: initialEvent?.isAllDay ?? false,
+    eventColor: initialEvent?.color ?? (initialType === 'todo' ? 'GRAY' : 'BLUE'),
+    repeatConfig: defaultRepeatConfig as RepeatConfigSchema,
+    location: initialEvent?.location ?? '',
+    address: initialEvent?.address ?? null,
+  }
+}
+
+type DraftBackedModalProps = {
+  modalDate: string
+  modalEventId: CalendarEvent['id']
+  modalEvent: CalendarEvent | null
+  detailEvent: CalendarEvent | null
+  isModalEditing: boolean
+  modalMode: 'modal' | 'inline'
+  onCloseModal: () => void
+  eventActions: CalendarModalsProps['eventActions']
+}
+
+const DraftBackedModal = ({
+  modalDate,
+  modalEventId,
+  modalEvent,
+  detailEvent,
+  isModalEditing,
+  modalMode,
+  onCloseModal,
+  eventActions,
+}: DraftBackedModalProps) => {
+  const isTodoModal = modalEvent?.type === 'todo'
+  const activeEvent = detailEvent ?? modalEvent
+  const [draftValues, setDraftValues] = useState<ItemEditorDraft | null>(() =>
+    isModalEditing
+      ? null
+      : getDefaultDraft(modalDate, isTodoModal ? 'todo' : 'schedule', activeEvent),
+  )
+
+  if (isTodoModal) {
+    return (
+      <TodoEditorModal
+        date={modalDate}
+        onClose={onCloseModal}
+        mode={modalMode}
+        eventId={modalEventId}
+        event={modalEvent}
+        showTypeTabs={!isModalEditing}
+        draftValues={draftValues}
+        onDraftChange={setDraftValues}
+        onEventColorChange={eventActions.onEventColorChange}
+        onEventTitleConfirm={eventActions.onEventTitleConfirm}
+        onEventTypeChange={eventActions.onEventTypeChange}
+        onEventTimingChange={eventActions.onEventTimingChange}
+        isEditing={isModalEditing}
+      />
+    )
+  }
+
+  return (
+    <ScheduleEditorModal
+      date={modalDate}
+      onClose={onCloseModal}
+      mode={modalMode}
+      eventId={modalEventId}
+      event={detailEvent ?? modalEvent}
+      isEditing={isModalEditing}
+      showTypeTabs={!isModalEditing}
+      draftValues={draftValues}
+      onDraftChange={setDraftValues}
+      onEventColorChange={eventActions.onEventColorChange}
+      onEventTitleConfirm={eventActions.onEventTitleConfirm}
+      onEventTypeChange={eventActions.onEventTypeChange}
+      onEventTimingChange={eventActions.onEventTimingChange}
+    />
+  )
 }
 
 const CalendarModals = ({
@@ -60,39 +164,22 @@ const CalendarModals = ({
       id: result.id ?? safeDetailEventId ?? 0,
     }
   }, [data, safeDetailEventId])
+  const resetKey = `${String(modalEventId ?? 'closed')}::${occurrenceDate}::${isModalEditing ? 'edit' : 'create'}`
+
   return (
     <>
       {/* ItemEditorModal 내부 포털을 그대로 사용해, 리사이즈 시 같은 폼 상태로 루트만 이동합니다. */}
-      {shouldRenderModal && isTodoModal && (
-        <TodoEditorModal
-          key={`todo-${String(modalEventId)}-${occurrenceDate}-${isModalEditing ? 'edit' : 'create'}`}
-          date={modalDate}
-          onClose={onCloseModal}
-          mode={modalMode}
-          eventId={modalEventId}
-          event={modalEvent}
-          showTypeTabs={!isModalEditing}
-          onEventColorChange={eventActions.onEventColorChange}
-          onEventTitleConfirm={eventActions.onEventTitleConfirm}
-          onEventTypeChange={eventActions.onEventTypeChange}
-          onEventTimingChange={eventActions.onEventTimingChange}
-          isEditing={isModalEditing}
-        />
-      )}
-      {shouldRenderModal && !isTodoModal && (
-        <ScheduleEditorModal
-          key={`schedule-${String(modalEventId)}-${occurrenceDate}-${isModalEditing ? 'edit' : 'create'}`}
-          date={modalDate}
-          onClose={onCloseModal}
-          mode={modalMode}
-          eventId={modalEventId}
-          event={detailEvent ?? modalEvent}
-          isEditing={isModalEditing}
-          showTypeTabs={!isModalEditing}
-          onEventColorChange={eventActions.onEventColorChange}
-          onEventTitleConfirm={eventActions.onEventTitleConfirm}
-          onEventTypeChange={eventActions.onEventTypeChange}
-          onEventTimingChange={eventActions.onEventTimingChange}
+      {shouldRenderModal && modalEventId != null && (
+        <DraftBackedModal
+          key={resetKey}
+          modalDate={modalDate}
+          modalEventId={modalEventId}
+          modalEvent={modalEvent}
+          detailEvent={detailEvent}
+          isModalEditing={isModalEditing}
+          modalMode={modalMode}
+          onCloseModal={onCloseModal}
+          eventActions={eventActions}
         />
       )}
     </>
