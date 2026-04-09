@@ -2,20 +2,15 @@ import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } fro
 import { createPortal } from 'react-dom'
 
 import type { CalendarEvent } from '@/shared/types/calendar/types'
-import type { RepeatConfigSchema } from '@/shared/types/event/event'
 import type { ItemEditorDraft } from '@/shared/types/modal/itemEditor'
-import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 import ScheduleEditorForm from '@/shared/ui/Modals/ScheduleEditor/ScheduleEditorForm'
 import TodoEditorForm from '@/shared/ui/Modals/TodoEditor/TodoEditorForm'
+import { buildDefaultItemEditorDraft } from '@/shared/utils'
 
 import EditorModalLayout from './EditorModalLayout'
 import * as S from './ItemEditorModal.style'
 
 type ItemType = 'todo' | 'schedule'
-
-const pad2 = (value: number) => String(value).padStart(2, '0')
-
-const formatTimeFromDate = (value: Date) => `${pad2(value.getHours())}:${pad2(value.getMinutes())}`
 
 const buildDateTime = (fallbackDate: string, dateValue?: Date | null, timeValue?: string) => {
   const nextDate = dateValue ? new Date(dateValue) : new Date(fallbackDate)
@@ -27,35 +22,6 @@ const buildDateTime = (fallbackDate: string, dateValue?: Date | null, timeValue?
   const [hour, minute] = timeValue.split(':').map((value) => Number.parseInt(value, 10))
   nextDate.setHours(Number.isNaN(hour) ? 0 : hour, Number.isNaN(minute) ? 0 : minute, 0, 0)
   return nextDate
-}
-
-const getDefaultDraft = (
-  date: string,
-  initialType: ItemType,
-  initialEvent?: CalendarEvent | null,
-): ItemEditorDraft => {
-  const baseStart = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
-  const baseEnd =
-    initialEvent?.end && new Date(initialEvent.end).getTime() !== baseStart.getTime()
-      ? new Date(initialEvent.end)
-      : new Date(baseStart.getTime() + 60 * 60 * 1000)
-
-  return {
-    title:
-      initialType === 'schedule' && initialEvent?.title === '새 일정'
-        ? ''
-        : (initialEvent?.title ?? ''),
-    description: initialEvent?.content ?? '',
-    startDate: baseStart,
-    endDate: baseEnd,
-    startTime: formatTimeFromDate(baseStart),
-    endTime: initialType === 'todo' ? formatTimeFromDate(baseStart) : formatTimeFromDate(baseEnd),
-    isAllday: initialEvent?.isAllDay ?? false,
-    eventColor: initialEvent?.color ?? (initialType === 'todo' ? 'GRAY' : 'BLUE'),
-    repeatConfig: defaultRepeatConfig as RepeatConfigSchema,
-    location: initialEvent?.location ?? '',
-    address: initialEvent?.address ?? null,
-  }
 }
 
 type ItemEditorModalProps = {
@@ -99,9 +65,10 @@ const ItemEditorModal = ({
 }: ItemEditorModalProps) => {
   const [activeType, setActiveType] = useState<ItemType>(initialType)
   const [internalDraftValues, setInternalDraftValues] = useState<ItemEditorDraft | null>(() =>
-    isEditing ? null : getDefaultDraft(date, initialType, initialEvent),
+    isEditing ? null : buildDefaultItemEditorDraft(date, initialType, initialEvent),
   )
   const draftValues = externalDraftValues ?? internalDraftValues
+  const draftValuesRef = useRef(draftValues)
   const setDraftValues = useCallback(
     (draft: ItemEditorDraft | null) => {
       if (onExternalDraftChange) {
@@ -119,6 +86,10 @@ const ItemEditorModal = ({
   const modalWrapperRef = useRef<HTMLDivElement | null>(null)
   const previousActiveTypeRef = useRef(activeType)
   const noopDeleteHandler = useCallback(() => undefined, [])
+
+  useEffect(() => {
+    draftValuesRef.current = draftValues
+  }, [draftValues])
 
   const registerDeleteHandler = useCallback(
     (handler?: (() => void) | null) => {
@@ -149,7 +120,9 @@ const ItemEditorModal = ({
 
   useEffect(() => {
     if (externalDraftValues !== undefined) return
-    setInternalDraftValues(isEditing ? null : getDefaultDraft(date, initialType, initialEvent))
+    setInternalDraftValues(
+      isEditing ? null : buildDefaultItemEditorDraft(date, initialType, initialEvent),
+    )
   }, [date, externalDraftValues, initialEvent, initialType, isEditing])
 
   useEffect(() => {
@@ -164,11 +137,12 @@ const ItemEditorModal = ({
     if (eventId == null || eventId === 0) return
     if (!onEventTimingChange) return
 
+    const latestDraftValues = draftValuesRef.current
     const startDate =
-      draftValues?.startDate ?? (initialEvent?.start ? new Date(initialEvent.start) : null)
+      latestDraftValues?.startDate ?? (initialEvent?.start ? new Date(initialEvent.start) : null)
     const endDate =
-      draftValues?.endDate ?? (initialEvent?.end ? new Date(initialEvent.end) : startDate)
-    const isAllDay = draftValues?.isAllday ?? initialEvent?.isAllDay ?? false
+      latestDraftValues?.endDate ?? (initialEvent?.end ? new Date(initialEvent.end) : startDate)
+    const isAllDay = latestDraftValues?.isAllday ?? initialEvent?.isAllDay ?? false
     const occurrenceDate = initialEvent?.occurrenceDate
 
     if (activeType === 'todo') {
@@ -181,7 +155,11 @@ const ItemEditorModal = ({
         return
       }
 
-      const point = buildDateTime(date, startDate, draftValues?.endTime ?? draftValues?.startTime)
+      const point = buildDateTime(
+        date,
+        startDate,
+        latestDraftValues?.endTime ?? latestDraftValues?.startTime,
+      )
       onEventTimingChange(eventId, point, point, false, occurrenceDate)
       return
     }
@@ -195,13 +173,12 @@ const ItemEditorModal = ({
       return
     }
 
-    const start = buildDateTime(date, startDate, draftValues?.startTime)
-    const end = buildDateTime(date, endDate ?? startDate, draftValues?.endTime)
+    const start = buildDateTime(date, startDate, latestDraftValues?.startTime)
+    const end = buildDateTime(date, endDate ?? startDate, latestDraftValues?.endTime)
     onEventTimingChange(eventId, start, end, false, occurrenceDate)
   }, [
     activeType,
     date,
-    draftValues,
     eventId,
     initialEvent?.end,
     initialEvent?.isAllDay,
