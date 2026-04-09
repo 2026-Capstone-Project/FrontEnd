@@ -113,6 +113,7 @@ const ScheduleEditorContent = ({
   const { syncEventTiming, handleTitleConfirm } = useScheduleEventSync({
     eventId,
     date,
+    occurrenceDate: initialEvent?.occurrenceDate,
     onEventTimingChange,
     onEventTitleConfirm,
     buildDateTime,
@@ -120,6 +121,7 @@ const ScheduleEditorContent = ({
 
   useSyncEventTiming({
     eventId,
+    occurrenceDate: initialEvent?.occurrenceDate,
     fallbackDate: date,
     isAllDay: isAllday,
     startDate: eventStartDate,

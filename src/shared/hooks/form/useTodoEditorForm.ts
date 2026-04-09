@@ -8,6 +8,7 @@ import type {
   RepeatConfigSchema,
   TodoEditorFormValues,
 } from '@/shared/types/event/event'
+import type { ItemEditorDraft } from '@/shared/types/modal/itemEditor'
 import type { RecurrenceTodoScope } from '@/shared/types/recurrence/recurrence'
 import type { CustomRepeatBasis, RepeatConfig, RepeatType } from '@/shared/types/recurrence/repeat'
 import { formatIsoDate } from '@/shared/utils/date'
@@ -21,6 +22,8 @@ type UseTodoEditorFormProps = {
   id: CalendarEvent['id']
   initialEvent?: CalendarEvent | null
   isEditing?: boolean
+  draftValues?: ItemEditorDraft | null
+  onDraftChange?: (draft: ItemEditorDraft) => void
 }
 
 export type UseTodoEditorFormResult = {
@@ -57,6 +60,8 @@ export const useTodoEditorForm = ({
   id,
   initialEvent,
   isEditing = false,
+  draftValues,
+  onDraftChange,
 }: UseTodoEditorFormProps): UseTodoEditorFormResult => {
   const { usePostTodo, usePatchTodo } = useTodoMutations()
   const { mutateAsync: postTodoMutate } = usePostTodo()
@@ -73,7 +78,7 @@ export const useTodoEditorForm = ({
     repeatConfig,
     todoTitle,
     eventColor,
-  } = useTodoFormFields({ date, initialEvent, isEditing })
+  } = useTodoFormFields({ date, initialEvent, isEditing, draftValues, onDraftChange })
 
   const handleRepeatType = useCallback(
     (value: RepeatType) => {

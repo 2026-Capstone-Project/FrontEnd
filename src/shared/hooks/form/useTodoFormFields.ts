@@ -1,5 +1,5 @@
 import { yupResolver } from '@hookform/resolvers/yup'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { type Control, type Resolver, useForm, type UseFormReturn, useWatch } from 'react-hook-form'
 
 import { addTodoSchema } from '@/shared/schemas/todo'
@@ -9,12 +9,15 @@ import {
   type RepeatConfigSchema,
   type TodoEditorFormValues,
 } from '@/shared/types/event/event'
+import type { ItemEditorDraft } from '@/shared/types/modal/itemEditor'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 
 type UseTodoFormFieldsProps = {
   date: string
   initialEvent?: CalendarEvent | null
   isEditing?: boolean
+  draftValues?: ItemEditorDraft | null
+  onDraftChange?: (draft: ItemEditorDraft) => void
 }
 
 export type UseTodoFormFieldsResult = {
@@ -34,28 +37,47 @@ const pad2 = (value: number) => String(value).padStart(2, '0')
 
 const formatTimeFromDate = (value: Date) => `${pad2(value.getHours())}:${pad2(value.getMinutes())}`
 
+const buildTodoDefaultValues = ({
+  date,
+  initialEvent,
+  draftValues,
+}: {
+  date: string
+  initialEvent?: CalendarEvent | null
+  draftValues?: ItemEditorDraft | null
+}): TodoEditorFormValues => {
+  const defaultTodoDate = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
+  const defaultTodoTime = initialEvent?.start ? formatTimeFromDate(defaultTodoDate) : '10:00'
+
+  return {
+    todoTitle: draftValues?.title ?? '',
+    todoDescription: draftValues?.description ?? '',
+    todoDate: draftValues?.startDate ?? defaultTodoDate,
+    todoEndTime: draftValues?.endTime ?? draftValues?.startTime ?? defaultTodoTime,
+    isAllday: draftValues?.isAllday ?? initialEvent?.isAllDay ?? false,
+    eventColor: draftValues?.eventColor ?? initialEvent?.color ?? 'GRAY',
+    todoPriority: 'MEDIUM',
+    repeatConfig: draftValues?.repeatConfig ?? (defaultRepeatConfig as RepeatConfigSchema),
+  }
+}
+
 export const useTodoFormFields = ({
   date,
   initialEvent,
   isEditing = false,
+  draftValues,
+  onDraftChange,
 }: UseTodoFormFieldsProps): UseTodoFormFieldsResult => {
   const resolver = yupResolver(addTodoSchema) as Resolver<TodoEditorFormValues>
-  const defaultTodoDate = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
-  const defaultTodoTime = initialEvent?.start ? formatTimeFromDate(defaultTodoDate) : '10:00'
+  const initialValues = useMemo(
+    () => buildTodoDefaultValues({ date, initialEvent, draftValues }),
+    [date, draftValues, initialEvent],
+  )
   const formMethods = useForm<TodoEditorFormValues>({
     resolver,
-    defaultValues: {
-      todoTitle: '',
-      todoDescription: '',
-      todoDate: defaultTodoDate,
-      todoEndTime: defaultTodoTime,
-      isAllday: initialEvent?.isAllDay ?? false,
-      eventColor: initialEvent?.color ?? 'GRAY',
-      todoPriority: 'MEDIUM',
-      repeatConfig: defaultRepeatConfig as RepeatConfigSchema,
-    },
+    defaultValues: initialValues,
   })
-  const { control, register, setValue, handleSubmit } = formMethods
+  const { control, register, reset, setValue, handleSubmit } = formMethods
 
   const todoDate = useWatch({ control, name: 'todoDate' })
   const todoEndTime = useWatch({ control, name: 'todoEndTime' })
@@ -76,13 +98,31 @@ export const useTodoFormFields = ({
 
   useEffect(() => {
     if (isEditing) return
-    const nextDate = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
-    setValue('todoDate', nextDate)
-    setValue('isAllday', initialEvent?.isAllDay ?? false)
-    if (!(initialEvent?.isAllDay ?? false)) {
-      setValue('todoEndTime', formatTimeFromDate(nextDate))
-    }
-  }, [date, initialEvent?.isAllDay, initialEvent?.start, isEditing, setValue])
+    reset(initialValues)
+  }, [date, initialValues, isEditing, reset])
+
+  useEffect(() => {
+    if (isEditing || !onDraftChange) return
+    const subscription = formMethods.watch((values) => {
+      onDraftChange({
+        title: values.todoTitle ?? '',
+        description: values.todoDescription ?? '',
+        startDate: values.todoDate ?? null,
+        endDate: values.todoDate ?? null,
+        startTime: values.todoEndTime,
+        endTime: values.todoEndTime,
+        isAllday: values.isAllday ?? false,
+        eventColor: (values.eventColor ?? 'GRAY') as EventColorType,
+        repeatConfig:
+          (values.repeatConfig as RepeatConfigSchema | undefined) ??
+          (defaultRepeatConfig as RepeatConfigSchema),
+        location: '',
+        address: null,
+      })
+    })
+
+    return () => subscription.unsubscribe()
+  }, [formMethods, isEditing, onDraftChange])
 
   return {
     formMethods,

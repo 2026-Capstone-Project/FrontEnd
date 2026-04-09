@@ -50,7 +50,7 @@ export const MenuButton = styled.button<{ isOpen: boolean }>`
   border: none;
   cursor: pointer;
   padding: 0;
-  z-index: 1001;
+  z-index: 1002;
 
   @media (max-width: 768px) {
     display: flex;
@@ -91,7 +91,7 @@ export const Nav = styled.nav<{ isOpen: boolean }>`
     flex-direction: column;
     padding: 100px 20px;
     box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
+    z-index: 1001;
 
     animation: slideIn 0.3s ease-out forwards;
   }

@@ -38,7 +38,14 @@ export const useCalendarEvents = (options: UseCalendarEventsOptions = {}) => {
     const normalizedStart = normalizeDate(start)
     const normalizedEnd = normalizeDate(end)
     setEvents((prev) =>
-      updateEventRange(prev, event.id, normalizedStart, normalizedEnd, event.type),
+      updateEventRange(
+        prev,
+        event.id,
+        normalizedStart,
+        normalizedEnd,
+        event.type,
+        event.occurrenceDate,
+      ),
     )
   }, [])
 
@@ -48,14 +55,27 @@ export const useCalendarEvents = (options: UseCalendarEventsOptions = {}) => {
     const normalizedStart = normalizeDate(start)
     const normalizedEnd = normalizeDate(end)
     setEvents((prev) =>
-      updateEventRange(prev, event.id, normalizedStart, normalizedEnd, event.type),
+      updateEventRange(
+        prev,
+        event.id,
+        normalizedStart,
+        normalizedEnd,
+        event.type,
+        event.occurrenceDate,
+      ),
     )
   }, [])
 
   // 외부에서 시간 변경을 직접 반영할 때 사용 (일간 뷰 등)
   const updateEventTime = useCallback(
-    (eventId: CalendarEvent['id'], start: Date, end: Date, type?: CalendarEvent['type']) => {
-      setEvents((prev) => updateEventRange(prev, eventId, start, end, type))
+    (
+      eventId: CalendarEvent['id'],
+      start: Date,
+      end: Date,
+      type?: CalendarEvent['type'],
+      occurrenceDate?: CalendarEvent['occurrenceDate'],
+    ) => {
+      setEvents((prev) => updateEventRange(prev, eventId, start, end, type, occurrenceDate))
     },
     [],
   )
@@ -70,10 +90,16 @@ export const useCalendarEvents = (options: UseCalendarEventsOptions = {}) => {
 
   // 이벤트 일정 시간/종일 여부 변경
   const updateEventTiming = useCallback(
-    (eventId: CalendarEvent['id'], start: Date, end: Date, allDay: boolean) => {
+    (
+      eventId: CalendarEvent['id'],
+      start: Date,
+      end: Date,
+      allDay: boolean,
+      occurrenceDate?: CalendarEvent['occurrenceDate'],
+    ) => {
       setEvents((prev) =>
         prev.map((event) =>
-          event.id === eventId
+          event.id === eventId && (occurrenceDate ? event.occurrenceDate === occurrenceDate : true)
             ? {
                 ...event,
                 start: moment(start).format('YYYY-MM-DDTHH:mm'),

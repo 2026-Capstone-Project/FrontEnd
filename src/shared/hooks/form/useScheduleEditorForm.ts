@@ -8,12 +8,15 @@ import {
   type RepeatConfigSchema,
   type ScheduleEditorFormValues,
 } from '@/shared/types/event/event'
+import type { ItemEditorDraft } from '@/shared/types/modal/itemEditor'
 import { type RepeatConfig, type RepeatType } from '@/shared/types/recurrence/repeat'
 
 type UseScheduleEditorFormProps = {
   date: string
   initialEvent?: CalendarEvent | null
   isEditing?: boolean
+  draftValues?: ItemEditorDraft | null
+  onDraftChange?: (draft: ItemEditorDraft) => void
 }
 
 export type UseScheduleEditorFormResult = {
@@ -37,6 +40,8 @@ export const useScheduleEditorForm = ({
   date,
   initialEvent,
   isEditing = false,
+  draftValues,
+  onDraftChange,
 }: UseScheduleEditorFormProps): UseScheduleEditorFormResult => {
   const {
     formMethods,
@@ -51,7 +56,7 @@ export const useScheduleEditorForm = ({
     repeatConfig,
     eventColor,
     eventTitle,
-  } = useScheduleFormFields({ date, initialEvent, isEditing })
+  } = useScheduleFormFields({ date, initialEvent, isEditing, draftValues, onDraftChange })
 
   const { handleRepeatType, updateConfig, setEventColor } = useRepeatConfigController({
     repeatConfig,

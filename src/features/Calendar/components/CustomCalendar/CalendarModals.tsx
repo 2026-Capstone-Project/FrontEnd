@@ -22,6 +22,7 @@ type CalendarModalsProps = {
       start: Date,
       end: Date,
       allDay: boolean,
+      occurrenceDate?: CalendarEvent['occurrenceDate'],
     ) => void
   }
 }
@@ -64,7 +65,7 @@ const CalendarModals = ({
       {/* ItemEditorModal 내부 포털을 그대로 사용해, 리사이즈 시 같은 폼 상태로 루트만 이동합니다. */}
       {shouldRenderModal && isTodoModal && (
         <TodoEditorModal
-          key={`todo-${String(modalEventId)}-${isModalEditing ? 'edit' : 'create'}`}
+          key={`todo-${String(modalEventId)}-${occurrenceDate}-${isModalEditing ? 'edit' : 'create'}`}
           date={modalDate}
           onClose={onCloseModal}
           mode={modalMode}
@@ -73,13 +74,14 @@ const CalendarModals = ({
           showTypeTabs={!isModalEditing}
           onEventColorChange={eventActions.onEventColorChange}
           onEventTitleConfirm={eventActions.onEventTitleConfirm}
+          onEventTypeChange={eventActions.onEventTypeChange}
           onEventTimingChange={eventActions.onEventTimingChange}
           isEditing={isModalEditing}
         />
       )}
       {shouldRenderModal && !isTodoModal && (
         <ScheduleEditorModal
-          key={`schedule-${String(modalEventId)}-${isModalEditing ? 'edit' : 'create'}`}
+          key={`schedule-${String(modalEventId)}-${occurrenceDate}-${isModalEditing ? 'edit' : 'create'}`}
           date={modalDate}
           onClose={onCloseModal}
           mode={modalMode}
