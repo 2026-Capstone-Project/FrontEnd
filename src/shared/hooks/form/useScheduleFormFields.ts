@@ -1,5 +1,5 @@
 import { yupResolver } from '@hookform/resolvers/yup'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { type Control, type Resolver, useForm, type UseFormReturn, useWatch } from 'react-hook-form'
 
 import { addScheduleSchema } from '@/shared/schemas/schedule'
@@ -9,6 +9,7 @@ import {
   type RepeatConfigSchema,
   type ScheduleEditorFormValues,
 } from '@/shared/types/event/event'
+import type { ItemEditorDraft } from '@/shared/types/modal/itemEditor'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
 import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/recurrenceGroup'
 
@@ -16,6 +17,8 @@ type UseScheduleFormFieldsProps = {
   date: string
   initialEvent?: CalendarEvent | null
   isEditing: boolean
+  draftValues?: ItemEditorDraft | null
+  onDraftChange?: (draft: ItemEditorDraft) => void
 }
 
 export type UseScheduleFormFieldsResult = {
@@ -37,42 +40,84 @@ const pad2 = (value: number) => String(value).padStart(2, '0')
 
 const formatTimeFromDate = (value: Date) => `${pad2(value.getHours())}:${pad2(value.getMinutes())}`
 
-export const useScheduleFormFields = ({
+const toDate = (value: string | Date) => new Date(value)
+
+const isSameDateTime = (left: string | Date, right: string | Date) =>
+  toDate(left).getTime() === toDate(right).getTime()
+
+const getDefaultEndDate = (
+  defaultStart: Date,
+  initialStart?: CalendarEvent['start'],
+  initialEnd?: CalendarEvent['end'],
+) => {
+  if (initialEnd && initialStart && !isSameDateTime(initialEnd, initialStart)) {
+    return toDate(initialEnd)
+  }
+  return new Date(defaultStart.getTime() + 60 * 60 * 1000)
+}
+
+const buildScheduleDefaultValues = ({
   date,
   initialEvent,
-  isEditing,
-}: UseScheduleFormFieldsProps): UseScheduleFormFieldsResult => {
-  const resolver = yupResolver(addScheduleSchema) as Resolver<ScheduleEditorFormValues>
-  const defaultStart = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
-  const defaultEnd =
-    initialEvent?.end && initialEvent.end !== initialEvent?.start
-      ? new Date(initialEvent.end)
-      : new Date(defaultStart)
-  const defaultStartTime = formatTimeFromDate(defaultStart)
-  const defaultEndTime = formatTimeFromDate(defaultEnd)
+  draftValues,
+}: {
+  date: string
+  initialEvent?: CalendarEvent | null
+  draftValues?: ItemEditorDraft | null
+}): ScheduleEditorFormValues => {
+  const initialStart = initialEvent?.start
+  const initialEnd = initialEvent?.end
+  const defaultStart = initialStart ? toDate(initialStart) : new Date(date)
+  const defaultEnd = getDefaultEndDate(defaultStart, initialStart, initialEnd)
   const initialTitle = initialEvent?.title === '새 일정' ? '' : (initialEvent?.title ?? '')
   const initialDescription = initialEvent?.content ?? ''
   const initialLocation = initialEvent?.location ?? ''
   const initialAddress = initialEvent?.address ?? null
   const initialColor = initialEvent?.color ?? 'BLUE'
   const initialIsAllDay = initialEvent?.isAllDay ?? false
+  const mappedRepeatConfig = mapRecurrenceGroupToRepeatConfig(initialEvent?.recurrenceGroup)
+  const initialRepeatConfig: RepeatConfigSchema = {
+    ...defaultRepeatConfig,
+    ...mappedRepeatConfig,
+    customWeeklyDays: mappedRepeatConfig.customWeeklyDays ?? [],
+    customMonthlyDates: mappedRepeatConfig.customMonthlyDates ?? [],
+    customYearlyMonths: mappedRepeatConfig.customYearlyMonths ?? [],
+  } as RepeatConfigSchema
+
+  return {
+    eventTitle: draftValues?.title ?? initialTitle,
+    eventDescription: draftValues?.description ?? initialDescription,
+    location: draftValues?.location ?? initialLocation,
+    address: draftValues?.address ?? initialAddress,
+    eventStartDate: draftValues?.startDate ?? defaultStart,
+    eventEndDate: draftValues?.endDate ?? defaultEnd,
+    eventStartTime: draftValues?.startTime ?? formatTimeFromDate(defaultStart),
+    eventEndTime: draftValues?.endTime ?? formatTimeFromDate(defaultEnd),
+    isAllday: draftValues?.isAllday ?? initialIsAllDay,
+    eventColor: draftValues?.eventColor ?? initialColor,
+    repeatConfig: draftValues?.repeatConfig ?? initialRepeatConfig,
+  }
+}
+
+export const useScheduleFormFields = ({
+  date,
+  initialEvent,
+  isEditing,
+  draftValues,
+  onDraftChange,
+}: UseScheduleFormFieldsProps): UseScheduleFormFieldsResult => {
+  const resolver = yupResolver(addScheduleSchema) as Resolver<ScheduleEditorFormValues>
+  const initialStart = initialEvent?.start
+  const initialIsAllDay = initialEvent?.isAllDay ?? false
+  const initialValues = useMemo(
+    () => buildScheduleDefaultValues({ date, initialEvent, draftValues }),
+    [date, draftValues, initialEvent],
+  )
   const formMethods = useForm<ScheduleEditorFormValues>({
     resolver,
-    defaultValues: {
-      eventTitle: initialTitle,
-      eventDescription: initialDescription,
-      location: initialLocation,
-      address: initialAddress,
-      eventStartDate: defaultStart,
-      eventEndDate: defaultEnd,
-      eventStartTime: defaultStartTime,
-      eventEndTime: defaultEndTime,
-      isAllday: initialIsAllDay,
-      eventColor: initialColor,
-      repeatConfig: defaultRepeatConfig as RepeatConfigSchema,
-    },
+    defaultValues: initialValues,
   })
-  const { control, register, setValue, handleSubmit } = formMethods
+  const { control, register, reset, setValue, handleSubmit } = formMethods
 
   const eventStartDate = useWatch({ control, name: 'eventStartDate' })
   const eventEndDate = useWatch({ control, name: 'eventEndDate' })
@@ -97,53 +142,37 @@ export const useScheduleFormFields = ({
   }, [register])
 
   useEffect(() => {
-    if (!isEditing || !initialEvent) return
-    const start = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
-    const end =
-      initialEvent?.end && initialEvent.end !== initialEvent?.start
-        ? new Date(initialEvent.end)
-        : new Date(start)
-    setValue('eventStartDate', start)
-    setValue('eventEndDate', end)
-    setValue('eventStartTime', formatTimeFromDate(start))
-    setValue('eventEndTime', formatTimeFromDate(end))
-    const nextTitle = initialEvent?.title ?? ''
-    setValue('eventTitle', nextTitle === '새 일정' ? '' : nextTitle)
-    setValue('eventDescription', initialEvent?.content ?? '')
-    setValue('location', initialEvent?.location ?? '')
-    setValue('address', initialEvent?.address ?? null)
-    setValue('isAllday', initialEvent?.isAllDay ?? false)
-    setValue('eventColor', initialEvent?.color ?? 'BLUE')
-    const mappedRepeatConfig = mapRecurrenceGroupToRepeatConfig(initialEvent?.recurrenceGroup)
-    const nextRepeatConfig: RepeatConfigSchema = {
-      ...defaultRepeatConfig,
-      ...mappedRepeatConfig,
-      customWeeklyDays: mappedRepeatConfig.customWeeklyDays ?? [],
-      customMonthlyDates: mappedRepeatConfig.customMonthlyDates ?? [],
-      customYearlyMonths: mappedRepeatConfig.customYearlyMonths ?? [],
-    } as RepeatConfigSchema
-    setValue('repeatConfig', nextRepeatConfig, { shouldValidate: true })
-  }, [date, initialEvent, isEditing, setValue])
+    if (!isEditing || !initialStart) return
+    reset(buildScheduleDefaultValues({ date, initialEvent, draftValues: null }))
+  }, [date, initialEvent, initialStart, isEditing, reset])
 
   useEffect(() => {
     if (isEditing) return
-    const start = initialEvent?.start ? new Date(initialEvent.start) : new Date(date)
-    const end =
-      initialEvent?.end && initialEvent.end !== initialEvent?.start
-        ? new Date(initialEvent.end)
-        : new Date(start)
-    const nextIsAllDay = initialEvent?.isAllDay ?? false
-    setValue('eventStartDate', start)
-    setValue('eventEndDate', end)
-    setValue('isAllday', nextIsAllDay)
-    if (nextIsAllDay) {
-      setValue('eventStartTime', undefined)
-      setValue('eventEndTime', undefined)
-      return
-    }
-    setValue('eventStartTime', formatTimeFromDate(start))
-    setValue('eventEndTime', formatTimeFromDate(end))
-  }, [date, initialEvent?.end, initialEvent?.isAllDay, initialEvent?.start, isEditing, setValue])
+    reset(initialValues)
+  }, [date, initialValues, isEditing, reset])
+
+  useEffect(() => {
+    if (isEditing || !onDraftChange) return
+    const subscription = formMethods.watch((values) => {
+      onDraftChange({
+        title: values.eventTitle ?? '',
+        description: values.eventDescription ?? '',
+        startDate: values.eventStartDate ?? null,
+        endDate: values.eventEndDate ?? values.eventStartDate ?? null,
+        startTime: values.eventStartTime,
+        endTime: values.eventEndTime,
+        isAllday: values.isAllday ?? false,
+        eventColor: (values.eventColor ?? 'BLUE') as EventColorType,
+        repeatConfig:
+          (values.repeatConfig as RepeatConfigSchema | undefined) ??
+          (defaultRepeatConfig as RepeatConfigSchema),
+        location: values.location ?? '',
+        address: values.address ?? null,
+      })
+    })
+
+    return () => subscription.unsubscribe()
+  }, [formMethods, isEditing, onDraftChange])
 
   return {
     formMethods,

@@ -92,13 +92,13 @@ const TodoEditorContent = ({
         start.setHours(0, 0, 0, 0)
         const end = new Date(baseDate)
         end.setHours(23, 59, 59, 999)
-        onEventTimingChange(eventId, start, end, true)
+        onEventTimingChange(eventId, start, end, true, occurrenceDate)
         return
       }
       const start = buildDateTime(baseDate, values.todoEndTime)
-      onEventTimingChange(eventId, start, start, false)
+      onEventTimingChange(eventId, start, start, false, occurrenceDate)
     },
-    [buildDateTime, date, eventId, onEventTimingChange],
+    [buildDateTime, date, eventId, occurrenceDate, onEventTimingChange],
   )
 
   const {
@@ -138,6 +138,7 @@ const TodoEditorContent = ({
 
   useSyncEventTiming({
     eventId,
+    occurrenceDate,
     fallbackDate: date,
     isAllDay: todo.isAllday,
     startDate: todo.todoDate,
