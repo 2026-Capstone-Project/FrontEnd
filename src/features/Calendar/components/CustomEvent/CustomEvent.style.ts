@@ -98,7 +98,7 @@ export const WeekEventContainer = styled.div<{
 export const EventTitle = styled.div`
   font-weight: 400;
   font-size: 12px;
-  width: 45px;
+  width: 38px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
