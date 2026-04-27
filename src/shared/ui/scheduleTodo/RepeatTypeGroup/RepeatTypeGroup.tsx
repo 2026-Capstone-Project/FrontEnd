@@ -8,12 +8,31 @@ type Props = {
   repeatType: RepeatType
   customBasis?: CustomRepeatBasis | null
   onToggleType: (value: RepeatType) => void
+  canToggleDetail: boolean
+  isDetailOpen: boolean
+  onToggleDetail: () => void
 }
 
-const RepeatTypeGroup = ({ repeatType, customBasis, onToggleType }: Props) => (
+const RepeatTypeGroup = ({
+  repeatType,
+  customBasis,
+  onToggleType,
+  canToggleDetail,
+  isDetailOpen,
+  onToggleDetail,
+}: Props) => (
   <S.RepeatRow>
     <S.Label>반복</S.Label>
-    <Rotate className="icon" />
+    <S.IconButton
+      type="button"
+      disabled={!canToggleDetail}
+      isOpen={isDetailOpen}
+      onClick={onToggleDetail}
+      aria-label="반복 상세 설정 열기"
+      title="반복 상세 설정"
+    >
+      <Rotate className="icon" />
+    </S.IconButton>
     <S.ButtonsWrapper>
       {MAIN_OPTIONS.map((option) => (
         <S.RepeatButton

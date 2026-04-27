@@ -1,4 +1,5 @@
 // 할 일 반복 규칙과 종료 조건을 편집하는 섹션입니다.
+import { useState } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
 import type { RepeatConfigSchema, TodoEditorFormValues } from '@/shared/types/event/event'
@@ -17,8 +18,20 @@ const TodoRepeatSection = ({ updateConfig, handleRepeatType }: TodoRepeatSection
   const { control } = useFormContext<TodoEditorFormValues>()
   const repeatConfig = useWatch({ control, name: 'repeatConfig' }) as RepeatConfigSchema
   const todoDate = useWatch({ control, name: 'todoDate' }) ?? null
+  const [isRepeatDetailOpen, setIsRepeatDetailOpen] = useState(false)
+  const hasRepeatType = Boolean(repeatConfig && repeatConfig.repeatType !== 'none')
 
   if (!repeatConfig) return null
+
+  const handleToggleRepeatType = (value: RepeatType) => {
+    const willClearRepeatType = repeatConfig.repeatType === value && value !== 'custom'
+    const willClearCustomRepeat = repeatConfig.repeatType === 'custom' && value === 'custom'
+
+    handleRepeatType(value)
+    if (willClearRepeatType || willClearCustomRepeat) {
+      setIsRepeatDetailOpen(false)
+    }
+  }
 
   const repeatEndDate = todoDate ? new Date(todoDate) : null
   repeatEndDate?.setHours(0, 0, 0, 0)
@@ -28,24 +41,32 @@ const TodoRepeatSection = ({ updateConfig, handleRepeatType }: TodoRepeatSection
       <RepeatTypeGroup
         repeatType={repeatConfig.repeatType}
         customBasis={repeatConfig.customBasis}
-        onToggleType={handleRepeatType}
+        onToggleType={handleToggleRepeatType}
+        canToggleDetail={hasRepeatType}
+        isDetailOpen={isRepeatDetailOpen}
+        onToggleDetail={() => {
+          if (!hasRepeatType) return
+          setIsRepeatDetailOpen((previous) => !previous)
+        }}
       />
-      <div style={{ marginTop: '12px' }}>
-        {repeatConfig.repeatType === 'custom' && (
-          <CustomBasisPanel
-            config={repeatConfig}
-            customBasis={repeatConfig.customBasis}
-            updateConfig={updateConfig}
-          />
-        )}
-        {repeatConfig.repeatType !== 'none' && (
-          <TerminationPanel
-            config={repeatConfig}
-            updateConfig={updateConfig}
-            minDate={repeatEndDate}
-          />
-        )}
-      </div>
+      {hasRepeatType && isRepeatDetailOpen && (
+        <div style={{ marginTop: '12px' }}>
+          {repeatConfig.repeatType === 'custom' && (
+            <CustomBasisPanel
+              config={repeatConfig}
+              customBasis={repeatConfig.customBasis}
+              updateConfig={updateConfig}
+            />
+          )}
+          {repeatConfig.repeatType !== 'none' && (
+            <TerminationPanel
+              config={repeatConfig}
+              updateConfig={updateConfig}
+              minDate={repeatEndDate}
+            />
+          )}
+        </div>
+      )}
     </S.Section>
   )
 }

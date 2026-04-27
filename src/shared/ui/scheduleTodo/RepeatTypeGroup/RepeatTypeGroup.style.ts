@@ -7,13 +7,35 @@ export const RepeatRow = styled.div`
   gap: 8px;
   align-items: center;
   height: fit-content;
-  .icon {
-    ${media.down(theme.breakPoints.mobile)} {
-      display: none;
-    }
-  }
+  width: 100%;
+  padding: 0 20px;
   ${media.down(theme.breakPoints.mobile)} {
     align-items: flex-start;
+  }
+`
+
+export const IconButton = styled.button<{ isOpen: boolean }>`
+  border: none;
+  background: transparent;
+  color: ${theme.colors.textColor3};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+
+  .icon {
+    transform: ${({ isOpen }) => (isOpen ? 'rotate(180deg)' : 'rotate(0deg)')};
+    transition: transform 0.2s ease;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+
+  ${media.down(theme.breakPoints.mobile)} {
+    display: none;
   }
 `
 
