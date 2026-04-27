@@ -18,6 +18,7 @@ export type ScheduleEditorFormProps = {
   initialEvent?: CalendarEvent | null
   onEventColorChange?: (eventId: CalendarEvent['id'], color: EventColorType) => void
   onEventTitleConfirm?: (eventId: CalendarEvent['id'], title: string) => void
+  onSharedChange?: (isShared: boolean) => void
   onEventTimingChange?: (
     eventId: CalendarEvent['id'],
     start: Date,

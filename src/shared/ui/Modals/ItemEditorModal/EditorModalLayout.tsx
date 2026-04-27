@@ -15,6 +15,7 @@ const EditorModalLayout = ({
   submitFormId,
   handleDelete,
   headerExtras,
+  submitButtonLabel,
   mode,
   headerTitleContainerRef,
   modalWrapperRef,
@@ -28,6 +29,7 @@ const EditorModalLayout = ({
   mode: 'modal' | 'inline'
   handleDelete?: () => void
   headerExtras?: React.ReactNode
+  submitButtonLabel?: string
   headerTitleContainerRef?: Ref<HTMLDivElement>
   modalWrapperRef?: Ref<HTMLDivElement>
 }) => {
@@ -64,6 +66,7 @@ const EditorModalLayout = ({
                     }
               }
             >
+              {submitButtonLabel && <span>{submitButtonLabel}</span>}
               <Check color="#ffffff" />
             </S.Button>
           </S.FooterRight>

@@ -36,6 +36,7 @@ const ScheduleEditorContent = ({
   onEventColorChange,
   onEventTitleConfirm,
   onEventTimingChange,
+  onSharedChange,
   schedule,
 }: ScheduleEditorContentProps) => {
   const {
@@ -185,6 +186,7 @@ const ScheduleEditorContent = ({
           updateConfig={updateConfig}
           handleRepeatType={handleRepeatType}
           onTitleConfirm={handleTitleConfirm}
+          onSharedChange={onSharedChange}
         />
       </form>
       <ScheduleEditorConfirmModals

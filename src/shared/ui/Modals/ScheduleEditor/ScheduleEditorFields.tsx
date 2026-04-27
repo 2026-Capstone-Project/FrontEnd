@@ -7,6 +7,8 @@ import ScheduleDetailsSection from '@/shared/ui/Modals/ScheduleEditor/ScheduleDe
 import ScheduleRepeatSection from '@/shared/ui/Modals/ScheduleEditor/ScheduleRepeatSection'
 import ScheduleTitleField from '@/shared/ui/Modals/ScheduleEditor/ScheduleTitleField'
 
+import ShareSchedulePanel from './ShareSchedulePanel'
+
 type ScheduleEditorFieldsProps = Pick<
   ScheduleEditorFormProps,
   'headerTitlePortalTarget' | 'isEditing' | 'modalWrapperElement' | 'mode'
@@ -15,6 +17,7 @@ type ScheduleEditorFieldsProps = Pick<
   handleRepeatType: (value: RepeatType) => void
   handleAllDayToggle: () => void
   onTitleConfirm: (value: string) => void
+  onSharedChange?: (isShared: boolean) => void
 }
 
 const ScheduleEditorFields = ({
@@ -26,6 +29,7 @@ const ScheduleEditorFields = ({
   handleRepeatType,
   handleAllDayToggle,
   onTitleConfirm,
+  onSharedChange,
 }: ScheduleEditorFieldsProps) => {
   return (
     <>
@@ -39,6 +43,7 @@ const ScheduleEditorFields = ({
         <ScheduleDetailsSection mode={mode} modalWrapperElement={modalWrapperElement} />
       </S.FormContent>
       <ScheduleRepeatSection updateConfig={updateConfig} handleRepeatType={handleRepeatType} />
+      <ShareSchedulePanel onSharedChange={onSharedChange} />
     </>
   )
 }

@@ -80,6 +80,7 @@ const ItemEditorModal = ({
     [onExternalDraftChange],
   )
   const [footerChildren, setFooterChildren] = useState<ReactNode | null>(null)
+  const [isScheduleShared, setIsScheduleShared] = useState(false)
   const [deleteHandler, setDeleteHandler] = useState<() => void>(() => () => undefined)
   const [closeGuard, setCloseGuard] = useState<null | (() => boolean)>(null)
   const [modalWrapperElement, setModalWrapperElement] = useState<HTMLDivElement | null>(null)
@@ -117,6 +118,12 @@ const ItemEditorModal = ({
   useEffect(() => {
     setActiveType(initialType)
   }, [initialType])
+
+  useEffect(() => {
+    if (activeType !== 'schedule') {
+      setIsScheduleShared(false)
+    }
+  }, [activeType])
 
   useEffect(() => {
     if (externalDraftValues !== undefined) return
@@ -247,6 +254,9 @@ const ItemEditorModal = ({
       submitFormId={activeType === 'todo' ? 'add-todo-form' : 'add-schedule-form'}
       handleDelete={deleteHandler}
       footerChildren={footerChildren}
+      submitButtonLabel={
+        activeType === 'schedule' && isScheduleShared ? '저장 및 초대 전송' : undefined
+      }
       headerExtras={showTypeTabs ? tabs : undefined}
       headerTitleContainerRef={handleHeaderTitleRef}
       modalWrapperRef={handleModalWrapperRef}
@@ -287,6 +297,7 @@ const ItemEditorModal = ({
           onEventColorChange={onEventColorChange}
           onEventTitleConfirm={onEventTitleConfirm}
           onEventTimingChange={onEventTimingChange}
+          onSharedChange={setIsScheduleShared}
         />
       )}
     </EditorModalLayout>

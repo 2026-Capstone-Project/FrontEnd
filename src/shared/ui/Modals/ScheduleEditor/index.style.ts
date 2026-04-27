@@ -139,8 +139,6 @@ export const CalendarPlaceholder = styled.div`
 export const Section = styled.div`
   display: flex;
   flex-direction: column;
-  padding: 0 20px;
-  gap: 20px;
   margin-top: 24px;
 `
 export const TextareaWrapper = styled.div`
@@ -182,4 +180,75 @@ export const BottomSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
+`
+
+export const FriendWrapper = styled.div`
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+`
+export const FriendSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 30px;
+  background-color: #f7f7f7;
+  .added-friend-list {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .added-friend {
+    border-radius: 40px;
+    font-size: 12px;
+    border: 1px solid #d5d4e3;
+    background: #fff;
+    display: flex;
+    padding: 6px 8px 6px 12px;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: fit-content;
+    color: #5d5b71;
+  }
+  .remove-friend-button {
+    border: none;
+    background: transparent;
+    color: #d5d4e3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+  }
+`
+export const FriendSectionOpenButton = styled.button<{ isOpen: boolean; isShared: boolean }>`
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  padding: 12px 20px;
+  cursor: pointer;
+  align-items: center;
+  .arrow {
+    transform: ${({ isOpen }) => (isOpen ? 'rotate(-90deg)' : 'rotate(180deg)')};
+  }
+  .section-title {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    border-radius: 40px;
+    padding: 6px 8px;
+    background-color: ${({ isShared }) => (isShared ? theme.colors.share.base : '#f7f7f7')};
+    border: 1px solid ${({ isShared }) => (isShared ? '#f0f0f0' : '#eaeaea')};
+    font-size: 12px;
+    font-weight: 600;
+    color: ${({ isShared }) => (isShared ? theme.colors.share.point : theme.colors.textColor3)};
+  }
+  .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: ${({ isShared }) =>
+      isShared ? theme.colors.share.point : theme.colors.textColor3};
+  }
 `
