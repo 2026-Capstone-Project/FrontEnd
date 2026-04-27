@@ -6,7 +6,7 @@ import { useThrottledValue } from '@/shared/hooks/common/useThrottledValue'
 import { useGetTodoTitleHistoryQuery } from '@/shared/hooks/query/useTodoQueries'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { TodoEditorFormValues } from '@/shared/types/event/event'
-import TitleSuggestionInput from '@/shared/ui/common/TitleSuggestionInput/TitleSuggestionInput'
+import TitleSuggestionInput from '@/shared/ui/scheduleTodo/TitleSuggestionInput/TitleSuggestionInput'
 
 type TodoTitleFieldProps = {
   eventId: CalendarEvent['id']

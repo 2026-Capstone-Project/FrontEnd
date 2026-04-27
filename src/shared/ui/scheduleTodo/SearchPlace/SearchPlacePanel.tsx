@@ -1,23 +1,8 @@
-import RecentSearch from '@/shared/ui/common/RecentSearch/RecentSearch'
+import type { SearchPlacePanelProps } from '@/shared/types/schedule/types'
+import RecentSearch from '@/shared/ui/scheduleTodo/RecentSearch/RecentSearch'
+import { getPlaceAddressValue } from '@/shared/utils/searchPlace'
 
 import * as S from './SearchPlace.style'
-import type { PlaceResult } from './SearchPlace.types'
-import { getPlaceAddressValue } from './SearchPlace.utils'
-
-type SearchPlacePanelProps = {
-  panelTitle: string
-  panelCaption: string | null
-  panelMessage: string
-  panelPlaces: PlaceResult[]
-  recentSearches: string[]
-  selectedPlaceId: string | null
-  shouldShowRecentSearches: boolean
-  showExpandedResults: boolean
-  showPreviewResults: boolean
-  onRecentSearchClick: (value: string) => void
-  onRemoveRecentSearch: (value: string) => void
-  onSelectPlace: (place: PlaceResult) => void
-}
 
 const SearchPlacePanel = ({
   panelTitle,

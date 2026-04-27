@@ -3,10 +3,10 @@ import { useFormContext, useWatch } from 'react-hook-form'
 
 import type { RepeatConfigSchema, ScheduleEditorFormValues } from '@/shared/types/event/event'
 import type { RepeatConfig, RepeatType } from '@/shared/types/recurrence/repeat'
-import CustomBasisPanel from '@/shared/ui/common/CustomBasisPanel/CustomBasisPanel'
-import RepeatTypeGroup from '@/shared/ui/common/RepeatTypeGroup/RepeatTypeGroup'
-import TerminationPanel from '@/shared/ui/common/TerminationPanel/TerminationPanel'
+import CustomBasisPanel from '@/shared/ui/calendar/CustomBasisPanel/CustomBasisPanel'
 import * as S from '@/shared/ui/Modals/ScheduleEditor/index.style'
+import RepeatTypeGroup from '@/shared/ui/scheduleTodo/RepeatTypeGroup/RepeatTypeGroup'
+import TerminationPanel from '@/shared/ui/scheduleTodo/TerminationPanel/TerminationPanel'
 
 type ScheduleRepeatSectionProps = {
   updateConfig: (changes: Partial<RepeatConfig>) => void

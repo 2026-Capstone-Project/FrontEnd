@@ -5,7 +5,7 @@ import { useFormContext, useWatch } from 'react-hook-form'
 import { useThrottledValue } from '@/shared/hooks/common/useThrottledValue'
 import { useEventTitleHistoryQuery } from '@/shared/hooks/query/useCalendarQueries'
 import type { ScheduleEditorFormValues } from '@/shared/types/event/event'
-import TitleSuggestionInput from '@/shared/ui/common/TitleSuggestionInput/TitleSuggestionInput'
+import TitleSuggestionInput from '@/shared/ui/scheduleTodo/TitleSuggestionInput/TitleSuggestionInput'
 
 type ScheduleTitleFieldProps = {
   portalTarget?: HTMLElement | null

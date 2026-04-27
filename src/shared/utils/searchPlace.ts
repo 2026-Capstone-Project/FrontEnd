@@ -1,4 +1,4 @@
-import type { PlaceMarker, PlaceResult } from './SearchPlace.types'
+import type { PlaceMarker, PlaceResult } from '../types/schedule/types'
 
 export const DEFAULT_CENTER = {
   lat: 37.566826,

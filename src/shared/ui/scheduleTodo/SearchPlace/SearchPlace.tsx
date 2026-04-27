@@ -2,12 +2,12 @@ import { Map, MapMarker, useKakaoLoader } from 'react-kakao-maps-sdk'
 
 import Check from '@/shared/assets/icons/check.svg?react'
 import Search from '@/shared/assets/icons/search.svg?react'
+import type { SearchPlaceProps } from '@/shared/types/schedule/types'
+import { DEFAULT_CENTER } from '@/shared/utils/searchPlace'
 
+import useSearchPlace from '../../../utils/useSearchPlace'
 import * as S from './SearchPlace.style'
-import type { SearchPlaceProps } from './SearchPlace.types'
-import { DEFAULT_CENTER } from './SearchPlace.utils'
 import SearchPlacePanel from './SearchPlacePanel'
-import useSearchPlace from './useSearchPlace'
 
 const SearchPlace = ({ selectedLocation = '', onSelectLocation }: SearchPlaceProps) => {
   const kakaoAppKey = import.meta.env.VITE_KAKAO_API ?? ''

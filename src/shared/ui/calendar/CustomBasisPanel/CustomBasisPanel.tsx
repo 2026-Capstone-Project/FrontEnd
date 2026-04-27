@@ -8,7 +8,7 @@ import {
   MonthlyRepeatPanel,
   WeeklyRepeatPanel,
   YearlyRepeatPanel,
-} from '@/shared/ui/common/RepeatPanel'
+} from '@/shared/ui/scheduleTodo/RepeatPanel'
 
 type Props = {
   config: RepeatConfigSchema

@@ -6,7 +6,7 @@ import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { EventColorType } from '@/shared/types/event/event'
 import type { TodoEditorFormProps } from '@/shared/types/modal/todoEditor'
 import type { RepeatConfig } from '@/shared/types/recurrence/repeat'
-import SelectColor from '@/shared/ui/common/SelectColor/SelectColor'
+import SelectColor from '@/shared/ui/scheduleTodo/SelectColor/SelectColor'
 
 type UseTodoFooterProps = {
   repeatConfig: RepeatConfig
