@@ -182,9 +182,7 @@ export const CalendarPlaceholder = styled.div`
 export const Section = styled.div`
   display: flex;
   flex-direction: column;
-  padding: 0 20px;
-  gap: 20px;
-  margin-top: 24px;
+  margin-top: 10px;
 `
 export const TextareaWrapper = styled.div`
   width: 100%;

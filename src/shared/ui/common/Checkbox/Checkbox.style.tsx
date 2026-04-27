@@ -7,9 +7,9 @@ export const Checkbox = styled.input<{ isChecked?: boolean }>`
   appearance: none;
   width: 100%;
   height: 100%;
-  border: none;
+  border: ${(props) => (props.isChecked ? 'none' : '1px solid #c4c4c4')};
   border-radius: 4px;
-  background-color: ${(props) => (props.isChecked ? theme.colors.primary2 : '#D2D3D2')};
+  background-color: ${(props) => (props.isChecked ? theme.colors.primary2 : 'transparent')};
   cursor: pointer;
   transition: background-color 150ms ease;
 `

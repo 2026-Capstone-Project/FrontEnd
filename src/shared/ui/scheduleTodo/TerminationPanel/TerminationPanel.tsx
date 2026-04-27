@@ -166,6 +166,7 @@ const TerminationPanel = ({ config, updateConfig, minDate }: Props) => {
         <S.InlineInput
           type="number"
           min={1}
+          max={1000}
           value={config.customEndCount ?? ''}
           onChange={(event) =>
             updateConfig({ customEndCount: Number(event.target.value) || undefined })

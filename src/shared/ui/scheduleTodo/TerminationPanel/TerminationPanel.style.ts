@@ -75,7 +75,7 @@ export const InlineInput = styled.input`
   border: 1px solid ${theme.colors.lightGray};
   border-radius: 8px;
   padding: 6px 10px;
-  width: 100px;
+  width: 80px;
   background: ${theme.colors.white};
   font-size: 16px;
   color: ${theme.colors.textColor2};

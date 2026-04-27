@@ -10,7 +10,7 @@ export const InlineInput = styled.input`
   border: 1px solid ${theme.colors.lightGray};
   border-radius: 8px;
   padding: 6px 10px;
-  width: 70px;
+  width: 55px;
   background: ${theme.colors.white};
   font-size: 16px;
   color: ${theme.colors.textColor2};
@@ -34,12 +34,11 @@ export const MultiSelectMonthGrid = styled.div`
 export const DayChip = styled.button<{ isActive?: boolean }>`
   background: ${(props) => (props.isActive ? '#e9f4f7' : theme.colors.white)};
   color: ${(props) => (props.isActive ? theme.colors.textPrimary : theme.colors.textColor2)};
-  border-radius: 16px;
-  width: 36px;
-  height: 36px;
+  border-radius: 50%;
+  width: 33px;
+  height: 33px;
   font-size: 14px;
   min-width: 32px;
-  box-shadow: 0 0 1.6px 0 rgba(0, 0, 0, 0.16);
   cursor: pointer;
 `
 
@@ -88,8 +87,12 @@ export const NumberRepeat = styled.div`
 `
 export const DayGrid = styled.div`
   display: flex;
-  justify-content: center;
   align-items: center;
   width: 100%;
   gap: 6px;
+  font-size: 14px;
+  .text {
+    margin-right: 16px;
+    color: #757575;
+  }
 `

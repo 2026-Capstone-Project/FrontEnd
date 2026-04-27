@@ -40,6 +40,7 @@ const WeeklyRepeatPanel = ({ config, updateConfig }: Props) => {
         주마다 반복
       </S.NumberRepeat>
       <S.DayGrid>
+        <div className="text">요일 지정</div>
         {WEEKDAYS.map((day) => {
           const isActive = config.customWeeklyDays?.includes(day.key) ?? false
           const toggleDay = () => {
