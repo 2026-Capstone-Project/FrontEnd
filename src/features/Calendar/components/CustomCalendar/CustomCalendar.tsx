@@ -100,6 +100,7 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
     updateEventTiming,
     updateEventType,
     updateEventTitle,
+    updateEventShared,
     toggleEventDone,
     removeEvent,
   } = useCalendarEvents({ initialEvents: apiEvents })
@@ -494,10 +495,11 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
     () => ({
       onEventColorChange: updateEventColor,
       onEventTitleConfirm: updateEventTitle,
+      onEventSharedChange: updateEventShared,
       onEventTypeChange: updateEventType,
       onEventTimingChange: updateEventTiming,
     }),
-    [updateEventColor, updateEventTitle, updateEventType, updateEventTiming],
+    [updateEventColor, updateEventShared, updateEventTitle, updateEventType, updateEventTiming],
   )
   useEffect(() => {
     onSelectedDateChange?.(selectedDate ?? date)

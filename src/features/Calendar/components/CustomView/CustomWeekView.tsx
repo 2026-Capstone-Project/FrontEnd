@@ -3,6 +3,7 @@ import React from 'react'
 import type { NavigateAction, ViewStatic } from 'react-big-calendar'
 import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 
+import People from '@/assets/icons/people.svg?react'
 import { getColorPalette } from '@/features/Calendar/utils/colorPalette'
 import {
   compareByStart,
@@ -286,6 +287,14 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
                       onToggleTodo?.(segment.event.id)
                     }}
                   />
+                ) : segment.event.isShared ? (
+                  <People
+                    aria-hidden="true"
+                    focusable="false"
+                    width={10}
+                    height={12}
+                    color={palette.point ?? 'transparent'}
+                  />
                 ) : (
                   <S.EventDot $color={palette.point} />
                 )}
@@ -345,6 +354,14 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
                         eventChange.stopPropagation()
                         onToggleTodo?.(event.id)
                       }}
+                    />
+                  ) : event.isShared ? (
+                    <People
+                      aria-hidden="true"
+                      focusable="false"
+                      width={10}
+                      height={12}
+                      color={palette.point ?? 'transparent'}
                     />
                   ) : (
                     <S.EventDot $color={palette.point} />

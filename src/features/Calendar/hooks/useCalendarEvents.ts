@@ -135,6 +135,12 @@ export const useCalendarEvents = (options: UseCalendarEventsOptions = {}) => {
     [],
   )
 
+  const updateEventShared = useCallback((eventId: CalendarEvent['id'], isShared: boolean) => {
+    setEvents((prev) =>
+      prev.map((event) => (event.id === eventId ? { ...event, isShared } : event)),
+    )
+  }, [])
+
   // 서버 응답 후 임시 이벤트 id를 실제 id로 교체
   const updateEventId = useCallback((tempId: CalendarEvent['id'], nextId: CalendarEvent['id']) => {
     setEvents((prev) =>
@@ -171,6 +177,7 @@ export const useCalendarEvents = (options: UseCalendarEventsOptions = {}) => {
     updateEventTiming,
     updateEventType,
     updateEventTitle,
+    updateEventShared,
     updateEventId,
     toggleEventDone,
     removeEvent,

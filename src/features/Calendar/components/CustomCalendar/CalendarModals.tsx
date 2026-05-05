@@ -18,6 +18,7 @@ type CalendarModalsProps = {
   eventActions: {
     onEventColorChange: (eventId: CalendarEvent['id'], color: CalendarEvent['color']) => void
     onEventTitleConfirm: (eventId: CalendarEvent['id'], title: CalendarEvent['title']) => void
+    onEventSharedChange: (eventId: CalendarEvent['id'], isShared: boolean) => void
     onEventTypeChange: (eventId: CalendarEvent['id'], type: 'todo' | 'schedule') => void
     onEventTimingChange: (
       eventId: CalendarEvent['id'],
@@ -91,6 +92,7 @@ const DraftBackedModal = ({
       onDraftChange={setDraftValues}
       onEventColorChange={eventActions.onEventColorChange}
       onEventTitleConfirm={eventActions.onEventTitleConfirm}
+      onEventSharedChange={eventActions.onEventSharedChange}
       onEventTypeChange={eventActions.onEventTypeChange}
       onEventTimingChange={eventActions.onEventTimingChange}
     />

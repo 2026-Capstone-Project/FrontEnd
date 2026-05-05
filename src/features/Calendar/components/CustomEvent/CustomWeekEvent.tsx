@@ -2,6 +2,8 @@ import moment from 'moment'
 import React, { type MouseEvent, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
+import People from '@/assets/icons/people.svg?react'
+
 import { getColorPalette } from '../../utils/colorPalette'
 import type { CalendarEvent } from '../CustomView/CustomDayView'
 import * as S from './CustomEvent.style'
@@ -116,6 +118,14 @@ const CustomWeekEvent: React.FC<CustomWeekEventProps> = ({
               eventChange.stopPropagation()
               onToggleTodo?.(event.id)
             }}
+          />
+        ) : event.isShared ? (
+          <People
+            aria-hidden="true"
+            focusable="false"
+            width={10}
+            height={12}
+            color={pointColor ?? 'transparent'}
           />
         ) : (
           <S.Circle backgroundColor={pointColor} />
