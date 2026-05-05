@@ -46,20 +46,23 @@ const CustomDatePicker = ({ selectedDate, onSelectDate }: DatePickerRenderProps)
     <S.CustomCalendarRoot>
       <S.Year> {`${displayMonth.getFullYear()}`}</S.Year>
       <S.CustomCalendarHeader>
-        <Arrow
-          color={theme.colors.textColor2}
+        <S.NavButton
           type="button"
+          aria-label="이전 달"
           onClick={() => setMonthOffset((prev) => prev - 1)}
-        />
-        <S.CustomCalendarTitle>
+        >
+          <Arrow color={theme.colors.textColor2} />
+        </S.NavButton>
+        <S.CustomCalendarTitle aria-live="polite" aria-atomic="true">
           {`${(displayMonth.getMonth() + 1).toString().padStart(2, '0')}월`}
         </S.CustomCalendarTitle>
-        <Arrow
+        <S.NavButton
           type="button"
-          color={theme.colors.textColor2}
+          aria-label="다음 달"
           onClick={() => setMonthOffset((prev) => prev + 1)}
-          css={{ rotate: '180deg' }}
-        />
+        >
+          <Arrow color={theme.colors.textColor2} css={{ rotate: '180deg' }} />
+        </S.NavButton>
       </S.CustomCalendarHeader>
       <S.CustomCalendarWeekdays>
         {WEEKDAYS.map((label, index) => (

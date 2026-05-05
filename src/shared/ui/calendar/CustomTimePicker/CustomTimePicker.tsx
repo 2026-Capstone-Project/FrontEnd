@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { type ChangeEvent, useEffect, useRef } from 'react'
 
 import type { TimePickerRenderProps } from '@/shared/types/event/event'
 
@@ -28,7 +28,7 @@ const CustomTimePicker = ({ value = '09:00', onChange }: TimePickerRenderProps) 
   const sanitizeDigits = (value: string) => value.replace(/[^0-9]/g, '').slice(0, 2)
   const formatTwoDigits = (value?: string) => value?.padStart(2, '0') ?? '00'
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'hour' | 'minute') => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>, type: 'hour' | 'minute') => {
     const max = type === 'hour' ? 23 : 59
     const digits = sanitizeDigits(e.target.value)
     let val = digits

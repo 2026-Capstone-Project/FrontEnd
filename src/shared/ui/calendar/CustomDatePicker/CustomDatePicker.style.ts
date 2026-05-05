@@ -21,6 +21,22 @@ export const CustomCalendarTitle = styled.span`
   color: ${theme.colors.textColor2};
 `
 
+export const NavButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: ${theme.colors.textColor2};
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.06);
+  }
+`
+
 export const CustomCalendarClose = styled.button`
   border: none;
   background: transparent;

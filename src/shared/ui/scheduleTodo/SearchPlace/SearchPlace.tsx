@@ -4,8 +4,8 @@ import Check from '@/shared/assets/icons/check.svg?react'
 import Search from '@/shared/assets/icons/search.svg?react'
 import type { SearchPlaceProps } from '@/shared/types/schedule/types'
 import { DEFAULT_CENTER } from '@/shared/utils/searchPlace'
+import useSearchPlace from '@/shared/utils/useSearchPlace'
 
-import useSearchPlace from '../../../utils/useSearchPlace'
 import * as S from './SearchPlace.style'
 import SearchPlacePanel from './SearchPlacePanel'
 

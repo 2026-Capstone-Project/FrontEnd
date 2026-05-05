@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 
-import type { PlaceResult, ResultsView, SearchState } from '../types/schedule/types'
-import { MAX_RECENT_SEARCHES } from './searchPlace'
+import type { PlaceResult, ResultsView, SearchState } from '@/shared/types/schedule/types'
+import { MAX_RECENT_SEARCHES } from '@/shared/utils/searchPlace'
 
 type UseSearchPlacePanelModelParams = {
   issue: 'missing_key' | 'sdk_loading' | 'search_failed' | null

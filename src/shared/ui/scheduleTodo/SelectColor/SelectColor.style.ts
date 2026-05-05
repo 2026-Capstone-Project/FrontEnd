@@ -1,10 +1,12 @@
 import styled from '@emotion/styled'
 
-export const CircleOption = styled.div<{ color: string; isSelected?: boolean }>`
+export const CircleOption = styled.button<{ color: string; isSelected?: boolean }>`
   width: 20px;
   height: 20px;
   border-radius: 50%;
   background-color: ${(props) => props.color};
+  border: none;
+  padding: 0;
   position: relative;
   cursor: pointer;
   transition: transform 0.2s;
@@ -31,17 +33,23 @@ export const Circle = styled.div<{ color: string }>`
   border-radius: 50%;
   background-color: ${(props) => props.color};
 `
+
 export const ColorDropdown = styled.div`
+  position: relative;
+  width: fit-content;
+`
+
+export const TriggerButton = styled.button`
   display: flex;
   gap: 10px;
-  position: relative;
   padding: 8px 4px 8px 10px;
-  width: fit-content;
   align-items: center;
   background-color: ${(props) => props.theme.colors.inputColor};
   border-radius: 8px;
+  border: none;
   cursor: pointer;
 `
+
 export const ColorOptions = styled.div`
   position: absolute;
   top: calc(100% + 8px);
