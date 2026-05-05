@@ -5,59 +5,13 @@ import {
   useRef,
   useState,
 } from 'react'
-import type {
-  FieldValues,
-  Path,
-  PathValue,
-  UseFormRegister,
-  UseFormSetValue,
-  UseFormWatch,
-} from 'react-hook-form'
+import type { FieldValues, PathValue } from 'react-hook-form'
 import { useFormContext } from 'react-hook-form'
 
+import type { TitleSuggestionInputProps } from '@/shared/types/scheduleTodo/titleSuggestionInput'
+import { getHighlightedSegments } from '@/shared/utils/titleSuggestionInput'
+
 import * as S from './TitleSuggestionInput.style'
-
-const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-
-const getHighlightedSegments = (text: string, query: string) => {
-  if (!query) {
-    return [{ text }]
-  }
-  const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi')
-  const segments: Array<{ text: string; highlight?: boolean }> = []
-  let lastIndex = 0
-  let match: RegExpExecArray | null = null
-
-  while ((match = regex.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      segments.push({ text: text.slice(lastIndex, match.index) })
-    }
-    segments.push({ text: match[0], highlight: true })
-    lastIndex = match.index + match[0].length
-  }
-
-  if (lastIndex < text.length) {
-    segments.push({ text: text.slice(lastIndex) })
-  }
-
-  return segments
-}
-
-type TitleSuggestionInputFormController<TFieldValues extends FieldValues> = {
-  register: UseFormRegister<TFieldValues>
-  watch: UseFormWatch<TFieldValues>
-  setValue: UseFormSetValue<TFieldValues>
-}
-
-type TitleSuggestionInputProps<TFieldValues extends FieldValues> = {
-  fieldName: Path<TFieldValues>
-  placeholder?: string
-  suggestions?: string[]
-  autoFocus?: boolean
-  formController?: TitleSuggestionInputFormController<TFieldValues>
-  onConfirm?: (value: string) => void
-  onLiveChange?: (value: string) => void
-}
 
 const TitleSuggestionInput = <TFieldValues extends FieldValues>({
   fieldName,
@@ -65,6 +19,7 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
   suggestions = [],
   autoFocus = false,
   formController,
+  inputColor,
   onConfirm,
   onLiveChange,
 }: TitleSuggestionInputProps<TFieldValues>) => {
@@ -157,6 +112,7 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
       <S.Input
         {...registerProps}
         ref={handleInputRef}
+        $color={inputColor}
         placeholder={placeholder}
         autoComplete="off"
         onFocus={() => {

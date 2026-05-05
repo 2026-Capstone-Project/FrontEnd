@@ -11,7 +11,7 @@ import ShareSchedulePanel from './ShareSchedulePanel'
 
 type ScheduleEditorFieldsProps = Pick<
   ScheduleEditorFormProps,
-  'headerTitlePortalTarget' | 'isEditing' | 'modalWrapperElement' | 'mode'
+  'headerTitlePortalTarget' | 'isEditing' | 'isShared' | 'modalWrapperElement' | 'mode'
 > & {
   updateConfig: (changes: Partial<RepeatConfig>) => void
   handleRepeatType: (value: RepeatType) => void
@@ -23,6 +23,7 @@ type ScheduleEditorFieldsProps = Pick<
 const ScheduleEditorFields = ({
   headerTitlePortalTarget,
   isEditing = false,
+  isShared = false,
   modalWrapperElement,
   mode = 'modal',
   updateConfig,
@@ -37,6 +38,7 @@ const ScheduleEditorFields = ({
         <ScheduleTitleField
           portalTarget={headerTitlePortalTarget}
           autoFocus={!isEditing}
+          isShared={isShared}
           onTitleConfirm={onTitleConfirm}
         />
         <ScheduleDateTimeSection mode={mode} handleAllDayToggle={handleAllDayToggle} />

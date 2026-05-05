@@ -123,7 +123,7 @@ export const Button = styled.button`
   gap: 6px;
   color: ${theme.colors.white};
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   white-space: nowrap;
 
   cursor: pointer;

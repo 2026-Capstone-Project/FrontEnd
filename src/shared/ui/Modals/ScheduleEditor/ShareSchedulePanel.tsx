@@ -2,9 +2,8 @@ import { useEffect, useState } from 'react'
 
 import Arrow from '@/shared/assets/icons/chevron.svg?react'
 import Close from '@/shared/assets/icons/close.svg?react'
-import SearchFriend, {
-  type ScheduleShareFriend,
-} from '@/shared/ui/scheduleTodo/SearchFriend/SearchFriend'
+import type { ScheduleShareFriend } from '@/shared/types/schedule/shareFriend'
+import SearchFriend from '@/shared/ui/scheduleTodo/SearchFriend/SearchFriend'
 
 import * as S from './index.style'
 

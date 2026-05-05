@@ -29,6 +29,7 @@ const ScheduleEditorContent = ({
   registerCloseGuard,
   registerFooterChildren,
   isEditing = false,
+  isShared = false,
   headerTitlePortalTarget,
   modalWrapperElement,
   initialEvent,
@@ -180,6 +181,7 @@ const ScheduleEditorContent = ({
         <ScheduleEditorFields
           headerTitlePortalTarget={headerTitlePortalTarget}
           isEditing={isEditing}
+          isShared={isShared}
           modalWrapperElement={modalWrapperElement}
           mode={mode}
           handleAllDayToggle={handleAllDayToggle}

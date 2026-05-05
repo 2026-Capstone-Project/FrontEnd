@@ -25,8 +25,8 @@ export const SearchInput = styled.input`
 
   &:focus {
     outline: none;
-    border-color: ${theme.colors.primary2};
-    box-shadow: 0 0 0 4px rgba(19, 138, 172, 0.08);
+    border-color: #acacac;
+    box-shadow: none;
   }
 `
 
@@ -40,7 +40,7 @@ export const InputActions = styled.div`
   gap: 6px;
 `
 
-const InputActionButton = styled.button`
+export const SearchButton = styled.button`
   width: 32px;
   height: 32px;
   border: none;
@@ -49,22 +49,15 @@ const InputActionButton = styled.button`
   place-items: center;
   color: ${theme.colors.primary2};
   cursor: pointer;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
-
   &:disabled {
     cursor: not-allowed;
     opacity: 0.6;
   }
 
   &:not(:disabled):hover {
-    background-color: ${theme.colors.primary2};
     color: ${theme.colors.white};
   }
 `
-
-export const SearchButton = styled(InputActionButton)``
 
 export const SearchResult = styled.div<{ position: { left: number; top: number; width: number } }>`
   position: fixed;
@@ -123,8 +116,8 @@ export const EmptySearchResult = styled.div`
   text-align: center;
 `
 
-export const Name = styled.div`
-  color: #655446;
+export const Name = styled.div<{ isAdded: boolean }>`
+  color: ${(props) => (props.isAdded ? '#484569' : '#655446')};
 `
 
 export const Email = styled.div`

@@ -4,83 +4,17 @@ import { createPortal } from 'react-dom'
 import Close from '@/shared/assets/icons/close.svg?react'
 import Plus from '@/shared/assets/icons/plus.svg?react'
 import Search from '@/shared/assets/icons/search.svg?react'
+import { MOCK_SCHEDULE_SHARE_FRIENDS } from '@/shared/constants/scheduleShareFriend'
 import { theme } from '@/shared/styles'
+import type { ScheduleShareFriend } from '@/shared/types/schedule/shareFriend'
+import { isElementVisible } from '@/shared/utils/domVisibility'
+import { filterScheduleShareFriends } from '@/shared/utils/scheduleShareFriend'
 
 import * as S from './SearchFriend.style'
-
-export type ScheduleShareFriend = {
-  userName: string
-  userId: string
-  email: string
-}
 
 type SearchFriendProps = {
   selectedFriends: ScheduleShareFriend[]
   onToggleFriend: (friend: ScheduleShareFriend) => void
-}
-
-const MOCK_FRIENDS: ScheduleShareFriend[] = [
-  { userName: '김철수', userId: '1', email: 'asdf@asdf.com' },
-  { userName: '김철수', userId: '5', email: 'asdf@asdf.com' },
-  { userName: '김철수', userId: '6', email: 'asdf@asdf.com' },
-  { userName: '김철수', userId: '7', email: 'asdf@asdf.com' },
-  { userName: '이영희', userId: '2', email: 'asdf@asdf.com' },
-  { userName: '박민수', userId: '3', email: 'asdf@asdf.com' },
-  { userName: '최지우', userId: '4', email: 'asdf@asdf.com' },
-] // TODO: 친구 목록 API 연동 필요
-
-const OVERFLOW_SCROLL_PATTERN = /(auto|scroll|hidden|clip)/
-
-const getIntersectionRect = (firstRect: DOMRect, secondRect: DOMRect) => {
-  const top = Math.max(firstRect.top, secondRect.top)
-  const right = Math.min(firstRect.right, secondRect.right)
-  const bottom = Math.min(firstRect.bottom, secondRect.bottom)
-  const left = Math.max(firstRect.left, secondRect.left)
-
-  return {
-    top,
-    right,
-    bottom,
-    left,
-    width: right - left,
-    height: bottom - top,
-  }
-}
-
-const hasVisibleArea = (rect: Pick<DOMRect, 'width' | 'height'>) =>
-  rect.width > 0 && rect.height > 0
-
-const isClippedByScrollableParent = (element: HTMLElement, parent: HTMLElement) => {
-  const parentStyle = window.getComputedStyle(parent)
-  const clipsContent = OVERFLOW_SCROLL_PATTERN.test(
-    `${parentStyle.overflow}${parentStyle.overflowX}${parentStyle.overflowY}`,
-  )
-
-  if (!clipsContent) return false
-
-  const visibleRect = getIntersectionRect(
-    element.getBoundingClientRect(),
-    parent.getBoundingClientRect(),
-  )
-
-  return !hasVisibleArea(visibleRect)
-}
-
-const isElementVisible = (element: HTMLElement) => {
-  const elementRect = element.getBoundingClientRect()
-  const viewportRect = new DOMRect(0, 0, window.innerWidth, window.innerHeight)
-  const viewportVisibleRect = getIntersectionRect(elementRect, viewportRect)
-
-  if (!hasVisibleArea(viewportVisibleRect)) return false
-
-  let parentElement = element.parentElement
-
-  while (parentElement && parentElement !== document.body) {
-    if (isClippedByScrollableParent(element, parentElement)) return false
-    parentElement = parentElement.parentElement
-  }
-
-  return true
 }
 
 const SearchFriend = ({ selectedFriends, onToggleFriend }: SearchFriendProps) => {
@@ -95,18 +29,11 @@ const SearchFriend = ({ selectedFriends, onToggleFriend }: SearchFriendProps) =>
   )
   const trimmedKeyword = keyword.trim().toLowerCase()
   const filteredFriends = useMemo(
-    () =>
-      trimmedKeyword
-        ? MOCK_FRIENDS.filter(
-            (friend) =>
-              friend.userName.toLowerCase().includes(trimmedKeyword) ||
-              friend.email.toLowerCase().includes(trimmedKeyword),
-          )
-        : [],
+    () => filterScheduleShareFriends(MOCK_SCHEDULE_SHARE_FRIENDS, trimmedKeyword),
     [trimmedKeyword],
   )
 
-  const shouldShowResult = isOpen && Boolean(trimmedKeyword)
+  const shouldShowResult = isOpen && Boolean(trimmedKeyword) && filteredFriends.length > 0
 
   const updateResultPosition = () => {
     const inputWrapper = inputWrapperRef.current
@@ -131,9 +58,6 @@ const SearchFriend = ({ selectedFriends, onToggleFriend }: SearchFriendProps) =>
 
     return createPortal(
       <S.SearchResult ref={resultRef} position={resultPosition}>
-        {filteredFriends.length === 0 && (
-          <S.EmptySearchResult>검색 결과가 없습니다</S.EmptySearchResult>
-        )}
         {filteredFriends.map((friend) => {
           const isSelected = selectedFriendIds.has(friend.userId)
 
@@ -144,7 +68,7 @@ const SearchFriend = ({ selectedFriends, onToggleFriend }: SearchFriendProps) =>
               isAdded={isSelected}
               onClick={() => onToggleFriend(friend)}
             >
-              <S.Name>{friend.userName} </S.Name>
+              <S.Name isAdded={isSelected}>{friend.userName}</S.Name>
               <div className="divider" />
               <S.Email>{friend.email}</S.Email>
               {isSelected ? (

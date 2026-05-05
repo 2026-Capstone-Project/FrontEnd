@@ -4,18 +4,21 @@ import { useFormContext, useWatch } from 'react-hook-form'
 
 import { useThrottledValue } from '@/shared/hooks/common/useThrottledValue'
 import { useEventTitleHistoryQuery } from '@/shared/hooks/query/useCalendarQueries'
+import { theme } from '@/shared/styles/theme'
 import type { ScheduleEditorFormValues } from '@/shared/types/event/event'
 import TitleSuggestionInput from '@/shared/ui/scheduleTodo/TitleSuggestionInput/TitleSuggestionInput'
 
 type ScheduleTitleFieldProps = {
   portalTarget?: HTMLElement | null
   autoFocus?: boolean
+  isShared?: boolean
   onTitleConfirm: (value: string) => void
 }
 
 const ScheduleTitleField = ({
   portalTarget,
   autoFocus = true,
+  isShared = false,
   onTitleConfirm,
 }: ScheduleTitleFieldProps) => {
   const { control } = useFormContext<ScheduleEditorFormValues>()
@@ -33,6 +36,7 @@ const ScheduleTitleField = ({
       placeholder="새로운 일정"
       autoFocus={autoFocus}
       suggestions={suggestions}
+      inputColor={isShared ? theme.colors.share.point : undefined}
       onLiveChange={onTitleConfirm}
       onConfirm={onTitleConfirm}
     />

@@ -10,7 +10,7 @@ export const Wrapper = styled.div`
   gap: 6px;
 `
 
-export const Input = styled.input`
+export const Input = styled.input<{ $color?: string }>`
   width: 100%;
   height: 43px;
   border: none;
@@ -18,6 +18,7 @@ export const Input = styled.input`
   padding: 0 12px 0 0;
   font-size: 20px;
   font-weight: 500;
+  color: ${({ $color }) => $color ?? theme.colors.black};
   &:focus {
     outline: none;
     border: none;
