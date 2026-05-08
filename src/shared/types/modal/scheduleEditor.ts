@@ -14,10 +14,12 @@ export type ScheduleEditorFormProps = {
   eventId: CalendarEvent['id']
   onClose: () => void
   isEditing?: boolean
+  isShared?: boolean
   headerTitlePortalTarget?: HTMLElement | null
   initialEvent?: CalendarEvent | null
   onEventColorChange?: (eventId: CalendarEvent['id'], color: EventColorType) => void
   onEventTitleConfirm?: (eventId: CalendarEvent['id'], title: string) => void
+  onSharedChange?: (isShared: boolean) => void
   onEventTimingChange?: (
     eventId: CalendarEvent['id'],
     start: Date,

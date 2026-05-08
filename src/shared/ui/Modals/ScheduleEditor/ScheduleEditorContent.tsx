@@ -29,6 +29,7 @@ const ScheduleEditorContent = ({
   registerCloseGuard,
   registerFooterChildren,
   isEditing = false,
+  isShared = false,
   headerTitlePortalTarget,
   modalWrapperElement,
   initialEvent,
@@ -36,6 +37,7 @@ const ScheduleEditorContent = ({
   onEventColorChange,
   onEventTitleConfirm,
   onEventTimingChange,
+  onSharedChange,
   schedule,
 }: ScheduleEditorContentProps) => {
   const {
@@ -179,12 +181,14 @@ const ScheduleEditorContent = ({
         <ScheduleEditorFields
           headerTitlePortalTarget={headerTitlePortalTarget}
           isEditing={isEditing}
+          isShared={isShared}
           modalWrapperElement={modalWrapperElement}
           mode={mode}
           handleAllDayToggle={handleAllDayToggle}
           updateConfig={updateConfig}
           handleRepeatType={handleRepeatType}
           onTitleConfirm={handleTitleConfirm}
+          onSharedChange={onSharedChange}
         />
       </form>
       <ScheduleEditorConfirmModals

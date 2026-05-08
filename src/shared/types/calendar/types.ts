@@ -14,6 +14,7 @@ export type Event = {
   isAllDay: boolean
   color: EventColorType
   recurrenceGroup: RecurrenceGroup | null
+  isShared?: boolean
 }
 
 export type CalendarEvent = Omit<Event, 'start' | 'end'> & {

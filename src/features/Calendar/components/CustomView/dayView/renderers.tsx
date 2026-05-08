@@ -1,6 +1,8 @@
 import moment from 'moment'
 import type { MutableRefObject, Ref } from 'react'
 
+import People from '@/assets/icons/people.svg?react'
+
 import type { CalendarEvent } from '../../../../../shared/types/calendar/types'
 import { TIMED_SLOT_CONFIG } from '../../../domain/constants'
 import { getColorPalette } from '../../../utils/colorPalette'
@@ -78,6 +80,14 @@ export const renderAllDayEventBadges = (
               eventChange.stopPropagation()
               onToggleTodo?.(event.id)
             }}
+          />
+        ) : event.isShared ? (
+          <People
+            aria-hidden="true"
+            focusable="false"
+            width={10}
+            height={12}
+            color={palette.point ?? 'transparent'}
           />
         ) : (
           <S.Circle backgroundColor={palette.point} />
@@ -235,6 +245,14 @@ export const renderTimeOverlayColumn = ({
                         eventChange.stopPropagation()
                         onToggleTodo?.(event.id)
                       }}
+                    />
+                  ) : event.isShared ? (
+                    <People
+                      aria-hidden="true"
+                      focusable="false"
+                      width={10}
+                      height={12}
+                      color={palette.point ?? 'transparent'}
                     />
                   ) : (
                     <S.Circle backgroundColor={palette.point} />

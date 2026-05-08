@@ -22,7 +22,6 @@ export const ModalOverlay = styled.div`
   ${media.down(theme.breakPoints.tablet)} {
     position: fixed;
     align-items: flex-start;
-    padding-top: 60px;
     box-sizing: border-box;
     gap: 0;
   }
@@ -56,7 +55,6 @@ export const ModalWrapper = styled.div<{ mode: 'modal' | 'inline' }>`
   inset: 0;
   ${media.down(theme.breakPoints.desktop)} {
     position: fixed;
-    padding-top: 60px;
     align-self: center;
     justify-self: center;
     gap: 0;
@@ -105,12 +103,14 @@ export const ModalContent = styled.div`
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
+  overflow-x: visible;
+  max-height: 600px;
   scrollbar-gutter: stable both-edges;
 `
 export const ModalFooter = styled.div`
   display: flex;
   justify-content: flex-end;
-  padding: 0px 24px 24px 24px;
+  padding: 24px;
 `
 export const Button = styled.button`
   background-color: ${theme.colors.primary2};
@@ -120,6 +120,11 @@ export const Button = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
+  color: ${theme.colors.white};
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
 
   cursor: pointer;
 `
@@ -130,6 +135,8 @@ export const FooterRight = styled.div`
 `
 export const FooterLeft = styled.div`
   flex: 1;
+  display: flex;
+  align-items: center;
 `
 
 export const InlineWrapper = styled.div`

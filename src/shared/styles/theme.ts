@@ -8,7 +8,10 @@ export const colors = {
   textColor3: '#757575', // --Text-Color-3
   inputColor: '#F7F7F7',
   red: '#E94B43', // --Red
-
+  share: {
+    base: '#ECEBFF',
+    point: '#594FCA',
+  },
   white: '#FDFDFD', // 메뉴 탭
   background: '#FAFAFA', // 전체 바탕
   black: '#111827', // 모든 블랙 대체

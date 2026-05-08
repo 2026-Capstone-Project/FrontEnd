@@ -5,8 +5,8 @@ import { useFormContext, useWatch } from 'react-hook-form'
 import { useSchedulePlaceOverlay } from '@/shared/hooks/addSchedule'
 import type { ScheduleEditorFormValues } from '@/shared/types/event/event'
 import type { ScheduleEditorFormProps } from '@/shared/types/modal/scheduleEditor'
-import SearchPlace from '@/shared/ui/common/SearchPlace/SearchPlace'
 import * as S from '@/shared/ui/Modals/ScheduleEditor/index.style'
+import SearchPlace from '@/shared/ui/scheduleTodo/SearchPlace/SearchPlace'
 
 type ScheduleDetailsSectionProps = Pick<ScheduleEditorFormProps, 'modalWrapperElement' | 'mode'>
 
