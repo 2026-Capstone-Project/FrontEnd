@@ -96,6 +96,7 @@ export const useSchedulePatchController = ({
         isAllDay: values.isAllday,
         color: values.eventColor,
         recurrenceGroup,
+        friendIds: values.friendIds ?? [],
       })
     },
     [buildDateTime, date, formatDateTime, postEventMutation],

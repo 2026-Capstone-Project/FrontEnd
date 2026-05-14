@@ -46,8 +46,16 @@ type PatchEventMutate = (params: {
     color?: Event['color']
     isAllDay?: boolean
     recurrenceGroup?: Event['recurrenceGroup'] | null
+    friendIds?: Event['friendIds']
   }
 }) => Promise<unknown>
+
+const areSameFriendIds = (left: number[] = [], right: number[] = []) => {
+  if (left.length !== right.length) return false
+  const leftSorted = [...left].sort((a, b) => a - b)
+  const rightSorted = [...right].sort((a, b) => a - b)
+  return leftSorted.every((friendId, index) => friendId === rightSorted[index])
+}
 
 type UseSchedulePatchArgs = {
   eventId: number | null
@@ -107,6 +115,7 @@ export const useSchedulePatch = ({
       const initialAddress = initialEvent?.address ?? null
       const initialColor = initialEvent?.color
       const initialIsAllday = initialEvent?.isAllDay ?? false
+      const initialFriendIds = initialEvent?.friendIds ?? []
       const initialStart =
         initialEvent?.start != null ? formatDateTime(new Date(initialEvent.start)) : undefined
       const initialEnd =
@@ -118,6 +127,7 @@ export const useSchedulePatch = ({
       const nextAddress = values.address?.trim() || null
       const nextStart = formatDateTime(start)
       const nextEnd = formatDateTime(end)
+      const nextFriendIds = values.friendIds ?? []
       const hasStartDateChanged =
         initialEvent?.start != null && !isSameYmd(new Date(initialEvent.start), start)
       const shouldSendMonthlySinglePattern =
@@ -151,6 +161,7 @@ export const useSchedulePatch = ({
         ...(initialEnd && nextEnd !== initialEnd ? { endTime: nextEnd } : {}),
         ...(initialColor && values.eventColor !== initialColor ? { color: values.eventColor } : {}),
         ...(values.isAllday !== initialIsAllday ? { isAllDay: values.isAllday } : {}),
+        ...(!areSameFriendIds(nextFriendIds, initialFriendIds) ? { friendIds: nextFriendIds } : {}),
         ...(recurrenceGroupPayload !== undefined
           ? {
               recurrenceGroup: recurrenceGroupPayload,

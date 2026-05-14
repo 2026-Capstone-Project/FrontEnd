@@ -38,6 +38,7 @@ export const postEvents = async (eventData: {
   color?: EventColorType
   isAllDay?: boolean
   recurrenceGroup?: RecurrenceGroup
+  friendIds?: number[]
 }) => {
   const { data } = await axiosInstance.post('/events', eventData)
   return data
@@ -55,6 +56,7 @@ export const patchEvent = async (
     color?: EventColorType
     isAllDay?: boolean
     recurrenceGroup?: RecurrenceGroup | null
+    friendIds?: number[]
   },
   params: {
     occurrenceDate: string
