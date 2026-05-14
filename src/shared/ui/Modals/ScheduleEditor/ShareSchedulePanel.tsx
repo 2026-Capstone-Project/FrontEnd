@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
+import { useFormContext, useWatch } from 'react-hook-form'
 
 import Arrow from '@/shared/assets/icons/chevron.svg?react'
 import Close from '@/shared/assets/icons/close.svg?react'
+import type { ScheduleEditorFormValues } from '@/shared/types/event/event'
 import type { ScheduleShareFriend } from '@/shared/types/schedule/shareFriend'
 import SearchFriend from '@/shared/ui/scheduleTodo/SearchFriend/SearchFriend'
 
@@ -12,17 +14,28 @@ type ShareSchedulePanelProps = {
 }
 
 const ShareSchedulePanel = ({ onSharedChange }: ShareSchedulePanelProps) => {
+  const { control, setValue } = useFormContext<ScheduleEditorFormValues>()
   const [isOpen, setIsOpen] = useState(false)
   const [selectedFriends, setSelectedFriends] = useState<ScheduleShareFriend[]>([])
+  const selectedFriendIds = useWatch({ control, name: 'friendIds' }) ?? []
 
   useEffect(() => {
-    onSharedChange?.(selectedFriends.length > 0)
-  }, [onSharedChange, selectedFriends.length])
+    onSharedChange?.(selectedFriendIds.length > 0)
+  }, [onSharedChange, selectedFriendIds.length])
 
   const handleToggleFriend = (friend: ScheduleShareFriend) => {
-    setSelectedFriends((previous) => {
-      const isSelected = previous.some((selectedFriend) => selectedFriend.userId === friend.userId)
+    const friendId = Number(friend.userId)
+    const isSelected = selectedFriendIds.includes(friendId)
 
+    setValue(
+      'friendIds',
+      isSelected
+        ? selectedFriendIds.filter((selectedFriendId) => selectedFriendId !== friendId)
+        : [...selectedFriendIds, friendId],
+      { shouldDirty: true, shouldValidate: true },
+    )
+
+    setSelectedFriends((previous) => {
       if (isSelected) {
         return previous.filter((selectedFriend) => selectedFriend.userId !== friend.userId)
       }
@@ -32,6 +45,12 @@ const ShareSchedulePanel = ({ onSharedChange }: ShareSchedulePanelProps) => {
   }
 
   const handleRemoveFriend = (friendId: ScheduleShareFriend['userId']) => {
+    const numericFriendId = Number(friendId)
+    setValue(
+      'friendIds',
+      selectedFriendIds.filter((selectedFriendId) => selectedFriendId !== numericFriendId),
+      { shouldDirty: true, shouldValidate: true },
+    )
     setSelectedFriends((previous) => previous.filter((friend) => friend.userId !== friendId))
   }
 
@@ -41,7 +60,7 @@ const ShareSchedulePanel = ({ onSharedChange }: ShareSchedulePanelProps) => {
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         isOpen={isOpen}
-        isShared={selectedFriends.length > 0}
+        isShared={selectedFriendIds.length > 0}
       >
         <div className="section-title">
           <div className="dot" />
@@ -51,7 +70,7 @@ const ShareSchedulePanel = ({ onSharedChange }: ShareSchedulePanelProps) => {
       </S.FriendSectionOpenButton>
       {isOpen && (
         <S.FriendSection>
-          <SearchFriend selectedFriends={selectedFriends} onToggleFriend={handleToggleFriend} />
+          <SearchFriend selectedFriendIds={selectedFriendIds} onToggleFriend={handleToggleFriend} />
 
           <div className="added-friend-list">
             {selectedFriends.map((friend) => (

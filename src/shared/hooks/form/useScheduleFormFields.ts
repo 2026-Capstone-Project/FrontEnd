@@ -96,6 +96,7 @@ const buildScheduleDefaultValues = ({
     isAllday: draftValues?.isAllday ?? initialIsAllDay,
     eventColor: draftValues?.eventColor ?? initialColor,
     repeatConfig: draftValues?.repeatConfig ?? initialRepeatConfig,
+    friendIds: initialEvent?.friendIds ?? [],
   }
 }
 
@@ -140,6 +141,7 @@ export const useScheduleFormFields = ({
     register('isAllday')
     register('repeatConfig')
     register('eventColor')
+    register('friendIds')
   }, [register])
 
   useEffect(() => {

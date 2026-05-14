@@ -4,36 +4,47 @@ import { createPortal } from 'react-dom'
 import Close from '@/shared/assets/icons/close.svg?react'
 import Plus from '@/shared/assets/icons/plus.svg?react'
 import Search from '@/shared/assets/icons/search.svg?react'
-import { MOCK_SCHEDULE_SHARE_FRIENDS } from '@/shared/constants/scheduleShareFriend'
+import { useThrottledValue } from '@/shared/hooks/common/useThrottledValue'
+import { useFriendSearchQuery } from '@/shared/hooks/query/useFriendQueries'
 import { theme } from '@/shared/styles'
 import type { ScheduleShareFriend } from '@/shared/types/schedule/shareFriend'
 import { isElementVisible } from '@/shared/utils/domVisibility'
-import { filterScheduleShareFriends } from '@/shared/utils/scheduleShareFriend'
 
 import * as S from './SearchFriend.style'
 
 type SearchFriendProps = {
-  selectedFriends: ScheduleShareFriend[]
+  selectedFriendIds: number[]
   onToggleFriend: (friend: ScheduleShareFriend) => void
 }
 
-const SearchFriend = ({ selectedFriends, onToggleFriend }: SearchFriendProps) => {
+const SearchFriend = ({ selectedFriendIds, onToggleFriend }: SearchFriendProps) => {
   const [keyword, setKeyword] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const [resultPosition, setResultPosition] = useState({ left: 0, top: 0, width: 0 })
   const inputWrapperRef = useRef<HTMLDivElement>(null)
   const resultRef = useRef<HTMLDivElement>(null)
-  const selectedFriendIds = useMemo(
-    () => new Set(selectedFriends.map((friend) => friend.userId)),
-    [selectedFriends],
-  )
-  const trimmedKeyword = keyword.trim().toLowerCase()
-  const filteredFriends = useMemo(
-    () => filterScheduleShareFriends(MOCK_SCHEDULE_SHARE_FRIENDS, trimmedKeyword),
-    [trimmedKeyword],
+  const selectedFriendIdSet = useMemo(() => new Set(selectedFriendIds), [selectedFriendIds])
+  const trimmedKeyword = keyword.trim()
+  const throttledKeyword = useThrottledValue(trimmedKeyword, 300)
+  const {
+    data: friendSearchData,
+    isError,
+    isFetching,
+  } = useFriendSearchQuery(throttledKeyword, Boolean(throttledKeyword))
+  const searchedFriends = useMemo(
+    () =>
+      (friendSearchData?.result.friendDetailList ?? []).map(
+        (friend): ScheduleShareFriend => ({
+          userId: String(friend.id),
+          userName: friend.opponentName,
+          email: friend.opponentEmail,
+        }),
+      ),
+    [friendSearchData?.result.friendDetailList],
   )
 
-  const shouldShowResult = isOpen && Boolean(trimmedKeyword) && filteredFriends.length > 0
+  const shouldShowResult = isOpen && Boolean(trimmedKeyword)
+  const isWaitingForThrottledSearch = trimmedKeyword !== throttledKeyword || isFetching
 
   const updateResultPosition = () => {
     const inputWrapper = inputWrapperRef.current
@@ -58,41 +69,49 @@ const SearchFriend = ({ selectedFriends, onToggleFriend }: SearchFriendProps) =>
 
     return createPortal(
       <S.SearchResult ref={resultRef} position={resultPosition}>
-        {filteredFriends.map((friend) => {
-          const isSelected = selectedFriendIds.has(friend.userId)
+        {isWaitingForThrottledSearch ? (
+          <S.EmptySearchResult>검색 중...</S.EmptySearchResult>
+        ) : isError ? (
+          <S.EmptySearchResult>친구 검색에 실패했어요</S.EmptySearchResult>
+        ) : searchedFriends.length === 0 ? (
+          <S.EmptySearchResult>검색 결과가 없어요</S.EmptySearchResult>
+        ) : (
+          searchedFriends.map((friend) => {
+            const isSelected = selectedFriendIdSet.has(Number(friend.userId))
 
-          return (
-            <S.SearchResultItem
-              key={friend.userId}
-              type="button"
-              isAdded={isSelected}
-              onClick={() => onToggleFriend(friend)}
-            >
-              <S.Name isAdded={isSelected}>{friend.userName}</S.Name>
-              <div className="divider" />
-              <S.Email>{friend.email}</S.Email>
-              {isSelected ? (
-                <Close
-                  aria-hidden="true"
-                  focusable="false"
-                  height={18}
-                  width={18}
-                  color={theme.colors.textColor3}
-                  className="close"
-                />
-              ) : (
-                <Plus
-                  aria-hidden="true"
-                  focusable="false"
-                  height={20}
-                  width={20}
-                  color="#594FCA"
-                  className="plus"
-                />
-              )}
-            </S.SearchResultItem>
-          )
-        })}
+            return (
+              <S.SearchResultItem
+                key={friend.userId}
+                type="button"
+                isAdded={isSelected}
+                onClick={() => onToggleFriend(friend)}
+              >
+                <S.Name isAdded={isSelected}>{friend.userName}</S.Name>
+                <div className="divider" />
+                <S.Email>{friend.email}</S.Email>
+                {isSelected ? (
+                  <Close
+                    aria-hidden="true"
+                    focusable="false"
+                    height={18}
+                    width={18}
+                    color={theme.colors.textColor3}
+                    className="close"
+                  />
+                ) : (
+                  <Plus
+                    aria-hidden="true"
+                    focusable="false"
+                    height={20}
+                    width={20}
+                    color="#594FCA"
+                    className="plus"
+                  />
+                )}
+              </S.SearchResultItem>
+            )
+          })
+        )}
       </S.SearchResult>,
       document.body,
     )
@@ -111,7 +130,7 @@ const SearchFriend = ({ selectedFriends, onToggleFriend }: SearchFriendProps) =>
       window.removeEventListener('resize', updateResultPosition)
       window.removeEventListener('scroll', updateResultPosition, true)
     }
-  }, [selectedFriends.length, shouldShowResult])
+  }, [selectedFriendIds.length, shouldShowResult])
 
   useEffect(() => {
     if (!isOpen) return undefined
