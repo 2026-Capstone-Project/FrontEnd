@@ -8,6 +8,8 @@ import { theme } from '@/shared/styles/theme'
 import type { ScheduleEditorFormValues } from '@/shared/types/event/event'
 import TitleSuggestionInput from '@/shared/ui/scheduleTodo/TitleSuggestionInput/TitleSuggestionInput'
 
+const TITLE_SEARCH_THROTTLE_MS = 300
+
 type ScheduleTitleFieldProps = {
   portalTarget?: HTMLElement | null
   autoFocus?: boolean
@@ -23,7 +25,7 @@ const ScheduleTitleField = ({
 }: ScheduleTitleFieldProps) => {
   const { control } = useFormContext<ScheduleEditorFormValues>()
   const eventTitleKeyword = (useWatch({ control, name: 'eventTitle' }) ?? '').trim()
-  const throttledEventTitleKeyword = useThrottledValue(eventTitleKeyword, 150)
+  const throttledEventTitleKeyword = useThrottledValue(eventTitleKeyword, TITLE_SEARCH_THROTTLE_MS)
   const { data: eventTitleHistoryData } = useEventTitleHistoryQuery(
     throttledEventTitleKeyword,
     Boolean(throttledEventTitleKeyword),
