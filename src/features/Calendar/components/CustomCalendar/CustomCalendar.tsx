@@ -3,15 +3,7 @@ import 'moment/locale/ko'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 
 import moment from 'moment'
-import {
-  cloneElement,
-  type MouseEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { cloneElement, type MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { Calendar, type DateCellWrapperProps, momentLocalizer } from 'react-big-calendar'
 import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
@@ -20,6 +12,7 @@ import {
   useCalendarApiEvents,
   useCalendarCreateHandlers,
   useCalendarDateRange,
+  useCalendarDayViewTiming,
   useCalendarDraftEvent,
   useCalendarDragDrop,
   useCalendarKeyDelete,
@@ -28,23 +21,20 @@ import {
   useCalendarRbcProps,
   useCalendarResponsive,
   useCalendarSelection,
+  useCalendarTodoTimingPatch,
   useDayViewHandlers,
   useStoredCalendarView,
 } from '@/features/Calendar/hooks'
-import { buildRecurringGroupForFutureDrop } from '@/features/Calendar/hooks/useCalendarDragDrop'
 import { useCalendarEvents } from '@/features/Calendar/hooks/useCalendarEvents'
 import {
-  getEventOccurrenceKey,
-  resolveOccurrenceDateTime,
-} from '@/features/Calendar/utils/helpers/dayViewHelpers'
-import { getDetailTodo } from '@/shared/api/todo/api'
+  getEventOccurrenceScope,
+  getEventScopeFromEditOption,
+  getTodoScopeFromEditOption,
+} from '@/features/Calendar/utils/helpers/calendarRecurrenceScope'
+import { getEventOccurrenceKey } from '@/features/Calendar/utils/helpers/dayViewHelpers'
 import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
 import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
-import type {
-  RecurrenceEventScope,
-  RecurrenceTodoScope,
-} from '@/shared/types/recurrence/recurrence'
 import type { EditConfirmOption } from '@/shared/ui/Modals'
 
 import CalendarModals from './CalendarModals'
@@ -77,7 +67,7 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
   const { mutate: patchCompleteTodoMutate } = usePatchCompleteTodo()
   const { mutate: patchTodoMutate } = usePatchTodo()
   const { mutate: deleteTodoMutate } = useDeleteTodo()
-  const recurringTodoPatchSeqRef = useRef<Map<string, number>>(new Map())
+  const { patchTodoTiming } = useCalendarTodoTimingPatch({ patchTodoMutate })
   const [deleteConfirm, setDeleteConfirm] = useState<{
     isOpen: boolean
     eventId: CalendarEvent['id'] | null
@@ -126,68 +116,6 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
     [events, patchCompleteTodoMutate, toggleEventDone],
   )
 
-  const resolveFutureTodoRecurrenceGroup = useCallback(
-    async (todoId: number, occurrenceDate: string, nextStart: Date) => {
-      try {
-        // "이후 일정만 변경"일 때는 현재 occurrence 기준의 상세 recurrence를 받아
-        // 드롭한 날짜(nextStart)에 맞는 recurrenceGroup으로 재계산해 patch에 포함합니다.
-        const { result } = await getDetailTodo(todoId, occurrenceDate)
-        return buildRecurringGroupForFutureDrop(result?.recurrenceGroup ?? null, nextStart)
-      } catch (error) {
-        console.error('[CustomCalendar] failed to resolve todo recurrenceGroup', error)
-        return undefined
-      }
-    },
-    [],
-  )
-
-  // Todo 일정 이동 시 시간 패치
-  const patchTodoTiming = useCallback(
-    (
-      todoEvent: CalendarEvent,
-      start: Date,
-      options?: { scope?: RecurrenceTodoScope; occurrenceDate?: string },
-    ) => {
-      const startDate = moment(start).format('YYYY-MM-DD')
-      const occurrenceDate =
-        options?.occurrenceDate ??
-        moment(todoEvent.occurrenceDate ?? todoEvent.start).format('YYYY-MM-DD')
-      const patchScope = options?.scope ?? (todoEvent.isRecurring ? 'THIS_TODO' : undefined)
-      const dueTime = todoEvent.isAllDay ? undefined : moment(start).format('HH:mm')
-      const submitPatch = (recurrenceGroup?: CalendarEvent['recurrenceGroup']) => {
-        patchTodoMutate({
-          todoId: todoEvent.id,
-          occurrenceDate,
-          ...(patchScope ? { scope: patchScope } : {}),
-          requestBody: {
-            startDate,
-            dueTime,
-            isAllDay: todoEvent.isAllDay,
-            ...(recurrenceGroup ? { recurrenceGroup } : {}),
-          },
-        })
-      }
-
-      if (patchScope === 'THIS_AND_FOLLOWING') {
-        const requestKey = `${todoEvent.id}-${occurrenceDate}`
-        const nextSequence = (recurringTodoPatchSeqRef.current.get(requestKey) ?? 0) + 1
-        recurringTodoPatchSeqRef.current.set(requestKey, nextSequence)
-        // 반복 할 일을 "이후 항목" 범위로 이동한 경우 recurrenceGroup 보정이 필요합니다.
-        void resolveFutureTodoRecurrenceGroup(todoEvent.id, occurrenceDate, start).then(
-          (recurrenceGroup) => {
-            // 가장 마지막 드롭 요청만 반영해, 비동기 응답 역전으로 인한 역패치를 방지합니다.
-            const latestSequence = recurringTodoPatchSeqRef.current.get(requestKey)
-            if (latestSequence !== nextSequence) return
-            submitPatch(recurrenceGroup)
-          },
-        )
-        return
-      }
-      submitPatch()
-    },
-    [patchTodoMutate, resolveFutureTodoRecurrenceGroup],
-  )
-
   // 반응형 레이아웃 판단
   const isDesktop = useCalendarResponsive()
   const isInlineMode = isDesktop
@@ -195,7 +123,7 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
   const handleRemoveEvent = useCallback(
     (eventId: CalendarEvent['id'], occurrenceDate: string, isRecurring: boolean) => {
       const params = {
-        ...(isRecurring ? { scope: 'THIS_EVENT' as const } : {}),
+        ...(isRecurring ? { scope: getEventOccurrenceScope(isRecurring) } : {}),
         occurrenceDate: moment(occurrenceDate).format('YYYY-MM-DDTHH:mm:ss'),
       }
       deleteEventMutate(
@@ -274,49 +202,12 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
     setDeleteConfirm({ isOpen: false, eventId: null, title: '', occurrenceDate: '' })
   }, [])
 
-  // 일간 뷰에서 시간 변경 확정 처리
-  const handleDayViewEventTimeChange = useCallback(
-    (eventId: CalendarEvent['id'], start: Date, end: Date, type?: CalendarEvent['type']) => {
-      updateLocalEventTime(eventId, start, end, type)
-      if (type === 'todo') {
-        const todoEvent = events.find(
-          (eventItem) => eventItem.id === eventId && eventItem.type === 'todo',
-        )
-        if (todoEvent) {
-          patchTodoTiming(todoEvent, start)
-        }
-        return
-      }
-      const nextEnd = moment(end).format('YYYY-MM-DDTHH:mm:ss')
-      const targetEvent = events.find((eventItem) => eventItem.id === eventId)
-      const occurrenceDate = resolveOccurrenceDateTime(
-        targetEvent?.occurrenceDate,
-        targetEvent?.start ?? start,
-      )
-      const patchScope = targetEvent?.recurrenceGroup != null ? ('THIS_EVENT' as const) : undefined
-      patchEventMutate({
-        eventId,
-        params: {
-          occurrenceDate,
-          ...(patchScope ? { scope: patchScope } : {}),
-        },
-        eventData: {
-          startTime: moment(start).format('YYYY-MM-DDTHH:mm:ss'),
-          endTime: nextEnd,
-          isAllDay: false,
-        },
-      })
-    },
-    [events, patchEventMutate, patchTodoTiming, updateLocalEventTime],
-  )
-
-  // 일간 뷰에서 시간 변경 미리보기
-  const handleDayViewEventTimePreview = useCallback(
-    (eventId: CalendarEvent['id'], start: Date, end: Date, type?: CalendarEvent['type']) => {
-      updateLocalEventTime(eventId, start, end, type)
-    },
-    [updateLocalEventTime],
-  )
+  const { handleDayViewEventTimeChange, handleDayViewEventTimePreview } = useCalendarDayViewTiming({
+    events,
+    patchEventMutate,
+    patchTodoTiming,
+    updateLocalEventTime,
+  })
 
   // 키보드 삭제(Backspace) 처리
   useCalendarKeyDelete({
@@ -431,15 +322,11 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
     (option: EditConfirmOption) => {
       if (!recurringDropConfirm.args) return
       if (recurringDropConfirm.target === 'todo') {
-        const todoScope: RecurrenceTodoScope =
-          option === 'future' ? 'THIS_AND_FOLLOWING' : 'THIS_TODO'
-        applyEventDrop(recurringDropConfirm.args, { todoScope })
+        applyEventDrop(recurringDropConfirm.args, { todoScope: getTodoScopeFromEditOption(option) })
         handleCloseRecurringDropConfirm()
         return
       }
-      const eventScope: RecurrenceEventScope =
-        option === 'future' ? 'THIS_AND_FOLLOWING_EVENTS' : 'THIS_EVENT'
-      applyEventDrop(recurringDropConfirm.args, { eventScope })
+      applyEventDrop(recurringDropConfirm.args, { eventScope: getEventScopeFromEditOption(option) })
       handleCloseRecurringDropConfirm()
     },
     [
