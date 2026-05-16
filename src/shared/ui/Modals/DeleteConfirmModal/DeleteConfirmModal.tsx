@@ -2,10 +2,12 @@ import type { UseMutateFunction } from '@tanstack/react-query'
 import { useId, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import type {
-  RecurrenceEventScope,
-  RecurrenceTodoScope,
-} from '@/shared/types/recurrence/recurrence'
+import {
+  RECURRENCE_EVENT_SCOPE,
+  RECURRENCE_TODO_SCOPE,
+  type RecurrenceEventSeriesScope,
+  type RecurrenceTodoScope,
+} from '@/shared/constants/recurrenceScope'
 
 import Modal from '../../common/Modal/Modal'
 import * as S from './DeleteConfirmModal.style'
@@ -13,7 +15,7 @@ import * as S from './DeleteConfirmModal.style'
 type EventDeleteVariables = {
   eventId: number
   params: {
-    scope?: RecurrenceEventScope
+    scope?: RecurrenceEventSeriesScope
     occurrenceDate: string
   }
 }
@@ -67,8 +69,10 @@ const DeleteConfirmModal = (props: DeleteConfirmModalProps) => {
 
   const handleDelete = () => {
     if (isEventDeleteProps(props)) {
-      const scope: RecurrenceEventScope =
-        selectedOption === 'single' ? 'THIS_EVENT' : 'THIS_AND_FOLLOWING_EVENTS'
+      const scope: RecurrenceEventSeriesScope =
+        selectedOption === 'single'
+          ? RECURRENCE_EVENT_SCOPE.THIS_EVENT
+          : RECURRENCE_EVENT_SCOPE.THIS_AND_FOLLOWING_EVENTS
       const params = { scope, occurrenceDate: props.target.occurrenceDate }
       props.mutate(
         { eventId: props.target.id, params },
@@ -81,7 +85,9 @@ const DeleteConfirmModal = (props: DeleteConfirmModalProps) => {
       return
     }
     const scope: RecurrenceTodoScope =
-      selectedOption === 'single' ? 'THIS_TODO' : 'THIS_AND_FOLLOWING'
+      selectedOption === 'single'
+        ? RECURRENCE_TODO_SCOPE.THIS_TODO
+        : RECURRENCE_TODO_SCOPE.THIS_AND_FOLLOWING
     props.mutate(
       { todoId: props.target.id, occurrenceDate: props.target.occurrenceDate, scope },
       {

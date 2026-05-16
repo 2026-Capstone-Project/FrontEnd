@@ -5,6 +5,7 @@ import { Views } from 'react-big-calendar'
 import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 
 import { resolveOccurrenceDateTime } from '@/features/Calendar/utils/helpers/dayViewHelpers'
+import { RECURRENCE_EVENT_SCOPE } from '@/shared/constants/recurrenceScope'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type {
   RecurrenceEventScope,
@@ -132,7 +133,7 @@ export const useCalendarDragDrop = ({
           startTime: nextStart,
           endTime: nextEnd,
           isAllDay: event.isAllDay ?? false,
-          ...(options?.eventScope === 'THIS_AND_FOLLOWING_EVENTS'
+          ...(options?.eventScope === RECURRENCE_EVENT_SCOPE.THIS_AND_FOLLOWING_EVENTS
             ? {
                 recurrenceGroup: buildRecurringGroupForFutureDrop(
                   event.recurrenceGroup,

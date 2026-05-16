@@ -1,0 +1,18 @@
+export const RECURRENCE_EVENT_SCOPE = {
+  THIS_EVENT: 'THIS_EVENT',
+  THIS_AND_FOLLOWING_EVENTS: 'THIS_AND_FOLLOWING_EVENTS',
+  THIS_AND_FOLLOWING: 'THIS_AND_FOLLOWING',
+} as const
+
+export const RECURRENCE_TODO_SCOPE = {
+  THIS_TODO: 'THIS_TODO',
+  THIS_AND_FOLLOWING: 'THIS_AND_FOLLOWING',
+} as const
+
+export type RecurrenceEventScope =
+  (typeof RECURRENCE_EVENT_SCOPE)[keyof typeof RECURRENCE_EVENT_SCOPE]
+export type RecurrenceEventSeriesScope =
+  | typeof RECURRENCE_EVENT_SCOPE.THIS_EVENT
+  | typeof RECURRENCE_EVENT_SCOPE.THIS_AND_FOLLOWING_EVENTS
+
+export type RecurrenceTodoScope = (typeof RECURRENCE_TODO_SCOPE)[keyof typeof RECURRENCE_TODO_SCOPE]

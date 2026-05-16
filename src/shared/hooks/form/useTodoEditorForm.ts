@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { type Control, type UseFormReturn } from 'react-hook-form'
 
+import { RECURRENCE_TODO_SCOPE } from '@/shared/constants/recurrenceScope'
 import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type {
@@ -143,7 +144,7 @@ export const useTodoEditorForm = ({
     const currentDate = values.todoDate ? new Date(values.todoDate) : null
     const targetOccurrenceDate = parseYmd(options?.occurrenceDate)
     const shouldAdjustFutureMonthlyPattern =
-      options?.scope === 'THIS_AND_FOLLOWING' &&
+      options?.scope === RECURRENCE_TODO_SCOPE.THIS_AND_FOLLOWING &&
       mappedRecurrenceGroup?.frequency === 'MONTHLY' &&
       mappedRecurrenceGroup?.monthlyType === 'DAY_OF_WEEK' &&
       mappedRecurrenceGroup?.weekdayRule != null &&

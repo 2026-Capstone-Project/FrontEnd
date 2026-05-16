@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { useFormContext } from 'react-hook-form'
 
+import { RECURRENCE_EVENT_SCOPE } from '@/shared/constants/recurrenceScope'
 import {
   useScheduleEventSync,
   useScheduleFooter,
@@ -106,7 +107,7 @@ const ScheduleEditorContent = ({
           isAllday: nextIsAllDay,
           ...(nextIsAllDay ? { eventStartTime: undefined, eventEndTime: undefined } : {}),
         },
-        isExistingRecurring ? 'THIS_EVENT' : undefined,
+        isExistingRecurring ? RECURRENCE_EVENT_SCOPE.THIS_EVENT : undefined,
       )
     }
   }, [getValues, initialEvent?.recurrenceGroup, isAllday, isEditing, patchSchedule, setValue])

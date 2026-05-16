@@ -1,4 +1,5 @@
 import type { Week } from '../event/event'
+export type { RecurrenceEventScope, RecurrenceTodoScope } from '@/shared/constants/recurrenceScope'
 
 export type MonthlyWeekDayRule = 'SINGLE' | 'WEEKDAY' | 'WEEKEND' | 'ALL_DAYS'
 
@@ -16,6 +17,3 @@ export interface RecurrenceGroup {
   dayOfWeekInMonth?: Week | null
   monthOfYear?: number
 }
-
-export type RecurrenceEventScope = 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS'
-export type RecurrenceTodoScope = 'THIS_TODO' | 'THIS_AND_FOLLOWING'

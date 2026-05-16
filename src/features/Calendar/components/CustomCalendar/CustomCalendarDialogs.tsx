@@ -1,15 +1,15 @@
 import type { UseMutateFunction } from '@tanstack/react-query'
 import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 
+import type { RecurrenceEventSeriesScope } from '@/shared/constants/recurrenceScope'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
-import type { RecurrenceEventScope } from '@/shared/types/recurrence/recurrence'
 import { EditConfirmModal, type EditConfirmOption } from '@/shared/ui/Modals'
 import DeleteConfirmModal from '@/shared/ui/Modals/DeleteConfirmModal/DeleteConfirmModal'
 
 type EventDeleteVariables = {
   eventId: number
   params: {
-    scope?: RecurrenceEventScope
+    scope?: RecurrenceEventSeriesScope
     occurrenceDate: string
   }
 }

@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import type { UseFormHandleSubmit, UseFormSetValue } from 'react-hook-form'
 
+import { RECURRENCE_EVENT_SCOPE } from '@/shared/constants/recurrenceScope'
 import { useRepeatChangeGuard } from '@/shared/hooks/repeat/useRepeatChangeGuard'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { ScheduleEditorFormValues } from '@/shared/types/event/event'
@@ -173,7 +174,10 @@ export const useScheduleSubmitFlow = ({
       const occurrenceDate = initialEvent?.occurrenceDate
         ? formatDateTime(new Date(initialEvent.occurrenceDate))
         : fallbackOccurrenceDate
-      const scope = option === 'future' ? 'THIS_AND_FOLLOWING_EVENTS' : 'THIS_EVENT'
+      const scope =
+        option === 'future'
+          ? RECURRENCE_EVENT_SCOPE.THIS_AND_FOLLOWING_EVENTS
+          : RECURRENCE_EVENT_SCOPE.THIS_EVENT
       await submitScheduleValues(pendingScheduleValues, {
         mode: 'patch',
         scope,

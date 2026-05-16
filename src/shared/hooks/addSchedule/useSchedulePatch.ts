@@ -1,6 +1,7 @@
 // 일정 수정 payload를 생성하고 patch 요청을 보내는 훅
 import { useCallback } from 'react'
 
+import { RECURRENCE_EVENT_SCOPE } from '@/shared/constants/recurrenceScope'
 import type { CalendarEvent, Event } from '@/shared/types/calendar/types'
 import type { RepeatConfigSchema, ScheduleEditorFormValues } from '@/shared/types/event/event'
 import type { RecurrenceEventScope, RecurrenceGroup } from '@/shared/types/recurrence/recurrence'
@@ -34,7 +35,7 @@ type PatchEventMutate = (params: {
   eventId: number
   params: {
     occurrenceDate: string
-    scope?: Extract<RecurrenceEventScope, 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS'>
+    scope?: RecurrenceEventScope
   }
   eventData: {
     title?: string
@@ -104,9 +105,9 @@ export const useSchedulePatch = ({
         JSON.stringify(nextRecurrenceGroupPayload ?? null) !==
         JSON.stringify(initialRecurrenceGroupPayload ?? null)
       const patchScope = shouldSendRecurrenceGroup
-        ? 'THIS_AND_FOLLOWING_EVENTS'
+        ? RECURRENCE_EVENT_SCOPE.THIS_AND_FOLLOWING_EVENTS
         : isRecurring
-          ? (scope ?? 'THIS_EVENT')
+          ? (scope ?? RECURRENCE_EVENT_SCOPE.THIS_EVENT)
           : undefined
 
       const initialTitle = initialEvent?.title ?? ''
@@ -131,7 +132,7 @@ export const useSchedulePatch = ({
       const hasStartDateChanged =
         initialEvent?.start != null && !isSameYmd(new Date(initialEvent.start), start)
       const shouldSendMonthlySinglePattern =
-        patchScope === 'THIS_AND_FOLLOWING_EVENTS' &&
+        patchScope === RECURRENCE_EVENT_SCOPE.THIS_AND_FOLLOWING_EVENTS &&
         !shouldSendRecurrenceGroup &&
         hasStartDateChanged &&
         isMonthlyPatternWithFlexibleWeekdayRule(initialRecurrenceGroupPayload)

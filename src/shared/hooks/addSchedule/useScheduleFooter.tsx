@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { type UseFormGetValues } from 'react-hook-form'
 
+import { RECURRENCE_EVENT_SCOPE } from '@/shared/constants/recurrenceScope'
 import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { EventColorType, ScheduleEditorFormValues } from '@/shared/types/event/event'
@@ -115,7 +116,10 @@ export const useScheduleFooter = ({
       const nextValues = { ...getValues(), eventColor: value }
       void (async () => {
         try {
-          await patchSchedule(nextValues, isExistingRecurring ? 'THIS_EVENT' : undefined)
+          await patchSchedule(
+            nextValues,
+            isExistingRecurring ? RECURRENCE_EVENT_SCOPE.THIS_EVENT : undefined,
+          )
         } catch (error) {
           setEventColor(previousColor)
           if (eventId != null && eventId !== 0) {
