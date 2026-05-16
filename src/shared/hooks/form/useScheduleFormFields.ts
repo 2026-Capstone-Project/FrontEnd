@@ -40,6 +40,35 @@ const pad2 = (value: number) => String(value).padStart(2, '0')
 
 const formatTimeFromDate = (value: Date) => `${pad2(value.getHours())}:${pad2(value.getMinutes())}`
 
+const toMinutes = (value?: string) => {
+  if (!value) return null
+  const [hour, minute] = value.split(':').map((item) => Number.parseInt(item, 10))
+  if (Number.isNaN(hour) || Number.isNaN(minute)) return null
+  return hour * 60 + minute
+}
+
+const formatTimeFromMinutes = (value: number) => {
+  const normalizedValue = Math.max(0, Math.min(value, 23 * 60 + 59))
+  const hour = Math.floor(normalizedValue / 60)
+  const minute = normalizedValue % 60
+  return `${pad2(hour)}:${pad2(minute)}`
+}
+
+const normalizeScheduleTimeRange = (startTime: string, endTime: string) => {
+  const startMinutes = toMinutes(startTime)
+  const endMinutes = toMinutes(endTime)
+
+  if (startMinutes == null || endMinutes == null || startMinutes !== endMinutes) {
+    return { startTime, endTime }
+  }
+
+  if (endMinutes >= 60) {
+    return { startTime: formatTimeFromMinutes(endMinutes - 60), endTime }
+  }
+
+  return { startTime, endTime: formatTimeFromMinutes(startMinutes + 60) }
+}
+
 const toDate = (value: string | Date) => new Date(value)
 
 const isSameDateTime = (left: string | Date, right: string | Date) =>
@@ -75,6 +104,9 @@ const buildScheduleDefaultValues = ({
   const initialAddress = initialEvent?.address ?? null
   const initialColor = initialEvent?.color ?? 'BLUE'
   const initialIsAllDay = initialEvent?.isAllDay ?? false
+  const defaultStartTime = draftValues?.startTime ?? formatTimeFromDate(defaultStart)
+  const defaultEndTime = draftValues?.endTime ?? formatTimeFromDate(defaultEnd)
+  const { startTime, endTime } = normalizeScheduleTimeRange(defaultStartTime, defaultEndTime)
   const mappedRepeatConfig = mapRecurrenceGroupToRepeatConfig(initialEvent?.recurrenceGroup)
   const initialRepeatConfig: RepeatConfigSchema = {
     ...defaultRepeatConfig,
@@ -91,8 +123,8 @@ const buildScheduleDefaultValues = ({
     address: draftValues?.address ?? initialAddress,
     eventStartDate: draftValues?.startDate ?? defaultStart,
     eventEndDate: draftValues?.endDate ?? defaultEnd,
-    eventStartTime: draftValues?.startTime ?? formatTimeFromDate(defaultStart),
-    eventEndTime: draftValues?.endTime ?? formatTimeFromDate(defaultEnd),
+    eventStartTime: startTime,
+    eventEndTime: endTime,
     isAllday: draftValues?.isAllday ?? initialIsAllDay,
     eventColor: draftValues?.eventColor ?? initialColor,
     repeatConfig: draftValues?.repeatConfig ?? initialRepeatConfig,
