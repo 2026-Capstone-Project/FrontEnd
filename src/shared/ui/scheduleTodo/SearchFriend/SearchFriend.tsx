@@ -88,14 +88,14 @@ const SearchFriend = ({ selectedFriendIds, onToggleFriend }: SearchFriendProps) 
               >
                 <S.Name isAdded={isSelected}>{friend.userName}</S.Name>
                 <div className="divider" />
-                <S.Email>{friend.email}</S.Email>
+                <S.Email isAdded={isSelected}>{friend.email}</S.Email>
                 {isSelected ? (
                   <Close
                     aria-hidden="true"
                     focusable="false"
                     height={18}
                     width={18}
-                    color={theme.colors.textColor3}
+                    color={theme.colors.share.point}
                     className="close"
                   />
                 ) : (
