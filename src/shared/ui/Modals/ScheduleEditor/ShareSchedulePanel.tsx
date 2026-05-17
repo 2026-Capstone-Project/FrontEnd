@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
 import Arrow from '@/shared/assets/icons/chevron.svg?react'
 import Close from '@/shared/assets/icons/close.svg?react'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { ScheduleEditorFormValues } from '@/shared/types/event/event'
 import type { ScheduleShareFriend } from '@/shared/types/schedule/shareFriend'
 import SearchFriend from '@/shared/ui/scheduleTodo/SearchFriend/SearchFriend'
@@ -10,30 +11,43 @@ import SearchFriend from '@/shared/ui/scheduleTodo/SearchFriend/SearchFriend'
 import * as S from './index.style'
 
 type ShareSchedulePanelProps = {
+  isShared?: boolean
+  invitedParticipants?: CalendarEvent['eventParticipantInfo']
   onSharedChange?: (isShared: boolean) => void
 }
 
-const ShareSchedulePanel = ({ onSharedChange }: ShareSchedulePanelProps) => {
+const ShareSchedulePanel = ({
+  isShared = false,
+  invitedParticipants = [],
+  onSharedChange,
+}: ShareSchedulePanelProps) => {
   const { control, setValue } = useFormContext<ScheduleEditorFormValues>()
   const [isOpen, setIsOpen] = useState(false)
   const [selectedFriends, setSelectedFriends] = useState<ScheduleShareFriend[]>([])
   const selectedFriendIds = useWatch({ control, name: 'friendIds' }) ?? []
-
-  useEffect(() => {
-    onSharedChange?.(selectedFriendIds.length > 0)
-  }, [onSharedChange, selectedFriendIds.length])
+  const visibleInvitedParticipants = invitedParticipants.filter((participant) =>
+    selectedFriendIds.includes(participant.eventParticipantId),
+  )
+  const displayedFriends = [
+    ...visibleInvitedParticipants.map((participant) => ({
+      id: String(participant.eventParticipantId),
+      name: participant.name,
+    })),
+    ...selectedFriends.map((friend) => ({
+      id: friend.userId,
+      name: friend.userName,
+    })),
+  ]
 
   const handleToggleFriend = (friend: ScheduleShareFriend) => {
     const friendId = Number(friend.userId)
     const isSelected = selectedFriendIds.includes(friendId)
+    const nextFriendIds = isSelected
+      ? selectedFriendIds.filter((selectedFriendId) => selectedFriendId !== friendId)
+      : [...selectedFriendIds, friendId]
 
-    setValue(
-      'friendIds',
-      isSelected
-        ? selectedFriendIds.filter((selectedFriendId) => selectedFriendId !== friendId)
-        : [...selectedFriendIds, friendId],
-      { shouldDirty: true, shouldValidate: true },
-    )
+    setValue('friendIds', nextFriendIds, { shouldDirty: true, shouldValidate: true })
+    onSharedChange?.(nextFriendIds.length > 0)
 
     setSelectedFriends((previous) => {
       if (isSelected) {
@@ -46,11 +60,11 @@ const ShareSchedulePanel = ({ onSharedChange }: ShareSchedulePanelProps) => {
 
   const handleRemoveFriend = (friendId: ScheduleShareFriend['userId']) => {
     const numericFriendId = Number(friendId)
-    setValue(
-      'friendIds',
-      selectedFriendIds.filter((selectedFriendId) => selectedFriendId !== numericFriendId),
-      { shouldDirty: true, shouldValidate: true },
+    const nextFriendIds = selectedFriendIds.filter(
+      (selectedFriendId) => selectedFriendId !== numericFriendId,
     )
+    setValue('friendIds', nextFriendIds, { shouldDirty: true, shouldValidate: true })
+    onSharedChange?.(nextFriendIds.length > 0)
     setSelectedFriends((previous) => previous.filter((friend) => friend.userId !== friendId))
   }
 
@@ -60,7 +74,7 @@ const ShareSchedulePanel = ({ onSharedChange }: ShareSchedulePanelProps) => {
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         isOpen={isOpen}
-        isShared={selectedFriendIds.length > 0}
+        isShared={isShared || selectedFriendIds.length > 0}
       >
         <div className="section-title">
           <div className="dot" />
@@ -72,25 +86,27 @@ const ShareSchedulePanel = ({ onSharedChange }: ShareSchedulePanelProps) => {
         <S.FriendSection>
           <SearchFriend selectedFriendIds={selectedFriendIds} onToggleFriend={handleToggleFriend} />
 
-          <div className="added-friend-list">
-            {selectedFriends.map((friend) => (
-              <div key={friend.userId} className="added-friend">
-                {friend.userName}
-                <button
-                  type="button"
-                  className="remove-friend-button"
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    handleRemoveFriend(friend.userId)
-                  }}
-                  aria-label={`${friend.userName} 삭제`}
-                  title={`${friend.userName} 삭제`}
-                >
-                  <Close width={14} height={14} />
-                </button>
-              </div>
-            ))}
-          </div>
+          {displayedFriends.length > 0 && (
+            <div className="added-friend-list">
+              {displayedFriends.map((friend) => (
+                <div key={friend.id} className="added-friend">
+                  {friend.name}
+                  <button
+                    type="button"
+                    className="remove-friend-button"
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      handleRemoveFriend(friend.id)
+                    }}
+                    aria-label={`${friend.name} 삭제`}
+                    title={`${friend.name} 삭제`}
+                  >
+                    <Close width={14} height={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </S.FriendSection>
       )}
     </S.FriendWrapper>

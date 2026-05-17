@@ -108,6 +108,10 @@ const buildScheduleDefaultValues = ({
   const defaultEndTime = draftValues?.endTime ?? formatTimeFromDate(defaultEnd)
   const { startTime, endTime } = normalizeScheduleTimeRange(defaultStartTime, defaultEndTime)
   const mappedRepeatConfig = mapRecurrenceGroupToRepeatConfig(initialEvent?.recurrenceGroup)
+  const initialFriendIds =
+    initialEvent?.friendIds ??
+    initialEvent?.eventParticipantInfo?.map((participant) => participant.eventParticipantId) ??
+    []
   const initialRepeatConfig: RepeatConfigSchema = {
     ...defaultRepeatConfig,
     ...mappedRepeatConfig,
@@ -128,7 +132,7 @@ const buildScheduleDefaultValues = ({
     isAllday: draftValues?.isAllday ?? initialIsAllDay,
     eventColor: draftValues?.eventColor ?? initialColor,
     repeatConfig: draftValues?.repeatConfig ?? initialRepeatConfig,
-    friendIds: initialEvent?.friendIds ?? [],
+    friendIds: initialFriendIds,
   }
 }
 

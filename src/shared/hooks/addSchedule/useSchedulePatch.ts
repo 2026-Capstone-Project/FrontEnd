@@ -116,7 +116,10 @@ export const useSchedulePatch = ({
       const initialAddress = initialEvent?.address ?? null
       const initialColor = initialEvent?.color
       const initialIsAllday = initialEvent?.isAllDay ?? false
-      const initialFriendIds = initialEvent?.friendIds ?? []
+      const initialFriendIds =
+        initialEvent?.friendIds ??
+        initialEvent?.eventParticipantInfo?.map((participant) => participant.eventParticipantId) ??
+        []
       const initialStart =
         initialEvent?.start != null ? formatDateTime(new Date(initialEvent.start)) : undefined
       const initialEnd =

@@ -15,7 +15,12 @@ export type Event = {
   color: EventColorType
   recurrenceGroup: RecurrenceGroup | null
   isShared?: boolean
-  friendIds: number[]
+  friendIds?: number[]
+  eventParticipantInfo?: Array<{
+    eventParticipantId: number
+    email: string
+    name: string
+  }>
 }
 
 export type CalendarEvent = Omit<Event, 'start' | 'end'> & {

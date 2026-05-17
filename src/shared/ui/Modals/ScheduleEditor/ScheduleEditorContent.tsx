@@ -34,6 +34,7 @@ const ScheduleEditorContent = ({
   headerTitlePortalTarget,
   modalWrapperElement,
   initialEvent,
+  invitedParticipants,
   eventId,
   onEventColorChange,
   onEventTitleConfirm,
@@ -185,6 +186,7 @@ const ScheduleEditorContent = ({
           isShared={isShared}
           modalWrapperElement={modalWrapperElement}
           mode={mode}
+          invitedParticipants={invitedParticipants ?? initialEvent?.eventParticipantInfo}
           handleAllDayToggle={handleAllDayToggle}
           updateConfig={updateConfig}
           handleRepeatType={handleRepeatType}

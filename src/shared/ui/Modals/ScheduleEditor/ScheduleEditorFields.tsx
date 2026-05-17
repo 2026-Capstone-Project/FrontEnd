@@ -11,7 +11,12 @@ import ShareSchedulePanel from './ShareSchedulePanel'
 
 type ScheduleEditorFieldsProps = Pick<
   ScheduleEditorFormProps,
-  'headerTitlePortalTarget' | 'isEditing' | 'isShared' | 'modalWrapperElement' | 'mode'
+  | 'headerTitlePortalTarget'
+  | 'isEditing'
+  | 'isShared'
+  | 'invitedParticipants'
+  | 'modalWrapperElement'
+  | 'mode'
 > & {
   updateConfig: (changes: Partial<RepeatConfig>) => void
   handleRepeatType: (value: RepeatType) => void
@@ -24,6 +29,7 @@ const ScheduleEditorFields = ({
   headerTitlePortalTarget,
   isEditing = false,
   isShared = false,
+  invitedParticipants,
   modalWrapperElement,
   mode = 'modal',
   updateConfig,
@@ -45,7 +51,11 @@ const ScheduleEditorFields = ({
         <ScheduleDetailsSection mode={mode} modalWrapperElement={modalWrapperElement} />
       </S.FormContent>
       <ScheduleRepeatSection updateConfig={updateConfig} handleRepeatType={handleRepeatType} />
-      <ShareSchedulePanel onSharedChange={onSharedChange} />
+      <ShareSchedulePanel
+        isShared={isShared}
+        invitedParticipants={invitedParticipants}
+        onSharedChange={onSharedChange}
+      />
     </>
   )
 }
