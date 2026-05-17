@@ -61,6 +61,7 @@ export const buildCalendarConfig = ({
     events,
     startAccessor: (event) => normalizeDate(event.start),
     endAccessor: (event) => normalizeDate(event.end),
+    tooltipAccessor: () => '',
     onView,
     onNavigate,
     onSelectEvent,
