@@ -8,6 +8,8 @@ import ScheduleEditorModal from '@/shared/ui/Modals/ScheduleEditor'
 import TodoEditorModal from '@/shared/ui/Modals/TodoEditor'
 import { buildDefaultItemEditorDraft } from '@/shared/utils'
 
+import type { CalendarEventActions } from './CustomCalendar.types'
+
 type CalendarModalsProps = {
   modalDate: string
   modalEventId: CalendarEvent['id'] | null
@@ -15,19 +17,7 @@ type CalendarModalsProps = {
   isModalEditing: boolean
   modalMode: 'modal' | 'inline'
   onCloseModal: () => void
-  eventActions: {
-    onEventColorChange: (eventId: CalendarEvent['id'], color: CalendarEvent['color']) => void
-    onEventTitleConfirm: (eventId: CalendarEvent['id'], title: CalendarEvent['title']) => void
-    onEventSharedChange: (eventId: CalendarEvent['id'], isShared: boolean) => void
-    onEventTypeChange: (eventId: CalendarEvent['id'], type: 'todo' | 'schedule') => void
-    onEventTimingChange: (
-      eventId: CalendarEvent['id'],
-      start: Date,
-      end: Date,
-      allDay: boolean,
-      occurrenceDate?: CalendarEvent['occurrenceDate'],
-    ) => void
-  }
+  eventActions: CalendarEventActions
 }
 
 type DraftBackedModalProps = {
@@ -38,7 +28,7 @@ type DraftBackedModalProps = {
   isModalEditing: boolean
   modalMode: 'modal' | 'inline'
   onCloseModal: () => void
-  eventActions: CalendarModalsProps['eventActions']
+  eventActions: CalendarEventActions
 }
 
 const DraftBackedModal = ({
