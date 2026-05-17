@@ -47,8 +47,9 @@ const toTodoEvent = (todo: TodoType): CalendarEvent => {
     location: null,
     isAllDay: todo.isAllDay,
     color: todo.color ?? 'GRAY',
+
     recurrenceGroup: null,
-    friendIds: [],
+    eventParticipantInfo: [],
     type: 'todo',
     isDone: todo.isCompleted,
     isRecurring: todo.isRecurring,
