@@ -2,10 +2,7 @@ import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { RepeatConfigSchema } from '@/shared/types/event/event'
 import type { ItemEditorDraft } from '@/shared/types/modal/itemEditor'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
-
-const pad2 = (value: number) => String(value).padStart(2, '0')
-
-const formatTimeFromDate = (value: Date) => `${pad2(value.getHours())}:${pad2(value.getMinutes())}`
+import { formatTimeFromDate } from '@/shared/utils/editorDateTime'
 
 export const buildDefaultItemEditorDraft = (
   date: string,

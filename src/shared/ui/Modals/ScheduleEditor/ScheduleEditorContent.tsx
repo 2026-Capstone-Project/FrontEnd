@@ -66,7 +66,7 @@ const ScheduleEditorContent = ({
       return
     }
     originalTitleRef.current = initialEvent?.title ?? ''
-  }, [eventId, initialEvent?.occurrenceDate, initialEvent?.start, isEditing])
+  }, [eventId, initialEvent?.occurrenceDate, initialEvent?.start, initialEvent?.title, isEditing])
 
   const handleDiscardDraftTitle = useCallback(() => {
     if (!isEditing || eventId == null || eventId === 0) return

@@ -1,7 +1,8 @@
 import { yupResolver } from '@hookform/resolvers/yup'
-import { useEffect, useMemo, useRef } from 'react'
+import { useCallback, useMemo } from 'react'
 import { type Control, type Resolver, useForm, type UseFormReturn, useWatch } from 'react-hook-form'
 
+import { useEditorFormLifecycle } from '@/shared/hooks/form/useEditorFormLifecycle'
 import { addScheduleSchema } from '@/shared/schemas/schedule'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import {
@@ -11,6 +12,12 @@ import {
 } from '@/shared/types/event/event'
 import type { ItemEditorDraft } from '@/shared/types/modal/itemEditor'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
+import {
+  formatTimeFromDate,
+  getDefaultEndDate,
+  normalizeScheduleTimeRange,
+  toDate,
+} from '@/shared/utils/editorDateTime'
 import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/recurrenceGroup'
 
 type UseScheduleFormFieldsProps = {
@@ -34,55 +41,6 @@ export type UseScheduleFormFieldsResult = {
   repeatConfig: RepeatConfigSchema
   eventColor: EventColorType
   eventTitle: string | undefined
-}
-
-const pad2 = (value: number) => String(value).padStart(2, '0')
-
-const formatTimeFromDate = (value: Date) => `${pad2(value.getHours())}:${pad2(value.getMinutes())}`
-
-const toMinutes = (value?: string) => {
-  if (!value) return null
-  const [hour, minute] = value.split(':').map((item) => Number.parseInt(item, 10))
-  if (Number.isNaN(hour) || Number.isNaN(minute)) return null
-  return hour * 60 + minute
-}
-
-const formatTimeFromMinutes = (value: number) => {
-  const normalizedValue = Math.max(0, Math.min(value, 23 * 60 + 59))
-  const hour = Math.floor(normalizedValue / 60)
-  const minute = normalizedValue % 60
-  return `${pad2(hour)}:${pad2(minute)}`
-}
-
-const normalizeScheduleTimeRange = (startTime: string, endTime: string) => {
-  const startMinutes = toMinutes(startTime)
-  const endMinutes = toMinutes(endTime)
-
-  if (startMinutes == null || endMinutes == null || startMinutes !== endMinutes) {
-    return { startTime, endTime }
-  }
-
-  if (endMinutes >= 60) {
-    return { startTime: formatTimeFromMinutes(endMinutes - 60), endTime }
-  }
-
-  return { startTime, endTime: formatTimeFromMinutes(startMinutes + 60) }
-}
-
-const toDate = (value: string | Date) => new Date(value)
-
-const isSameDateTime = (left: string | Date, right: string | Date) =>
-  toDate(left).getTime() === toDate(right).getTime()
-
-const getDefaultEndDate = (
-  defaultStart: Date,
-  initialStart?: CalendarEvent['start'],
-  initialEnd?: CalendarEvent['end'],
-) => {
-  if (initialEnd && initialStart && !isSameDateTime(initialEnd, initialStart)) {
-    return toDate(initialEnd)
-  }
-  return new Date(defaultStart.getTime() + 60 * 60 * 1000)
 }
 
 const buildScheduleDefaultValues = ({
@@ -150,12 +108,19 @@ export const useScheduleFormFields = ({
     () => buildScheduleDefaultValues({ date, initialEvent, draftValues }),
     [date, draftValues, initialEvent],
   )
-  const previousResetKeyRef = useRef(`${date}::${String(initialEvent?.id ?? 'new')}`)
+  const editingResetValues = useMemo(
+    () =>
+      isEditing && initialStart
+        ? buildScheduleDefaultValues({ date, initialEvent, draftValues: null })
+        : null,
+    [date, initialEvent, initialStart, isEditing],
+  )
+  const resetKey = `${date}::${String(initialEvent?.id ?? 'new')}`
   const formMethods = useForm<ScheduleEditorFormValues>({
     resolver,
     defaultValues: initialValues,
   })
-  const { control, register, reset, setValue, handleSubmit } = formMethods
+  const { control, setValue, handleSubmit } = formMethods
 
   const eventStartDate = useWatch({ control, name: 'eventStartDate' })
   const eventEndDate = useWatch({ control, name: 'eventEndDate' })
@@ -167,54 +132,46 @@ export const useScheduleFormFields = ({
   const eventColor = (useWatch({ control, name: 'eventColor' }) ?? 'BLUE') as EventColorType
   const eventTitle = useWatch({ control, name: 'eventTitle' })
 
-  useEffect(() => {
-    register('eventStartDate')
-    register('eventEndDate')
-    register('eventStartTime')
-    register('eventEndTime')
-    register('location')
-    register('address')
-    register('isAllday')
-    register('repeatConfig')
-    register('eventColor')
-    register('friendIds')
-  }, [register])
+  const mapDraft = useCallback(
+    (values: ScheduleEditorFormValues): ItemEditorDraft => ({
+      title: values.eventTitle ?? '',
+      description: values.eventDescription ?? '',
+      startDate: values.eventStartDate ?? null,
+      endDate: values.eventEndDate ?? values.eventStartDate ?? null,
+      startTime: values.eventStartTime,
+      endTime: values.eventEndTime,
+      isAllday: values.isAllday ?? false,
+      eventColor: (values.eventColor ?? 'BLUE') as EventColorType,
+      repeatConfig:
+        (values.repeatConfig as RepeatConfigSchema | undefined) ??
+        (defaultRepeatConfig as RepeatConfigSchema),
+      location: values.location ?? '',
+      address: values.address ?? null,
+    }),
+    [],
+  )
 
-  useEffect(() => {
-    if (!isEditing || !initialStart) return
-    reset(buildScheduleDefaultValues({ date, initialEvent, draftValues: null }))
-  }, [date, initialEvent, initialStart, isEditing, reset])
-
-  useEffect(() => {
-    if (isEditing) return
-    const nextResetKey = `${date}::${String(initialEvent?.id ?? 'new')}`
-    if (previousResetKeyRef.current === nextResetKey) return
-    previousResetKeyRef.current = nextResetKey
-    reset(initialValues)
-  }, [date, initialEvent?.id, initialValues, isEditing, reset])
-
-  useEffect(() => {
-    if (isEditing || !onDraftChange) return
-    const subscription = formMethods.watch((values) => {
-      onDraftChange({
-        title: values.eventTitle ?? '',
-        description: values.eventDescription ?? '',
-        startDate: values.eventStartDate ?? null,
-        endDate: values.eventEndDate ?? values.eventStartDate ?? null,
-        startTime: values.eventStartTime,
-        endTime: values.eventEndTime,
-        isAllday: values.isAllday ?? false,
-        eventColor: (values.eventColor ?? 'BLUE') as EventColorType,
-        repeatConfig:
-          (values.repeatConfig as RepeatConfigSchema | undefined) ??
-          (defaultRepeatConfig as RepeatConfigSchema),
-        location: values.location ?? '',
-        address: values.address ?? null,
-      })
-    })
-
-    return () => subscription.unsubscribe()
-  }, [formMethods, isEditing, onDraftChange])
+  useEditorFormLifecycle({
+    formMethods,
+    registeredFields: [
+      'eventStartDate',
+      'eventEndDate',
+      'eventStartTime',
+      'eventEndTime',
+      'location',
+      'address',
+      'isAllday',
+      'repeatConfig',
+      'eventColor',
+      'friendIds',
+    ],
+    resetKey,
+    isEditing,
+    initialValues,
+    editingResetValues,
+    onDraftChange,
+    mapDraft,
+  })
 
   return {
     formMethods,

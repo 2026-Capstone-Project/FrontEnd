@@ -1,7 +1,8 @@
 import { yupResolver } from '@hookform/resolvers/yup'
-import { useEffect, useMemo, useRef } from 'react'
+import { useCallback, useMemo } from 'react'
 import { type Control, type Resolver, useForm, type UseFormReturn, useWatch } from 'react-hook-form'
 
+import { useEditorFormLifecycle } from '@/shared/hooks/form/useEditorFormLifecycle'
 import { addTodoSchema } from '@/shared/schemas/todo'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import {
@@ -11,6 +12,7 @@ import {
 } from '@/shared/types/event/event'
 import type { ItemEditorDraft } from '@/shared/types/modal/itemEditor'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
+import { formatTimeFromDate } from '@/shared/utils/editorDateTime'
 
 type UseTodoFormFieldsProps = {
   date: string
@@ -32,10 +34,6 @@ export type UseTodoFormFieldsResult = {
   todoTitle: string | undefined
   eventColor: EventColorType
 }
-
-const pad2 = (value: number) => String(value).padStart(2, '0')
-
-const formatTimeFromDate = (value: Date) => `${pad2(value.getHours())}:${pad2(value.getMinutes())}`
 
 const buildTodoDefaultValues = ({
   date,
@@ -73,12 +71,12 @@ export const useTodoFormFields = ({
     () => buildTodoDefaultValues({ date, initialEvent, draftValues }),
     [date, draftValues, initialEvent],
   )
-  const previousResetKeyRef = useRef(`${date}::${String(initialEvent?.id ?? 'new')}`)
+  const resetKey = `${date}::${String(initialEvent?.id ?? 'new')}`
   const formMethods = useForm<TodoEditorFormValues>({
     resolver,
     defaultValues: initialValues,
   })
-  const { control, register, reset, setValue, handleSubmit } = formMethods
+  const { control, setValue, handleSubmit } = formMethods
 
   const todoDate = useWatch({ control, name: 'todoDate' })
   const todoEndTime = useWatch({ control, name: 'todoEndTime' })
@@ -88,45 +86,41 @@ export const useTodoFormFields = ({
   const todoTitle = useWatch({ control, name: 'todoTitle' })
   const eventColor = (useWatch({ control, name: 'eventColor' }) ?? 'GRAY') as EventColorType
 
-  useEffect(() => {
-    register('todoDate')
-    register('todoEndTime')
-    register('isAllday')
-    register('eventColor')
-    register('todoPriority')
-    register('repeatConfig')
-  }, [register])
+  const mapDraft = useCallback(
+    (values: TodoEditorFormValues): ItemEditorDraft => ({
+      title: values.todoTitle ?? '',
+      description: values.todoDescription ?? '',
+      startDate: values.todoDate ?? null,
+      endDate: values.todoDate ?? null,
+      startTime: values.todoEndTime,
+      endTime: values.todoEndTime,
+      isAllday: values.isAllday ?? false,
+      eventColor: (values.eventColor ?? 'GRAY') as EventColorType,
+      repeatConfig:
+        (values.repeatConfig as RepeatConfigSchema | undefined) ??
+        (defaultRepeatConfig as RepeatConfigSchema),
+      location: '',
+      address: null,
+    }),
+    [],
+  )
 
-  useEffect(() => {
-    if (isEditing) return
-    const nextResetKey = `${date}::${String(initialEvent?.id ?? 'new')}`
-    if (previousResetKeyRef.current === nextResetKey) return
-    previousResetKeyRef.current = nextResetKey
-    reset(initialValues)
-  }, [date, initialEvent?.id, initialValues, isEditing, reset])
-
-  useEffect(() => {
-    if (isEditing || !onDraftChange) return
-    const subscription = formMethods.watch((values) => {
-      onDraftChange({
-        title: values.todoTitle ?? '',
-        description: values.todoDescription ?? '',
-        startDate: values.todoDate ?? null,
-        endDate: values.todoDate ?? null,
-        startTime: values.todoEndTime,
-        endTime: values.todoEndTime,
-        isAllday: values.isAllday ?? false,
-        eventColor: (values.eventColor ?? 'GRAY') as EventColorType,
-        repeatConfig:
-          (values.repeatConfig as RepeatConfigSchema | undefined) ??
-          (defaultRepeatConfig as RepeatConfigSchema),
-        location: '',
-        address: null,
-      })
-    })
-
-    return () => subscription.unsubscribe()
-  }, [formMethods, isEditing, onDraftChange])
+  useEditorFormLifecycle({
+    formMethods,
+    registeredFields: [
+      'todoDate',
+      'todoEndTime',
+      'isAllday',
+      'eventColor',
+      'todoPriority',
+      'repeatConfig',
+    ],
+    resetKey,
+    isEditing,
+    initialValues,
+    onDraftChange,
+    mapDraft,
+  })
 
   return {
     formMethods,

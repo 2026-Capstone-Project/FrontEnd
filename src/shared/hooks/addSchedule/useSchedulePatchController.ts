@@ -6,6 +6,7 @@ import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { RepeatConfigSchema, ScheduleEditorFormValues } from '@/shared/types/event/event'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
+import { buildDateTime as buildEditorDateTime } from '@/shared/utils/editorDateTime'
 import {
   mapRecurrenceGroupToRepeatConfig,
   mapRepeatConfigToRecurrenceGroup,
@@ -45,16 +46,10 @@ export const useSchedulePatchController = ({
   }, [initialEvent])
 
   // 날짜 + 시간 문자열을 Date로 합성
-  const buildDateTime = useCallback((dateValue: Date | null, timeValue?: string) => {
-    const nextDate = dateValue ? new Date(dateValue) : new Date()
-    if (!timeValue) {
-      nextDate.setHours(0, 0, 0, 0)
-      return nextDate
-    }
-    const [hour, minute] = timeValue.split(':').map((value) => Number.parseInt(value, 10))
-    nextDate.setHours(Number.isNaN(hour) ? 0 : hour, Number.isNaN(minute) ? 0 : minute, 0, 0)
-    return nextDate
-  }, [])
+  const buildDateTime = useCallback(
+    (dateValue: Date | null, timeValue?: string) => buildEditorDateTime(dateValue, timeValue),
+    [],
+  )
 
   // 변경된 필드만 추려 patch 요청 생성
   const patchSchedule = useSchedulePatch({

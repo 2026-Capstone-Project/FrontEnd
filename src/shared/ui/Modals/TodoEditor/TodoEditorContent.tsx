@@ -10,6 +10,7 @@ import type { TodoEditorFormProps } from '@/shared/types/modal/todoEditor'
 import { UnsavedChangesConfirmModal } from '@/shared/ui/Modals'
 import TodoEditorConfirmModals from '@/shared/ui/Modals/TodoEditor/TodoEditorConfirmModals'
 import TodoEditorFields from '@/shared/ui/Modals/TodoEditor/TodoEditorFields'
+import { buildDateTime as buildEditorDateTime } from '@/shared/utils/editorDateTime'
 
 type TodoEditorContentProps = TodoEditorFormProps & {
   todo: UseTodoEditorFormResult
@@ -71,16 +72,10 @@ const TodoEditorContent = ({
     })
   const repeatGuardEnabled = isEditing && hasExistingRecurrence
 
-  const buildDateTime = useCallback((dateValue: Date | null, timeValue?: string) => {
-    const nextDate = dateValue ? new Date(dateValue) : new Date()
-    if (!timeValue) {
-      nextDate.setHours(0, 0, 0, 0)
-      return nextDate
-    }
-    const [hour, minute] = timeValue.split(':').map((value) => Number.parseInt(value, 10))
-    nextDate.setHours(Number.isNaN(hour) ? 0 : hour, Number.isNaN(minute) ? 0 : minute, 0, 0)
-    return nextDate
-  }, [])
+  const buildDateTime = useCallback(
+    (dateValue: Date | null, timeValue?: string) => buildEditorDateTime(dateValue, timeValue),
+    [],
+  )
 
   const syncEventTiming = useCallback(
     (values: TodoEditorFormValues) => {

@@ -60,7 +60,12 @@ export const useScheduleEditorForm = ({
 
   const { handleRepeatType, updateConfig, setEventColor } = useRepeatConfigController({
     repeatConfig,
-    setValue,
+    onRepeatConfigChange: (value) => {
+      setValue('repeatConfig', value, { shouldValidate: true })
+    },
+    onEventColorChange: (value) => {
+      setValue('eventColor', value, { shouldValidate: true })
+    },
   })
 
   return {
