@@ -30,7 +30,9 @@ const ScheduleRepeatSection = ({ updateConfig, handleRepeatType }: ScheduleRepea
     handleRepeatType(value)
     if (willClearRepeatType || willClearCustomRepeat) {
       setIsRepeatDetailOpen(false)
+      return
     }
+    setIsRepeatDetailOpen(true)
   }
 
   return (
