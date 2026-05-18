@@ -17,6 +17,7 @@ import {
   toWeekday,
   toWeekOfMonth,
 } from '@/shared/utils/recurrencePattern'
+import { useToastStore } from '@/store/useToastStore'
 
 export const buildRecurringGroupForFutureDrop = (
   recurrenceGroup: CalendarEvent['recurrenceGroup'],
@@ -99,6 +100,14 @@ export const useCalendarDragDrop = ({
   patchTodoTiming,
   onRequireRecurringDropConfirm,
 }: UseCalendarDragDropArgs) => {
+  const showReadOnlyToast = useCallback(() => {
+    useToastStore.getState().showToast({
+      title: '일정을 수정할 수 없습니다',
+      message: '일정 소유자만 수정할 수 있습니다.',
+      toastType: 'warning',
+    })
+  }, [])
+
   const applyEventDrop = useCallback(
     (
       args: EventInteractionArgs<CalendarEvent>,
@@ -107,9 +116,13 @@ export const useCalendarDragDrop = ({
         todoScope?: RecurrenceTodoScope
       },
     ) => {
+      const { event, start, end } = args
+      if (event.type !== 'todo' && event.isOwner === false) {
+        showReadOnlyToast()
+        return
+      }
       moveEvent(args)
       if (view !== Views.MONTH && view !== Views.WEEK) return
-      const { event, start, end } = args
       if (event.type === 'todo') {
         const defaultOccurrenceDate = moment(event.occurrenceDate ?? event.start).format(
           'YYYY-MM-DD',
@@ -144,12 +157,16 @@ export const useCalendarDragDrop = ({
         },
       })
     },
-    [moveEvent, patchEventMutate, patchTodoTiming, view],
+    [moveEvent, patchEventMutate, patchTodoTiming, showReadOnlyToast, view],
   )
 
   const handleEventDrop = useCallback(
     (args: EventInteractionArgs<CalendarEvent>) => {
       const { event } = args
+      if (event.type !== 'todo' && event.isOwner === false) {
+        showReadOnlyToast()
+        return
+      }
       if (
         (view === Views.MONTH || view === Views.WEEK) &&
         event.type !== 'todo' &&
@@ -168,7 +185,7 @@ export const useCalendarDragDrop = ({
       }
       applyEventDrop(args)
     },
-    [applyEventDrop, onRequireRecurringDropConfirm, view],
+    [applyEventDrop, onRequireRecurringDropConfirm, showReadOnlyToast, view],
   )
 
   return { handleEventDrop, applyEventDrop }

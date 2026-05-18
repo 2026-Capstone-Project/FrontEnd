@@ -5,6 +5,7 @@ import { getEventOccurrenceScope } from '@/features/Calendar/utils/helpers/calen
 import { resolveOccurrenceDateTime } from '@/features/Calendar/utils/helpers/dayViewHelpers'
 import type { RecurrenceEventSeriesScope } from '@/shared/constants/recurrenceScope'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import { useToastStore } from '@/store/useToastStore'
 
 import type { PatchTodoTiming } from './useCalendarTodoTimingPatch'
 
@@ -39,10 +40,18 @@ export const useCalendarDayViewTiming = ({
   patchTodoTiming,
   updateLocalEventTime,
 }: UseCalendarDayViewTimingArgs) => {
+  const showReadOnlyToast = useCallback(() => {
+    useToastStore.getState().showToast({
+      title: '일정을 수정할 수 없습니다',
+      message: '일정 소유자만 수정할 수 있습니다.',
+      toastType: 'warning',
+    })
+  }, [])
+
   const handleDayViewEventTimeChange = useCallback(
     (eventId: CalendarEvent['id'], start: Date, end: Date, type?: CalendarEvent['type']) => {
-      updateLocalEventTime(eventId, start, end, type)
       if (type === 'todo') {
+        updateLocalEventTime(eventId, start, end, type)
         const todoEvent = events.find(
           (eventItem) => eventItem.id === eventId && eventItem.type === 'todo',
         )
@@ -53,6 +62,11 @@ export const useCalendarDayViewTiming = ({
       }
 
       const targetEvent = events.find((eventItem) => eventItem.id === eventId)
+      if (targetEvent?.isOwner === false) {
+        showReadOnlyToast()
+        return
+      }
+      updateLocalEventTime(eventId, start, end, type)
       const occurrenceDate = resolveOccurrenceDateTime(
         targetEvent?.occurrenceDate,
         targetEvent?.start ?? start,
@@ -71,14 +85,16 @@ export const useCalendarDayViewTiming = ({
         },
       })
     },
-    [events, patchEventMutate, patchTodoTiming, updateLocalEventTime],
+    [events, patchEventMutate, patchTodoTiming, showReadOnlyToast, updateLocalEventTime],
   )
 
   const handleDayViewEventTimePreview = useCallback(
     (eventId: CalendarEvent['id'], start: Date, end: Date, type?: CalendarEvent['type']) => {
+      const targetEvent = events.find((eventItem) => eventItem.id === eventId)
+      if (type !== 'todo' && targetEvent?.isOwner === false) return
       updateLocalEventTime(eventId, start, end, type)
     },
-    [updateLocalEventTime],
+    [events, updateLocalEventTime],
   )
 
   return {
