@@ -8,13 +8,19 @@ import type { ScheduleEditorFormProps } from '@/shared/types/modal/scheduleEdito
 import * as S from '@/shared/ui/Modals/ScheduleEditor/index.style'
 import SearchPlace from '@/shared/ui/scheduleTodo/SearchPlace/SearchPlace'
 
-type ScheduleDetailsSectionProps = Pick<ScheduleEditorFormProps, 'modalWrapperElement' | 'mode'>
+type ScheduleDetailsSectionProps = Pick<ScheduleEditorFormProps, 'modalWrapperElement' | 'mode'> & {
+  readOnly?: boolean
+  onReadOnlyAttempt?: () => void
+}
 
 const ScheduleDetailsSection = ({
   modalWrapperElement,
   mode = 'modal',
+  readOnly = false,
+  onReadOnlyAttempt,
 }: ScheduleDetailsSectionProps) => {
   const { control, register, setValue } = useFormContext<ScheduleEditorFormValues>()
+  const descriptionField = register('eventDescription')
   const location = useWatch({ control, name: 'location' }) ?? ''
   const {
     closeSearchPlace,
@@ -37,12 +43,27 @@ const ScheduleDetailsSection = ({
       <S.BottomSection>
         <S.TextareaWrapper>
           <S.TextareaHeader>메모</S.TextareaHeader>
-          <S.Textarea {...register('eventDescription')} />
+          <S.Textarea
+            {...descriptionField}
+            readOnly={readOnly}
+            aria-readonly={readOnly}
+            onFocus={() => {
+              if (readOnly) onReadOnlyAttempt?.()
+            }}
+            onChange={(event) => {
+              if (readOnly) {
+                event.preventDefault()
+                onReadOnlyAttempt?.()
+                return
+              }
+              descriptionField.onChange(event)
+            }}
+          />
         </S.TextareaWrapper>
         <S.FieldRow style={{ width: '100%' }}>
           <S.FieldMap
             type="button"
-            onClick={() => openSearchPlace()}
+            onClick={readOnly ? onReadOnlyAttempt : () => openSearchPlace()}
             $hasValue={Boolean(location)}
             title={location || '장소 추가'}
           >

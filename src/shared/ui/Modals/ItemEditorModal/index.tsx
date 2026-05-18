@@ -8,6 +8,7 @@ import TodoEditorForm from '@/shared/ui/Modals/TodoEditor/TodoEditorForm'
 import { useEditorDraft } from '@/shared/utils/useEditorDraft'
 import { useEditorRegistry } from '@/shared/utils/useEditorRegistry'
 import { useEditorTypeSync } from '@/shared/utils/useEditorTypeSync'
+import { useToastStore } from '@/store/useToastStore'
 
 import EditorModalLayout from './EditorModalLayout'
 import * as S from './ItemEditorModal.style'
@@ -84,6 +85,15 @@ const ItemEditorModal = ({
 
   const [modalWrapperElement, setModalWrapperElement] = useState<HTMLDivElement | null>(null)
   const modalWrapperRef = useRef<HTMLDivElement | null>(null)
+  const isReadOnlySchedule =
+    isEditing && initialType === 'schedule' && initialEvent?.isOwner === false
+  const showReadOnlyScheduleToast = useCallback(() => {
+    useToastStore.getState().showToast({
+      title: '일정을 수정할 수 없습니다',
+      message: '일정 소유자만 수정할 수 있습니다.',
+      toastType: 'warning',
+    })
+  }, [])
 
   const handleSubmit = useCallback(() => {
     const submitFormId = activeType === 'todo' ? 'add-todo-form' : 'add-schedule-form'
@@ -105,14 +115,26 @@ const ItemEditorModal = ({
       <S.TabButton
         type="button"
         $isActive={activeType === 'todo'}
-        onClick={() => setActiveType('todo')}
+        onClick={() => {
+          if (isReadOnlySchedule) {
+            showReadOnlyScheduleToast()
+            return
+          }
+          setActiveType('todo')
+        }}
       >
         할 일
       </S.TabButton>
       <S.TabButton
         type="button"
         $isActive={activeType === 'schedule'}
-        onClick={() => setActiveType('schedule')}
+        onClick={() => {
+          if (isReadOnlySchedule) {
+            showReadOnlyScheduleToast()
+            return
+          }
+          setActiveType('schedule')
+        }}
       >
         일정
       </S.TabButton>
@@ -154,6 +176,7 @@ const ItemEditorModal = ({
       submitFormId={activeType === 'todo' ? 'add-todo-form' : 'add-schedule-form'}
       handleDelete={deleteHandler}
       footerChildren={footerChildren}
+      hideActions={isReadOnlySchedule && activeType === 'schedule'}
       submitButtonLabel={
         activeType === 'schedule' && isScheduleShared ? '저장 및 초대 전송' : undefined
       }

@@ -16,6 +16,7 @@ const EditorModalLayout = ({
   handleDelete,
   headerExtras,
   submitButtonLabel,
+  hideActions = false,
   mode,
   headerTitleContainerRef,
   modalWrapperRef,
@@ -30,6 +31,7 @@ const EditorModalLayout = ({
   handleDelete?: () => void
   headerExtras?: React.ReactNode
   submitButtonLabel?: string
+  hideActions?: boolean
   headerTitleContainerRef?: Ref<HTMLDivElement>
   modalWrapperRef?: Ref<HTMLDivElement>
 }) => {
@@ -53,23 +55,25 @@ const EditorModalLayout = ({
         <S.ModalContent>{children}</S.ModalContent>
         <S.ModalFooter>
           <S.FooterLeft>{footerChildren}</S.FooterLeft>
-          <S.FooterRight>
-            <Trash onClick={handleDelete} css={{ cursor: 'pointer' }} color="#757575" />
-            <S.Button
-              type={submitFormId ? 'submit' : 'button'}
-              form={submitFormId}
-              onClick={
-                submitFormId
-                  ? undefined
-                  : () => {
-                      onSubmit()
-                    }
-              }
-            >
-              {submitButtonLabel && <span>{submitButtonLabel}</span>}
-              <Check color="#ffffff" />
-            </S.Button>
-          </S.FooterRight>
+          {!hideActions && (
+            <S.FooterRight>
+              <Trash onClick={handleDelete} css={{ cursor: 'pointer' }} color="#757575" />
+              <S.Button
+                type={submitFormId ? 'submit' : 'button'}
+                form={submitFormId}
+                onClick={
+                  submitFormId
+                    ? undefined
+                    : () => {
+                        onSubmit()
+                      }
+                }
+              >
+                {submitButtonLabel && <span>{submitButtonLabel}</span>}
+                <Check color="#ffffff" />
+              </S.Button>
+            </S.FooterRight>
+          )}
         </S.ModalFooter>
       </S.ModalWrapper>
     </S.ModalInner>

@@ -29,6 +29,8 @@ type UseScheduleFooterProps = {
   eventColor: EventColorType
   closeModal: () => void
   occurrenceDate: string
+  canEdit?: boolean
+  onReadOnlyAttempt?: () => void
 }
 
 export const useScheduleFooter = ({
@@ -45,6 +47,8 @@ export const useScheduleFooter = ({
   eventColor,
   closeModal,
   occurrenceDate,
+  canEdit = true,
+  onReadOnlyAttempt,
 }: UseScheduleFooterProps) => {
   const [deleteWarningVisible, setDeleteWarningVisible] = useState(false)
   const { useDeleteEvent } = useCalendarMutation()
@@ -72,6 +76,10 @@ export const useScheduleFooter = ({
   }, [deleteEventMutate])
 
   const handleDelete = useCallback(() => {
+    if (!canEdit) {
+      onReadOnlyAttempt?.()
+      return
+    }
     if (repeatConfigRef.current.repeatType !== 'none') {
       setDeleteWarningVisible(true)
       return
@@ -90,7 +98,7 @@ export const useScheduleFooter = ({
         },
       },
     )
-  }, [])
+  }, [canEdit, onReadOnlyAttempt])
 
   useEffect(() => {
     registerDeleteHandler?.(handleDelete)
@@ -105,6 +113,10 @@ export const useScheduleFooter = ({
 
   const handleColorChange = useCallback(
     (value: EventColorType) => {
+      if (!canEdit) {
+        onReadOnlyAttempt?.()
+        return
+      }
       const previousColor = eventColor
       setEventColor(value)
       if (eventId != null && eventId !== 0) {
@@ -133,17 +145,19 @@ export const useScheduleFooter = ({
       eventColor,
       eventId,
       getValues,
+      canEdit,
       isEditing,
       isExistingRecurring,
       onEventColorChange,
+      onReadOnlyAttempt,
       patchSchedule,
       setEventColor,
     ],
   )
 
   const footerNode = useMemo(
-    () => <SelectColor value={eventColor} onChange={handleColorChange} />,
-    [eventColor, handleColorChange],
+    () => (canEdit ? <SelectColor value={eventColor} onChange={handleColorChange} /> : null),
+    [canEdit, eventColor, handleColorChange],
   )
 
   // 하단 컬러 선택기를 footer에 등록

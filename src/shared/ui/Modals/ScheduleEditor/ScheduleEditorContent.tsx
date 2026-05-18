@@ -1,5 +1,5 @@
 // 일정 편집 본문을 조합하고 제출, 패치, 삭제, 닫기 보호 흐름을 연결합니다.
-import { useCallback, useEffect, useRef } from 'react'
+import { type FormEvent, useCallback, useEffect, useRef } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import { RECURRENCE_EVENT_SCOPE } from '@/shared/constants/recurrenceScope'
@@ -17,6 +17,7 @@ import type { ScheduleEditorFormProps } from '@/shared/types/modal/scheduleEdito
 import { UnsavedChangesConfirmModal } from '@/shared/ui/Modals'
 import ScheduleEditorConfirmModals from '@/shared/ui/Modals/ScheduleEditor/ScheduleEditorConfirmModals'
 import ScheduleEditorFields from '@/shared/ui/Modals/ScheduleEditor/ScheduleEditorFields'
+import { useToastStore } from '@/store/useToastStore'
 
 type ScheduleEditorContentProps = ScheduleEditorFormProps & {
   schedule: UseScheduleEditorFormResult
@@ -59,6 +60,14 @@ const ScheduleEditorContent = ({
   const { setValue, getValues, formState } = useFormContext<ScheduleEditorFormValues>()
   const { isDirty } = formState
   const originalTitleRef = useRef('')
+  const canEdit = !isEditing || initialEvent?.isOwner !== false
+  const showReadOnlyToast = useCallback(() => {
+    useToastStore.getState().showToast({
+      title: '일정을 수정할 수 없습니다',
+      message: '일정 소유자만 수정할 수 있습니다.',
+      toastType: 'warning',
+    })
+  }, [])
 
   useEffect(() => {
     if (!isEditing) {
@@ -91,6 +100,10 @@ const ScheduleEditorContent = ({
 
   // 종일 토글 처리 (시간 필드 초기화 포함)
   const handleAllDayToggle = useCallback(() => {
+    if (!canEdit) {
+      showReadOnlyToast()
+      return
+    }
     const nextIsAllDay = !isAllday
     const isExistingRecurring = initialEvent?.recurrenceGroup != null
     setValue('isAllday', nextIsAllDay, {
@@ -111,7 +124,16 @@ const ScheduleEditorContent = ({
         isExistingRecurring ? RECURRENCE_EVENT_SCOPE.THIS_EVENT : undefined,
       )
     }
-  }, [getValues, initialEvent?.recurrenceGroup, isAllday, isEditing, patchSchedule, setValue])
+  }, [
+    canEdit,
+    getValues,
+    initialEvent?.recurrenceGroup,
+    isAllday,
+    isEditing,
+    patchSchedule,
+    setValue,
+    showReadOnlyToast,
+  ])
 
   // 로컬 이벤트 동기화(타이틀/시간)
   const { syncEventTiming, handleTitleConfirm } = useScheduleEventSync({
@@ -158,6 +180,8 @@ const ScheduleEditorContent = ({
     handleTitleConfirm,
     buildDateTime,
     formatDateTime,
+    canEdit,
+    onReadOnlyAttempt: showReadOnlyToast,
   })
 
   // 하단 컬러 선택/삭제 핸들러
@@ -175,11 +199,26 @@ const ScheduleEditorContent = ({
     eventColor,
     closeModal: () => requestClose(true),
     occurrenceDate: initialEvent?.occurrenceDate ?? date,
+    canEdit,
+    onReadOnlyAttempt: showReadOnlyToast,
   })
+
+  const handleReadOnlyFormSubmit = useCallback(
+    (event: FormEvent<HTMLFormElement>) => {
+      if (canEdit) {
+        void handleFormSubmit(event)
+        return
+      }
+      event.preventDefault()
+      event.stopPropagation()
+      showReadOnlyToast()
+    },
+    [canEdit, handleFormSubmit, showReadOnlyToast],
+  )
 
   return (
     <>
-      <form id="add-schedule-form" onSubmit={handleFormSubmit}>
+      <form id="add-schedule-form" onSubmit={handleReadOnlyFormSubmit}>
         <ScheduleEditorFields
           headerTitlePortalTarget={headerTitlePortalTarget}
           isEditing={isEditing}
@@ -192,6 +231,8 @@ const ScheduleEditorContent = ({
           handleRepeatType={handleRepeatType}
           onTitleConfirm={handleTitleConfirm}
           onSharedChange={onSharedChange}
+          readOnly={!canEdit}
+          onReadOnlyAttempt={showReadOnlyToast}
         />
       </form>
       <ScheduleEditorConfirmModals

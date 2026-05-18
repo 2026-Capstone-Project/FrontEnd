@@ -9,7 +9,17 @@ const getTimeParts = (time?: string) => {
   return { nextHour, nextMinute }
 }
 
-const CustomTimePicker = ({ value = '09:00', onChange }: TimePickerRenderProps) => {
+type CustomTimePickerProps = TimePickerRenderProps & {
+  readOnly?: boolean
+  onReadOnlyAttempt?: () => void
+}
+
+const CustomTimePicker = ({
+  value = '09:00',
+  onChange,
+  readOnly = false,
+  onReadOnlyAttempt,
+}: CustomTimePickerProps) => {
   const hourRef = useRef<HTMLInputElement | null>(null)
   const minuteRef = useRef<HTMLInputElement | null>(null)
   const { nextHour: initialHour, nextMinute: initialMinute } = getTimeParts(value)
@@ -29,6 +39,10 @@ const CustomTimePicker = ({ value = '09:00', onChange }: TimePickerRenderProps) 
   const formatTwoDigits = (value?: string) => value?.padStart(2, '0') ?? '00'
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>, type: 'hour' | 'minute') => {
+    if (readOnly) {
+      onReadOnlyAttempt?.()
+      return
+    }
     const max = type === 'hour' ? 23 : 59
     const digits = sanitizeDigits(e.target.value)
     let val = digits
@@ -54,6 +68,7 @@ const CustomTimePicker = ({ value = '09:00', onChange }: TimePickerRenderProps) 
 
   // 포커스 아웃 시 1자리 숫자를 2자리로 보정 (예: '9' -> '09')
   const handleBlur = () => {
+    if (readOnly) return
     const formattedHour = formatTwoDigits(hourRef.current?.value ?? initialHour)
     const formattedMin = formatTwoDigits(minuteRef.current?.value ?? initialMinute)
     if (hourRef.current) hourRef.current.value = formattedHour
@@ -70,6 +85,11 @@ const CustomTimePicker = ({ value = '09:00', onChange }: TimePickerRenderProps) 
           pattern="[0-9]*"
           defaultValue={initialHour}
           ref={hourRef}
+          readOnly={readOnly}
+          aria-readonly={readOnly}
+          onFocus={() => {
+            if (readOnly) onReadOnlyAttempt?.()
+          }}
           onChange={(e) => handleInputChange(e, 'hour')}
           onBlur={handleBlur}
           placeholder="HH"
@@ -81,6 +101,11 @@ const CustomTimePicker = ({ value = '09:00', onChange }: TimePickerRenderProps) 
           pattern="[0-9]*"
           defaultValue={initialMinute}
           ref={minuteRef}
+          readOnly={readOnly}
+          aria-readonly={readOnly}
+          onFocus={() => {
+            if (readOnly) onReadOnlyAttempt?.()
+          }}
           onChange={(e) => handleInputChange(e, 'minute')}
           onBlur={handleBlur}
           placeholder="mm"

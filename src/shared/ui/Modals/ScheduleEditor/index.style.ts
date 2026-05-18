@@ -204,7 +204,7 @@ export const FriendSection = styled.div`
     border: 1px solid #d5d4e3;
     background: #fff;
     display: flex;
-    padding: 6px 8px 6px 12px;
+    padding: 6px 8px;
     justify-content: center;
     align-items: center;
     gap: 5px;
