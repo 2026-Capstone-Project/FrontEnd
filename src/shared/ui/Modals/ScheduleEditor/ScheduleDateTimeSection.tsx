@@ -16,6 +16,7 @@ type ScheduleDateTimeSectionProps = Pick<ScheduleEditorFormProps, 'mode'> & {
   handleAllDayToggle: () => void
   readOnly?: boolean
   onReadOnlyAttempt?: () => void
+  onUserEdit?: () => void
 }
 
 const ScheduleDateTimeSection = ({
@@ -23,6 +24,7 @@ const ScheduleDateTimeSection = ({
   handleAllDayToggle,
   readOnly = false,
   onReadOnlyAttempt,
+  onUserEdit,
 }: ScheduleDateTimeSectionProps) => {
   const { control, setValue } = useFormContext<ScheduleEditorFormValues>()
   const isAllday = useWatch({ control, name: 'isAllday' }) ?? false
@@ -69,7 +71,10 @@ const ScheduleDateTimeSection = ({
               <CustomTimePicker
                 field="start"
                 value={eventStartTime ?? ''}
-                onChange={(value) => handleTimeChange('start', value)}
+                onChange={(value) => {
+                  onUserEdit?.()
+                  handleTimeChange('start', value)
+                }}
                 readOnly={readOnly}
                 onReadOnlyAttempt={onReadOnlyAttempt}
               />
@@ -87,7 +92,10 @@ const ScheduleDateTimeSection = ({
               <CustomTimePicker
                 field="end"
                 value={eventEndTime ?? ''}
-                onChange={(value) => handleTimeChange('end', value)}
+                onChange={(value) => {
+                  onUserEdit?.()
+                  handleTimeChange('end', value)
+                }}
                 readOnly={readOnly}
                 onReadOnlyAttempt={onReadOnlyAttempt}
               />
@@ -107,7 +115,10 @@ const ScheduleDateTimeSection = ({
                     ? (eventStartDate ?? null)
                     : (eventEndDate ?? null)
                 }
-                onSelectDate={handleDateSelect}
+                onSelectDate={(selectedDate) => {
+                  onUserEdit?.()
+                  handleDateSelect(selectedDate)
+                }}
               />
             </S.CalendarPortal>,
             document.getElementById('modal-root')!,

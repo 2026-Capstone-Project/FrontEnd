@@ -164,6 +164,10 @@ const SearchFriend = ({ selectedFriendIds, onToggleFriend }: SearchFriendProps) 
       <S.InputWrapper ref={inputWrapperRef}>
         <S.SearchInput
           type="text"
+          name="schedule-friend-search"
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
           value={keyword}
           placeholder="일정 공유할 친구 찾기"
           onChange={(event) => handleKeywordChange(event.target.value)}

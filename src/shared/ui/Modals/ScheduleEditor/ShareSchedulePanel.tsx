@@ -11,12 +11,28 @@ import { getEventParticipantFriendId } from '@/shared/utils/eventParticipants'
 
 import * as S from './index.style'
 
+type DisplayedFriend = {
+  id: string
+  name: string
+}
+
+const dedupeFriends = (friends: DisplayedFriend[]) => {
+  const seenIds = new Set<string>()
+
+  return friends.filter((friend) => {
+    if (seenIds.has(friend.id)) return false
+    seenIds.add(friend.id)
+    return true
+  })
+}
+
 type ShareSchedulePanelProps = {
   isShared?: boolean
   invitedParticipants?: CalendarEvent['eventParticipantInfo']
   onSharedChange?: (isShared: boolean) => void
   readOnly?: boolean
   onReadOnlyAttempt?: () => void
+  onUserEdit?: () => void
 }
 
 const ShareSchedulePanel = ({
@@ -25,6 +41,7 @@ const ShareSchedulePanel = ({
   onSharedChange,
   readOnly = false,
   onReadOnlyAttempt,
+  onUserEdit,
 }: ShareSchedulePanelProps) => {
   const { control, setValue } = useFormContext<ScheduleEditorFormValues>()
   const [isOpen, setIsOpen] = useState(false)
@@ -37,7 +54,7 @@ const ShareSchedulePanel = ({
 
         return friendId != null && selectedFriendIds.includes(friendId)
       })
-  const displayedFriends = [
+  const displayedFriends = dedupeFriends([
     ...visibleInvitedParticipants.map((participant) => {
       const friendId = getEventParticipantFriendId(participant)
 
@@ -50,7 +67,7 @@ const ShareSchedulePanel = ({
       id: friend.userId,
       name: friend.userName,
     })),
-  ]
+  ])
 
   const handleToggleFriend = (friend: ScheduleShareFriend) => {
     if (readOnly) {
@@ -63,12 +80,17 @@ const ShareSchedulePanel = ({
       ? selectedFriendIds.filter((selectedFriendId) => selectedFriendId !== friendId)
       : [...selectedFriendIds, friendId]
 
+    onUserEdit?.()
     setValue('friendIds', nextFriendIds, { shouldDirty: true, shouldValidate: true })
     onSharedChange?.(nextFriendIds.length > 0)
 
     setSelectedFriends((previous) => {
       if (isSelected) {
         return previous.filter((selectedFriend) => selectedFriend.userId !== friend.userId)
+      }
+
+      if (previous.some((selectedFriend) => selectedFriend.userId === friend.userId)) {
+        return previous
       }
 
       return [...previous, friend]
@@ -84,6 +106,7 @@ const ShareSchedulePanel = ({
     const nextFriendIds = selectedFriendIds.filter(
       (selectedFriendId) => selectedFriendId !== numericFriendId,
     )
+    onUserEdit?.()
     setValue('friendIds', nextFriendIds, { shouldDirty: true, shouldValidate: true })
     onSharedChange?.(nextFriendIds.length > 0)
     setSelectedFriends((previous) => previous.filter((friend) => friend.userId !== friendId))

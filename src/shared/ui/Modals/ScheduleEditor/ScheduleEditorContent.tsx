@@ -1,5 +1,5 @@
 // 일정 편집 본문을 조합하고 제출, 패치, 삭제, 닫기 보호 흐름을 연결합니다.
-import { type FormEvent, useCallback, useEffect, useRef } from 'react'
+import { type FormEvent, useCallback, useEffect, useRef, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import { RECURRENCE_EVENT_SCOPE } from '@/shared/constants/recurrenceScope'
@@ -57,10 +57,13 @@ const ScheduleEditorContent = ({
     setEventColor,
     eventTitle,
   } = schedule
-  const { setValue, getValues, formState } = useFormContext<ScheduleEditorFormValues>()
-  const { isDirty } = formState
+  const { setValue, getValues } = useFormContext<ScheduleEditorFormValues>()
+  const [hasUserEdited, setHasUserEdited] = useState(false)
   const originalTitleRef = useRef('')
   const canEdit = !isEditing || initialEvent?.isOwner !== false
+  const markUserEdited = useCallback(() => {
+    setHasUserEdited(true)
+  }, [])
   const showReadOnlyToast = useCallback(() => {
     useToastStore.getState().showToast({
       title: '일정을 수정할 수 없습니다',
@@ -84,7 +87,7 @@ const ScheduleEditorContent = ({
 
   const { isUnsavedConfirmOpen, requestClose, handleCloseUnsavedConfirm, handleLeaveUnsavedForm } =
     useUnsavedCloseGuard({
-      isDirty,
+      isDirty: hasUserEdited,
       onClose,
       onDiscard: handleDiscardDraftTitle,
       registerCloseGuard,
@@ -105,6 +108,7 @@ const ScheduleEditorContent = ({
       return
     }
     const nextIsAllDay = !isAllday
+    markUserEdited()
     const isExistingRecurring = initialEvent?.recurrenceGroup != null
     setValue('isAllday', nextIsAllDay, {
       shouldDirty: true,
@@ -132,6 +136,7 @@ const ScheduleEditorContent = ({
     isEditing,
     patchSchedule,
     setValue,
+    markUserEdited,
     showReadOnlyToast,
   ])
 
@@ -233,6 +238,7 @@ const ScheduleEditorContent = ({
           onSharedChange={onSharedChange}
           readOnly={!canEdit}
           onReadOnlyAttempt={showReadOnlyToast}
+          onUserEdit={markUserEdited}
         />
       </form>
       <ScheduleEditorConfirmModals

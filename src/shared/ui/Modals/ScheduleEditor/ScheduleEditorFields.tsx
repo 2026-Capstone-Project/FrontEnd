@@ -25,6 +25,7 @@ type ScheduleEditorFieldsProps = Pick<
   onSharedChange?: (isShared: boolean) => void
   readOnly?: boolean
   onReadOnlyAttempt?: () => void
+  onUserEdit?: () => void
 }
 
 const ScheduleEditorFields = ({
@@ -41,6 +42,7 @@ const ScheduleEditorFields = ({
   onSharedChange,
   readOnly = false,
   onReadOnlyAttempt,
+  onUserEdit,
 }: ScheduleEditorFieldsProps) => {
   return (
     <>
@@ -52,18 +54,21 @@ const ScheduleEditorFields = ({
           onTitleConfirm={onTitleConfirm}
           readOnly={readOnly}
           onReadOnlyAttempt={onReadOnlyAttempt}
+          onUserEdit={onUserEdit}
         />
         <ScheduleDateTimeSection
           mode={mode}
           handleAllDayToggle={handleAllDayToggle}
           readOnly={readOnly}
           onReadOnlyAttempt={onReadOnlyAttempt}
+          onUserEdit={onUserEdit}
         />
         <ScheduleDetailsSection
           mode={mode}
           modalWrapperElement={modalWrapperElement}
           readOnly={readOnly}
           onReadOnlyAttempt={onReadOnlyAttempt}
+          onUserEdit={onUserEdit}
         />
       </S.FormContent>
       <ScheduleRepeatSection
@@ -71,6 +76,7 @@ const ScheduleEditorFields = ({
         handleRepeatType={handleRepeatType}
         readOnly={readOnly}
         onReadOnlyAttempt={onReadOnlyAttempt}
+        onUserEdit={onUserEdit}
       />
       <ShareSchedulePanel
         isShared={isShared}
@@ -78,6 +84,7 @@ const ScheduleEditorFields = ({
         onSharedChange={onSharedChange}
         readOnly={readOnly}
         onReadOnlyAttempt={onReadOnlyAttempt}
+        onUserEdit={onUserEdit}
       />
     </>
   )

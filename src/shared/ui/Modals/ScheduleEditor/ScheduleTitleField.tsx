@@ -17,6 +17,7 @@ type ScheduleTitleFieldProps = {
   readOnly?: boolean
   onTitleConfirm: (value: string) => void
   onReadOnlyAttempt?: () => void
+  onUserEdit?: () => void
 }
 
 const ScheduleTitleField = ({
@@ -26,6 +27,7 @@ const ScheduleTitleField = ({
   readOnly = false,
   onTitleConfirm,
   onReadOnlyAttempt,
+  onUserEdit,
 }: ScheduleTitleFieldProps) => {
   const { control } = useFormContext<ScheduleEditorFormValues>()
   const eventTitleKeyword = (useWatch({ control, name: 'eventTitle' }) ?? '').trim()
@@ -44,8 +46,22 @@ const ScheduleTitleField = ({
       readOnly={readOnly}
       suggestions={suggestions}
       inputColor={isShared ? theme.colors.share.point : undefined}
-      onLiveChange={readOnly ? undefined : onTitleConfirm}
-      onConfirm={readOnly ? undefined : onTitleConfirm}
+      onLiveChange={
+        readOnly
+          ? undefined
+          : (value) => {
+              onUserEdit?.()
+              onTitleConfirm(value)
+            }
+      }
+      onConfirm={
+        readOnly
+          ? undefined
+          : (value) => {
+              onUserEdit?.()
+              onTitleConfirm(value)
+            }
+      }
       onReadOnlyAttempt={onReadOnlyAttempt}
     />
   )

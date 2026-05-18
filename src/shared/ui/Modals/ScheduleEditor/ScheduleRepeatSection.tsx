@@ -14,6 +14,7 @@ type ScheduleRepeatSectionProps = {
   handleRepeatType: (value: RepeatType) => void
   readOnly?: boolean
   onReadOnlyAttempt?: () => void
+  onUserEdit?: () => void
 }
 
 const ScheduleRepeatSection = ({
@@ -21,6 +22,7 @@ const ScheduleRepeatSection = ({
   handleRepeatType,
   readOnly = false,
   onReadOnlyAttempt,
+  onUserEdit,
 }: ScheduleRepeatSectionProps) => {
   const { control } = useFormContext<ScheduleEditorFormValues>()
   const repeatConfig = useWatch({ control, name: 'repeatConfig' }) as RepeatConfigSchema
@@ -30,7 +32,12 @@ const ScheduleRepeatSection = ({
   const handleReadOnlyConfigChange = useCallback(() => {
     onReadOnlyAttempt?.()
   }, [onReadOnlyAttempt])
-  const resolvedUpdateConfig = readOnly ? handleReadOnlyConfigChange : updateConfig
+  const resolvedUpdateConfig = readOnly
+    ? handleReadOnlyConfigChange
+    : (changes: Partial<RepeatConfig>) => {
+        onUserEdit?.()
+        updateConfig(changes)
+      }
 
   if (!repeatConfig) return null
 
@@ -42,6 +49,7 @@ const ScheduleRepeatSection = ({
     const willClearRepeatType = repeatConfig.repeatType === value && value !== 'custom'
     const willClearCustomRepeat = repeatConfig.repeatType === 'custom' && value === 'custom'
 
+    onUserEdit?.()
     handleRepeatType(value)
     if (willClearRepeatType || willClearCustomRepeat) {
       setIsRepeatDetailOpen(false)

@@ -1,5 +1,6 @@
 import moment from 'moment'
 import { useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 
 import { useDetailEventQuery } from '@/shared/hooks/query/useCalendarQueries'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
@@ -98,7 +99,8 @@ const CalendarModals = ({
   onCloseModal,
   eventActions,
 }: CalendarModalsProps) => {
-  const shouldRenderModal = modalEventId != null
+  const location = useLocation()
+  const shouldRenderModal = modalEventId != null && location.pathname.startsWith('/calendar')
   const isTodoModal = modalEvent?.type === 'todo'
   const safeDetailEventId = isModalEditing && !isTodoModal ? modalEventId : null
   const occurrenceDate = useMemo(() => {

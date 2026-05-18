@@ -11,6 +11,7 @@ import SearchPlace from '@/shared/ui/scheduleTodo/SearchPlace/SearchPlace'
 type ScheduleDetailsSectionProps = Pick<ScheduleEditorFormProps, 'modalWrapperElement' | 'mode'> & {
   readOnly?: boolean
   onReadOnlyAttempt?: () => void
+  onUserEdit?: () => void
 }
 
 const ScheduleDetailsSection = ({
@@ -18,6 +19,7 @@ const ScheduleDetailsSection = ({
   mode = 'modal',
   readOnly = false,
   onReadOnlyAttempt,
+  onUserEdit,
 }: ScheduleDetailsSectionProps) => {
   const { control, register, setValue } = useFormContext<ScheduleEditorFormValues>()
   const descriptionField = register('eventDescription')
@@ -56,6 +58,7 @@ const ScheduleDetailsSection = ({
                 onReadOnlyAttempt?.()
                 return
               }
+              onUserEdit?.()
               descriptionField.onChange(event)
             }}
           />
@@ -76,6 +79,7 @@ const ScheduleDetailsSection = ({
                 <SearchPlace
                   selectedLocation={location}
                   onSelectLocation={(nextLocation, options) => {
+                    onUserEdit?.()
                     setValue('location', nextLocation, {
                       shouldDirty: true,
                       shouldValidate: true,

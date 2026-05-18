@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 type UseUnsavedCloseGuardArgs = {
   isDirty: boolean
@@ -14,7 +15,10 @@ export const useUnsavedCloseGuard = ({
   registerCloseGuard,
 }: UseUnsavedCloseGuardArgs) => {
   const allowCloseRef = useRef(false)
+  const pendingPathRef = useRef<string | null>(null)
   const [isUnsavedConfirmOpen, setIsUnsavedConfirmOpen] = useState(false)
+  const location = useLocation()
+  const navigate = useNavigate()
 
   const requestClose = useCallback(
     (force?: boolean) => {
@@ -39,14 +43,56 @@ export const useUnsavedCloseGuard = ({
   }, [isDirty])
 
   const handleCloseUnsavedConfirm = useCallback(() => {
+    pendingPathRef.current = null
     setIsUnsavedConfirmOpen(false)
   }, [])
 
   const handleLeaveUnsavedForm = useCallback(() => {
+    const pendingPath = pendingPathRef.current
+    pendingPathRef.current = null
     setIsUnsavedConfirmOpen(false)
     onDiscard?.()
+    if (pendingPath) {
+      navigate(pendingPath)
+      return
+    }
     requestClose(true)
-  }, [onDiscard, requestClose])
+  }, [navigate, onDiscard, requestClose])
+
+  useEffect(() => {
+    if (!isDirty) return undefined
+
+    const handleDocumentClick = (event: MouseEvent) => {
+      if (event.defaultPrevented) return
+      if (event.button !== 0) return
+      if (event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) return
+
+      const target = event.target
+      if (!(target instanceof Element)) return
+
+      const anchor = target.closest('a[href]')
+      if (!(anchor instanceof HTMLAnchorElement)) return
+      if (anchor.target && anchor.target !== '_self') return
+
+      const nextUrl = new URL(anchor.href, window.location.href)
+      if (nextUrl.origin !== window.location.origin) return
+
+      const currentPath = `${location.pathname}${location.search}${location.hash}`
+      const nextPath = `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`
+      if (nextPath === currentPath) return
+
+      event.preventDefault()
+      event.stopPropagation()
+      pendingPathRef.current = nextPath
+      setIsUnsavedConfirmOpen(true)
+    }
+
+    document.addEventListener('click', handleDocumentClick, true)
+
+    return () => {
+      document.removeEventListener('click', handleDocumentClick, true)
+    }
+  }, [isDirty, location.hash, location.pathname, location.search])
 
   useEffect(() => {
     if (!registerCloseGuard) return
