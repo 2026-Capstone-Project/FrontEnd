@@ -18,6 +18,7 @@ import {
   normalizeScheduleTimeRange,
   toDate,
 } from '@/shared/utils/editorDateTime'
+import { getEventFriendIds } from '@/shared/utils/eventParticipants'
 import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/recurrenceGroup'
 
 type UseScheduleFormFieldsProps = {
@@ -66,10 +67,7 @@ const buildScheduleDefaultValues = ({
   const defaultEndTime = draftValues?.endTime ?? formatTimeFromDate(defaultEnd)
   const { startTime, endTime } = normalizeScheduleTimeRange(defaultStartTime, defaultEndTime)
   const mappedRepeatConfig = mapRecurrenceGroupToRepeatConfig(initialEvent?.recurrenceGroup)
-  const initialFriendIds =
-    initialEvent?.friendIds ??
-    initialEvent?.eventParticipantInfo?.map((participant) => participant.eventParticipantId) ??
-    []
+  const initialFriendIds = getEventFriendIds(initialEvent)
   const initialRepeatConfig: RepeatConfigSchema = {
     ...defaultRepeatConfig,
     ...mappedRepeatConfig,

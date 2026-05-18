@@ -57,7 +57,7 @@ export const patchEvent = async (
     color?: EventColorType
     isAllDay?: boolean
     recurrenceGroup?: RecurrenceGroup | null
-    friendIds?: number[]
+    friendIds?: number[] | null
   },
   params: {
     occurrenceDate: string

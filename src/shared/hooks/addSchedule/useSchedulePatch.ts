@@ -5,6 +5,7 @@ import { RECURRENCE_EVENT_SCOPE } from '@/shared/constants/recurrenceScope'
 import type { CalendarEvent, Event } from '@/shared/types/calendar/types'
 import type { RepeatConfigSchema, ScheduleEditorFormValues } from '@/shared/types/event/event'
 import type { RecurrenceEventScope, RecurrenceGroup } from '@/shared/types/recurrence/recurrence'
+import { getEventFriendIds } from '@/shared/utils/eventParticipants'
 import { mapRepeatConfigToRecurrenceGroup } from '@/shared/utils/recurrenceGroup'
 import {
   isSameYmd,
@@ -116,10 +117,7 @@ export const useSchedulePatch = ({
       const initialAddress = initialEvent?.address ?? null
       const initialColor = initialEvent?.color
       const initialIsAllday = initialEvent?.isAllDay ?? false
-      const initialFriendIds =
-        initialEvent?.friendIds ??
-        initialEvent?.eventParticipantInfo?.map((participant) => participant.eventParticipantId) ??
-        []
+      const initialFriendIds = getEventFriendIds(initialEvent)
       const initialStart =
         initialEvent?.start != null ? formatDateTime(new Date(initialEvent.start)) : undefined
       const initialEnd =

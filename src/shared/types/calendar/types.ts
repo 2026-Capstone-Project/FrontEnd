@@ -15,9 +15,11 @@ export type Event = {
   color: EventColorType
   recurrenceGroup: RecurrenceGroup | null
   isShared?: boolean
-  friendIds?: number[]
+  isOwner?: boolean
+  friendIds?: number[] | null
   eventParticipantInfo?: Array<{
     eventParticipantId: number
+    friendId?: number
     email: string
     name: string
   }>
