@@ -25,10 +25,15 @@ export const useEditorFormLifecycle = <TValues extends FieldValues>({
   mapDraft,
 }: UseEditorFormLifecycleArgs<TValues>) => {
   const previousResetKeyRef = useRef(resetKey)
+  const registeredFieldSetRef = useRef(new Set<Path<TValues>>())
   const { register, reset } = formMethods
 
   useEffect(() => {
-    registeredFields.forEach((field) => register(field))
+    registeredFields.forEach((field) => {
+      if (registeredFieldSetRef.current.has(field)) return
+      register(field)
+      registeredFieldSetRef.current.add(field)
+    })
   }, [register, registeredFields])
 
   useEffect(() => {
