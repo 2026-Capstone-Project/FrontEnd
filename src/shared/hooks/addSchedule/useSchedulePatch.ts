@@ -105,8 +105,14 @@ export const useSchedulePatch = ({
       const shouldSendRecurrenceGroup =
         JSON.stringify(nextRecurrenceGroupPayload ?? null) !==
         JSON.stringify(initialRecurrenceGroupPayload ?? null)
+      const isConvertingSingleToRecurring =
+        initialEvent?.recurrenceGroup == null &&
+        nextRecurrenceGroupPayload != null &&
+        shouldSendRecurrenceGroup
       const patchScope = shouldSendRecurrenceGroup
-        ? RECURRENCE_EVENT_SCOPE.THIS_AND_FOLLOWING_EVENTS
+        ? isConvertingSingleToRecurring
+          ? undefined
+          : RECURRENCE_EVENT_SCOPE.THIS_AND_FOLLOWING_EVENTS
         : isRecurring
           ? (scope ?? RECURRENCE_EVENT_SCOPE.THIS_EVENT)
           : undefined
