@@ -3,6 +3,7 @@ import 'moment/locale/ko'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 
 import moment from 'moment'
+import type { View } from 'react-big-calendar'
 import { Calendar, momentLocalizer } from 'react-big-calendar'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 
@@ -20,10 +21,11 @@ const DragAndDropCalendar = withDragAndDrop<CalendarEvent, object>(Calendar)
 export type { SelectDateSource } from './CustomCalendar.types'
 
 type CustomCalendarProps = {
+  initialView?: View
   onSelectedDateChange?: (selectedDate: Date) => void
 }
 
-const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
+const CustomCalendar = ({ initialView, onSelectedDateChange }: CustomCalendarProps) => {
   const {
     view,
     date,
@@ -43,7 +45,7 @@ const CustomCalendar = ({ onSelectedDateChange }: CustomCalendarProps) => {
     handleCloseRecurringDropConfirm,
     handleConfirmRecurringDrop,
     onView,
-  } = useCustomCalendarController({ localizer, onSelectedDateChange })
+  } = useCustomCalendarController({ localizer, initialView, onSelectedDateChange })
 
   return (
     <div css={{ position: 'relative', height: 'fit-content', width: '100%' }}>

@@ -3,7 +3,15 @@ import { useEffect, useState } from 'react'
 import type { View } from 'react-big-calendar'
 import { Views } from 'react-big-calendar'
 
+import type { CalendarView } from '@/shared/types/settings/settings'
+
 const VIEW_STORAGE_KEY = 'calendar.view'
+
+const SETTINGS_VIEW_MAP: Record<CalendarView, View> = {
+  MONTH: Views.MONTH,
+  WEEK: Views.WEEK,
+  DAY: Views.DAY,
+}
 
 const getStoredView = (): View | null => {
   if (typeof window === 'undefined') return null
@@ -14,16 +22,19 @@ const getStoredView = (): View | null => {
   return null
 }
 
+export const mapSettingsDefaultView = (defaultView: CalendarView): View =>
+  SETTINGS_VIEW_MAP[defaultView] ?? Views.MONTH
+
 type UseStoredCalendarViewArgs = {
   initialView?: View | null
 }
 
 export const useStoredCalendarView = ({ initialView }: UseStoredCalendarViewArgs = {}) => {
-  const storedView = getStoredView()
-  const [userView, setUserView] = useState<View | null>(() => storedView ?? null)
+  const [userView, setUserView] = useState<View | null>(() => initialView ?? getStoredView())
   const view = userView ?? initialView ?? Views.MONTH
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
     window.localStorage.setItem(VIEW_STORAGE_KEY, view)
   }, [view])
 

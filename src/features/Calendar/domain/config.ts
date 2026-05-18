@@ -55,7 +55,7 @@ export const buildCalendarConfig = ({
     localizer,
     culture: 'ko',
     views,
-    defaultView: Views.MONTH,
+    defaultView: view,
     view,
     date,
     events,

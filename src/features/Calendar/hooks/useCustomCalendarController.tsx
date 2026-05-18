@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { DateLocalizer } from 'react-big-calendar'
+import type { DateLocalizer, View } from 'react-big-calendar'
 
 import type { CalendarEventActions } from '@/features/Calendar/components/CustomCalendar/CustomCalendar.types'
 import { useCalendarApiEvents } from '@/features/Calendar/hooks/useCalendarApiEvents'
@@ -24,14 +24,16 @@ import { getCalendarModalEvent } from '@/features/Calendar/utils/helpers/calenda
 
 type UseCustomCalendarControllerArgs = {
   localizer: DateLocalizer
+  initialView?: View
   onSelectedDateChange?: (selectedDate: Date) => void
 }
 
 export const useCustomCalendarController = ({
   localizer,
+  initialView,
   onSelectedDateChange,
 }: UseCustomCalendarControllerArgs) => {
-  const { view, setView } = useStoredCalendarView()
+  const { view, setView } = useStoredCalendarView({ initialView })
   const [date, setDate] = useState<Date>(new Date())
   const { startDate, endDate } = useCalendarDateRange(view, date)
   const { events: apiEvents, refetch: refetchEvents } = useCalendarApiEvents(startDate, endDate)
