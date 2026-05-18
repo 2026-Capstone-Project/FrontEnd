@@ -206,6 +206,7 @@ const ScheduleEditorContent = ({
     occurrenceDate: initialEvent?.occurrenceDate ?? date,
     canEdit,
     onReadOnlyAttempt: showReadOnlyToast,
+    onUserEdit: markUserEdited,
   })
 
   const handleReadOnlyFormSubmit = useCallback(
