@@ -30,7 +30,9 @@ const TodoRepeatSection = ({ updateConfig, handleRepeatType }: TodoRepeatSection
     handleRepeatType(value)
     if (willClearRepeatType || willClearCustomRepeat) {
       setIsRepeatDetailOpen(false)
+      return
     }
+    setIsRepeatDetailOpen(true)
   }
 
   const repeatEndDate = todoDate ? new Date(todoDate) : null

@@ -18,10 +18,12 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
   placeholder = '새로운 일정',
   suggestions = [],
   autoFocus = false,
+  readOnly = false,
   formController,
   inputColor,
   onConfirm,
   onLiveChange,
+  onReadOnlyAttempt,
 }: TitleSuggestionInputProps<TFieldValues>) => {
   const context = useFormContext<TFieldValues>()
   const registerFn = formController?.register ?? context?.register
@@ -89,6 +91,10 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
   }, [autoFocus])
 
   const handleSelectSuggestion = (value: string) => {
+    if (readOnly) {
+      onReadOnlyAttempt?.()
+      return
+    }
     setValueFn(fieldName, value as PathValue<TFieldValues, typeof fieldName>, {
       shouldDirty: true,
       shouldTouch: true,
@@ -101,6 +107,11 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
   }
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (readOnly) {
+      event.preventDefault()
+      onReadOnlyAttempt?.()
+      return
+    }
     if (event.key !== 'Enter') return
     event.preventDefault()
     const value = (watchFn(fieldName) as string | undefined) ?? ''
@@ -108,18 +119,31 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
   }
 
   return (
-    <S.Wrapper ref={wrapperRef}>
+    <S.Wrapper
+      ref={wrapperRef}
+      onMouseDownCapture={() => {
+        if (!readOnly) return
+        onReadOnlyAttempt?.()
+      }}
+    >
       <S.Input
         {...registerProps}
         ref={handleInputRef}
         $color={inputColor}
         placeholder={placeholder}
         autoComplete="off"
+        readOnly={readOnly}
+        aria-readonly={readOnly}
         onFocus={() => {
+          if (readOnly) return
           setIsInputActive(true)
           setDismissedTitleQuery(null)
         }}
         onChange={(event) => {
+          if (readOnly) {
+            onReadOnlyAttempt?.()
+            return
+          }
           registerProps.onChange?.(event)
           setDismissedTitleQuery(null)
           setIsInputActive(true)

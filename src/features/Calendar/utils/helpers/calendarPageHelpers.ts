@@ -32,6 +32,7 @@ export const createEvent = (date: Date, index: number, allDay = false): Calendar
     isAllDay: allDay,
     color: 'GRAY',
     recurrenceGroup: null,
+    friendIds: [],
     type: 'schedule',
   }
 }

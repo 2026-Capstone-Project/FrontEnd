@@ -1,11 +1,6 @@
 import { useCallback } from 'react'
-import { type UseFormReturn } from 'react-hook-form'
 
-import {
-  type EventColorType,
-  type RepeatConfigSchema,
-  type ScheduleEditorFormValues,
-} from '@/shared/types/event/event'
+import { type EventColorType, type RepeatConfigSchema } from '@/shared/types/event/event'
 import {
   type CustomRepeatBasis,
   type RepeatConfig,
@@ -14,7 +9,8 @@ import {
 
 type UseRepeatConfigControllerProps = {
   repeatConfig: RepeatConfigSchema
-  setValue: UseFormReturn<ScheduleEditorFormValues>['setValue']
+  onRepeatConfigChange: (value: RepeatConfigSchema) => void
+  onEventColorChange: (value: EventColorType) => void
 }
 
 export type UseRepeatConfigControllerResult = {
@@ -25,22 +21,19 @@ export type UseRepeatConfigControllerResult = {
 
 export const useRepeatConfigController = ({
   repeatConfig,
-  setValue,
+  onRepeatConfigChange,
+  onEventColorChange,
 }: UseRepeatConfigControllerProps): UseRepeatConfigControllerResult => {
-  const handleRepeatConfigChange = (value: RepeatConfigSchema) => {
-    setValue('repeatConfig', value, { shouldValidate: true })
-  }
-
   const isCustomBasis = (value: RepeatType): value is CustomRepeatBasis =>
     value !== 'none' && value !== 'custom'
 
   const handleRepeatType = (value: RepeatType) => {
     if (value === 'custom') {
       if (repeatConfig.repeatType === 'custom') {
-        handleRepeatConfigChange({ ...repeatConfig, repeatType: 'none', customBasis: null })
+        onRepeatConfigChange({ ...repeatConfig, repeatType: 'none', customBasis: null })
         return
       }
-      handleRepeatConfigChange({
+      onRepeatConfigChange({
         ...repeatConfig,
         repeatType: 'custom',
         customBasis: repeatConfig.customBasis ?? 'daily',
@@ -49,12 +42,12 @@ export const useRepeatConfigController = ({
     }
 
     if (repeatConfig.repeatType === 'custom' && isCustomBasis(value)) {
-      handleRepeatConfigChange({ ...repeatConfig, customBasis: value })
+      onRepeatConfigChange({ ...repeatConfig, customBasis: value })
       return
     }
 
     const nextType = repeatConfig.repeatType === value ? 'none' : value
-    handleRepeatConfigChange({
+    onRepeatConfigChange({
       ...repeatConfig,
       repeatType: nextType,
       customBasis: null,
@@ -62,13 +55,13 @@ export const useRepeatConfigController = ({
   }
 
   const updateConfig = (changes: Partial<RepeatConfig>) =>
-    handleRepeatConfigChange({ ...repeatConfig, ...changes })
+    onRepeatConfigChange({ ...repeatConfig, ...changes })
 
   const setEventColor = useCallback(
     (value: EventColorType) => {
-      setValue('eventColor', value, { shouldValidate: true })
+      onEventColorChange(value)
     },
-    [setValue],
+    [onEventColorChange],
   )
 
   return {

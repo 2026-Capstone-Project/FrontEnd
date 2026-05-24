@@ -17,10 +17,12 @@ export type TitleSuggestionInputProps<TFieldValues extends FieldValues> = {
   placeholder?: string
   suggestions?: string[]
   autoFocus?: boolean
+  readOnly?: boolean
   formController?: TitleSuggestionInputFormController<TFieldValues>
   inputColor?: string
   onConfirm?: (value: string) => void
   onLiveChange?: (value: string) => void
+  onReadOnlyAttempt?: () => void
 }
 
 export type HighlightedSegment = {

@@ -10,6 +10,7 @@ import { getEventOccurrenceKey, type TimedSlotEvent } from '../../../utils/helpe
 import { TodoCheckbox } from '../../CustomEvent/CustomEvent.style'
 import * as S from '../dayView'
 import type { DragState, EventPointerDownHandler } from './dragHandlers'
+import { getDayEventRenderGeometry } from './renderGeometry'
 import { normalizeDateValue } from './timeHelpers'
 
 /** 24시간을 12시간씩 두 컬럼으로 나누어 시간 라인을 렌더링합니다. */
@@ -137,14 +138,11 @@ export const renderTimeOverlayColumn = ({
   columnIndex: number
 }) => {
   const rowHeightForCalc = rowHeight || TIMED_SLOT_CONFIG.SLOT_HEIGHT
-  const columnHeight = rowHeightForCalc * (TIMED_SLOT_CONFIG.MAX_VISUAL_HOURS - 1)
-  const minHeight = TIMED_SLOT_CONFIG.MIN_HEIGHT
   const gridRect = gridRef?.current?.getBoundingClientRect() ?? null
   const columnGapPx = gridRef?.current
     ? Number.parseFloat(getComputedStyle(gridRef.current).columnGap || '0')
     : 0
   const columnWidth = gridRect ? (gridRect.width - columnGapPx) / 2 : 0
-  const laneGap = 6
   return (
     <S.SlotColumn key={startHour}>
       {renderTimeSlotRows(startHour, date, handleSlotDoubleClick, slotRef)}
@@ -153,42 +151,20 @@ export const renderTimeOverlayColumn = ({
           ({ event, top, height, palette, overflowTop, overflowBottom, laneIndex, laneCount }) => {
             const eventStart = normalizeDateValue(event.start)
             const eventEnd = normalizeDateValue(event.end)
-            const currentDragState = dragStateRef.current
-            const isDraggingEvent = currentDragState?.event.id === event.id
-            const isPreviewing = Boolean(currentDragState?.preview)
-            const columnShift =
-              isDraggingEvent && currentDragState?.mode === 'move' && !isPreviewing
-                ? (currentDragState?.columnShift ?? 0)
-                : 0
-            const translateX = columnShift ? columnShift * (columnWidth + columnGapPx) : 0
-            const moveDeltaMinutes =
-              isDraggingEvent && currentDragState?.mode === 'move' && !isPreviewing
-                ? currentDragState.deltaMinutes
-                : 0
-            const resizeDeltaMinutes =
-              isDraggingEvent && currentDragState?.mode === 'resize' && !isPreviewing
-                ? currentDragState.deltaMinutes
-                : 0
-            const moveOffset = (moveDeltaMinutes / 60) * rowHeightForCalc
-            const resizeOffset = (resizeDeltaMinutes / 60) * rowHeightForCalc
-            const baseTop = top + moveOffset
-            const clampedTop = Math.min(Math.max(baseTop, 0), columnHeight - minHeight)
-            const baseHeight = Math.max(height + resizeOffset, minHeight)
-            const clampedHeight = Math.min(
-              baseHeight,
-              Math.max(columnHeight - clampedTop, minHeight),
-            )
-            const overflowTopResolved = Boolean(overflowTop) || baseTop < 0
-            const overflowBottomResolved =
-              Boolean(overflowBottom) || baseTop + baseHeight > columnHeight
-            const lanes = Math.max(laneCount ?? 1, 1)
-            const lane = Math.max(laneIndex ?? 0, 0)
-            const totalGap = lanes > 1 ? laneGap * (lanes - 1) : 0
-            const laneWidthCss = lanes > 1 ? `calc((100% - ${totalGap}px) / ${lanes})` : '100%'
-            const laneLeftCss =
-              lanes > 1
-                ? `calc(${lane} * (100% - ${totalGap}px) / ${lanes} + ${lane * laneGap}px)`
-                : '0px'
+            const { overflowTopResolved, overflowBottomResolved, style } =
+              getDayEventRenderGeometry({
+                top,
+                height,
+                overflowTop,
+                overflowBottom,
+                laneIndex,
+                laneCount,
+                rowHeight: rowHeightForCalc,
+                columnWidth,
+                columnGapPx,
+                dragState: dragStateRef.current,
+                eventId: event.id,
+              })
             return (
               <S.DayEventBadge
                 key={event.id}
@@ -197,16 +173,7 @@ export const renderTimeOverlayColumn = ({
                 isSelected={selectedEventKey === getEventOccurrenceKey(event)}
                 overflowTop={overflowTopResolved}
                 overflowBottom={overflowBottomResolved}
-                style={{
-                  top: clampedTop,
-                  height: clampedHeight,
-                  width: laneWidthCss,
-                  left: laneLeftCss,
-                  right: 'auto',
-                  transform: translateX ? `translateX(${translateX}px)` : undefined,
-                  transition: translateX ? 'transform 120ms ease' : undefined,
-                  zIndex: isDraggingEvent ? 4 : undefined,
-                }}
+                style={style}
                 onClick={() => {
                   if (dragThresholdPassedRef?.current) return
                   onEventSelect?.(event)

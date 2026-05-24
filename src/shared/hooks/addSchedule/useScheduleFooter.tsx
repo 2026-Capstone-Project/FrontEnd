@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { type UseFormGetValues } from 'react-hook-form'
 
+import { RECURRENCE_EVENT_SCOPE } from '@/shared/constants/recurrenceScope'
 import { useCalendarMutation } from '@/shared/hooks/query/useCalendarMutation'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { EventColorType, ScheduleEditorFormValues } from '@/shared/types/event/event'
@@ -28,6 +29,8 @@ type UseScheduleFooterProps = {
   eventColor: EventColorType
   closeModal: () => void
   occurrenceDate: string
+  canEdit?: boolean
+  onReadOnlyAttempt?: () => void
 }
 
 export const useScheduleFooter = ({
@@ -44,6 +47,8 @@ export const useScheduleFooter = ({
   eventColor,
   closeModal,
   occurrenceDate,
+  canEdit = true,
+  onReadOnlyAttempt,
 }: UseScheduleFooterProps) => {
   const [deleteWarningVisible, setDeleteWarningVisible] = useState(false)
   const { useDeleteEvent } = useCalendarMutation()
@@ -53,24 +58,34 @@ export const useScheduleFooter = ({
   const occurrenceDateRef = useRef(occurrenceDate)
   const closeModalRef = useRef(closeModal)
   const deleteEventMutateRef = useRef(deleteEventMutate)
+  const canEditRef = useRef(canEdit)
+  const onReadOnlyAttemptRef = useRef(onReadOnlyAttempt)
+  const eventColorRef = useRef(eventColor)
+  const setEventColorRef = useRef(setEventColor)
+  const onEventColorChangeRef = useRef(onEventColorChange)
+  const isEditingRef = useRef(isEditing)
+  const getValuesRef = useRef(getValues)
+  const patchScheduleRef = useRef(patchSchedule)
 
-  useEffect(() => {
-    repeatConfigRef.current = repeatConfig
-  }, [repeatConfig])
-  useEffect(() => {
-    eventIdRef.current = eventId
-  }, [eventId])
-  useEffect(() => {
-    occurrenceDateRef.current = occurrenceDate
-  }, [occurrenceDate])
-  useEffect(() => {
-    closeModalRef.current = closeModal
-  }, [closeModal])
-  useEffect(() => {
-    deleteEventMutateRef.current = deleteEventMutate
-  }, [deleteEventMutate])
+  repeatConfigRef.current = repeatConfig
+  eventIdRef.current = eventId
+  occurrenceDateRef.current = occurrenceDate
+  closeModalRef.current = closeModal
+  deleteEventMutateRef.current = deleteEventMutate
+  canEditRef.current = canEdit
+  onReadOnlyAttemptRef.current = onReadOnlyAttempt
+  eventColorRef.current = eventColor
+  setEventColorRef.current = setEventColor
+  onEventColorChangeRef.current = onEventColorChange
+  isEditingRef.current = isEditing
+  getValuesRef.current = getValues
+  patchScheduleRef.current = patchSchedule
 
   const handleDelete = useCallback(() => {
+    if (!canEditRef.current) {
+      onReadOnlyAttemptRef.current?.()
+      return
+    }
     if (repeatConfigRef.current.repeatType !== 'none') {
       setDeleteWarningVisible(true)
       return
@@ -101,45 +116,43 @@ export const useScheduleFooter = ({
     () => initialEvent?.recurrenceGroup != null,
     [initialEvent?.recurrenceGroup],
   )
+  const isExistingRecurringRef = useRef(isExistingRecurring)
+  isExistingRecurringRef.current = isExistingRecurring
 
-  const handleColorChange = useCallback(
-    (value: EventColorType) => {
-      const previousColor = eventColor
-      setEventColor(value)
-      if (eventId != null && eventId !== 0) {
-        onEventColorChange?.(eventId, value)
-      }
-      if (!isEditing) {
-        return
-      }
-      const nextValues = { ...getValues(), eventColor: value }
-      void (async () => {
-        try {
-          await patchSchedule(nextValues, isExistingRecurring ? 'THIS_EVENT' : undefined)
-        } catch (error) {
-          setEventColor(previousColor)
-          if (eventId != null && eventId !== 0) {
-            onEventColorChange?.(eventId, previousColor)
-          }
-          console.error('[ScheduleEditorForm] color patch failed', error)
+  const handleColorChange = useCallback((value: EventColorType) => {
+    if (!canEditRef.current) {
+      onReadOnlyAttemptRef.current?.()
+      return
+    }
+    const previousColor = eventColorRef.current
+    const currentEventId = eventIdRef.current
+    setEventColorRef.current(value)
+    if (currentEventId != null && currentEventId !== 0) {
+      onEventColorChangeRef.current?.(currentEventId, value)
+    }
+    if (!isEditingRef.current) {
+      return
+    }
+    const nextValues = { ...getValuesRef.current(), eventColor: value }
+    void (async () => {
+      try {
+        await patchScheduleRef.current(
+          nextValues,
+          isExistingRecurringRef.current ? RECURRENCE_EVENT_SCOPE.THIS_EVENT : undefined,
+        )
+      } catch (error) {
+        setEventColorRef.current(previousColor)
+        if (currentEventId != null && currentEventId !== 0) {
+          onEventColorChangeRef.current?.(currentEventId, previousColor)
         }
-      })()
-    },
-    [
-      eventColor,
-      eventId,
-      getValues,
-      isEditing,
-      isExistingRecurring,
-      onEventColorChange,
-      patchSchedule,
-      setEventColor,
-    ],
-  )
+        console.error('[ScheduleEditorForm] color patch failed', error)
+      }
+    })()
+  }, [])
 
   const footerNode = useMemo(
-    () => <SelectColor value={eventColor} onChange={handleColorChange} />,
-    [eventColor, handleColorChange],
+    () => (canEdit ? <SelectColor value={eventColor} onChange={handleColorChange} /> : null),
+    [canEdit, eventColor, handleColorChange],
   )
 
   // 하단 컬러 선택기를 footer에 등록

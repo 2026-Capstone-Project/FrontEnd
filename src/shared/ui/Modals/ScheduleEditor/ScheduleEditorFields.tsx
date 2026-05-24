@@ -11,19 +11,28 @@ import ShareSchedulePanel from './ShareSchedulePanel'
 
 type ScheduleEditorFieldsProps = Pick<
   ScheduleEditorFormProps,
-  'headerTitlePortalTarget' | 'isEditing' | 'isShared' | 'modalWrapperElement' | 'mode'
+  | 'headerTitlePortalTarget'
+  | 'isEditing'
+  | 'isShared'
+  | 'invitedParticipants'
+  | 'modalWrapperElement'
+  | 'mode'
 > & {
   updateConfig: (changes: Partial<RepeatConfig>) => void
   handleRepeatType: (value: RepeatType) => void
   handleAllDayToggle: () => void
   onTitleConfirm: (value: string) => void
   onSharedChange?: (isShared: boolean) => void
+  readOnly?: boolean
+  onReadOnlyAttempt?: () => void
+  onUserEdit?: () => void
 }
 
 const ScheduleEditorFields = ({
   headerTitlePortalTarget,
   isEditing = false,
   isShared = false,
+  invitedParticipants,
   modalWrapperElement,
   mode = 'modal',
   updateConfig,
@@ -31,6 +40,9 @@ const ScheduleEditorFields = ({
   handleAllDayToggle,
   onTitleConfirm,
   onSharedChange,
+  readOnly = false,
+  onReadOnlyAttempt,
+  onUserEdit,
 }: ScheduleEditorFieldsProps) => {
   return (
     <>
@@ -40,12 +52,40 @@ const ScheduleEditorFields = ({
           autoFocus={!isEditing}
           isShared={isShared}
           onTitleConfirm={onTitleConfirm}
+          readOnly={readOnly}
+          onReadOnlyAttempt={onReadOnlyAttempt}
+          onUserEdit={onUserEdit}
         />
-        <ScheduleDateTimeSection mode={mode} handleAllDayToggle={handleAllDayToggle} />
-        <ScheduleDetailsSection mode={mode} modalWrapperElement={modalWrapperElement} />
+        <ScheduleDateTimeSection
+          mode={mode}
+          handleAllDayToggle={handleAllDayToggle}
+          readOnly={readOnly}
+          onReadOnlyAttempt={onReadOnlyAttempt}
+          onUserEdit={onUserEdit}
+        />
+        <ScheduleDetailsSection
+          mode={mode}
+          modalWrapperElement={modalWrapperElement}
+          readOnly={readOnly}
+          onReadOnlyAttempt={onReadOnlyAttempt}
+          onUserEdit={onUserEdit}
+        />
       </S.FormContent>
-      <ScheduleRepeatSection updateConfig={updateConfig} handleRepeatType={handleRepeatType} />
-      <ShareSchedulePanel onSharedChange={onSharedChange} />
+      <ScheduleRepeatSection
+        updateConfig={updateConfig}
+        handleRepeatType={handleRepeatType}
+        readOnly={readOnly}
+        onReadOnlyAttempt={onReadOnlyAttempt}
+        onUserEdit={onUserEdit}
+      />
+      <ShareSchedulePanel
+        isShared={isShared}
+        invitedParticipants={invitedParticipants}
+        onSharedChange={onSharedChange}
+        readOnly={readOnly}
+        onReadOnlyAttempt={onReadOnlyAttempt}
+        onUserEdit={onUserEdit}
+      />
     </>
   )
 }

@@ -11,9 +11,16 @@ import * as S from './SelectColor.style'
 type SelectColorProps = {
   value?: EventColorType
   onChange: (value: EventColorType) => void
+  readOnly?: boolean
+  onReadOnlyAttempt?: () => void
 }
 
-const SelectColor = ({ value, onChange }: SelectColorProps) => {
+const SelectColor = ({
+  value,
+  onChange,
+  readOnly = false,
+  onReadOnlyAttempt,
+}: SelectColorProps) => {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement | null>(null)
 
@@ -58,7 +65,13 @@ const SelectColor = ({ value, onChange }: SelectColorProps) => {
         aria-haspopup="listbox"
         aria-expanded={dropdownOpen}
         aria-label="색상 선택"
-        onClick={() => setDropdownOpen((prev) => !prev)}
+        onClick={() => {
+          if (readOnly) {
+            onReadOnlyAttempt?.()
+            return
+          }
+          setDropdownOpen((prev) => !prev)
+        }}
       >
         <S.Circle color={palette.point} />
         <Arrow css={{ rotate: '-90deg' }} color="#A5A5A5" />
@@ -75,6 +88,10 @@ const SelectColor = ({ value, onChange }: SelectColorProps) => {
               color={theme.colors[colorName].point}
               isSelected={resolvedValue === colorName}
               onClick={() => {
+                if (readOnly) {
+                  onReadOnlyAttempt?.()
+                  return
+                }
                 onChange(colorName)
                 setDropdownOpen(false)
               }}

@@ -6,7 +6,9 @@ import {
   getEventOccurrenceKey,
   resolveOccurrenceDateTime,
 } from '@/features/Calendar/utils/helpers/dayViewHelpers'
+import { RECURRENCE_TODO_SCOPE } from '@/shared/constants/recurrenceScope'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import type { RecurrenceTodoScope } from '@/shared/types/recurrence/recurrence'
 
 type UseCalendarKeyDeleteArgs = {
   isModalOpen: boolean
@@ -26,7 +28,11 @@ type UseCalendarKeyDeleteArgs = {
     occurrenceDate: string,
     isRecurring: boolean,
   ) => void
-  onDeleteTodo: (payload: { todoId: number; occurrenceDate: string; scope?: 'THIS_TODO' }) => void
+  onDeleteTodo: (payload: {
+    todoId: number
+    occurrenceDate: string
+    scope?: RecurrenceTodoScope
+  }) => void
 }
 
 // input, textarea, contenteditable 요소에서는 백스페이스로 이벤트 삭제 안되도록 막기
@@ -81,7 +87,7 @@ export const useCalendarKeyDelete = ({
         onDeleteTodo({
           todoId: selectedEvent.id,
           occurrenceDate: selectedEvent.occurrenceDate ?? moment(baseDate).format('YYYY-MM-DD'),
-          scope: isRecurringEvent ? 'THIS_TODO' : undefined,
+          scope: isRecurringEvent ? RECURRENCE_TODO_SCOPE.THIS_TODO : undefined,
         })
         onClearSelection()
         return

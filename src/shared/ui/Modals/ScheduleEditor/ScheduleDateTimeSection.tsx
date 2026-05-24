@@ -14,11 +14,17 @@ import { formatDisplayDate } from '@/shared/utils/date'
 
 type ScheduleDateTimeSectionProps = Pick<ScheduleEditorFormProps, 'mode'> & {
   handleAllDayToggle: () => void
+  readOnly?: boolean
+  onReadOnlyAttempt?: () => void
+  onUserEdit?: () => void
 }
 
 const ScheduleDateTimeSection = ({
   mode = 'modal',
   handleAllDayToggle,
+  readOnly = false,
+  onReadOnlyAttempt,
+  onUserEdit,
 }: ScheduleDateTimeSectionProps) => {
   const { control, setValue } = useFormContext<ScheduleEditorFormValues>()
   const isAllday = useWatch({ control, name: 'isAllday' }) ?? false
@@ -55,27 +61,43 @@ const ScheduleDateTimeSection = ({
       <S.Selection>
         <S.SelectionColumn isAllday={isAllday}>
           <S.FieldRow isAllday={isAllday}>
-            <S.DateFieldButton type="button" onClick={handleCalendarButtonClick('start')}>
+            <S.DateFieldButton
+              type="button"
+              onClick={readOnly ? onReadOnlyAttempt : handleCalendarButtonClick('start')}
+            >
               {startDate}
             </S.DateFieldButton>
             {!isAllday && (
               <CustomTimePicker
                 field="start"
                 value={eventStartTime ?? ''}
-                onChange={(value) => handleTimeChange('start', value)}
+                onChange={(value) => {
+                  onUserEdit?.()
+                  handleTimeChange('start', value)
+                }}
+                readOnly={readOnly}
+                onReadOnlyAttempt={onReadOnlyAttempt}
               />
             )}
           </S.FieldRow>
           {isAllday && '-'}
           <S.FieldRow isAllday={isAllday}>
-            <S.DateFieldButton type="button" onClick={handleCalendarButtonClick('end')}>
+            <S.DateFieldButton
+              type="button"
+              onClick={readOnly ? onReadOnlyAttempt : handleCalendarButtonClick('end')}
+            >
               {endDate}
             </S.DateFieldButton>
             {!isAllday && (
               <CustomTimePicker
                 field="end"
                 value={eventEndTime ?? ''}
-                onChange={(value) => handleTimeChange('end', value)}
+                onChange={(value) => {
+                  onUserEdit?.()
+                  handleTimeChange('end', value)
+                }}
+                readOnly={readOnly}
+                onReadOnlyAttempt={onReadOnlyAttempt}
               />
             )}
           </S.FieldRow>
@@ -93,13 +115,22 @@ const ScheduleDateTimeSection = ({
                     ? (eventStartDate ?? null)
                     : (eventEndDate ?? null)
                 }
-                onSelectDate={handleDateSelect}
+                onSelectDate={(selectedDate) => {
+                  onUserEdit?.()
+                  handleDateSelect(selectedDate)
+                }}
               />
             </S.CalendarPortal>,
             document.getElementById('modal-root')!,
           )}
       </S.Selection>
-      <Checkbox checked={isAllday} onChange={handleAllDayToggle} label="종일" />
+      <Checkbox
+        checked={isAllday}
+        onChange={handleAllDayToggle}
+        label="종일"
+        readOnly={readOnly}
+        onReadOnlyAttempt={onReadOnlyAttempt}
+      />
     </>
   )
 }

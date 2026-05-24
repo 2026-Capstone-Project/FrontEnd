@@ -8,10 +8,14 @@ const Checkbox = ({
   checked,
   onChange,
   label,
+  readOnly = false,
+  onReadOnlyAttempt,
 }: {
   label?: string
   checked: boolean
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  readOnly?: boolean
+  onReadOnlyAttempt?: () => void
 }) => {
   const id = useId()
   return (
@@ -22,7 +26,19 @@ const Checkbox = ({
           isChecked={checked}
           type="checkbox"
           checked={checked}
-          onChange={onChange}
+          onChange={(event) => {
+            if (readOnly) {
+              event.preventDefault()
+              onReadOnlyAttempt?.()
+              return
+            }
+            onChange(event)
+          }}
+          onClick={(event) => {
+            if (!readOnly) return
+            event.preventDefault()
+            onReadOnlyAttempt?.()
+          }}
         />
         <S.CheckIcon isVisible={checked}>
           <Check color="#ffffff" width={12} height={12} />

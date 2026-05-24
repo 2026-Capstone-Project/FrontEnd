@@ -8,25 +8,33 @@ import { theme } from '@/shared/styles/theme'
 import type { ScheduleEditorFormValues } from '@/shared/types/event/event'
 import TitleSuggestionInput from '@/shared/ui/scheduleTodo/TitleSuggestionInput/TitleSuggestionInput'
 
+const TITLE_SEARCH_THROTTLE_MS = 300
+
 type ScheduleTitleFieldProps = {
   portalTarget?: HTMLElement | null
   autoFocus?: boolean
   isShared?: boolean
+  readOnly?: boolean
   onTitleConfirm: (value: string) => void
+  onReadOnlyAttempt?: () => void
+  onUserEdit?: () => void
 }
 
 const ScheduleTitleField = ({
   portalTarget,
   autoFocus = true,
   isShared = false,
+  readOnly = false,
   onTitleConfirm,
+  onReadOnlyAttempt,
+  onUserEdit,
 }: ScheduleTitleFieldProps) => {
   const { control } = useFormContext<ScheduleEditorFormValues>()
   const eventTitleKeyword = (useWatch({ control, name: 'eventTitle' }) ?? '').trim()
-  const throttledEventTitleKeyword = useThrottledValue(eventTitleKeyword, 150)
+  const throttledEventTitleKeyword = useThrottledValue(eventTitleKeyword, TITLE_SEARCH_THROTTLE_MS)
   const { data: eventTitleHistoryData } = useEventTitleHistoryQuery(
     throttledEventTitleKeyword,
-    Boolean(throttledEventTitleKeyword),
+    !readOnly && Boolean(throttledEventTitleKeyword),
   )
   const suggestions = eventTitleHistoryData?.result.titleHistory ?? []
 
@@ -34,11 +42,27 @@ const ScheduleTitleField = ({
     <TitleSuggestionInput
       fieldName="eventTitle"
       placeholder="새로운 일정"
-      autoFocus={autoFocus}
+      autoFocus={autoFocus && !readOnly}
+      readOnly={readOnly}
       suggestions={suggestions}
       inputColor={isShared ? theme.colors.share.point : undefined}
-      onLiveChange={onTitleConfirm}
-      onConfirm={onTitleConfirm}
+      onLiveChange={
+        readOnly
+          ? undefined
+          : (value) => {
+              onUserEdit?.()
+              onTitleConfirm(value)
+            }
+      }
+      onConfirm={
+        readOnly
+          ? undefined
+          : (value) => {
+              onUserEdit?.()
+              onTitleConfirm(value)
+            }
+      }
+      onReadOnlyAttempt={onReadOnlyAttempt}
     />
   )
 

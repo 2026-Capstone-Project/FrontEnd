@@ -57,4 +57,5 @@ export const addScheduleSchema = yup.object().shape({
   isAllday,
   eventColor,
   repeatConfig: repeatConfigSchema,
+  friendIds: yup.array().of(yup.number().required()).default([]).defined(),
 })

@@ -1,47 +1,15 @@
 import { type PointerEvent as ReactPointerEvent, useCallback, useRef, useState } from 'react'
 
 import type { CalendarEvent } from '../../../../../shared/types/calendar/types'
-import { MIN_EVENT_DURATION_MINUTES } from './constants'
 import {
-  buildMoveRange,
-  buildResizeRange,
-  buildResizeStartRange,
-  getMinutesPerPixel,
-  shiftMinutesBy,
-  snapDateToMinutes,
-} from './timeHelpers'
+  buildSnappedDragRange,
+  type DayViewDragMode,
+  getColumnShift,
+  snapMinutes,
+} from './dragMath'
+import { getMinutesPerPixel } from './timeHelpers'
 
-const SNAP_MINUTES = 30
-const snapMinutes = (value: number) => Math.round(value / SNAP_MINUTES) * SNAP_MINUTES
-
-const snapMoveRange = (range: { nextStart: Date; nextEnd: Date }) => {
-  const snappedStart = snapDateToMinutes(range.nextStart, SNAP_MINUTES)
-  const snappedEnd = snapDateToMinutes(range.nextEnd, SNAP_MINUTES)
-  if (snappedEnd <= snappedStart) {
-    return { nextStart: snappedStart, nextEnd: shiftMinutesBy(snappedStart, SNAP_MINUTES) }
-  }
-  return { nextStart: snappedStart, nextEnd: snappedEnd }
-}
-
-const snapResizeRange = (range: { nextStart: Date; nextEnd: Date }, start: Date) => {
-  const snappedEnd = snapDateToMinutes(range.nextEnd, SNAP_MINUTES)
-  const minEnd = shiftMinutesBy(start, MIN_EVENT_DURATION_MINUTES)
-  return {
-    nextStart: range.nextStart,
-    nextEnd: snappedEnd <= start ? minEnd : snappedEnd,
-  }
-}
-
-const snapResizeStartRange = (range: { nextStart: Date; nextEnd: Date }, end: Date) => {
-  const snappedStart = snapDateToMinutes(range.nextStart, SNAP_MINUTES)
-  const maxStart = shiftMinutesBy(end, -MIN_EVENT_DURATION_MINUTES)
-  return {
-    nextStart: snappedStart >= end ? maxStart : snappedStart,
-    nextEnd: range.nextEnd,
-  }
-}
-
-export type DragMode = 'move' | 'resize' | 'resize-start'
+export type DragMode = DayViewDragMode
 export type DragState = {
   event: CalendarEvent
   startClientY: number
@@ -139,22 +107,12 @@ export const useDayViewDragHandlers = (
         if (Math.hypot(deltaX, deltaY) > 6) {
           dragThresholdPassedRef.current = true
         }
-        let columnShift = 0
-        if (gridRect && typeof originColumnIndex === 'number') {
-          const gap = Math.max(columnGapPx, 0)
-          const columnWidth = (gridRect.width - gap) / 2
-          const relativeX = moveEvent.clientX - gridRect.left
-          const clampedX = Math.min(Math.max(relativeX, 0), gridRect.width)
-          const leftBoundary = columnWidth
-          const rightBoundary = columnWidth + gap
-          let targetIndex = originColumnIndex
-          if (clampedX < leftBoundary) {
-            targetIndex = 0
-          } else if (clampedX > rightBoundary) {
-            targetIndex = 1
-          }
-          columnShift = targetIndex - originColumnIndex
-        }
+        const columnShift = getColumnShift({
+          clientX: moveEvent.clientX,
+          gridRect,
+          originColumnIndex,
+          columnGapPx,
+        })
         dragStateRef.current = {
           event: calendarEvent,
           startClientY: pointerStartY,
@@ -171,14 +129,13 @@ export const useDayViewDragHandlers = (
           preview: Boolean(onEventDragPreview),
         }
         if (onEventDragPreview) {
-          const totalMinutes = mode === 'move' ? deltaMinutes + columnShift * 12 * 60 : deltaMinutes
-          const snappedTotalMinutes = snapMinutes(totalMinutes)
-          const nextRange =
-            mode === 'move'
-              ? snapMoveRange(buildMoveRange(start, end, snappedTotalMinutes))
-              : mode === 'resize'
-                ? snapResizeRange(buildResizeRange(start, end, snappedTotalMinutes), start)
-                : snapResizeStartRange(buildResizeStartRange(start, end, snappedTotalMinutes), end)
+          const { nextRange } = buildSnappedDragRange({
+            mode,
+            start,
+            end,
+            deltaMinutes,
+            columnShift,
+          })
           pendingPreviewRef.current = {
             event: calendarEvent,
             start: nextRange.nextStart,
@@ -202,8 +159,13 @@ export const useDayViewDragHandlers = (
         const currentState = dragStateRef.current
         const deltaMinutes = currentState?.deltaMinutes ?? 0
         const columnShift = currentState?.columnShift ?? 0
-        const totalMinutes = mode === 'move' ? deltaMinutes + columnShift * 12 * 60 : deltaMinutes
-        const snappedTotalMinutes = snapMinutes(totalMinutes)
+        const { snappedTotalMinutes, nextRange } = buildSnappedDragRange({
+          mode,
+          start,
+          end,
+          deltaMinutes,
+          columnShift,
+        })
         if (snappedTotalMinutes === 0) {
           if (pointerEvent.currentTarget instanceof HTMLElement) {
             pointerEvent.currentTarget.releasePointerCapture(pointerEvent.pointerId)
@@ -211,12 +173,6 @@ export const useDayViewDragHandlers = (
           cleanup()
           return
         }
-        const nextRange =
-          mode === 'move'
-            ? snapMoveRange(buildMoveRange(start, end, snappedTotalMinutes))
-            : mode === 'resize'
-              ? snapResizeRange(buildResizeRange(start, end, snappedTotalMinutes), start)
-              : snapResizeStartRange(buildResizeStartRange(start, end, snappedTotalMinutes), end)
         if (pointerEvent.currentTarget instanceof HTMLElement) {
           pointerEvent.currentTarget.releasePointerCapture(pointerEvent.pointerId)
         }

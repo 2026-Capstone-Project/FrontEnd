@@ -90,11 +90,12 @@ export const SearchResultItem = styled.button<{ isAdded: boolean }>`
     background-color 0.2s ease,
     color 0.2s ease;
   background-color: ${(props) => (props.isAdded ? theme.colors.share.base : '#f1f1f1')};
+  border: 1px solid ${(props) => (props.isAdded ? theme.colors.share.point : 'transparent')};
 
   .divider {
     width: 1px;
     height: 16px;
-    background-color: #d2d3d2;
+    background-color: ${(props) => (props.isAdded ? theme.colors.share.point : '#d2d3d2')};
     margin: 0 8px;
   }
   .plus {
@@ -117,10 +118,10 @@ export const EmptySearchResult = styled.div`
 `
 
 export const Name = styled.div<{ isAdded: boolean }>`
-  color: ${(props) => (props.isAdded ? '#484569' : '#655446')};
+  color: ${(props) => (props.isAdded ? theme.colors.share.point : '#655446')};
 `
 
-export const Email = styled.div`
-  color: ${theme.colors.textColor2};
+export const Email = styled.div<{ isAdded?: boolean }>`
+  color: ${(props) => (props.isAdded ? theme.colors.share.point : theme.colors.textColor2)};
   font-weight: 400;
 `

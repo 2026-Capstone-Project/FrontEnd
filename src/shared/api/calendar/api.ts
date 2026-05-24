@@ -1,4 +1,5 @@
 import axiosInstance from '@/shared/api/axios'
+import type { RecurrenceEventSeriesScope } from '@/shared/constants/recurrenceScope'
 import type { GetEventDetailResponseDTO, GetEventsResponseDTO } from '@/shared/types/calendar/types'
 import type { TCommonResponse, TitleHistoryResponseDTO } from '@/shared/types/common/common'
 import type { EventColorType } from '@/shared/types/event/event'
@@ -38,6 +39,7 @@ export const postEvents = async (eventData: {
   color?: EventColorType
   isAllDay?: boolean
   recurrenceGroup?: RecurrenceGroup
+  friendIds?: number[]
 }) => {
   const { data } = await axiosInstance.post('/events', eventData)
   return data
@@ -55,10 +57,11 @@ export const patchEvent = async (
     color?: EventColorType
     isAllDay?: boolean
     recurrenceGroup?: RecurrenceGroup | null
+    friendIds?: number[] | null
   },
   params: {
     occurrenceDate: string
-    scope?: Extract<RecurrenceEventScope, 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS'>
+    scope?: RecurrenceEventScope
   },
 ) => {
   const { data } = await axiosInstance.patch(`/events/${eventId}`, eventData, { params })
@@ -69,7 +72,7 @@ export const deleteEvent = async (
   eventId: number,
   params: {
     occurrenceDate: string
-    scope?: Extract<RecurrenceEventScope, 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS'>
+    scope?: RecurrenceEventSeriesScope
   },
 ) => {
   const { data } = await axiosInstance.delete(`/events/${eventId}`, { params })
