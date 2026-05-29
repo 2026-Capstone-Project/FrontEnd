@@ -9,10 +9,10 @@ import { useCustomQuery } from '@/shared/hooks/common/customQuery'
 import { useFriendMutations } from '@/shared/hooks/friends/useFriendsMutations'
 import type { FriendItem, ReceivedFriendRequestItem } from '@/shared/types/friends/friends'
 
-import * as S from '../../../features/Friends/Friend.styles'
-import FriendListSection from '../../../features/Friends/FriendListSection'
-import ScheduleItem from '../../../features/Friends/ScheduleItem'
-import AddFriendModal from '../../../shared/ui/Modals/AddFriendsModal/AddFriendsModal'
+import * as S from '@/features/Friends/Friend.styles'
+import FriendListSection from '@/features/Friends/FriendListSection'
+import ScheduleItem from '@/features/Friends/ScheduleItem'
+import AddFriendModal from '@/shared/ui/Modals/AddFriendsModal/AddFriendsModal'
 
 export default function FriendsPage() {
   const [searchKeyword, setSearchKeyword] = useState<string>('')
