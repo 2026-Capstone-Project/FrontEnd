@@ -84,12 +84,25 @@ export default function FriendsPage() {
           maxHeight="330px"
           onDelete={handleDeleteFriend}
           headerAction={
-            <div
+            <button
+              type="button"
               onClick={() => setIsModalOpen(true)}
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+              aria-label="친구 추가"
+              style={{
+                width: '54px',
+                height: '35px',
+                background: '#f5f5f5',
+                border: 'none',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                padding: '8px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
             >
               <AddIcon />
-            </div>
+            </button>
           }
         >
           <div style={{ position: 'relative', marginBottom: '16px' }}>

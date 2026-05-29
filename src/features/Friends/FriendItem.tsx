@@ -1,17 +1,11 @@
 /** @jsxImportSource @emotion/react */
-import * as S from './Friend.styles'
+import type { FriendData } from '@/shared/types/friends/friends'
 
-export interface FriendData {
-  id: number
-  name: string
-  email: string
-  info?: string
-  avatarColor: string
-}
+import * as S from './Friend.styles'
 
 interface FriendItemProps extends FriendData {
   type: 'list' | 'request'
-  onDelete?: (friendId: number) => void // 👈 추가
+  onDelete?: (friendId: number) => void
 }
 
 export default function FriendItem({
