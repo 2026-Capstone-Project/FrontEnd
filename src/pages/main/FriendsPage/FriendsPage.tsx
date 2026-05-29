@@ -59,7 +59,7 @@ export default function FriendsPage() {
     },
   )
 
-  const FriendsData = friendsList.map((item: FriendItem) => ({
+  const friendsData = friendsList.map((item: FriendItem) => ({
     id: item.id,
     name: item.opponentName || '알 수 없음',
     email: item.opponentEmail || '',
@@ -67,7 +67,7 @@ export default function FriendsPage() {
     avatarColor: getAvatarColor(item.opponentEmail || String(item.id)),
   }))
 
-  const RequestsData = receivedRequests.map((item: ReceivedFriendRequestItem) => ({
+  const requestsData = receivedRequests.map((item: ReceivedFriendRequestItem) => ({
     id: item.id,
     name: item.opponentName || '알 수 없음',
     email: item.opponentEmail || '',
@@ -80,7 +80,7 @@ export default function FriendsPage() {
         <FriendListSection
           title="친구"
           type="list"
-          data={FriendsData}
+          data={friendsData}
           maxHeight="330px"
           onDelete={handleDeleteFriend}
           headerAction={
@@ -137,14 +137,14 @@ export default function FriendsPage() {
             <span>친구 요청</span>
           </S.SectionTitle>
           <S.ScrollArea maxHeight="100px">
-            {RequestsData.length === 0 ? (
+            {requestsData.length === 0 ? (
               <div
                 style={{ padding: '16px 0', color: '#999', fontSize: '14px', textAlign: 'center' }}
               >
                 받은 친구 요청이 없습니다.
               </div>
             ) : (
-              RequestsData.map((item) => (
+              requestsData.map((item) => (
                 <div
                   key={item.id}
                   style={{ display: 'flex', alignItems: 'center', padding: '12px 0' }}
