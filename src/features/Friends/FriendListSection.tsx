@@ -1,8 +1,10 @@
 /** @jsxImportSource @emotion/react */
 import type { ReactNode } from 'react'
 
+import type { FriendData } from '@/shared/types/friends/friends'
+
 import * as S from './Friend.styles'
-import FriendItem, { type FriendData } from './FriendItem'
+import FriendItem from './FriendItem'
 
 interface SectionProps {
   title: string
