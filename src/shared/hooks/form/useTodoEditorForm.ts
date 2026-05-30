@@ -1,7 +1,8 @@
-import { useCallback } from 'react'
 import { type Control, type UseFormReturn } from 'react-hook-form'
 
+import { RECURRENCE_TODO_SCOPE } from '@/shared/constants/recurrenceScope'
 import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
+import { useRepeatConfigController } from '@/shared/hooks/repeat/useRepeatConfigController'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type {
   EventColorType,
@@ -10,7 +11,7 @@ import type {
 } from '@/shared/types/event/event'
 import type { ItemEditorDraft } from '@/shared/types/modal/itemEditor'
 import type { RecurrenceTodoScope } from '@/shared/types/recurrence/recurrence'
-import type { CustomRepeatBasis, RepeatConfig, RepeatType } from '@/shared/types/recurrence/repeat'
+import type { RepeatConfig, RepeatType } from '@/shared/types/recurrence/repeat'
 import { formatIsoDate } from '@/shared/utils/date'
 import { mapRepeatConfigToRecurrenceGroup } from '@/shared/utils/recurrenceGroup'
 import { isSameYmd, toWeekday, toWeekOfMonth } from '@/shared/utils/recurrencePattern'
@@ -45,9 +46,6 @@ export type UseTodoEditorFormResult = {
   todoTitle: string | undefined
 }
 
-const isCustomBasis = (value: RepeatType): value is CustomRepeatBasis =>
-  value !== 'none' && value !== 'custom'
-
 const parseYmd = (value?: string) => {
   if (!value) return null
   const [year, month, day] = value.split('-').map((item) => Number.parseInt(item, 10))
@@ -80,57 +78,15 @@ export const useTodoEditorForm = ({
     eventColor,
   } = useTodoFormFields({ date, initialEvent, isEditing, draftValues, onDraftChange })
 
-  const handleRepeatType = useCallback(
-    (value: RepeatType) => {
-      if (value === 'custom') {
-        if (repeatConfig.repeatType === 'custom') {
-          setValue(
-            'repeatConfig',
-            { ...repeatConfig, repeatType: 'none', customBasis: null },
-            { shouldValidate: true },
-          )
-          return
-        }
-        setValue(
-          'repeatConfig',
-          {
-            ...repeatConfig,
-            repeatType: 'custom',
-            customBasis: repeatConfig.customBasis ?? 'daily',
-          },
-          { shouldValidate: true },
-        )
-        return
-      }
-
-      if (repeatConfig.repeatType === 'custom' && isCustomBasis(value)) {
-        setValue('repeatConfig', { ...repeatConfig, customBasis: value }, { shouldValidate: true })
-        return
-      }
-
-      const nextType = repeatConfig.repeatType === value ? 'none' : value
-      setValue(
-        'repeatConfig',
-        { ...repeatConfig, repeatType: nextType, customBasis: null },
-        { shouldValidate: true },
-      )
+  const { handleRepeatType, updateConfig, setEventColor } = useRepeatConfigController({
+    repeatConfig,
+    onRepeatConfigChange: (value) => {
+      setValue('repeatConfig', value, { shouldValidate: true })
     },
-    [repeatConfig, setValue],
-  )
-
-  const updateConfig = useCallback(
-    (changes: Partial<RepeatConfig>) => {
-      setValue('repeatConfig', { ...repeatConfig, ...changes }, { shouldValidate: true })
-    },
-    [repeatConfig, setValue],
-  )
-
-  const setEventColor = useCallback(
-    (value: EventColorType) => {
+    onEventColorChange: (value) => {
       setValue('eventColor', value, { shouldValidate: true })
     },
-    [setValue],
-  )
+  })
 
   const onSubmit = (
     values: TodoEditorFormValues,
@@ -143,7 +99,7 @@ export const useTodoEditorForm = ({
     const currentDate = values.todoDate ? new Date(values.todoDate) : null
     const targetOccurrenceDate = parseYmd(options?.occurrenceDate)
     const shouldAdjustFutureMonthlyPattern =
-      options?.scope === 'THIS_AND_FOLLOWING' &&
+      options?.scope === RECURRENCE_TODO_SCOPE.THIS_AND_FOLLOWING &&
       mappedRecurrenceGroup?.frequency === 'MONTHLY' &&
       mappedRecurrenceGroup?.monthlyType === 'DAY_OF_WEEK' &&
       mappedRecurrenceGroup?.weekdayRule != null &&

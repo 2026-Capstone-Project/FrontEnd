@@ -1,9 +1,11 @@
 // 일정 수정 payload를 생성하고 patch 요청을 보내는 훅
 import { useCallback } from 'react'
 
+import { RECURRENCE_EVENT_SCOPE } from '@/shared/constants/recurrenceScope'
 import type { CalendarEvent, Event } from '@/shared/types/calendar/types'
 import type { RepeatConfigSchema, ScheduleEditorFormValues } from '@/shared/types/event/event'
 import type { RecurrenceEventScope, RecurrenceGroup } from '@/shared/types/recurrence/recurrence'
+import { getEventFriendIds } from '@/shared/utils/eventParticipants'
 import { mapRepeatConfigToRecurrenceGroup } from '@/shared/utils/recurrenceGroup'
 import {
   isSameYmd,
@@ -34,7 +36,7 @@ type PatchEventMutate = (params: {
   eventId: number
   params: {
     occurrenceDate: string
-    scope?: Extract<RecurrenceEventScope, 'THIS_EVENT' | 'THIS_AND_FOLLOWING_EVENTS'>
+    scope?: RecurrenceEventScope
   }
   eventData: {
     title?: string
@@ -46,8 +48,16 @@ type PatchEventMutate = (params: {
     color?: Event['color']
     isAllDay?: boolean
     recurrenceGroup?: Event['recurrenceGroup'] | null
+    friendIds?: Event['friendIds']
   }
 }) => Promise<unknown>
+
+const areSameFriendIds = (left: number[] = [], right: number[] = []) => {
+  if (left.length !== right.length) return false
+  const leftSorted = [...left].sort((a, b) => a - b)
+  const rightSorted = [...right].sort((a, b) => a - b)
+  return leftSorted.every((friendId, index) => friendId === rightSorted[index])
+}
 
 type UseSchedulePatchArgs = {
   eventId: number | null
@@ -95,10 +105,16 @@ export const useSchedulePatch = ({
       const shouldSendRecurrenceGroup =
         JSON.stringify(nextRecurrenceGroupPayload ?? null) !==
         JSON.stringify(initialRecurrenceGroupPayload ?? null)
+      const isConvertingSingleToRecurring =
+        initialEvent?.recurrenceGroup == null &&
+        nextRecurrenceGroupPayload != null &&
+        shouldSendRecurrenceGroup
       const patchScope = shouldSendRecurrenceGroup
-        ? 'THIS_AND_FOLLOWING_EVENTS'
+        ? isConvertingSingleToRecurring
+          ? undefined
+          : RECURRENCE_EVENT_SCOPE.THIS_AND_FOLLOWING_EVENTS
         : isRecurring
-          ? (scope ?? 'THIS_EVENT')
+          ? (scope ?? RECURRENCE_EVENT_SCOPE.THIS_EVENT)
           : undefined
 
       const initialTitle = initialEvent?.title ?? ''
@@ -107,6 +123,7 @@ export const useSchedulePatch = ({
       const initialAddress = initialEvent?.address ?? null
       const initialColor = initialEvent?.color
       const initialIsAllday = initialEvent?.isAllDay ?? false
+      const initialFriendIds = getEventFriendIds(initialEvent)
       const initialStart =
         initialEvent?.start != null ? formatDateTime(new Date(initialEvent.start)) : undefined
       const initialEnd =
@@ -118,10 +135,11 @@ export const useSchedulePatch = ({
       const nextAddress = values.address?.trim() || null
       const nextStart = formatDateTime(start)
       const nextEnd = formatDateTime(end)
+      const nextFriendIds = values.friendIds ?? []
       const hasStartDateChanged =
         initialEvent?.start != null && !isSameYmd(new Date(initialEvent.start), start)
       const shouldSendMonthlySinglePattern =
-        patchScope === 'THIS_AND_FOLLOWING_EVENTS' &&
+        patchScope === RECURRENCE_EVENT_SCOPE.THIS_AND_FOLLOWING_EVENTS &&
         !shouldSendRecurrenceGroup &&
         hasStartDateChanged &&
         isMonthlyPatternWithFlexibleWeekdayRule(initialRecurrenceGroupPayload)
@@ -151,6 +169,7 @@ export const useSchedulePatch = ({
         ...(initialEnd && nextEnd !== initialEnd ? { endTime: nextEnd } : {}),
         ...(initialColor && values.eventColor !== initialColor ? { color: values.eventColor } : {}),
         ...(values.isAllday !== initialIsAllday ? { isAllDay: values.isAllday } : {}),
+        ...(!areSameFriendIds(nextFriendIds, initialFriendIds) ? { friendIds: nextFriendIds } : {}),
         ...(recurrenceGroupPayload !== undefined
           ? {
               recurrenceGroup: recurrenceGroupPayload,

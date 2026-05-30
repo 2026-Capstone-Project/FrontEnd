@@ -1,28 +1,17 @@
-import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import type { CalendarEvent } from '@/shared/types/calendar/types'
-import type { ItemEditorDraft } from '@/shared/types/modal/itemEditor'
+import type { ItemEditorDraft, ItemType } from '@/shared/types/modal/itemEditor'
 import ScheduleEditorForm from '@/shared/ui/Modals/ScheduleEditor/ScheduleEditorForm'
 import TodoEditorForm from '@/shared/ui/Modals/TodoEditor/TodoEditorForm'
-import { buildDefaultItemEditorDraft } from '@/shared/utils'
+import { useEditorDraft } from '@/shared/utils/useEditorDraft'
+import { useEditorRegistry } from '@/shared/utils/useEditorRegistry'
+import { useEditorTypeSync } from '@/shared/utils/useEditorTypeSync'
+import { useToastStore } from '@/store/useToastStore'
 
 import EditorModalLayout from './EditorModalLayout'
 import * as S from './ItemEditorModal.style'
-
-type ItemType = 'todo' | 'schedule'
-
-const buildDateTime = (fallbackDate: string, dateValue?: Date | null, timeValue?: string) => {
-  const nextDate = dateValue ? new Date(dateValue) : new Date(fallbackDate)
-  if (!timeValue) {
-    nextDate.setHours(0, 0, 0, 0)
-    return nextDate
-  }
-
-  const [hour, minute] = timeValue.split(':').map((value) => Number.parseInt(value, 10))
-  nextDate.setHours(Number.isNaN(hour) ? 0 : hour, Number.isNaN(minute) ? 0 : minute, 0, 0)
-  return nextDate
-}
 
 type ItemEditorModalProps = {
   onClose: () => void
@@ -35,6 +24,7 @@ type ItemEditorModalProps = {
   initialEvent?: CalendarEvent | null
   onEventColorChange?: (eventId: CalendarEvent['id'], color: CalendarEvent['color']) => void
   onEventTitleConfirm?: (eventId: CalendarEvent['id'], title: CalendarEvent['title']) => void
+  onEventSharedChange?: (eventId: CalendarEvent['id'], isShared: boolean) => void
   onEventTypeChange?: (eventId: CalendarEvent['id'], type: ItemType) => void
   onEventTimingChange?: (
     eventId: CalendarEvent['id'],
@@ -58,135 +48,52 @@ const ItemEditorModal = ({
   initialEvent = null,
   onEventColorChange,
   onEventTitleConfirm,
+  onEventSharedChange,
   onEventTypeChange,
   onEventTimingChange,
   draftValues: externalDraftValues,
   onDraftChange: onExternalDraftChange,
 }: ItemEditorModalProps) => {
-  const [activeType, setActiveType] = useState<ItemType>(initialType)
-  const [internalDraftValues, setInternalDraftValues] = useState<ItemEditorDraft | null>(() =>
-    isEditing ? null : buildDefaultItemEditorDraft(date, initialType, initialEvent),
-  )
-  const draftValues = externalDraftValues ?? internalDraftValues
-  const draftValuesRef = useRef(draftValues)
-  const setDraftValues = useCallback(
-    (draft: ItemEditorDraft | null) => {
-      if (onExternalDraftChange) {
-        onExternalDraftChange(draft)
-        return
-      }
-      setInternalDraftValues(draft)
-    },
-    [onExternalDraftChange],
-  )
-  const [footerChildren, setFooterChildren] = useState<ReactNode | null>(null)
-  const [deleteHandler, setDeleteHandler] = useState<() => void>(() => () => undefined)
-  const [closeGuard, setCloseGuard] = useState<null | (() => boolean)>(null)
+  const { draftValues, draftValuesRef, setDraftValues } = useEditorDraft({
+    date,
+    initialType,
+    initialEvent,
+    isEditing,
+    externalDraftValues,
+    onExternalDraftChange,
+  })
+
+  const {
+    footerChildren,
+    deleteHandler,
+    handleClose,
+    registerDeleteHandler,
+    registerFooterChildren,
+    registerCloseGuard,
+  } = useEditorRegistry(onClose)
+
+  const { activeType, setActiveType, isScheduleShared, setIsScheduleShared } = useEditorTypeSync({
+    initialType,
+    showTypeTabs,
+    eventId,
+    date,
+    initialEvent,
+    draftValuesRef,
+    onEventTypeChange,
+    onEventTimingChange,
+  })
+
   const [modalWrapperElement, setModalWrapperElement] = useState<HTMLDivElement | null>(null)
   const modalWrapperRef = useRef<HTMLDivElement | null>(null)
-  const previousActiveTypeRef = useRef(activeType)
-  const noopDeleteHandler = useCallback(() => undefined, [])
-
-  useEffect(() => {
-    draftValuesRef.current = draftValues
-  }, [draftValues])
-
-  const registerDeleteHandler = useCallback(
-    (handler?: (() => void) | null) => {
-      setDeleteHandler(() => handler ?? noopDeleteHandler)
-    },
-    [noopDeleteHandler],
-  )
-
-  const registerFooterChildren = useCallback((node: React.ReactNode | null) => {
-    setFooterChildren((prev) => (prev === node ? prev : node))
-  }, [])
-
-  const registerCloseGuard = useCallback((guard?: (() => boolean) | null) => {
-    setCloseGuard((prev) => {
-      const next = guard ?? null
-      return prev === next ? prev : next
+  const isReadOnlySchedule =
+    isEditing && initialType === 'schedule' && initialEvent?.isOwner === false
+  const showReadOnlyScheduleToast = useCallback(() => {
+    useToastStore.getState().showToast({
+      title: '일정을 수정할 수 없습니다',
+      message: '일정 소유자만 수정할 수 있습니다.',
+      toastType: 'warning',
     })
   }, [])
-
-  const handleClose = useCallback(() => {
-    if (closeGuard && !closeGuard()) return
-    onClose()
-  }, [closeGuard, onClose])
-
-  useEffect(() => {
-    setActiveType(initialType)
-  }, [initialType])
-
-  useEffect(() => {
-    if (externalDraftValues !== undefined) return
-    setInternalDraftValues(
-      isEditing ? null : buildDefaultItemEditorDraft(date, initialType, initialEvent),
-    )
-  }, [date, externalDraftValues, initialEvent, initialType, isEditing])
-
-  useEffect(() => {
-    if (eventId == null || eventId === 0) return
-    onEventTypeChange?.(eventId, activeType)
-  }, [activeType, eventId, onEventTypeChange])
-
-  useEffect(() => {
-    if (!showTypeTabs) return
-    if (previousActiveTypeRef.current === activeType) return
-    previousActiveTypeRef.current = activeType
-    if (eventId == null || eventId === 0) return
-    if (!onEventTimingChange) return
-
-    const latestDraftValues = draftValuesRef.current
-    const startDate =
-      latestDraftValues?.startDate ?? (initialEvent?.start ? new Date(initialEvent.start) : null)
-    const endDate =
-      latestDraftValues?.endDate ?? (initialEvent?.end ? new Date(initialEvent.end) : startDate)
-    const isAllDay = latestDraftValues?.isAllday ?? initialEvent?.isAllDay ?? false
-    const occurrenceDate = initialEvent?.occurrenceDate
-
-    if (activeType === 'todo') {
-      if (isAllDay) {
-        const start = new Date(startDate ?? new Date(date))
-        start.setHours(0, 0, 0, 0)
-        const end = new Date(start)
-        end.setHours(23, 59, 59, 999)
-        onEventTimingChange(eventId, start, end, true, occurrenceDate)
-        return
-      }
-
-      const point = buildDateTime(
-        date,
-        startDate,
-        latestDraftValues?.endTime ?? latestDraftValues?.startTime,
-      )
-      onEventTimingChange(eventId, point, point, false, occurrenceDate)
-      return
-    }
-
-    if (isAllDay) {
-      const start = new Date(startDate ?? new Date(date))
-      start.setHours(0, 0, 0, 0)
-      const end = new Date(endDate ?? start)
-      end.setHours(23, 59, 59, 999)
-      onEventTimingChange(eventId, start, end, true, occurrenceDate)
-      return
-    }
-
-    const start = buildDateTime(date, startDate, latestDraftValues?.startTime)
-    const end = buildDateTime(date, endDate ?? startDate, latestDraftValues?.endTime)
-    onEventTimingChange(eventId, start, end, false, occurrenceDate)
-  }, [
-    activeType,
-    date,
-    eventId,
-    initialEvent?.end,
-    initialEvent?.isAllDay,
-    initialEvent?.occurrenceDate,
-    initialEvent?.start,
-    onEventTimingChange,
-    showTypeTabs,
-  ])
 
   const handleSubmit = useCallback(() => {
     const submitFormId = activeType === 'todo' ? 'add-todo-form' : 'add-schedule-form'
@@ -208,14 +115,26 @@ const ItemEditorModal = ({
       <S.TabButton
         type="button"
         $isActive={activeType === 'todo'}
-        onClick={() => setActiveType('todo')}
+        onClick={() => {
+          if (isReadOnlySchedule) {
+            showReadOnlyScheduleToast()
+            return
+          }
+          setActiveType('todo')
+        }}
       >
         할 일
       </S.TabButton>
       <S.TabButton
         type="button"
         $isActive={activeType === 'schedule'}
-        onClick={() => setActiveType('schedule')}
+        onClick={() => {
+          if (isReadOnlySchedule) {
+            showReadOnlyScheduleToast()
+            return
+          }
+          setActiveType('schedule')
+        }}
       >
         일정
       </S.TabButton>
@@ -230,6 +149,7 @@ const ItemEditorModal = ({
     if (typeof document === 'undefined') return null
     return document.getElementById('modal-root')
   }, [])
+
   const [headerTitlePortalTarget, setHeaderTitlePortalTarget] = useState<HTMLElement | null>(null)
   const handleHeaderTitleRef = useCallback((node: HTMLDivElement | null) => {
     setHeaderTitlePortalTarget(node)
@@ -238,6 +158,15 @@ const ItemEditorModal = ({
     modalWrapperRef.current = node
     setModalWrapperElement((prev) => (prev === node ? prev : node))
   }, [])
+  const handleSharedChange = useCallback(
+    (isShared: boolean) => {
+      setIsScheduleShared(isShared)
+      if (eventId == null || eventId === 0) return
+      onEventSharedChange?.(eventId, isShared)
+    },
+    [eventId, onEventSharedChange, setIsScheduleShared],
+  )
+
   const layout = (
     <EditorModalLayout
       mode={mode}
@@ -247,6 +176,10 @@ const ItemEditorModal = ({
       submitFormId={activeType === 'todo' ? 'add-todo-form' : 'add-schedule-form'}
       handleDelete={deleteHandler}
       footerChildren={footerChildren}
+      hideActions={isReadOnlySchedule && activeType === 'schedule'}
+      submitButtonLabel={
+        activeType === 'schedule' && isScheduleShared ? '저장 및 초대 전송' : undefined
+      }
       headerExtras={showTypeTabs ? tabs : undefined}
       headerTitleContainerRef={handleHeaderTitleRef}
       modalWrapperRef={handleModalWrapperRef}
@@ -284,9 +217,11 @@ const ItemEditorModal = ({
           headerTitlePortalTarget={headerTitlePortalTarget}
           initialEvent={initialEvent}
           isEditing={isEditing}
+          isShared={isScheduleShared}
           onEventColorChange={onEventColorChange}
           onEventTitleConfirm={onEventTitleConfirm}
           onEventTimingChange={onEventTimingChange}
+          onSharedChange={handleSharedChange}
         />
       )}
     </EditorModalLayout>

@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import type { UseFormHandleSubmit, UseFormSetValue } from 'react-hook-form'
 
+import { RECURRENCE_EVENT_SCOPE } from '@/shared/constants/recurrenceScope'
 import { useRepeatChangeGuard } from '@/shared/hooks/repeat/useRepeatChangeGuard'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { ScheduleEditorFormValues } from '@/shared/types/event/event'
@@ -28,6 +29,8 @@ type UseScheduleSubmitFlowProps = {
   buildDateTime: (dateValue: Date | null, timeValue?: string) => Date
   formatDateTime: (value: Date) => string
   repeatConfig: ScheduleEditorFormValues['repeatConfig']
+  canEdit?: boolean
+  onReadOnlyAttempt?: () => void
 }
 
 export const useScheduleSubmitFlow = ({
@@ -45,6 +48,8 @@ export const useScheduleSubmitFlow = ({
   buildDateTime,
   formatDateTime,
   repeatConfig,
+  canEdit = true,
+  onReadOnlyAttempt,
 }: UseScheduleSubmitFlowProps) => {
   // 반복 변경 시 편집 확인 모달을 띄우는 guard 훅
   const {
@@ -100,6 +105,10 @@ export const useScheduleSubmitFlow = ({
         shouldConfirmChange?: boolean
       },
     ) => {
+      if (!canEdit) {
+        onReadOnlyAttempt?.()
+        return
+      }
       if (options.shouldConfirmChange) {
         confirmChange()
       }
@@ -125,12 +134,14 @@ export const useScheduleSubmitFlow = ({
       }
     },
     [
+      canEdit,
       clearApplyConfirm,
       confirmChange,
       confirmTitle,
       createSchedule,
       onClose,
       patchSchedule,
+      onReadOnlyAttempt,
       showToast,
       syncEventTiming,
     ],
@@ -139,6 +150,10 @@ export const useScheduleSubmitFlow = ({
   // 폼 제출 처리(일반/반복 분기)
   const handleFormSubmit = handleSubmit(
     async (values) => {
+      if (!canEdit) {
+        onReadOnlyAttempt?.()
+        return
+      }
       if (isExistingRecurring && requestConfirmation()) {
         setPendingScheduleValues(values)
         return
@@ -152,6 +167,10 @@ export const useScheduleSubmitFlow = ({
       })
     },
     (errors) => {
+      if (!canEdit) {
+        onReadOnlyAttempt?.()
+        return
+      }
       showToast({
         title: '일정 입력을 확인해주세요',
         message: getFormErrorMessage(errors, '필수 입력 항목을 다시 확인해주세요.'),
@@ -164,6 +183,10 @@ export const useScheduleSubmitFlow = ({
   const handleConfirmedSubmit = useCallback(
     async (option: EditConfirmOption) => {
       if (!pendingScheduleValues) return
+      if (!canEdit) {
+        onReadOnlyAttempt?.()
+        return
+      }
       const fallbackStartDate = pendingScheduleValues.eventStartDate ?? new Date(date)
       const fallbackOccurrenceDate = formatDateTime(
         buildDateTime(fallbackStartDate, pendingScheduleValues.eventStartTime),
@@ -173,7 +196,10 @@ export const useScheduleSubmitFlow = ({
       const occurrenceDate = initialEvent?.occurrenceDate
         ? formatDateTime(new Date(initialEvent.occurrenceDate))
         : fallbackOccurrenceDate
-      const scope = option === 'future' ? 'THIS_AND_FOLLOWING_EVENTS' : 'THIS_EVENT'
+      const scope =
+        option === 'future'
+          ? RECURRENCE_EVENT_SCOPE.THIS_AND_FOLLOWING_EVENTS
+          : RECURRENCE_EVENT_SCOPE.THIS_EVENT
       await submitScheduleValues(pendingScheduleValues, {
         mode: 'patch',
         scope,
@@ -183,10 +209,12 @@ export const useScheduleSubmitFlow = ({
     },
     [
       buildDateTime,
+      canEdit,
       date,
       formatDateTime,
       initialEvent,
       isEditConfirmOpen,
+      onReadOnlyAttempt,
       pendingScheduleValues,
       submitScheduleValues,
     ],

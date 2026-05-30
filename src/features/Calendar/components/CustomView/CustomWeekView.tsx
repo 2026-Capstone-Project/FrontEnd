@@ -3,19 +3,26 @@ import React from 'react'
 import type { NavigateAction, ViewStatic } from 'react-big-calendar'
 import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 
+import People from '@/assets/icons/people.svg?react'
 import { getColorPalette } from '@/features/Calendar/utils/colorPalette'
 import {
-  compareByStart,
-  eventCoversDate,
   getEventOccurrenceKey,
   isDateOnlyString,
 } from '@/features/Calendar/utils/helpers/dayViewHelpers'
+import {
+  buildAllDaySegments,
+  buildWeekDays,
+  buildWeekDropRange,
+  getAllDayLaneCount,
+  getDropDayIndex,
+  getTimedEventsForDate,
+  getWeeklyAllDayEvents,
+  KOREAN_WEEKDAYS,
+} from '@/features/Calendar/utils/weekViewLayout'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 
 import { TodoCheckbox } from '../CustomEvent/CustomEvent.style'
 import * as S from './weekView'
-
-const KOREAN_WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'] as const
 
 type WeekProps = {
   date?: Date
@@ -28,14 +35,6 @@ type WeekProps = {
   onEventDrop?: (args: EventInteractionArgs<CalendarEvent>) => void
   onToggleTodo?: (eventId: CalendarEvent['id']) => void
   selectedEventKey?: string | null
-}
-
-type AllDaySegment = {
-  event: CalendarEvent
-  key: string
-  startIndex: number
-  endIndex: number
-  lane: number
 }
 
 const formatTime = (event: CalendarEvent) => {
@@ -63,52 +62,19 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
   onToggleTodo,
   selectedEventKey,
 }: WeekProps) => {
-  const weekStart = moment(date).startOf('week')
-  const weekDays = Array.from({ length: 7 }, (_, index) => weekStart.clone().add(index, 'day'))
+  const weekDays = React.useMemo(() => buildWeekDays(date), [date])
+  const weekDayDates = React.useMemo(
+    () => weekDays.map((dayMoment) => dayMoment.toDate()),
+    [weekDays],
+  )
   const allDaySectionRef = React.useRef<HTMLElement | null>(null)
   const today = moment()
-  const weeklyAllDayEvents = React.useMemo(
-    () =>
-      events
-        .filter((event) => event.isAllDay || isDateOnlyString(event.start))
-        .sort(compareByStart),
-    [events],
+  const weeklyAllDayEvents = React.useMemo(() => getWeeklyAllDayEvents(events), [events])
+  const allDaySegments = React.useMemo(
+    () => buildAllDaySegments(weeklyAllDayEvents, weekDayDates),
+    [weekDayDates, weeklyAllDayEvents],
   )
-  const allDaySegments = React.useMemo<AllDaySegment[]>(() => {
-    const laneLastEndIndexes: number[] = []
-    const segments: AllDaySegment[] = []
-
-    weeklyAllDayEvents.forEach((event) => {
-      const coveredIndexes = weekDays
-        .map((dayMoment, index) => (eventCoversDate(event, dayMoment.toDate()) ? index : -1))
-        .filter((index) => index >= 0)
-      if (coveredIndexes.length === 0) return
-
-      const startIndex = coveredIndexes[0]
-      const endIndex = coveredIndexes[coveredIndexes.length - 1]
-      let lane = laneLastEndIndexes.findIndex((lastEnd) => startIndex > lastEnd)
-      if (lane === -1) {
-        lane = laneLastEndIndexes.length
-        laneLastEndIndexes.push(endIndex)
-      } else {
-        laneLastEndIndexes[lane] = endIndex
-      }
-
-      segments.push({
-        event,
-        key: getEventOccurrenceKey(event),
-        startIndex,
-        endIndex,
-        lane,
-      })
-    })
-
-    return segments
-  }, [weekDays, weeklyAllDayEvents])
-  const allDayLaneCount = React.useMemo(
-    () => allDaySegments.reduce((maxLane, segment) => Math.max(maxLane, segment.lane), -1) + 1,
-    [allDaySegments],
-  )
+  const allDayLaneCount = React.useMemo(() => getAllDayLaneCount(allDaySegments), [allDaySegments])
   const eventsByOccurrenceKey = React.useMemo(
     () => new Map(events.map((event) => [getEventOccurrenceKey(event), event])),
     [events],
@@ -124,39 +90,13 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
       setDraggingEventKey(null)
       if (!draggingEvent) return
 
-      const originalStart = moment(draggingEvent.start)
-      const originalEnd = moment(draggingEvent.end)
-      const originalStartDay = originalStart.clone().startOf('day')
-      const originalEndDay = originalEnd.clone().startOf('day')
-      const originalAllDay = draggingEvent.isAllDay || isDateOnlyString(draggingEvent.start)
-      const durationMs = Math.max(originalEnd.diff(originalStart), 0)
-      const useAllDayTime = dropAsAllDay || originalAllDay
-
-      const nextStart = useAllDayTime
-        ? moment(targetDate).startOf('day')
-        : moment(targetDate).set({
-            hour: originalStart.hour(),
-            minute: originalStart.minute(),
-            second: originalStart.second(),
-            millisecond: originalStart.millisecond(),
-          })
-      const nextEnd = useAllDayTime
-        ? (() => {
-            const spanDays = Math.max(originalEndDay.diff(originalStartDay, 'days') + 1, 1)
-            return nextStart
-              .clone()
-              .add(spanDays - 1, 'days')
-              .endOf('day')
-          })()
-        : durationMs > 0
-          ? nextStart.clone().add(durationMs, 'milliseconds')
-          : nextStart.clone().add(1, 'hour')
+      const nextRange = buildWeekDropRange(draggingEvent, targetDate, dropAsAllDay)
 
       onEventDrop({
         event: draggingEvent,
-        start: nextStart.toDate(),
-        end: nextEnd.toDate(),
-        allDay: useAllDayTime,
+        start: nextRange.start,
+        end: nextRange.end,
+        allDay: nextRange.allDay,
       } as EventInteractionArgs<CalendarEvent>)
     },
     [draggingEventKey, eventsByOccurrenceKey, onEventDrop],
@@ -165,9 +105,7 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
     (clientX: number) => {
       const sectionRect = allDaySectionRef.current?.getBoundingClientRect()
       if (!sectionRect || sectionRect.width <= 0) return
-      const relativeX = Math.max(0, Math.min(clientX - sectionRect.left, sectionRect.width - 1))
-      const dayWidth = sectionRect.width / 7
-      const dayIndex = Math.max(0, Math.min(6, Math.floor(relativeX / dayWidth)))
+      const dayIndex = getDropDayIndex(clientX, sectionRect, weekDays.length)
       handleDropToDate(weekDays[dayIndex].toDate(), true)
     },
     [handleDropToDate, weekDays],
@@ -286,6 +224,14 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
                       onToggleTodo?.(segment.event.id)
                     }}
                   />
+                ) : segment.event.isShared ? (
+                  <People
+                    aria-hidden="true"
+                    focusable="false"
+                    width={10}
+                    height={12}
+                    color={palette.point ?? 'transparent'}
+                  />
                 ) : (
                   <S.EventDot $color={palette.point} />
                 )}
@@ -300,10 +246,7 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
         {weekDays.map((dayMoment) => {
           const dayDate = dayMoment.toDate()
           const isSelectedDay = selectedDate ? dayMoment.isSame(selectedDate, 'day') : false
-          const timedEvents = events
-            .filter((event) => eventCoversDate(event, dayDate))
-            .filter((event) => !event.isAllDay && !isDateOnlyString(event.start))
-            .sort(compareByStart)
+          const timedEvents = getTimedEventsForDate(events, dayDate)
 
           const renderEventCard = (event: CalendarEvent) => {
             const palette = getColorPalette(event.color)
@@ -345,6 +288,14 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
                         eventChange.stopPropagation()
                         onToggleTodo?.(event.id)
                       }}
+                    />
+                  ) : event.isShared ? (
+                    <People
+                      aria-hidden="true"
+                      focusable="false"
+                      width={10}
+                      height={12}
+                      color={palette.point ?? 'transparent'}
                     />
                   ) : (
                     <S.EventDot $color={palette.point} />

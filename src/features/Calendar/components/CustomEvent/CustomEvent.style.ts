@@ -5,6 +5,7 @@ import { theme } from '@/shared/styles/theme'
 export const Circle = styled.div<{ backgroundColor?: string }>`
   min-width: 10px;
   min-height: 10px;
+  flex: 0 0 auto;
   border-radius: 50%;
   background-color: ${({ backgroundColor }) => backgroundColor ?? 'transparent'};
 `
@@ -14,6 +15,7 @@ export const TodoCheckbox = styled.input`
   max-height: 10px;
   width: 10px;
   height: 10px;
+  flex: 0 0 auto;
   aspect-ratio: 1 / 1;
   appearance: none;
   border: 1px dashed ${({ theme }) => theme.colors.textColor3};
@@ -66,6 +68,8 @@ export const MonthEventContainer = styled.div<{
   align-items: center;
   justify-content: space-between;
   color: #1f1f1f;
+  overflow: hidden;
+  width: 100%;
   background-color: ${({ backgroundColor }) => backgroundColor ?? 'transparent'};
   padding: 0 5px;
   border-radius: 8px;
@@ -98,21 +102,25 @@ export const WeekEventContainer = styled.div<{
 export const EventTitle = styled.div`
   font-weight: 400;
   font-size: 12px;
-  width: 38px;
+  width: 100%;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 `
 
 export const EventMeta = styled.div`
+  flex: 0 0 auto;
   font-size: 8px;
   color: ${({ theme }) => theme.colors.black};
   white-space: nowrap;
   min-width: fit-content;
 `
 export const EventWeekMeta = styled.div`
+  flex: 0 0 auto;
   font-size: 10px;
   color: ${({ theme }) => theme.colors.black};
+  white-space: nowrap;
 `
 
 export const EventLocation = styled.div`
@@ -121,13 +129,16 @@ export const EventLocation = styled.div`
 `
 
 export const EventRow = styled.div`
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 3px;
-  max-width: 80%;
+  max-width: 100%;
 `
 
 export const WeekEventRow = styled.div`
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 3px;

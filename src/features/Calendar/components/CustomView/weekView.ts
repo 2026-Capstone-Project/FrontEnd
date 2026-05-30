@@ -201,17 +201,20 @@ export const EventHeader = styled.div`
   display: flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
 `
 
 export const EventDot = styled.div<{ $color?: string }>`
   min-width: 10px;
   min-height: 10px;
+  flex: 0 0 auto;
   border-radius: 50%;
   background-color: ${({ $color }) => $color ?? theme.colors.textColor3};
 `
 
 export const EventTitle = styled.div`
   width: 100%;
+  min-width: 0;
   font-size: 12px;
   color: ${theme.colors.black};
   white-space: nowrap;
@@ -220,8 +223,10 @@ export const EventTitle = styled.div`
 `
 
 export const EventMeta = styled.div`
+  flex: 0 0 auto;
   font-size: 10px;
   color: ${theme.colors.textColor3};
+  white-space: nowrap;
 `
 
 export const EmptyText = styled.div`

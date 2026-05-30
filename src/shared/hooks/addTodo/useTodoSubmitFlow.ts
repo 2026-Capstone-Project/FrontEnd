@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import type { UseFormHandleSubmit, UseFormSetValue } from 'react-hook-form'
 
+import { RECURRENCE_TODO_SCOPE } from '@/shared/constants/recurrenceScope'
 import { useRepeatChangeGuard } from '@/shared/hooks/repeat/useRepeatChangeGuard'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { TodoEditorFormValues } from '@/shared/types/event/event'
@@ -150,7 +151,10 @@ export const useTodoSubmitFlow = ({
   const handleConfirmedSubmit = useCallback(
     async (option: EditConfirmOption) => {
       if (!pendingTodoValues) return
-      const scope: RecurrenceTodoScope = option === 'future' ? 'THIS_AND_FOLLOWING' : 'THIS_TODO'
+      const scope: RecurrenceTodoScope =
+        option === 'future'
+          ? RECURRENCE_TODO_SCOPE.THIS_AND_FOLLOWING
+          : RECURRENCE_TODO_SCOPE.THIS_TODO
       await submitTodoValues(pendingTodoValues, {
         scope,
         shouldConfirmChange: isEditConfirmOpen,

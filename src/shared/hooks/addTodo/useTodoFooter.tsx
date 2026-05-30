@@ -1,12 +1,13 @@
 import type { ReactNode } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { RECURRENCE_TODO_SCOPE } from '@/shared/constants/recurrenceScope'
 import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { EventColorType } from '@/shared/types/event/event'
 import type { TodoEditorFormProps } from '@/shared/types/modal/todoEditor'
 import type { RepeatConfig } from '@/shared/types/recurrence/repeat'
-import SelectColor from '@/shared/ui/common/SelectColor/SelectColor'
+import SelectColor from '@/shared/ui/scheduleTodo/SelectColor/SelectColor'
 
 type UseTodoFooterProps = {
   repeatConfig: RepeatConfig
@@ -105,7 +106,7 @@ export const useTodoFooter = ({
       {
         todoId: eventIdRef.current,
         occurrenceDate: occurrenceDateRef.current,
-        ...(hasExistingRecurrenceRef.current ? { scope: 'THIS_TODO' as const } : {}),
+        ...(hasExistingRecurrenceRef.current ? { scope: RECURRENCE_TODO_SCOPE.THIS_TODO } : {}),
         requestBody: {
           color: value,
         },

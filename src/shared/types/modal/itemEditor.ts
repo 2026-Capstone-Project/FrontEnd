@@ -1,5 +1,7 @@
 import type { EventColorType, RepeatConfigSchema } from '@/shared/types/event/event'
 
+export type ItemType = 'todo' | 'schedule'
+
 export type ItemEditorDraft = {
   title: string
   description: string
