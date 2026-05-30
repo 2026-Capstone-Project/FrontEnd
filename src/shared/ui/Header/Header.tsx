@@ -32,6 +32,9 @@ export default function Header() {
           <S.NavItem to="/todo" onClick={closeMenu}>
             할 일
           </S.NavItem>
+          <S.NavItem to="/friends" onClick={closeMenu}>
+            친구
+          </S.NavItem>
           <S.NavItem to="/calendar" onClick={closeMenu}>
             캘린더
           </S.NavItem>
