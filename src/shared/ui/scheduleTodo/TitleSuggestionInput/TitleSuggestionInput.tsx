@@ -108,8 +108,10 @@ const TitleSuggestionInput = <TFieldValues extends FieldValues>({
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (readOnly) {
-      event.preventDefault()
-      onReadOnlyAttempt?.()
+      if (event.key === 'Enter') {
+        event.preventDefault()
+        onReadOnlyAttempt?.()
+      }
       return
     }
     if (event.key !== 'Enter') return
