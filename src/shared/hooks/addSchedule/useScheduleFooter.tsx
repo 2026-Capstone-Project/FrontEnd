@@ -31,6 +31,7 @@ type UseScheduleFooterProps = {
   occurrenceDate: string
   canEdit?: boolean
   onReadOnlyAttempt?: () => void
+  onUserEdit?: () => void
 }
 
 export const useScheduleFooter = ({
@@ -49,6 +50,7 @@ export const useScheduleFooter = ({
   occurrenceDate,
   canEdit = true,
   onReadOnlyAttempt,
+  onUserEdit,
 }: UseScheduleFooterProps) => {
   const [deleteWarningVisible, setDeleteWarningVisible] = useState(false)
   const { useDeleteEvent } = useCalendarMutation()
@@ -60,6 +62,7 @@ export const useScheduleFooter = ({
   const deleteEventMutateRef = useRef(deleteEventMutate)
   const canEditRef = useRef(canEdit)
   const onReadOnlyAttemptRef = useRef(onReadOnlyAttempt)
+  const onUserEditRef = useRef(onUserEdit)
   const eventColorRef = useRef(eventColor)
   const setEventColorRef = useRef(setEventColor)
   const onEventColorChangeRef = useRef(onEventColorChange)
@@ -74,6 +77,7 @@ export const useScheduleFooter = ({
   deleteEventMutateRef.current = deleteEventMutate
   canEditRef.current = canEdit
   onReadOnlyAttemptRef.current = onReadOnlyAttempt
+  onUserEditRef.current = onUserEdit
   eventColorRef.current = eventColor
   setEventColorRef.current = setEventColor
   onEventColorChangeRef.current = onEventColorChange
@@ -126,6 +130,9 @@ export const useScheduleFooter = ({
     }
     const previousColor = eventColorRef.current
     const currentEventId = eventIdRef.current
+    if (value !== previousColor) {
+      onUserEditRef.current?.()
+    }
     setEventColorRef.current(value)
     if (currentEventId != null && currentEventId !== 0) {
       onEventColorChangeRef.current?.(currentEventId, value)

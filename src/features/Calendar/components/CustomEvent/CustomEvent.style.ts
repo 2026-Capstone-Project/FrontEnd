@@ -107,6 +107,7 @@ export const EventTitle = styled.div`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 80px;
 `
 
 export const EventMeta = styled.div`
