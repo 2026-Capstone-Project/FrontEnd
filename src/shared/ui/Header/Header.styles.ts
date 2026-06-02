@@ -35,7 +35,7 @@ export const LogoLink = styled(NavLink)`
 `
 
 export const Logo = styled.img`
-  height: 32px;
+  height: 50px;
   width: auto;
   cursor: pointer;
 `
