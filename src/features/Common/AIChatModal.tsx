@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query' // 1. useQueryClient 임포트
 import React, { useEffect, useRef, useState } from 'react'
 
 import { nlpApi } from '@/shared/api/home/home'
@@ -9,6 +10,7 @@ import { SparkleIcon } from '../Home/Icon/SparkleIcon'
 import * as S from './AIChatModal.styles'
 
 function AIChatModal() {
+  const queryClient = useQueryClient()
   const [inputValue, setInputValue] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -45,6 +47,12 @@ function AIChatModal() {
           action: response.result.action,
         }
         setMessages((prev) => [...prev, botMessage])
+
+        if (response.result.action === 'UPDATED') {
+          queryClient.invalidateQueries({ queryKey: ['calendar'] })
+          queryClient.invalidateQueries({ queryKey: ['events'] })
+          queryClient.invalidateQueries({ queryKey: ['todos'] })
+        }
       } else {
         setMessages((prev) => [
           ...prev,
