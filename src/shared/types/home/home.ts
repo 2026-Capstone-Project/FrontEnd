@@ -45,3 +45,33 @@ export interface SuggestionListResponse {
     details: Suggestion[]
   }
 }
+
+//챗봇 관련 type
+export type ChatActionType = 'CREATED' | 'UPDATED' | 'DELETED' | 'CLARIFYING' | 'NONE'
+export type ScheduleType = 'EVENT' | 'TODO'
+
+export interface ChatRequest {
+  message: string
+}
+
+export interface ChatResponseResult {
+  reply: string
+  action: ChatActionType
+  scheduleId: number | null
+  recurrenceGroupId: number | null
+  scheduleType: ScheduleType | null
+}
+
+export interface ChatResponse {
+  isSuccess: boolean
+  code: string
+  message: string
+  result: ChatResponseResult | null
+}
+
+export interface ChatMessage {
+  id: string
+  sender: 'user' | 'bot'
+  text: string
+  action?: ChatActionType
+}

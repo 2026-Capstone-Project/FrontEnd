@@ -1,5 +1,6 @@
 import type {
   BriefingResponse,
+  ChatResponse,
   ReminderResponse,
   SuggestionListResponse,
 } from '@/shared/types/home/home'
@@ -38,5 +39,12 @@ export const suggestionApi = {
   },
   deleteSuggestion: async () => {
     await axiosInstance.delete('/suggestions')
+  },
+}
+
+export const nlpApi = {
+  sendMessage: async (message: string): Promise<ChatResponse> => {
+    const res = await axiosInstance.post<ChatResponse>('/chat', { message })
+    return res.data
   },
 }
