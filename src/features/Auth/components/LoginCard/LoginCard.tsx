@@ -13,7 +13,7 @@ const LoginCard = () => {
   return (
     <S.Right>
       <S.InnerCard>
-        <S.Title>로그인 하기</S.Title>
+        <S.Title>바로 시작해보세요</S.Title>
 
         <S.Google
           onClick={function () {
