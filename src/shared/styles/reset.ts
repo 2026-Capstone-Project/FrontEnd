@@ -119,6 +119,12 @@ const reset = css`
     cursor: pointer;
     font-family: inherit;
   }
+  html,
+  body {
+    overscroll-behavior-y: none;
+    height: 100%;
+    overflow: hidden;
+  }
 `
 
 export default reset
