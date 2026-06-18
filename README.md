@@ -1,74 +1,197 @@
-# Calio - 2026 Capstone Frontend
+<div align="center">
+  <img src="./public/readme-cover.png" alt="Calio 대표 이미지" width="100%" />
 
-Vite + React 기반의 프론트엔드 프로젝트로, 캘린더와 투두 등 사용자 인터랙션이 많은 화면을 중심으로 빠른 데이터 패칭, 상태/폼 관리, 테스트 환경을 함께 구성하고 있습니다.
+  <br />
+  <br />
 
-## Contributors
+  <img src="./src/assets/logo.svg" width="96" alt="Calio logo" />
 
-|                                             **김연진(코튼)**                                              |                                            **지유진 (제이)**                                             |
-| :-------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------: |
-| <img width="150" height="150" alt="김연진" src="https://avatars.githubusercontent.com/u/111187984?v=4" /> | <img width="150" height="150" alt="지유진" src="https://avatars.githubusercontent.com/u/69490799?v=4" /> |
-|                               [@yeonjin719](https://github.com/yeonjin719)                                |                                [@yujin5959](https://github.com/yujin5959)                                |
+  <h1>Calio</h1>
+  <p>
+    말 한마디로 일정이 완성되는 AI 일정 관리 서비스<br />
+    <strong>2026 Capstone Frontend</strong>
+  </p>
 
-### 커밋/PR/브랜치 규칙
+  <p>
+    <img alt="React" src="https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=000" />
+    <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=fff" />
+    <img alt="Vite" src="https://img.shields.io/badge/Vite-7.2-646CFF?logo=vite&logoColor=fff" />
+    <img alt="Emotion" src="https://img.shields.io/badge/Emotion-Styled-DB7093" />
+    <img alt="Node" src="https://img.shields.io/badge/Node.js-20_LTS-339933?logo=node.js&logoColor=fff" />
+  </p>
+</div>
 
-- 커밋 메시지는 의미 있는 영어/한글로 상태와 변경을 담되 `gitmoji`식 장식은 생략하고 `feat:`/`fix:`/`chore:` 등 일반 접두사 활용을 권장합니다.
-- PR 제목은 `[Feature/#1] 작업내용`처럼 `[...]` 안에 이슈/기능 번호를 넣고 이후 작업을 간단히 설명합니다.
-- 브랜치 이름은 `feature/#1-작업내용` 형태로, 기능 번호와 핵심 설명을 `#`으로 연결해 생성합니다.
+---
 
-## 협업 컨벤션
+## 📌 Overview
 
-- ESLint는 `.vscode/settings.json`에서 `source.fixAll.eslint`와 `source.organizeImports`를 설정해 저장 시 자동 정렬합니다.
-- `simple-import-sort`의 `imports/exports` 룰과 `react/self-closing-comp`가 적용되어 있으므로 이를 위반하면 lint 오류가 납니다.
-- GitHub Copilot 리뷰 가이드(`.github/COPILOT_REVIEW.md`)에 아키텍처/구조/성능/접근성 기준이 정리되어 있으니 리뷰 시 참고합니다.
-- 새로운 기능을 도입할 때는 `src/features`와 `src/shared` 사이의 책임을 명확히 하고, alias(`@/...`)를 유지하세요.
-- 이슈가 필요하면 GitHub 프로젝트(프로젝트 탭 또는 지정된 도구)에서 먼저 등록한 뒤 이슈 번호/링크를 커밋/PR에 포함합니다.
+Calio는 사용자가 자연어로 말한 약속, 할 일, 공유 일정을 캘린더에 빠르게 정리할 수 있도록 돕는 AI 기반 일정 관리 서비스입니다. 반복적인 입력 과정을 줄이고, 개인 일정과 친구 간 일정 공유를 한 화면에서 관리하는 것을 목표로 합니다.
 
-## 주요 구조
+Calio Frontend는 Vite + React 기반의 캡스톤 프로젝트입니다. 캘린더, 투두, 친구, 인증 등 사용자 인터랙션이 많은 화면을 중심으로 빠른 데이터 패칭, UI 상태 관리, 폼 검증, 일관된 스타일 시스템을 구성합니다.
 
-- `src/app`: 엔트리/전역 설정(`main.tsx`, `App.tsx`)과 shared 레이아웃(`shared/layout`)을 정의합니다.
-- `src/pages`: 라우트 타겟 페이지(`CalendarPage`)를 담고, 각 페이지는 기능 단위(`features`)를 조합하여 구성합니다.
-- `src/features`: 캘린더 기능을 기준으로 `components`, `hooks`, `utils`, `mocks`, `domain` 등 도메인 단위 모듈이 모여 있습니다.
-- `src/shared`: 여러 페이지에서 재사용되는 UI, 훅, 스타일, 레이아웃, 테마, 타입을 담습니다. 예: `shared/layout`, `shared/styles`, `shared/constants`.
-- `src/assets`: 그림/아이콘 등 정적 자산. `vite-plugin-svgr`을 통해 SVG를 React 컴포넌트로 import합니다.
-- `src/types`: 공통 타입 정의(예: `EventColorType`).
-- `src/routes`: TanStack Router 기반(예정) 라우팅 트리를 위치시킬 폴더입니다.
-- Alias: `tsconfig.app.json`과 `vite-tsconfig-paths`를 통해 `@/` 접두사가 `src/`를 가리키므로 `@/features/...`처럼 통일된 방식으로 import하세요.
+### 핵심 기능 영역
 
-## Tech Stack
+- 일정과 할 일을 한 흐름에서 관리하는 캘린더 중심 UI
+- AI 제안을 통해 자연어 일정을 빠르게 등록하는 사용자 흐름
+- 친구 초대와 일정 공유를 지원하는 협업 일정 관리
+- React Query 기반 서버 상태 관리와 Axios API 레이어
+- Zustand 기반 클라이언트 UI 상태 관리
+- Emotion 기반 컴포넌트 스타일링과 공통 테마
+- ESLint, Prettier, Husky, lint-staged를 통한 협업 품질 관리
 
-- Core: React, TypeScript, Vite
-- Routing: `react-router-dom`
-- State Management: `zustand`(UI 상태) + `@tanstack/react-query`(서버 상태)
-- HTTP: `axios` (인터셉터 포함)
-- Styling: `@emotion/react`, `@emotion/styled`, 테마/컬러 팔레트 기반 스타일
-- Form/Validation: `react-hook-form`, `yup`, `@hookform/resolvers`
-- SVG: `vite-plugin-svgr`으로 SVG를 React 컴포넌트화
-- Testing: `vitest`, `@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`
-- Lint/Format: `eslint`(custom config + `simple-import-sort`, `react/self-closing-comp`), `prettier`
+## 🧭 Table of Contents
 
-## 주요 스크립트
+- [Tech Stack](#-tech-stack)
+- [Getting Started](#-getting-started)
+- [Scripts](#-scripts)
+- [Environment Variables](#-environment-variables)
+- [Project Structure](#-project-structure)
+- [Conventions](#-conventions)
+- [Contributors](#-contributors)
 
-| 스크립트          | 설명                                      |
-| ----------------- | ----------------------------------------- |
-| `npm run dev`     | Vite 개발 서버                            |
-| `npm run build`   | TypeScript 빌드(`tsc -b`) 및 Vite 빌드    |
-| `npm run lint`    | ESLint 검증(간편히 `eslint --fix`도 가능) |
-| `npm run preview` | 빌드 결과 미리보기                        |
-| `npm run prepare` | Husky 훅 설치                             |
+## 🛠 Tech Stack
 
-## 환경 변수
+| Category | Stack |
+| --- | --- |
+| Core | React 19, TypeScript, Vite |
+| Routing | React Router DOM |
+| Server State | TanStack React Query, Query Key Factory |
+| Client State | Zustand |
+| HTTP | Axios |
+| Styling | Emotion, theme/color palette |
+| Form / Validation | React Hook Form, Yup |
+| Calendar / Date | React Big Calendar, React Day Picker, Moment |
+| Map | React Kakao Maps SDK |
+| Icon | Lucide React, SVGR |
+| Test | Vitest, Testing Library, jsdom |
+| Quality | ESLint, Prettier, Husky, lint-staged, Commitlint |
 
-- `.env`(개인 설정)와 `.env.example`(팀 공유 템플릿)을 루트에 위치시킵니다.
-- 현재 프로젝트에서 읽는 키:
-  - `VITE_DEV_MODE`: React Query DevTools를 로컬에서만 표시하려면 `true`, 배포 시 `false`.
-  - `VITE_SERVER_URL`: 서버 URL
-- `.env.example`을 복사하여 `.env`로 만들고 팀 기준대로 값을 수정하세요.
+## 🚀 Getting Started
 
-## Node Version
+### Prerequisites
 
-Node.js 20 LTS를 기준으로 개발합니다.
+- Node.js 20 LTS
+- npm 또는 pnpm
 
 ```bash
 node -v
 # v20.x.x
 ```
+
+### Installation
+
+```bash
+npm install
+```
+
+### Run Dev Server
+
+```bash
+npm run dev
+```
+
+### Build
+
+```bash
+npm run build
+```
+
+## 📜 Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Vite 개발 서버를 실행합니다. |
+| `npm run build` | TypeScript 빌드 후 Vite 프로덕션 빌드를 생성합니다. |
+| `npm run lint` | ESLint로 전체 코드를 검사합니다. |
+| `npm run preview` | 빌드 결과를 로컬에서 미리 확인합니다. |
+| `npm run prepare` | Husky Git hook을 설치합니다. |
+
+## 🔐 Environment Variables
+
+루트 경로에 `.env` 파일을 생성하고 팀에서 공유한 값으로 채웁니다.
+
+```bash
+VITE_DEV_MODE=true
+VITE_SERVER_URL=https://example.com
+```
+
+| Key | Description |
+| --- | --- |
+| `VITE_DEV_MODE` | React Query DevTools 표시 여부를 제어합니다. 로컬에서는 `true`, 배포에서는 `false`를 권장합니다. |
+| `VITE_SERVER_URL` | API 서버 URL입니다. |
+
+## 🗂 Project Structure
+
+```text
+src
+├── app              # 앱 엔트리와 전역 설정
+├── assets           # 로고, 아이콘, 로그인/랜딩 이미지
+├── features         # 도메인별 기능 모듈
+│   ├── Auth
+│   ├── Calendar
+│   ├── Common
+│   ├── Friends
+│   ├── Home
+│   └── Todo
+├── pages            # 라우트 단위 페이지
+├── routes           # 라우팅 관련 설정
+├── shared           # 공통 API, UI, hooks, styles, utils
+├── store            # 전역 클라이언트 상태
+└── types            # 공통 타입
+```
+
+### Import Alias
+
+`@/`는 `src/`를 가리킵니다.
+
+```ts
+import { theme } from '@/shared/styles/theme'
+```
+
+## 🤝 Conventions
+
+### Branch
+
+```text
+feature/#1-description
+style/#1-description
+fix/#1-description
+docs/#1-description
+```
+
+### Commit
+
+일반적인 prefix를 사용해 변경 의도를 먼저 드러냅니다.
+
+```text
+feat: add todo creation flow
+fix: prevent calendar event overflow
+style: align event detail card text
+docs: update README
+```
+
+### Pull Request
+
+- PR 제목은 `[Feature/#1] 작업 내용` 형식을 권장합니다.
+- GitHub Issue를 먼저 등록하고 PR 본문에 `closes #이슈번호`를 포함합니다.
+- 리뷰 기준은 `.github/instructions/capstone.instructions.md`를 따릅니다.
+
+### Code Quality
+
+- 저장 전 ESLint와 Prettier 규칙을 맞춥니다.
+- `simple-import-sort` 규칙에 따라 import 순서를 유지합니다.
+- `shared`는 `features`에 의존하지 않도록 import 방향을 지킵니다.
+- SVG는 `vite-plugin-svgr`을 통해 React 컴포넌트로 사용할 수 있습니다.
+
+## 👥 Contributors
+
+| 김연진 (코튼) | 지유진 (제이) |
+| :---: | :---: |
+| <img width="140" height="140" alt="김연진" src="https://avatars.githubusercontent.com/u/111187984?v=4" /> | <img width="140" height="140" alt="지유진" src="https://avatars.githubusercontent.com/u/69490799?v=4" /> |
+| [@yeonjin719](https://github.com/yeonjin719) | [@yujin5959](https://github.com/yujin5959) |
+
+---
+
+<div align="center">
+  <sub>Built for 2026 Capstone Project</sub>
+</div>
