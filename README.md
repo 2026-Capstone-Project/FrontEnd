@@ -1,17 +1,12 @@
 <div align="center">
-  <img src="./public/readme-cover.png" alt="Calio 대표 이미지" width="100%" />
-
-  <br />
-  <br />
-
   <img src="./src/assets/logo.svg" width="96" alt="Calio logo" />
-
-  <h1>Calio</h1>
   <p>
     말 한마디로 일정이 완성되는 AI 일정 관리 서비스<br />
     <strong>2026 Capstone Frontend</strong>
   </p>
-
+  <img src="./public/readme-cover.png" alt="Calio 대표 이미지" width="100%" />
+  <br />
+  <br />
   <p>
     <img alt="React" src="https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=000" />
     <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=fff" />
@@ -51,20 +46,20 @@ Calio Frontend는 Vite + React 기반의 캡스톤 프로젝트입니다. 캘린
 
 ## 🛠 Tech Stack
 
-| Category | Stack |
-| --- | --- |
-| Core | React 19, TypeScript, Vite |
-| Routing | React Router DOM |
-| Server State | TanStack React Query, Query Key Factory |
-| Client State | Zustand |
-| HTTP | Axios |
-| Styling | Emotion, theme/color palette |
-| Form / Validation | React Hook Form, Yup |
-| Calendar / Date | React Big Calendar, React Day Picker, Moment |
-| Map | React Kakao Maps SDK |
-| Icon | Lucide React, SVGR |
-| Test | Vitest, Testing Library, jsdom |
-| Quality | ESLint, Prettier, Husky, lint-staged, Commitlint |
+| Category          | Stack                                            |
+| ----------------- | ------------------------------------------------ |
+| Core              | React 19, TypeScript, Vite                       |
+| Routing           | React Router DOM                                 |
+| Server State      | TanStack React Query, Query Key Factory          |
+| Client State      | Zustand                                          |
+| HTTP              | Axios                                            |
+| Styling           | Emotion, theme/color palette                     |
+| Form / Validation | React Hook Form, Yup                             |
+| Calendar / Date   | React Big Calendar, React Day Picker, Moment     |
+| Map               | React Kakao Maps SDK                             |
+| Icon              | Lucide React, SVGR                               |
+| Test              | Vitest, Testing Library, jsdom                   |
+| Quality           | ESLint, Prettier, Husky, lint-staged, Commitlint |
 
 ## 🚀 Getting Started
 
@@ -98,13 +93,13 @@ npm run build
 
 ## 📜 Scripts
 
-| Command | Description |
-| --- | --- |
-| `npm run dev` | Vite 개발 서버를 실행합니다. |
-| `npm run build` | TypeScript 빌드 후 Vite 프로덕션 빌드를 생성합니다. |
-| `npm run lint` | ESLint로 전체 코드를 검사합니다. |
-| `npm run preview` | 빌드 결과를 로컬에서 미리 확인합니다. |
-| `npm run prepare` | Husky Git hook을 설치합니다. |
+| Command           | Description                                         |
+| ----------------- | --------------------------------------------------- |
+| `npm run dev`     | Vite 개발 서버를 실행합니다.                        |
+| `npm run build`   | TypeScript 빌드 후 Vite 프로덕션 빌드를 생성합니다. |
+| `npm run lint`    | ESLint로 전체 코드를 검사합니다.                    |
+| `npm run preview` | 빌드 결과를 로컬에서 미리 확인합니다.               |
+| `npm run prepare` | Husky Git hook을 설치합니다.                        |
 
 ## 🔐 Environment Variables
 
@@ -115,10 +110,10 @@ VITE_DEV_MODE=true
 VITE_SERVER_URL=https://example.com
 ```
 
-| Key | Description |
-| --- | --- |
-| `VITE_DEV_MODE` | React Query DevTools 표시 여부를 제어합니다. 로컬에서는 `true`, 배포에서는 `false`를 권장합니다. |
-| `VITE_SERVER_URL` | API 서버 URL입니다. |
+| Key               | Description                                                                                      |
+| ----------------- | ------------------------------------------------------------------------------------------------ |
+| `VITE_DEV_MODE`   | React Query DevTools 표시 여부를 제어합니다. 로컬에서는 `true`, 배포에서는 `false`를 권장합니다. |
+| `VITE_SERVER_URL` | API 서버 URL입니다.                                                                              |
 
 ## 🗂 Project Structure
 
@@ -185,10 +180,10 @@ docs: update README
 
 ## 👥 Contributors
 
-| 김연진 (코튼) | 지유진 (제이) |
-| :---: | :---: |
+|                                               김연진 (코튼)                                               |                                              지유진 (제이)                                               |
+| :-------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------: |
 | <img width="140" height="140" alt="김연진" src="https://avatars.githubusercontent.com/u/111187984?v=4" /> | <img width="140" height="140" alt="지유진" src="https://avatars.githubusercontent.com/u/69490799?v=4" /> |
-| [@yeonjin719](https://github.com/yeonjin719) | [@yujin5959](https://github.com/yujin5959) |
+|                               [@yeonjin719](https://github.com/yeonjin719)                                |                                [@yujin5959](https://github.com/yujin5959)                                |
 
 ---
 
