@@ -92,6 +92,7 @@ const TodoCard = ({
             event.stopPropagation()
             handleDelete()
           }}
+          style={{ cursor: 'pointer' }}
         />
       </S.ButtonWrapper>
       {openDeleteModal && isRecurringTodo && (
