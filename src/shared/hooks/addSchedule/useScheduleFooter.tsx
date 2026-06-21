@@ -58,6 +58,7 @@ export const useScheduleFooter = ({
   const occurrenceDateRef = useRef(occurrenceDate)
   const closeModalRef = useRef(closeModal)
   const deleteEventMutateRef = useRef(deleteEventMutate)
+  const isTemporaryEventRef = useRef(Boolean(initialEvent?.isTemporary))
   const canEditRef = useRef(canEdit)
   const onReadOnlyAttemptRef = useRef(onReadOnlyAttempt)
   const eventColorRef = useRef(eventColor)
@@ -72,6 +73,7 @@ export const useScheduleFooter = ({
   occurrenceDateRef.current = occurrenceDate
   closeModalRef.current = closeModal
   deleteEventMutateRef.current = deleteEventMutate
+  isTemporaryEventRef.current = Boolean(initialEvent?.isTemporary)
   canEditRef.current = canEdit
   onReadOnlyAttemptRef.current = onReadOnlyAttempt
   eventColorRef.current = eventColor
@@ -84,6 +86,11 @@ export const useScheduleFooter = ({
   const handleDelete = useCallback(() => {
     if (!canEditRef.current) {
       onReadOnlyAttemptRef.current?.()
+      return
+    }
+    if (eventIdRef.current == null || eventIdRef.current === 0 || isTemporaryEventRef.current) {
+      setDeleteWarningVisible(false)
+      closeModalRef.current()
       return
     }
     if (repeatConfigRef.current.repeatType !== 'none') {
@@ -130,7 +137,7 @@ export const useScheduleFooter = ({
     if (currentEventId != null && currentEventId !== 0) {
       onEventColorChangeRef.current?.(currentEventId, value)
     }
-    if (!isEditingRef.current) {
+    if (!isEditingRef.current || isTemporaryEventRef.current) {
       return
     }
     const nextValues = { ...getValuesRef.current(), eventColor: value }

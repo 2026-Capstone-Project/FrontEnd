@@ -32,11 +32,16 @@ export const useCalendarDraftEvent = ({
   updateEventTiming,
 }: UseCalendarDraftEventArgs) => {
   const handleCloseModalWithCleanup = useCallback(() => {
-    if (!isModalEditing && modal.eventId != null) {
-      removeEvent(modal.eventId)
+    if (modal.eventId != null) {
+      const shouldRemoveDraft =
+        !isModalEditing ||
+        events.some((eventItem) => eventItem.id === modal.eventId && eventItem.isTemporary)
+      if (shouldRemoveDraft) {
+        removeEvent(modal.eventId)
+      }
     }
     handleCloseModal()
-  }, [handleCloseModal, isModalEditing, modal.eventId, removeEvent])
+  }, [events, handleCloseModal, isModalEditing, modal.eventId, removeEvent])
 
   const clearPendingDraftEvent = useCallback(() => {
     if (!modal.isOpen || isModalEditing || modal.eventId == null) return

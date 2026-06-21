@@ -81,6 +81,7 @@ export const useScheduleSubmitFlow = ({
   }, [])
 
   const showToast = useToastStore.getState().showToast
+  const isTemporaryEvent = Boolean(initialEvent?.isTemporary)
 
   const confirmTitle = useCallback(
     (values: ScheduleEditorFormValues) => {
@@ -163,7 +164,7 @@ export const useScheduleSubmitFlow = ({
         return
       }
       await submitScheduleValues(values, {
-        mode: isEditing ? 'patch' : 'create',
+        mode: isEditing && !isTemporaryEvent ? 'patch' : 'create',
       })
     },
     (errors) => {

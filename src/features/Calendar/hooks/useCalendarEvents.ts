@@ -144,7 +144,9 @@ export const useCalendarEvents = (options: UseCalendarEventsOptions = {}) => {
   // 서버 응답 후 임시 이벤트 id를 실제 id로 교체
   const updateEventId = useCallback((tempId: CalendarEvent['id'], nextId: CalendarEvent['id']) => {
     setEvents((prev) =>
-      prev.map((event) => (event.id === tempId ? { ...event, id: nextId } : event)),
+      prev.map((event) =>
+        event.id === tempId ? { ...event, id: nextId, isTemporary: false } : event,
+      ),
     )
   }, [])
 
