@@ -86,13 +86,16 @@ const TodoCard = ({
       </S.TodoLeftWrapper>
       <S.ButtonWrapper>
         <PriorityBadge priority={priority} />
-        <Trash
-          color="#c5c5c5"
+        <S.DeleteButton
+          type="button"
+          aria-label={`${title} 삭제`}
           onClick={(event) => {
             event.stopPropagation()
             handleDelete()
           }}
-        />
+        >
+          <Trash color="#c5c5c5" />
+        </S.DeleteButton>
       </S.ButtonWrapper>
       {openDeleteModal && isRecurringTodo && (
         <DeleteConfirmModal

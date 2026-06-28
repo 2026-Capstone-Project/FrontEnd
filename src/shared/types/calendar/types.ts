@@ -31,6 +31,7 @@ export type CalendarEvent = Omit<Event, 'start' | 'end'> & {
   type?: 'todo' | 'schedule'
   isDone?: boolean
   isRecurring?: boolean
+  isTemporary?: boolean
 }
 
 export type GetEventsResponseDTO = {

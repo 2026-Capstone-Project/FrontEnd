@@ -80,7 +80,7 @@ export const useSchedulePatch = ({
 }: UseSchedulePatchArgs) =>
   useCallback(
     (values: ScheduleEditorFormValues, scope?: RecurrenceEventScope, occurrenceDate?: string) => {
-      if (eventId == null || eventId === 0) return Promise.resolve()
+      if (eventId == null || eventId === 0 || initialEvent?.isTemporary) return Promise.resolve()
       const startDate = values.eventStartDate ?? new Date(date)
       const endDate = values.eventEndDate ?? startDate
       const [start, end] = values.isAllday

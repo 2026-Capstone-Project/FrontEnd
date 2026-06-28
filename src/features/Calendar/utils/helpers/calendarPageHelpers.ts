@@ -34,6 +34,7 @@ export const createEvent = (date: Date, index: number, allDay = false): Calendar
     recurrenceGroup: null,
     friendIds: [],
     type: 'schedule',
+    isTemporary: true,
   }
 }
 

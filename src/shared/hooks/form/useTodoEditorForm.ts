@@ -127,7 +127,7 @@ export const useTodoEditorForm = ({
       recurrenceGroup,
     }
 
-    const isPersistedTodoId = typeof id === 'number' && id > 0
+    const isPersistedTodoId = typeof id === 'number' && id > 0 && !initialEvent?.isTemporary
     if (isEditing && isPersistedTodoId) {
       const occurrenceDate = options?.occurrenceDate ?? formatIsoDate(date)
       return patchTodoMutate({
