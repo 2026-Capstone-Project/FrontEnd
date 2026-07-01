@@ -4,9 +4,9 @@ import type { EventProps } from 'react-big-calendar'
 import { createPortal } from 'react-dom'
 
 import People from '@/assets/icons/people.svg?react'
+import { getColorPalette } from '@/features/Calendar//utils/colorPalette'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 
-import { getColorPalette } from '../../../utils/colorPalette'
 import * as S from '../eventStyles'
 
 const formatTimeRange = (event: CalendarEvent) => {

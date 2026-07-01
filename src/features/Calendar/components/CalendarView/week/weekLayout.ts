@@ -1,13 +1,12 @@
 import moment from 'moment'
 
-import type { CalendarEvent } from '@/shared/types/calendar/types'
-
 import {
   compareByStart,
   eventCoversDate,
   getEventOccurrenceKey,
   isDateOnlyString,
-} from '../../../utils/helpers/dayViewHelpers'
+} from '@/features/Calendar//utils/helpers/dayViewHelpers'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 
 export const KOREAN_WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'] as const
 
