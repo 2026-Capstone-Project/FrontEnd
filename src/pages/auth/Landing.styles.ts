@@ -44,7 +44,7 @@ export const Nav = styled.nav`
   font-size: 15px;
   font-weight: 700;
   max-width: 1040px;
-  min-width: 1000px;
+  width: 100%;
   margin: 84px auto 0;
 
   ${media.down(theme.breakPoints.tablet)} {
@@ -285,6 +285,14 @@ export const RobotIconSlot = styled.div`
       height: 18px;
     }
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+
+    &::after {
+      animation: none;
+    }
+  }
 `
 
 export const Circle = styled.div<{
@@ -357,6 +365,37 @@ export const BotFallbackBubble = styled.div`
     padding: 6px 12px;
     border-radius: 8px;
   }
+`
+
+export const ChatUserMessage = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+`
+
+export const ChatUserBubble = styled.div`
+  max-width: 75%;
+  padding: 10px 16px;
+  border-radius: 16px 16px 4px 16px;
+  background: ${theme.colors.primary2};
+  color: ${theme.colors.white};
+  font-size: 14px;
+  line-height: 1.4;
+  word-break: break-all;
+`
+
+export const ChatBotMessage = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+`
+
+export const ChatBotContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 80%;
 `
 
 export const HeroCopy = styled.div`
@@ -633,33 +672,79 @@ export const LandingSuggestionCard = styled.div<{ $reverse: boolean }>`
   background: #ffffff;
   box-shadow: 0 10px 24px rgba(13, 120, 148, 0.1);
 
-  > div:first-of-type {
-    margin-bottom: 8px;
-  }
-
-  span {
-    margin-bottom: 0;
-    font-size: 12px;
-  }
-
-  p {
-    font-size: 12px;
-    line-height: 1.55;
-  }
-
-  > div:last-of-type {
-    margin-top: 16px;
-  }
-
-  button {
-    padding: 9px 12px;
-    border-radius: 9px;
-    font-size: 12px;
-  }
-
   ${media.down(theme.breakPoints.tablet)} {
     order: initial;
   }
+`
+
+export const SuggestionHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+`
+
+export const SuggestionTag = styled.span`
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-bottom: 0;
+  padding: 6px 14px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, #4684c1 0%, #00dccc 100%);
+  background-clip: text;
+  color: transparent;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    padding: 2px;
+    background: linear-gradient(90deg, #4684c1 0%, #00dccc 100%);
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+`
+
+export const SuggestionText = styled.p`
+  margin: 0;
+  color: #1e293b;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.55;
+`
+
+export const SuggestionButtonRow = styled.div`
+  display: flex;
+  width: 100%;
+  gap: 10px;
+  margin-top: 16px;
+`
+
+export const SuggestionGhostButton = styled.button`
+  flex: 1;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 9px;
+  background: #fafafa;
+  color: #3da4b2;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+`
+
+export const SuggestionPrimaryButton = styled(SuggestionGhostButton)`
+  background: #4490b4;
+  color: #ffffff;
 `
 
 export const ShareCardPreview = styled.div<{ $reverse: boolean }>`

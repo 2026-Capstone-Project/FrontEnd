@@ -2,9 +2,7 @@ import { Clock4, MapPin, UserRound } from 'lucide-react'
 
 import LandingCalendar from '@/assets/login/LandingCalendar_noBack.svg?react'
 import LandingTodo from '@/assets/login/LandingTodo.svg?react'
-import * as ChatS from '@/features/Common/AIChatModal.styles'
 import { SparkleIcon } from '@/features/Home/Icon/SparkleIcon'
-import * as HomeS from '@/pages/main/HomePage/HomePage.styles'
 import Plus from '@/shared/assets/icons/plus.svg?react'
 
 import * as S from '../Landing.styles'
@@ -14,12 +12,12 @@ export function FeatureVisual({ slot, reverse }: { slot: string; reverse: boolea
     return (
       <S.ImageSlot $reverse={reverse} $type={slot} aria-label="AI 채팅 이미지 영역">
         <S.LandingChatPreview $reverse={reverse}>
-          <ChatS.UserMessageWrapper>
-            <ChatS.UserBubble>내일 1시에 졸업 프로젝트 미팅 있어</ChatS.UserBubble>
-          </ChatS.UserMessageWrapper>
+          <S.ChatUserMessage>
+            <S.ChatUserBubble>내일 1시에 졸업 프로젝트 미팅 있어</S.ChatUserBubble>
+          </S.ChatUserMessage>
 
-          <ChatS.BotMessageWrapper>
-            <ChatS.BotContentArea>
+          <S.ChatBotMessage>
+            <S.ChatBotContent>
               <S.BotFallbackBubble>
                 일정 <b>졸업 프로젝트 미팅</b>
                 <br />
@@ -29,10 +27,10 @@ export function FeatureVisual({ slot, reverse }: { slot: string; reverse: boolea
                 <br />
                 유형 <b>일정</b>
                 <br />
-                <button>일정 등록하기</button>
+                <button type="button">일정 등록하기</button>
               </S.BotFallbackBubble>
-            </ChatS.BotContentArea>
-          </ChatS.BotMessageWrapper>
+            </S.ChatBotContent>
+          </S.ChatBotMessage>
         </S.LandingChatPreview>
       </S.ImageSlot>
     )
@@ -41,19 +39,19 @@ export function FeatureVisual({ slot, reverse }: { slot: string; reverse: boolea
   if (slot === 'suggest') {
     return (
       <S.LandingSuggestionCard $reverse={reverse}>
-        <HomeS.CardHeader>
-          <HomeS.Tag type="ai">AI 제안</HomeS.Tag>
+        <S.SuggestionHeader>
+          <S.SuggestionTag>AI 제안</S.SuggestionTag>
           <SparkleIcon startColor="#4684C1" endColor="#00DCCC" size={34} />
-        </HomeS.CardHeader>
-        <HomeS.CardText>
+        </S.SuggestionHeader>
+        <S.SuggestionText>
           4주째 한 번 미팅을 가졌는데, 이번 주가 4주차예요!
           <br />
           이번 주도 회의 일정을 등록할까요?
-        </HomeS.CardText>
-        <HomeS.ButtonRow>
-          <HomeS.GhostButton type="button">거절</HomeS.GhostButton>
-          <HomeS.PrimaryButton type="button">등록</HomeS.PrimaryButton>
-        </HomeS.ButtonRow>
+        </S.SuggestionText>
+        <S.SuggestionButtonRow>
+          <S.SuggestionGhostButton type="button">거절</S.SuggestionGhostButton>
+          <S.SuggestionPrimaryButton type="button">등록</S.SuggestionPrimaryButton>
+        </S.SuggestionButtonRow>
       </S.LandingSuggestionCard>
     )
   }

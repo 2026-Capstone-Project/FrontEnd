@@ -58,7 +58,7 @@ export default function Landing() {
         <S.Circle $width="538px" $color="rgba(84, 152, 208, 0.5)" $top="60%" $left="80%" />
         <S.Circle $width="491px" $color="rgba(146, 255, 233, 0.70)" $top="40%" $left="40%" />
         <S.BackgroundText>
-          Calender
+          Calendar
           <br /> + i/O
         </S.BackgroundText>
         <S.Nav>
@@ -117,15 +117,15 @@ export default function Landing() {
           캘리오와 함께하세요.
         </S.CtaText>
         <S.SocialButtons>
-          <S.Google onClick={() => handleSocialLogin('GOOGLE')}>
+          <S.Google onClick={() => handleSocialLogin('GOOGLE')} type="button">
             <GoogleIcon />
             Google로 계정 만들기
           </S.Google>
-          <S.Kakao onClick={() => handleSocialLogin('KAKAO')}>
+          <S.Kakao onClick={() => handleSocialLogin('KAKAO')} type="button">
             <KakaoIcon />
             카카오로 계정 만들기
           </S.Kakao>
-          <S.Naver onClick={() => handleSocialLogin('NAVER')}>
+          <S.Naver onClick={() => handleSocialLogin('NAVER')} type="button">
             <NaverIcon />
             NAVER로 계정 만들기
           </S.Naver>
@@ -145,7 +145,7 @@ export default function Landing() {
           <a
             href="https://fortune-squash-ece.notion.site/3908f1b5499880468dbfc2567d5ab359?pvs=74"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
           >
             개인정보처리방침
           </a>
