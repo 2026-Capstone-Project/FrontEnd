@@ -1,162 +1,16 @@
-import { Clock4, MapPin, UserRound } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 
 import GoogleIcon from '@/assets/icons/google.svg?react'
 import KakaoIcon from '@/assets/icons/kakao.svg?react'
 import NaverIcon from '@/assets/icons/naver.svg?react'
-import LandingCalendar from '@/assets/login/LandingCalendar_noBack.svg?react'
-import LandingTodo from '@/assets/login/LandingTodo.svg?react'
 import Logo from '@/assets/logo.svg?react'
-import * as ChatS from '@/features/Common/AIChatModal.styles'
-import { SparkleIcon } from '@/features/Home/Icon/SparkleIcon'
-import * as HomeS from '@/pages/main/HomePage/HomePage.styles'
 import { redirectToSocialLogin } from '@/shared/api/auth/auth'
-import Plus from '@/shared/assets/icons/plus.svg?react'
 import Robot from '@/shared/assets/icons/robot_noBackground.svg?react'
 import Star from '@/shared/assets/icons/star.svg?react'
 
+import { features } from './components/features'
+import { FeatureVisual } from './components/FeatureVisual'
 import * as S from './Landing.styles'
-
-const features = [
-  {
-    title: '말하면 바로 등록돼요',
-    description: ['"내일 1시에 미팅" 한 마디면 충분해요', '번거로운 과정을 줄여줘요'],
-    align: 'left',
-    slot: 'chat',
-  },
-  {
-    title: '캘리오가 먼저 제안해요',
-    description: [
-      '반복되는 일정 패턴을 학습해 다음 일정을 미리 추천해요.',
-      '등록 버튼 하나로 바로 추가 완료.',
-    ],
-    align: 'right',
-    slot: 'suggest',
-  },
-  {
-    title: '일정도, 할 일도 여기 다 있어요',
-    description: ['여러 앱을 사용할 필요 없이 한 곳에서 관리해요'],
-    align: 'left',
-    slot: 'todo',
-  },
-  {
-    title: '친구와 함께하는 일정도 쉽게',
-    description: [
-      '공유 일정을 만들어 친구를 초대하세요',
-      '친구가 수락하면 각자 캘린더에 자동으로 등록돼요',
-    ],
-    align: 'right',
-    slot: 'share',
-  },
-]
-
-function FeatureVisual({ slot, reverse }: { slot: string; reverse: boolean }) {
-  if (slot === 'chat') {
-    return (
-      <S.ImageSlot $reverse={reverse} $type={slot} aria-label="AI 채팅 이미지 영역">
-        <S.LandingChatPreview $reverse={reverse}>
-          <ChatS.UserMessageWrapper>
-            <ChatS.UserBubble>내일 1시에 졸업 프로젝트 미팅 있어</ChatS.UserBubble>
-          </ChatS.UserMessageWrapper>
-
-          <ChatS.BotMessageWrapper>
-            <ChatS.BotContentArea>
-              <S.BotFallbackBubble>
-                일정 <b>졸업 프로젝트 미팅</b>
-                <br />
-                날짜 <b>2026년 5월 7일 목요일</b>
-                <br />
-                시간 <b>오후 1시 (13:00)</b>
-                <br />
-                유형 <b>일정</b>
-                <br />
-                <button>일정 등록하기</button>
-              </S.BotFallbackBubble>
-            </ChatS.BotContentArea>
-          </ChatS.BotMessageWrapper>
-        </S.LandingChatPreview>
-      </S.ImageSlot>
-    )
-  }
-
-  if (slot === 'suggest') {
-    return (
-      <S.LandingSuggestionCard $reverse={reverse}>
-        <HomeS.CardHeader>
-          <HomeS.Tag type="ai">AI 제안</HomeS.Tag>
-          <SparkleIcon startColor="#4684C1" endColor="#00DCCC" size={34} />
-        </HomeS.CardHeader>
-        <HomeS.CardText>
-          4주째 한 번 미팅을 가졌는데, 이번 주가 4주차예요!
-          <br />
-          이번 주도 회의 일정을 등록할까요?
-        </HomeS.CardText>
-        <HomeS.ButtonRow>
-          <HomeS.GhostButton type="button">거절</HomeS.GhostButton>
-          <HomeS.PrimaryButton type="button">등록</HomeS.PrimaryButton>
-        </HomeS.ButtonRow>
-      </S.LandingSuggestionCard>
-    )
-  }
-
-  if (slot === 'todo') {
-    return (
-      <S.ImageSlot $reverse={reverse} $type={slot} aria-label="일정과 할 일 이미지 영역">
-        <S.TodoPreview>
-          <S.IconTile>
-            <LandingCalendar />
-          </S.IconTile>
-          <S.PlusMark>
-            <Plus />
-          </S.PlusMark>
-          <S.IconTile>
-            <LandingTodo />
-          </S.IconTile>
-        </S.TodoPreview>
-      </S.ImageSlot>
-    )
-  }
-
-  return (
-    <S.ShareCardPreview $reverse={reverse}>
-      <S.ShareHeader>
-        <S.ShareTitle>일정 공유</S.ShareTitle>
-        <S.ShareCount>3</S.ShareCount>
-      </S.ShareHeader>
-      <S.ShareCard>
-        <S.ShareInviteRow>
-          <S.ShareAvatar>a</S.ShareAvatar>
-          <S.ShareInviteText>
-            <strong>김캘리님이 초대했어요</strong>
-            <span>방금 전</span>
-          </S.ShareInviteText>
-          <S.ShareActions>
-            <button type="button">거절</button>
-            <button type="button">수락</button>
-          </S.ShareActions>
-        </S.ShareInviteRow>
-        <S.ShareDetail>
-          <S.ShareDetailTitle>
-            <span />
-            대전 여행
-          </S.ShareDetailTitle>
-          <S.ShareMeta>
-            <Clock4 />
-            2026년 4월 10일 (금) - 4월 11일 (토)
-          </S.ShareMeta>
-          <S.ShareMeta>
-            <MapPin />
-            대전
-          </S.ShareMeta>
-          <S.ShareMeta>
-            <UserRound />
-            참여자 4명
-          </S.ShareMeta>
-        </S.ShareDetail>
-      </S.ShareCard>
-    </S.ShareCardPreview>
-  )
-}
 
 export default function Landing() {
   const pageRef = useRef<HTMLElement>(null)
