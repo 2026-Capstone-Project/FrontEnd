@@ -2,7 +2,7 @@
 import { useCallback, useMemo } from 'react'
 import type { ViewStatic } from 'react-big-calendar'
 
-import CustomDayView from '@/features/Calendar/components/CustomView/CustomDayView'
+import CustomDayView from '@/features/Calendar/components/CalendarView/day/DayView'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 
 type UseDayViewHandlersArgs = {

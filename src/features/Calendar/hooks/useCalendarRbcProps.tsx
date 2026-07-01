@@ -15,8 +15,8 @@ import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAnd
 
 import CalendarHeader from '@/features/Calendar/components/CalendarDateHeader/CalendarDateHeader'
 import CustomToolbar from '@/features/Calendar/components/CalendarToolbar/CalendarToolbar'
-import { CustomMonthEvent, CustomMonthShowMore } from '@/features/Calendar/components/CustomEvent'
-import CustomWeekView from '@/features/Calendar/components/CustomView/CustomWeekView'
+import { CustomMonthEvent, CustomMonthShowMore } from '@/features/Calendar/components/CalendarView/month'
+import CustomWeekView from '@/features/Calendar/components/CalendarView/week/WeekView'
 import {
   getDayPropStyle,
   normalizeDate,

@@ -9,7 +9,7 @@ import ScheduleEditorModal from '@/shared/ui/Modals/ScheduleEditor'
 import TodoEditorModal from '@/shared/ui/Modals/TodoEditor'
 import { buildDefaultItemEditorDraft } from '@/shared/utils'
 
-import type { CalendarEventActions } from './CustomCalendar.types'
+import type { CalendarEventActions } from './Calendar.types'
 
 type CalendarModalsProps = {
   modalDate: string

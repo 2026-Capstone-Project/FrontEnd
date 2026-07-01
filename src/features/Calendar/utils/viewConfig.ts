@@ -4,8 +4,9 @@ import { createElement } from 'react'
 import type { Components, Formats, HeaderProps, View } from 'react-big-calendar'
 import { Views } from 'react-big-calendar'
 
+import type { CalendarEvent } from '@/shared/types/calendar/types'
+
 import CustomHeader from '../components/CalendarHeader/CalendarHeader'
-import type { CalendarEvent } from '../components/CustomView/CustomDayView'
 import { formatDayHeaderLabel, formatDayNumber, formatWeekday } from './formatters'
 
 type ViewConfigOptions = {

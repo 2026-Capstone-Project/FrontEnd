@@ -1,9 +1,9 @@
 import { css } from '@emotion/react'
 import styled from '@emotion/styled'
 
-import { dayViewStyles } from '@/features/Calendar/components/CustomView/dayView'
-import { monthViewStyles } from '@/features/Calendar/components/CustomView/monthView'
-import { weekViewStyles } from '@/features/Calendar/components/CustomView/weekView'
+import { dayViewStyles } from '@/features/Calendar/components/CalendarView/day/dayStyles'
+import { monthViewStyles } from '@/features/Calendar/components/CalendarView/month/monthStyles'
+import { weekViewStyles } from '@/features/Calendar/components/CalendarView/week/weekStyles'
 import { media } from '@/shared/styles/media'
 import { theme } from '@/shared/styles/theme'
 

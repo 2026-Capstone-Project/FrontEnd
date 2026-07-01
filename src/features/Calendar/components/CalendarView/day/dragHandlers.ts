@@ -1,6 +1,7 @@
 import { type PointerEvent as ReactPointerEvent, useCallback, useRef, useState } from 'react'
 
-import type { CalendarEvent } from '../../../../../shared/types/calendar/types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
+
 import {
   buildSnappedDragRange,
   type DayViewDragMode,

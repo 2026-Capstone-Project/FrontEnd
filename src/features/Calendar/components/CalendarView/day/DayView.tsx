@@ -5,17 +5,17 @@ import type { NavigateAction, ViewStatic } from 'react-big-calendar'
 import { formatWeekday } from '@/features/Calendar/utils/formatters'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 
-import { TIMED_SLOT_CONFIG } from '../../domain/constants'
+import { TIMED_SLOT_CONFIG } from '../../../domain/constants'
 import {
   buildTimedSlots,
   compareByStart,
   eventCoversDate,
   isDateOnlyString,
-} from '../../utils/helpers/dayViewHelpers'
-import * as S from './dayView'
-import { TIME_COLUMN_START_HOURS } from './dayView/constants'
-import { useDayViewDragHandlers } from './dayView/dragHandlers'
-import { renderAllDayEventBadges, renderTimeOverlayColumn } from './dayView/renderers'
+} from '../../../utils/helpers/dayViewHelpers'
+import { TIME_COLUMN_START_HOURS } from './constants'
+import * as S from './dayStyles'
+import { useDayViewDragHandlers } from './dragHandlers'
+import { renderAllDayEventBadges, renderTimeOverlayColumn } from './renderers'
 
 interface CustomDayViewProps {
   events?: CalendarEvent[]
