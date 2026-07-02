@@ -1,6 +1,7 @@
 import type { stringOrDate } from 'react-big-calendar'
 
-import { TIMED_SLOT_CONFIG } from '../../../domain/constants'
+import { TIMED_SLOT_CONFIG } from '@/features/Calendar//domain/constants'
+
 import { MIN_EVENT_DURATION_MINUTES } from './constants'
 
 export const normalizeDateValue = (value: stringOrDate): Date => {

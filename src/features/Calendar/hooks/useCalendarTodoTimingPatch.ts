@@ -1,7 +1,6 @@
 import moment from 'moment'
 import { useCallback, useRef } from 'react'
 
-import { buildRecurringGroupForFutureDrop } from '@/features/Calendar/hooks/useCalendarDragDrop'
 import {
   getTodoOccurrenceScope,
   isTodoFollowingScope,
@@ -10,6 +9,8 @@ import { getDetailTodo } from '@/shared/api/todo/api'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { RecurrenceGroup, RecurrenceTodoScope } from '@/shared/types/recurrence/recurrence'
 import type { PatchTodoRequestDTO } from '@/shared/types/todo/types'
+
+import { buildRecurringGroupForFutureDrop } from './useCalendarDragDrop'
 
 type PatchTodoPayload = {
   todoId: number

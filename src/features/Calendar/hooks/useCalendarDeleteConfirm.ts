@@ -1,7 +1,7 @@
 import moment from 'moment'
 import { useCallback, useState } from 'react'
 
-import type { DeleteConfirmState } from '@/features/Calendar/components/CustomCalendar/CustomCalendar.types'
+import type { DeleteConfirmState } from '@/features/Calendar/components/Calendar/Calendar.types'
 import { getEventOccurrenceScope } from '@/features/Calendar/utils/helpers/calendarRecurrenceScope'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 

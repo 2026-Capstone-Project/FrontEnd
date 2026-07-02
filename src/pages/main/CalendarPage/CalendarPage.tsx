@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { useRef, useState } from 'react'
 
-import CustomCalendar from '@/features/Calendar/components/CustomCalendar/CustomCalendar'
+import CustomCalendar from '@/features/Calendar/components/Calendar/Calendar'
 import EventsCard from '@/features/Calendar/components/EventsCard/EventsCard'
 import { mapSettingsDefaultView } from '@/features/Calendar/hooks/useStoredCalendarView'
 import { SettingsAPI } from '@/shared/api/settings/settings'

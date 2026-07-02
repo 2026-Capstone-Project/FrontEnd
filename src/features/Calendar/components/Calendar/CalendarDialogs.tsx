@@ -4,7 +4,7 @@ import type { RecurrenceEventSeriesScope } from '@/shared/constants/recurrenceSc
 import { EditConfirmModal, type EditConfirmOption } from '@/shared/ui/Modals'
 import DeleteConfirmModal from '@/shared/ui/Modals/DeleteConfirmModal/DeleteConfirmModal'
 
-import type { DeleteConfirmState, RecurringDropConfirmState } from './CustomCalendar.types'
+import type { DeleteConfirmState, RecurringDropConfirmState } from './Calendar.types'
 
 type EventDeleteVariables = {
   eventId: number

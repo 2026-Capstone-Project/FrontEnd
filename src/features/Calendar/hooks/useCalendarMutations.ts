@@ -3,7 +3,7 @@ import { useTodoMutations } from '@/shared/hooks/query/useTodoMutations'
 
 import { useCalendarTodoTimingPatch } from './useCalendarTodoTimingPatch'
 
-export const useCustomCalendarMutations = () => {
+export const useCalendarMutations = () => {
   const { usePatchEvent, useDeleteEvent } = useCalendarMutation()
   const { mutate: patchEventMutate } = usePatchEvent()
   const { mutate: deleteEventMutate } = useDeleteEvent()

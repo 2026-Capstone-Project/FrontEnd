@@ -1,49 +1,54 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { DateLocalizer, View } from 'react-big-calendar'
 
-import type { CalendarEventActions } from '@/features/Calendar/components/CustomCalendar/CustomCalendar.types'
-import { useCalendarApiEvents } from '@/features/Calendar/hooks/useCalendarApiEvents'
-import { useCalendarDateCellWrapper } from '@/features/Calendar/hooks/useCalendarDateCellWrapper'
-import { useCalendarDateRange } from '@/features/Calendar/hooks/useCalendarDateRange'
-import { useCalendarDayViewTiming } from '@/features/Calendar/hooks/useCalendarDayViewTiming'
-import { useCalendarDeleteConfirm } from '@/features/Calendar/hooks/useCalendarDeleteConfirm'
-import { useCalendarDraftEvent } from '@/features/Calendar/hooks/useCalendarDraftEvent'
-import { useCalendarEvents } from '@/features/Calendar/hooks/useCalendarEvents'
-import { useCalendarKeyDelete } from '@/features/Calendar/hooks/useCalendarKeyDelete'
-import { useCalendarModal } from '@/features/Calendar/hooks/useCalendarModal'
-import { useCalendarNavigation } from '@/features/Calendar/hooks/useCalendarNavigation'
-import { useCalendarRbcProps } from '@/features/Calendar/hooks/useCalendarRbcProps'
-import { useCalendarRecurringDropConfirm } from '@/features/Calendar/hooks/useCalendarRecurringDropConfirm'
-import { useCalendarResponsive } from '@/features/Calendar/hooks/useCalendarResponsive'
-import { useCalendarSelectionBridge } from '@/features/Calendar/hooks/useCalendarSelectionBridge'
-import { useCalendarTodoActions } from '@/features/Calendar/hooks/useCalendarTodoActions'
-import { useCalendarViewCreationHandlers } from '@/features/Calendar/hooks/useCalendarViewCreationHandlers'
-import { useCustomCalendarMutations } from '@/features/Calendar/hooks/useCustomCalendarMutations'
-import { useStoredCalendarView } from '@/features/Calendar/hooks/useStoredCalendarView'
-import { getCalendarModalEvent } from '@/features/Calendar/utils/helpers/calendarModalEvent'
+import type { CalendarEventActions } from '@/features/Calendar/components/Calendar/Calendar.types'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 
-type UseCustomCalendarControllerArgs = {
+import { getCalendarModalEvent } from '../utils/helpers/calendarModalEvent'
+import { useCalendarApiEvents } from './useCalendarApiEvents'
+import { useCalendarCreationHandlers } from './useCalendarCreationHandlers'
+import { useCalendarDateCellWrapper } from './useCalendarDateCellWrapper'
+import { useCalendarDateRange } from './useCalendarDateRange'
+import { useCalendarDayViewTiming } from './useCalendarDayViewTiming'
+import { useCalendarDeleteConfirm } from './useCalendarDeleteConfirm'
+import { useCalendarDraftEvent } from './useCalendarDraftEvent'
+import { useCalendarEvents } from './useCalendarEvents'
+import { useCalendarKeyDelete } from './useCalendarKeyDelete'
+import { useCalendarModal } from './useCalendarModal'
+import { useCalendarMutations } from './useCalendarMutations'
+import { useCalendarNavigation } from './useCalendarNavigation'
+import { useCalendarRbcProps } from './useCalendarRbcProps'
+import { useCalendarRecurringDropConfirm } from './useCalendarRecurringDropConfirm'
+import { useCalendarResponsive } from './useCalendarResponsive'
+import { useCalendarSelection } from './useCalendarSelection'
+import { useCalendarTodoActions } from './useCalendarTodoActions'
+import { useStoredCalendarView } from './useStoredCalendarView'
+
+type UseCalendarControllerArgs = {
   localizer: DateLocalizer
   initialView?: View
   onSelectedDateChange?: (selectedDate: Date) => void
 }
 
-export const useCustomCalendarController = ({
+export const useCalendarController = ({
   localizer,
   initialView,
   onSelectedDateChange,
-}: UseCustomCalendarControllerArgs) => {
+}: UseCalendarControllerArgs) => {
+  // 1. Calendar range and server data
   const { view, setView } = useStoredCalendarView({ initialView })
   const [date, setDate] = useState<Date>(new Date())
   const { startDate, endDate } = useCalendarDateRange(view, date)
   const { events: apiEvents, refetch: refetchEvents } = useCalendarApiEvents(startDate, endDate)
+
+  // 2. Server writes and local event state
   const {
     patchEventMutate,
     deleteEventMutate,
     patchCompleteTodoMutate,
     patchTodoTiming,
     deleteTodoMutate,
-  } = useCustomCalendarMutations()
+  } = useCalendarMutations()
 
   const {
     events,
@@ -60,6 +65,7 @@ export const useCustomCalendarController = ({
     removeEvent,
   } = useCalendarEvents({ initialEvents: apiEvents })
 
+  // 3. Todo, delete, modal, and selection flows
   const isDesktop = useCalendarResponsive()
   const modalMode: 'modal' | 'inline' = isDesktop ? 'inline' : 'modal'
   const { handleToggleTodo } = useCalendarTodoActions({
@@ -86,6 +92,16 @@ export const useCustomCalendarController = ({
       isRecurring,
     })
 
+  const handleOpenEventFromCalendar = useCallback(
+    (event: CalendarEvent) => {
+      if (!isModalEditing && modal.isOpen && modal.eventId != null) {
+        removeEvent(modal.eventId)
+      }
+      handleEventClick(event)
+    },
+    [handleEventClick, isModalEditing, modal.eventId, modal.isOpen, removeEvent],
+  )
+
   const {
     selectedDate,
     setSelectedDate,
@@ -96,12 +112,8 @@ export const useCustomCalendarController = ({
     clearSelection,
     selectEvent,
     selectEventOnly,
-  } = useCalendarSelectionBridge({
-    isModalEditing,
-    isModalOpen: modal.isOpen,
-    modalEventId: modal.eventId,
-    removeEvent,
-    handleEventClick,
+  } = useCalendarSelection({
+    onOpenEvent: handleOpenEventFromCalendar,
   })
 
   const { handleCloseModalWithCleanup, enqueueDraftEvent } = useCalendarDraftEvent({
@@ -121,6 +133,7 @@ export const useCustomCalendarController = ({
     updateLocalEventTime,
   })
 
+  // 4. Global keyboard and navigation side effects
   useCalendarKeyDelete({
     isModalOpen: modal.isOpen,
     date,
@@ -145,12 +158,13 @@ export const useCustomCalendarController = ({
     setSelectedEventKey,
   })
 
+  // 5. View-specific handlers and react-big-calendar props
   const {
     dayViewWithHandlers,
     handleSelectSlotWrapper,
     handleWeekViewCreateEvent,
     handleWeekViewSelectDate,
-  } = useCalendarViewCreationHandlers({
+  } = useCalendarCreationHandlers({
     view,
     enqueueEvent: enqueueDraftEvent,
     handleAddEvent,
@@ -206,6 +220,7 @@ export const useCustomCalendarController = ({
     localizer,
   })
 
+  // 6. Modal payloads exposed to the Calendar component
   const modalEvent = useMemo(
     () =>
       getCalendarModalEvent({

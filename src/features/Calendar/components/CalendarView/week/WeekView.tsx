@@ -4,11 +4,6 @@ import type { NavigateAction, ViewStatic } from 'react-big-calendar'
 import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 
 import People from '@/assets/icons/people.svg?react'
-import { getColorPalette } from '@/features/Calendar/utils/colorPalette'
-import {
-  getEventOccurrenceKey,
-  isDateOnlyString,
-} from '@/features/Calendar/utils/helpers/dayViewHelpers'
 import {
   buildAllDaySegments,
   buildWeekDays,
@@ -18,11 +13,16 @@ import {
   getTimedEventsForDate,
   getWeeklyAllDayEvents,
   KOREAN_WEEKDAYS,
-} from '@/features/Calendar/utils/weekViewLayout'
+} from '@/features/Calendar/components/CalendarView/week/weekLayout'
+import { getColorPalette } from '@/features/Calendar/utils/colorPalette'
+import {
+  getEventOccurrenceKey,
+  isDateOnlyString,
+} from '@/features/Calendar/utils/helpers/dayViewHelpers'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 
-import { TodoCheckbox } from '../CustomEvent/CustomEvent.style'
-import * as S from './weekView'
+import { TodoCheckbox } from '../eventStyles'
+import * as S from './weekStyles'
 
 type WeekProps = {
   date?: Date

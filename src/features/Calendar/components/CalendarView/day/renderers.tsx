@@ -2,13 +2,16 @@ import moment from 'moment'
 import type { MutableRefObject, Ref } from 'react'
 
 import People from '@/assets/icons/people.svg?react'
+import { TIMED_SLOT_CONFIG } from '@/features/Calendar//domain/constants'
+import { getColorPalette } from '@/features/Calendar//utils/colorPalette'
+import {
+  getEventOccurrenceKey,
+  type TimedSlotEvent,
+} from '@/features/Calendar//utils/helpers/dayViewHelpers'
+import type { CalendarEvent } from '@/shared/types/calendar/types'
 
-import type { CalendarEvent } from '../../../../../shared/types/calendar/types'
-import { TIMED_SLOT_CONFIG } from '../../../domain/constants'
-import { getColorPalette } from '../../../utils/colorPalette'
-import { getEventOccurrenceKey, type TimedSlotEvent } from '../../../utils/helpers/dayViewHelpers'
-import { TodoCheckbox } from '../../CustomEvent/CustomEvent.style'
-import * as S from '../dayView'
+import { TodoCheckbox } from '../eventStyles'
+import * as S from './dayStyles'
 import type { DragState, EventPointerDownHandler } from './dragHandlers'
 import { getDayEventRenderGeometry } from './renderGeometry'
 import { normalizeDateValue } from './timeHelpers'

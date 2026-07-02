@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 
-import type { RecurringDropConfirmState } from '@/features/Calendar/components/CustomCalendar/CustomCalendar.types'
+import type { RecurringDropConfirmState } from '@/features/Calendar/components/Calendar/Calendar.types'
 import {
   getEventScopeFromEditOption,
   getTodoScopeFromEditOption,

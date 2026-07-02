@@ -5,7 +5,7 @@ import Plus from '@/shared/assets/icons/plus.svg?react'
 import { theme } from '@/shared/styles/theme'
 
 import { CustomViewButton } from '../CustomViewButton/CustomViewButton'
-import * as S from './CustomCalendar.style'
+import * as S from './Calendar.style'
 
 type CustomCalendarMobileActionsProps = {
   view: View

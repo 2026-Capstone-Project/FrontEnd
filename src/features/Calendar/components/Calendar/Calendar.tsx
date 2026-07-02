@@ -7,18 +7,18 @@ import type { View } from 'react-big-calendar'
 import { Calendar, momentLocalizer } from 'react-big-calendar'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 
-import { useCustomCalendarController } from '@/features/Calendar/hooks/useCustomCalendarController'
+import { useCalendarController } from '@/features/Calendar/hooks/useCalendarController'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 
+import * as S from './Calendar.style'
+import CalendarDialogs from './CalendarDialogs'
+import CalendarMobileActions from './CalendarMobileActions'
 import CalendarModals from './CalendarModals'
-import * as S from './CustomCalendar.style'
-import CustomCalendarDialogs from './CustomCalendarDialogs'
-import CustomCalendarMobileActions from './CustomCalendarMobileActions'
 
 moment.locale('ko')
 const localizer = momentLocalizer(moment)
 const DragAndDropCalendar = withDragAndDrop<CalendarEvent, object>(Calendar)
-export type { SelectDateSource } from './CustomCalendar.types'
+export type { SelectDateSource } from './Calendar.types'
 
 type CustomCalendarProps = {
   initialView?: View
@@ -45,11 +45,11 @@ const CustomCalendar = ({ initialView, onSelectedDateChange }: CustomCalendarPro
     handleCloseRecurringDropConfirm,
     handleConfirmRecurringDrop,
     onView,
-  } = useCustomCalendarController({ localizer, initialView, onSelectedDateChange })
+  } = useCalendarController({ localizer, initialView, onSelectedDateChange })
 
   return (
     <div css={{ position: 'relative', height: 'fit-content', width: '100%' }}>
-      <CustomCalendarMobileActions
+      <CalendarMobileActions
         view={view}
         onView={onView}
         currentDate={date}
@@ -67,7 +67,7 @@ const CustomCalendar = ({ initialView, onSelectedDateChange }: CustomCalendarPro
         onCloseModal={handleCloseModalWithCleanup}
         eventActions={eventActions}
       />
-      <CustomCalendarDialogs
+      <CalendarDialogs
         deleteConfirm={deleteConfirm}
         onCloseDeleteConfirm={handleCloseDeleteConfirm}
         deleteEventMutate={deleteEventMutate}
