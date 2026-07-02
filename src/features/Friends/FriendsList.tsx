@@ -98,6 +98,8 @@ export default function FriendsPage() {
               location="대전"
               participants={4}
               accentColor="#ffbb00"
+              participantId={0}
+              createdAt={''}
             />
             <ScheduleItem
               inviter="김캘리"
@@ -107,6 +109,8 @@ export default function FriendsPage() {
               location="여의도 한강 공원"
               participants={2}
               accentColor="#ff85a1"
+              participantId={0}
+              createdAt={''}
             />
           </S.ScrollArea>
         </S.SectionContainer>
