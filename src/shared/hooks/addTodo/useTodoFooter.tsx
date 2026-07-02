@@ -99,7 +99,12 @@ export const useTodoFooter = ({
     if (eventIdRef.current != null && eventIdRef.current !== 0) {
       onEventColorChangeRef.current?.(eventIdRef.current, value)
     }
-    if (!isEditingRef.current || eventIdRef.current == null || eventIdRef.current === 0) {
+    if (
+      !isEditingRef.current ||
+      eventIdRef.current == null ||
+      eventIdRef.current === 0 ||
+      !isPersistedTodoRef.current
+    ) {
       return
     }
     patchTodoMutateRef.current(

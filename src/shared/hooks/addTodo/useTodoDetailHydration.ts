@@ -12,6 +12,7 @@ type UseTodoDetailHydrationProps = {
   date: string
   eventId: CalendarEvent['id']
   isEditing: boolean
+  initialEvent?: CalendarEvent | null
   todoDate: Date | null
   setValue: UseFormSetValue<TodoEditorFormValues>
 }
@@ -20,11 +21,13 @@ export const useTodoDetailHydration = ({
   date,
   eventId,
   isEditing,
+  initialEvent,
   todoDate,
   setValue,
 }: UseTodoDetailHydrationProps) => {
   const hydratedDetailKeyRef = useRef<string | null>(null)
-  const isPersistedTodo = isEditing && eventId != null && eventId !== 0
+  const isPersistedTodo =
+    isEditing && eventId != null && eventId !== 0 && !initialEvent?.isTemporary
   const shouldFetchDetail = isPersistedTodo
   const detailOccurrenceDate = moment(date).format('YYYY-MM-DD')
   const { data: detailData } = useGetDetailTodoQuery(

@@ -39,6 +39,7 @@ const TodoEditorContent = ({
       date,
       eventId,
       isEditing,
+      initialEvent,
       todoDate: todo.todoDate,
       setValue,
     })

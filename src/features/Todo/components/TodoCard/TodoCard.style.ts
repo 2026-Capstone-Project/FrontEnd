@@ -45,6 +45,15 @@ export const ButtonWrapper = styled.div`
     }
   }
 `
+export const DeleteButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+`
 export const TodoLeftWrapper = styled.div`
   display: flex;
   gap: 16px;
