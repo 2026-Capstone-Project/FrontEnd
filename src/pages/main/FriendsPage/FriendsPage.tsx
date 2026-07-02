@@ -5,6 +5,7 @@ import * as S from '@/features/Friends/Friend.styles'
 import FriendListSection from '@/features/Friends/FriendListSection'
 import ScheduleItem from '@/features/Friends/ScheduleItem'
 import SharedScheduleItem from '@/features/Friends/SharedScheduleItem'
+import { eventShareApi } from '@/shared/api/friends/eventShare'
 import { friendApi, friendRequestApi } from '@/shared/api/friends/friends'
 import AddIcon from '@/shared/assets/icons/add.svg?react'
 import SearchIcon from '@/shared/assets/icons/search.svg?react'
@@ -28,6 +29,11 @@ export default function FriendsPage() {
     }
     const h = Math.abs(hash) % 360
     return `hsl(${h}, 75%, 85%)`
+  }
+
+  const getAccentColor = (index: number) => {
+    const colors = ['#5c6ac4', '#ffbb00', '#06bdff', '#00ff9d', '#ffd43b', '#d0bfff']
+    return colors[index % colors.length]
   }
 
   useEffect(() => {
@@ -59,13 +65,38 @@ export default function FriendsPage() {
     },
   )
 
-  const friendsData = friendsList.map((item: FriendItem) => ({
-    id: item.id,
-    name: item.opponentName || '알 수 없음',
-    email: item.opponentEmail || '',
-    info: '공유 중인 일정',
-    avatarColor: getAvatarColor(item.opponentEmail || String(item.id)),
-  }))
+  const { data: invitations = [], refetch: refetchInvitations } = useCustomQuery(
+    ['eventShare', 'invitations'],
+    () => eventShareApi.getInvitations(),
+    {
+      select: (response) => response?.result?.invitations ?? [],
+    },
+  )
+
+  const { data: sharedEvents = [], refetch: refetchSharedEvents } = useCustomQuery(
+    ['eventShare', 'sharedEvents'],
+    () => eventShareApi.getSharedEvents(),
+    {
+      select: (response) => response?.result?.sharedEvents ?? [],
+    },
+  )
+
+  const handleActionSuccess = () => {
+    refetchInvitations()
+    refetchSharedEvents()
+  }
+
+  const friendsData = friendsList.map((item: FriendItem) => {
+    const sharedCount = sharedEvents.filter((event) => event.ownerName === item.opponentName).length
+
+    return {
+      id: item.id,
+      name: item.opponentName || '알 수 없음',
+      email: item.opponentEmail || '',
+      info: `공유 중인 일정 ${sharedCount}개`,
+      avatarColor: getAvatarColor(item.opponentEmail || String(item.id)),
+    }
+  })
 
   const requestsData = receivedRequests.map((item: ReceivedFriendRequestItem) => ({
     id: item.id,
@@ -223,65 +254,97 @@ export default function FriendsPage() {
         </S.SectionContainer>
       </S.Column>
 
-      {/* 오른쪽 일정 공유 영역 시작 부분 입니다. */}
       <S.Column width="60%">
         <S.SectionContainer bgColor="#f0f2ff">
           <S.SharedHeader bgColor="#f0f2ff">
-            <S.HeaderTitle color="#5c6ac4">일정 공유</S.HeaderTitle>
-            <S.HeaderBadge>0</S.HeaderBadge>
+            <S.HeaderTitle color="#5c6ac4">일정 공유 초대</S.HeaderTitle>
+            <S.HeaderBadge>{invitations.length}</S.HeaderBadge>
           </S.SharedHeader>
           <S.SharedContent>
-            <ScheduleItem
-              inviter="서캘리"
-              title="대전 여행"
-              startDate="2024-07-01"
-              endDate="2024-07-02"
-              location="대전"
-              participants={4}
-              accentColor="#ffbb00"
-            />
-            <ScheduleItem
-              inviter="지캘리"
-              title="일본 여행"
-              startDate="2024-07-01"
-              endDate="2024-07-02"
-              location="일본"
-              participants={4}
-              accentColor="#06bdff"
-            />
-            <ScheduleItem
-              inviter="지캘리"
-              title="제주 여행"
-              startDate="2026-07-15"
-              endDate="2026-07-16"
-              location="제주"
-              participants={4}
-              accentColor="#00ff9d"
-            />
+            {invitations.length > 0 ? (
+              invitations.map((item, index) => (
+                <ScheduleItem
+                  key={item.participantId}
+                  participantId={item.participantId}
+                  inviter={item.ownerName}
+                  title={item.title}
+                  startDate={item.startDate}
+                  endDate={item.endDate}
+                  location={item.location}
+                  participants={item.participantCount}
+                  accentColor={getAccentColor(index)}
+                  onActionSuccess={handleActionSuccess}
+                  createdAt={item.createdAt}
+                />
+              ))
+            ) : (
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '60px 20px',
+                  textAlign: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: '18px',
+                    fontWeight: 700,
+                    color: '#333333',
+                    marginBottom: '12px',
+                    letterSpacing: '-0.3px',
+                  }}
+                >
+                  아직 알림이 없어요
+                </div>
+
+                <div
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    color: '#868e96',
+                    lineHeight: '1.5',
+                    letterSpacing: '-0.2px',
+                  }}
+                >
+                  새로운 일정이나 변경 사항이 생기면 알려드릴게요
+                </div>
+              </div>
+            )}
           </S.SharedContent>
         </S.SectionContainer>
 
         <S.SectionContainer bgColor="#f4f5ff">
           <S.SectionTitle color="#5c6ac4">공유 중인 일정</S.SectionTitle>
-          <SharedScheduleItem
-            title="가족 모임"
-            startDate="2024-04-24"
-            sharerName="나"
-            accentColor="#748ffc"
-          />
-          <SharedScheduleItem
-            title="스터디"
-            startDate="2024-04-16"
-            sharerName="김캘리"
-            accentColor="#ffd43b"
-          />
-          <SharedScheduleItem
-            title="일본 여행"
-            startDate="2024-05-05"
-            endDate="2024-05-09"
-            sharerName="김캘리"
-            accentColor="#d0bfff"
-          />
+          {sharedEvents.length > 0 ? (
+            sharedEvents.map((item, index) => (
+              <SharedScheduleItem
+                key={item.eventId}
+                eventId={item.eventId}
+                title={item.title}
+                startDate={item.startDate}
+                endDate={item.endDate}
+                sharerName={item.ownerName}
+                accentColor={getAccentColor(index + 3)}
+                onCancelSuccess={handleActionSuccess}
+              />
+            ))
+          ) : (
+            <div
+              style={{
+                padding: '30px 20px',
+                textAlign: 'center',
+                color: '#adb5bd',
+                background: '#fff',
+                borderRadius: '20px',
+                fontSize: '14px',
+              }}
+            >
+              공유된 일정 없습니다.
+            </div>
+          )}
         </S.SectionContainer>
       </S.Column>
 
