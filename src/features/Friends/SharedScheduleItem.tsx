@@ -2,22 +2,29 @@
 import * as S from './Friend.styles'
 
 interface SharedScheduleItemProps {
+  eventId: number
   title: string
   startDate: string
   endDate?: string
   sharerName: string
   accentColor: string
+  onCancelSuccess?: () => void
 }
 
 export default function SharedScheduleItem({
-  title,
-  startDate,
+  eventId,
+  title = '',
+  startDate = '',
   endDate,
-  sharerName,
-  accentColor,
+  sharerName = '이름없음',
+  accentColor = '#5c6ac4',
+  onCancelSuccess,
 }: SharedScheduleItemProps) {
   const formatDate = (dateStr: string) => {
+    if (!dateStr) return ''
     const date = new Date(dateStr)
+    if (isNaN(date.getTime())) return ''
+
     const month = date.getMonth() + 1
     const day = date.getDate()
     const week = ['일', '월', '화', '수', '목', '금', '토'][date.getDay()]
@@ -28,6 +35,11 @@ export default function SharedScheduleItem({
     !endDate || startDate === endDate
       ? formatDate(startDate)
       : `${formatDate(startDate)} - ${formatDate(endDate)}`
+
+  const handleCancelShare = () => {
+    console.log(`eventId ${eventId} 공유 취소 클릭`)
+    onCancelSuccess?.()
+  }
 
   return (
     <div
@@ -92,6 +104,7 @@ export default function SharedScheduleItem({
         bgColor="#fff1f0"
         textColor="#ff4d4f"
         style={{ padding: '8px 14px', borderRadius: '10px', fontSize: '13px' }}
+        onClick={handleCancelShare}
       >
         공유 취소
       </S.CommonButton>
