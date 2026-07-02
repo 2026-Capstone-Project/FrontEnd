@@ -2,6 +2,8 @@
 import { Clock4, MapPin, UserRound } from 'lucide-react'
 
 import { eventShareApi } from '@/shared/api/friends/eventShare'
+import { getErrorMessage } from '@/shared/utils'
+import { useToastStore } from '@/store/useToastStore'
 
 import * as S from './Friend.styles'
 
@@ -34,12 +36,22 @@ export default function ScheduleItem({
     try {
       const response = await eventShareApi.rejectInvitation(participantId)
       if (response.isSuccess) {
-        alert('초대를 거절했습니다.')
+        showToast({
+          title: '초대 거절 완료',
+          message: '초대를 거절했습니다.',
+          toastType: 'success',
+        })
         onActionSuccess?.()
       }
     } catch (error) {
       console.error(error)
-      alert('초대 거절에 실패했습니다.')
+      const errorMessage = getErrorMessage(error)
+
+      showToast({
+        title: '초대 거절 실패',
+        message: errorMessage || '초대 거절에 실패했습니다.',
+        toastType: 'error',
+      })
     }
   }
 
@@ -47,12 +59,22 @@ export default function ScheduleItem({
     try {
       const response = await eventShareApi.acceptInvitation(participantId)
       if (response.isSuccess) {
-        alert('초대를 수락했습니다.')
+        showToast({
+          title: '초대 수락 완료',
+          message: '초대를 수락했습니다.',
+          toastType: 'success',
+        })
         onActionSuccess?.()
       }
     } catch (error) {
       console.error(error)
-      alert('초대 수락에 실패했습니다.')
+      const errorMessage = getErrorMessage(error)
+
+      showToast({
+        title: '초대 수락 실패',
+        message: errorMessage || '초대 수락에 실패했습니다.',
+        toastType: 'error',
+      })
     }
   }
 
@@ -102,6 +124,8 @@ export default function ScheduleItem({
 
     return `${past.getMonth() + 1}월 ${past.getDate()}일`
   }
+
+  const { showToast } = useToastStore()
 
   return (
     <div
