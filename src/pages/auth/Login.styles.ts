@@ -3,27 +3,12 @@ import styled from '@emotion/styled'
 import { media } from '@/shared/styles/media'
 import { theme } from '@/shared/styles/theme'
 
-export const Logo = styled.img`
-  height: 50px;
-  width: auto;
-  cursor: pointer;
-  margin-bottom: 32px;
-
-  image-rendering: -webkit-optimize-contrast;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-
-  ${media.down(theme.breakPoints.tablet)} {
-    margin-bottom: 20px;
-  }
-`
-
 const Wrapper = styled.div`
   min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 0px;
   width: 100vw;
   position: absolute;
   left: 50%;
@@ -51,7 +36,7 @@ const Card = styled.div`
   ${media.down(theme.breakPoints.tablet)} {
     flex-direction: column;
     justify-content: center;
-    gap: 40px;
+    gap: 24px;
     padding: 0 20px;
   }
 `
@@ -67,6 +52,28 @@ const Left = styled.div`
   ${media.down(theme.breakPoints.tablet)} {
     align-items: center;
     text-align: center;
+    flex: none;
+    width: 100%;
+
+    & > *:not(img) {
+      display: none !important;
+    }
+  }
+`
+
+export const Logo = styled.img`
+  height: 50px;
+  width: auto;
+  cursor: pointer;
+  margin-bottom: 32px;
+
+  image-rendering: -webkit-optimize-contrast;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+
+  ${media.down(theme.breakPoints.tablet)} {
+    height: 60px;
+    margin-bottom: 0;
   }
 `
 
@@ -79,10 +86,6 @@ export const Title = styled.h1`
   font-family: 'GmarketSansMedium', sans-serif;
   gap: 10px;
   color: #005067;
-  ${media.down(theme.breakPoints.tablet)} {
-    font-size: 32px;
-    margin-bottom: 16px;
-  }
 `
 
 export const Description = styled.p`
@@ -92,10 +95,6 @@ export const Description = styled.p`
   line-height: 1.6;
   color: #64808e;
   margin: 0;
-
-  ${media.down(theme.breakPoints.tablet)} {
-    font-size: 14px;
-  }
 `
 
 export const Info = styled.div`
@@ -103,11 +102,6 @@ export const Info = styled.div`
   align-items: center;
   gap: 16px;
   margin-top: 24px;
-
-  ${media.down(theme.breakPoints.tablet)} {
-    justify-content: center;
-    margin-top: 16px;
-  }
 `
 
 export const InfoContent = styled.div`

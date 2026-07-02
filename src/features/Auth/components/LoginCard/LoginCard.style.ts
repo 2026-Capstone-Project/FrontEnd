@@ -9,7 +9,7 @@ export const Right = styled.div`
   justify-content: center;
   align-items: center;
   ${media.down(theme.breakPoints.tablet)} {
-    padding: 20px;
+    padding: 5px;
     width: 100%;
   }
 `
@@ -45,6 +45,19 @@ export const Title = styled.h2`
   /* 물과 잘 어울리는 투명감 있는 청록/네이비 계열 */
   color: #3e6b77;
   text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+
+  ${media.down(theme.breakPoints.tablet)} {
+    font-size: 22px;
+    margin-bottom: 60px;
+
+    font-size: 0;
+
+    &::after {
+      content: '오늘 일정도 함께해요';
+      font-size: 25px;
+      font-weight: 600;
+    }
+  }
 `
 
 export const SocialButton = styled.button`
