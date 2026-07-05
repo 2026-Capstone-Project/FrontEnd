@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import Close from '@/shared/assets/icons/close.svg?react'
-import Plus from '@/shared/assets/icons/plus.svg?react'
-import Search from '@/shared/assets/icons/search.svg?react'
+import Close from '@/assets/icons/common/close.svg?react'
+import Plus from '@/assets/icons/common/plus.svg?react'
+import Search from '@/assets/icons/common/search.svg?react'
 import { useThrottledValue } from '@/shared/hooks/common/useThrottledValue'
 import { useFriendSearchQuery } from '@/shared/hooks/query/useFriendQueries'
 import { theme } from '@/shared/styles'

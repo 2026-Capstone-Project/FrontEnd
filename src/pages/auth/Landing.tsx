@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react'
 
-import GoogleIcon from '@/assets/icons/google.svg?react'
-import KakaoIcon from '@/assets/icons/kakao.svg?react'
-import NaverIcon from '@/assets/icons/naver.svg?react'
+import Robot from '@/assets/icons/common/robot_noBackground.svg?react'
+import Star from '@/assets/icons/common/star.svg?react'
 import Logo from '@/assets/logo.svg?react'
+import GoogleIcon from '@/assets/social/google.svg?react'
+import KakaoIcon from '@/assets/social/kakao.svg?react'
+import NaverIcon from '@/assets/social/naver.svg?react'
 import { redirectToSocialLogin } from '@/shared/api/auth/auth'
-import Robot from '@/shared/assets/icons/robot_noBackground.svg?react'
-import Star from '@/shared/assets/icons/star.svg?react'
 
 import { features } from './components/features'
 import { FeatureVisual } from './components/FeatureVisual'

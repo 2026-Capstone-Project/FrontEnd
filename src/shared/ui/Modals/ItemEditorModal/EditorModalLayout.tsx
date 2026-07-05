@@ -1,9 +1,9 @@
 /** @JSXImportSource @emotion/react */
 import type { Ref } from 'react'
 
-import Check from '@/shared/assets/icons/check.svg?react'
-import Close from '@/shared/assets/icons/close.svg?react'
-import Trash from '@/shared/assets/icons/trash-2.svg?react'
+import Check from '@/assets/icons/common/check.svg?react'
+import Close from '@/assets/icons/common/close.svg?react'
+import Trash from '@/assets/icons/common/trash-2.svg?react'
 
 import * as S from './EditorModalLayout.style'
 const EditorModalLayout = ({
