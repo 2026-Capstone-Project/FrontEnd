@@ -28,6 +28,10 @@ export const AIChatButton = styled.button`
   font-weight: bold;
   border: none;
   cursor: pointer;
+
+  &:focus {
+    outline: none;
+  }
 `
 
 export const ModalPositioner = styled.div`
