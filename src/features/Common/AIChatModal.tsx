@@ -5,8 +5,8 @@ import ChatIcon from '@/assets/icons/common/chat.svg'
 import RobotIcon from '@/assets/icons/common/robot.svg'
 import { nlpApi } from '@/shared/api/home/home'
 import type { ChatMessage } from '@/shared/types/home/home'
+import { SparkleIcon } from '@/shared/ui/icons/SparkleIcon'
 
-import { SparkleIcon } from '../Home/Icon/SparkleIcon'
 import * as S from './AIChatModal.styles'
 
 interface AIChatModalProps {

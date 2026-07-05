@@ -1,9 +1,9 @@
 import BellIcon from '@/assets/icons/bell.svg?react'
 import AIChatModal from '@/features/Common/AIChatModal'
-import { SparkleIcon } from '@/features/Home/Icon/SparkleIcon'
 import { fetchReminders, fetchTodayBriefing } from '@/shared/api/home/home'
 import { useCustomQuery } from '@/shared/hooks/common/customQuery'
 import { useSuggestions } from '@/shared/hooks/query/useSuggestion'
+import { SparkleIcon } from '@/shared/ui/icons/SparkleIcon'
 
 import * as S from './HomePage.styles'
 

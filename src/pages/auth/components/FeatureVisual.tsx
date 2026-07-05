@@ -3,7 +3,7 @@ import { Clock4, MapPin, UserRound } from 'lucide-react'
 import Plus from '@/assets/icons/common/plus.svg?react'
 import LandingCalendar from '@/assets/login/LandingCalendar_noBack.svg?react'
 import LandingTodo from '@/assets/login/LandingTodo.svg?react'
-import { SparkleIcon } from '@/features/Home/Icon/SparkleIcon'
+import { SparkleIcon } from '@/shared/ui/icons/SparkleIcon'
 
 import * as S from '../Landing.styles'
 

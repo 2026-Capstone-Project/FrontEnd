@@ -32,6 +32,12 @@ export const AIChatButton = styled.button`
   &:focus {
     outline: none;
   }
+
+  &:focus-visible {
+    box-shadow:
+      0 0 0 3px ${({ theme }) => theme.colors.primary2}40,
+      2px 4px 20px rgba(0, 0, 0, 0.16);
+  }
 `
 
 export const ModalPositioner = styled.div`

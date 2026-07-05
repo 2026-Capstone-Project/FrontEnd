@@ -27,8 +27,13 @@ export const AIChatModalButton = () => {
 
   return (
     <S.Wrapper ref={wrapperRef}>
-      <S.AIChatButton onClick={() => setIsOpen((prev) => !prev)}>
-        <Robot />
+      <S.AIChatButton
+        type="button"
+        aria-label={isOpen ? 'AI 채팅 닫기' : 'AI 채팅 열기'}
+        aria-expanded={isOpen}
+        onClick={() => setIsOpen((prev) => !prev)}
+      >
+        <Robot aria-hidden="true" focusable="false" />
       </S.AIChatButton>
       {isOpen && (
         <S.ModalPositioner>
