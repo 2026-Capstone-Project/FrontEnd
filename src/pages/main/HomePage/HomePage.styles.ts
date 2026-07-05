@@ -17,10 +17,24 @@ export const Container = styled.div`
     gap: 40px;
   }
 `
+export const GridContainer = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+
+  ${media.up(theme.breakPoints.desktop)} {
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+  }
+`
+export const LeftCol = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+`
 
 export const Left = styled.div`
   width: 100%;
-  max-width: 540px;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -29,12 +43,18 @@ export const DateTitle = styled.h1`
   font-size: 32px;
   font-weight: 700;
   color: ${theme.colors.black};
+  ${media.down(theme.breakPoints.tablet)} {
+    font-size: 24px;
+  }
 `
 
 export const SubTitle = styled.p`
   font-size: 20px;
   margin-top: 4px;
   color: ${theme.colors.GRAY.point};
+  ${media.down(theme.breakPoints.tablet)} {
+    font-size: 16px;
+  }
 `
 export const CardHeader = styled.div`
   display: flex;
@@ -93,6 +113,7 @@ export const ScheduleList = styled.div`
   padding-left: 20px;
   border-left: 4.5px solid #4490b4; // 이미지처럼 굵은 세로 바
   margin: 10px 0;
+  border-radius: 3px 0 0 3px; // 왼쪽 상단과 하단만 둥글게
 `
 
 export const ScheduleItem = styled.div`
@@ -113,6 +134,18 @@ export const ScheduleItem = styled.div`
     text-decoration: ${(props: { isDeadline?: boolean }) =>
       props.isDeadline ? 'underline' : 'none'};
     text-underline-offset: 5px;
+  }
+
+  ${media.down(theme.breakPoints.tablet)} {
+    gap: 15px;
+
+    .time {
+      font-size: 16px;
+      width: 45px;
+    }
+    .content {
+      font-size: 16px;
+    }
   }
 `
 
@@ -141,6 +174,15 @@ export const Badge = styled.div`
     font-size: 19px;
     margin-right: 6px;
   }
+
+  ${media.down(theme.breakPoints.tablet)} {
+    padding: 12px 20px;
+    font-size: 14px;
+
+    span {
+      font-size: 16px;
+    }
+  }
 `
 export const TodoText = styled.p`
   margin: 0;
@@ -148,6 +190,10 @@ export const TodoText = styled.p`
   color: #333;
   text-underline-offset: 4px;
   text-decoration: underline;
+
+  ${media.down(theme.breakPoints.tablet)} {
+    font-size: 14px;
+  }
 `
 
 export const Tag = styled.span<{ type?: 'remind' | 'ai' }>`
@@ -156,8 +202,7 @@ export const Tag = styled.span<{ type?: 'remind' | 'ai' }>`
   justify-content: center;
 
   font-size: 16px;
-  font-weight: 800;
-  padding: 8px 18px;
+  font-weight: 600;
   border-radius: 14px;
   margin-bottom: 20px;
   width: fit-content;
@@ -174,7 +219,7 @@ export const Tag = styled.span<{ type?: 'remind' | 'ai' }>`
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-
+        padding: 8px 18px;
         &::before {
           content: "";
           position: absolute;
@@ -200,6 +245,10 @@ export const CardText = styled.p`
 
   b {
     font-weight: 800;
+  }
+
+  ${media.down(theme.breakPoints.tablet)} {
+    font-size: 15px;
   }
 `
 

@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import CustomCalendar from '@/features/Calendar/components/CustomCalendar/CustomCalendar'
 import EventsCard from '@/features/Calendar/components/EventsCard/EventsCard'
 import { mapSettingsDefaultView } from '@/features/Calendar/hooks/useStoredCalendarView'
+import { AIChatModalButton } from '@/features/Common/AIChatModalButton'
 import { SettingsAPI } from '@/shared/api/settings/settings'
 import { useCustomSuspenseQuery } from '@/shared/hooks/common/customQuery'
 
@@ -33,6 +34,7 @@ const CalendarPage = () => {
       >
         <EventsCard selectedDate={selectedDate} />
       </div>
+      <AIChatModalButton />
     </S.PageWrapper>
   )
 }

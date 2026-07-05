@@ -3,36 +3,42 @@ import styled from '@emotion/styled'
 import { media } from '@/shared/styles/media'
 import { theme } from '@/shared/styles/theme'
 
-export const Container = styled.div`
+interface ContainerProps {
+  isCompact?: boolean
+}
+
+export const Container = styled.div<ContainerProps>`
   display: flex;
   flex-direction: column;
   background: ${theme.gradients.ai2};
   border-radius: 30px;
-  padding: 24px 32px;
+  padding: 24px;
   box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
-  position: absolute;
-  top: 70px;
-  right: 0;
   width: 500px;
-  height: 400px;
+  height: ${({ isCompact }) => (isCompact ? 'fit-content' : '400px')};
   z-index: 999;
   will-change: transform, opacity;
 
+  ${media.up(theme.breakPoints.desktop)} {
+    justify-self: end;
+  }
+
   ${media.down(theme.breakPoints.desktop)} {
     position: relative;
-    top: 0;
-    right: 0;
+    order: -1;
     width: 100%;
-    height: 430px;
+    max-height: 430px;
+    height: fit-content;
     margin: 20px 0;
     z-index: 1;
     box-shadow: none;
+    padding: 20px 16px;
   }
 
   ${media.down(theme.breakPoints.tablet)} {
-    padding: 20px;
     border-radius: 20px;
-    height: 380px;
+    max-height: 380px;
+    height: fit-content;
   }
 `
 
@@ -43,7 +49,7 @@ export const Title = styled.h2`
   font-size: 18px;
   font-weight: 600;
   color: ${theme.colors.primary2};
-  padding: 10px 0;
+  padding-bottom: 16px;
   flex-shrink: 0;
 `
 
@@ -62,6 +68,7 @@ export const IconWrapper = styled.div`
 
 interface ChatBoxProps {
   isEmpty?: boolean
+  isHidden?: boolean
 }
 
 export const ChatBox = styled.div<ChatBoxProps>`
@@ -71,7 +78,7 @@ export const ChatBox = styled.div<ChatBoxProps>`
   margin-bottom: 16px;
   overflow-y: auto;
   padding: 16px;
-  display: flex;
+  display: ${({ isHidden }) => (isHidden ? 'none' : 'flex')};
   flex-direction: column;
   gap: 12px;
 
@@ -91,6 +98,10 @@ export const ChatBox = styled.div<ChatBoxProps>`
   &::-webkit-scrollbar-track {
     background: transparent;
   }
+
+  ${media.down(theme.breakPoints.desktop)} {
+    display: ${({ isEmpty }) => (isEmpty ? 'none' : 'flex')};
+  }
 `
 
 export const InputWrapper = styled.div`
@@ -98,12 +109,16 @@ export const InputWrapper = styled.div`
   align-items: center;
   background: ${theme.colors.white};
   border-radius: 24px;
-  padding: 4px 4px 4px 16px;
+  padding: 6px 6px 6px 16px;
   width: 100%;
   flex-shrink: 0;
 
   &:focus-within {
     box-shadow: 0 0 0 2px ${theme.colors.primary2}40;
+  }
+
+  ${media.down(theme.breakPoints.tablet)} {
+    border-radius: 12px;
   }
 `
 
@@ -126,7 +141,7 @@ export const SendButton = styled.button`
   justify-content: center;
   align-items: center;
   border-radius: 20px;
-  padding: 14.5px 17px 13.5px 17px;
+  padding: 12px 17px;
   margin-left: 8px;
   background: ${theme.colors.primary2};
   color: ${theme.colors.white};
@@ -142,6 +157,10 @@ export const SendButton = styled.button`
   &:disabled {
     background: ${theme.colors.GRAY || '#cbd5e1'};
     cursor: not-allowed;
+  }
+
+  ${media.down(theme.breakPoints.tablet)} {
+    padding: 3px 6px;
   }
 `
 export const UserMessageWrapper = styled.div`
@@ -176,12 +195,13 @@ export const BotContentArea = styled.div`
 `
 
 export const BotFallbackBubble = styled.div`
-  background: ${theme.colors.GRAY || '#f1f3f5'};
+  background: ${theme.colors.white};
   color: ${theme.colors.black || '#333333'};
   padding: 10px 14px;
   border-radius: 4px 16px 16px 16px;
   font-size: 14px;
   line-height: 1.4;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.1);
 `
 
 export const EmptyState = styled.div`

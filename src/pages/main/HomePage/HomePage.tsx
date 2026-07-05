@@ -48,76 +48,78 @@ export default function HomePage() {
       <S.Left>
         <S.DateTitle>{formatDateKorean(briefing?.date)}</S.DateTitle>
         <S.SubTitle>AI가 오늘의 일정을 한눈에, 쉽게 정리해드려요</S.SubTitle>
-
-        <S.BriefingCard>
-          <S.BriefingHeader>
-            <S.CardTitle>오늘의 일정 브리핑</S.CardTitle>
-            {briefing?.reason === 'AVAILABLE' && <S.RedDot />}
-          </S.BriefingHeader>
-
-          <S.BriefingContent>
-            {isLoading ? (
-              <S.ScheduleItem>AI가 브리핑을 생성하고 있습니다. . .</S.ScheduleItem>
-            ) : briefing?.reason === 'AVAILABLE' && briefing.briefInfo ? (
-              <S.ScheduleList>
-                {briefing.briefInfo.map((item, index) => (
-                  <S.ScheduleItem key={index}>
-                    <span className="time">{formatTime(item.startTime)}</span>
-                    <span className="content">{item.title}</span>
+        <S.GridContainer>
+          <S.LeftCol>
+            <S.BriefingCard>
+              <S.BriefingHeader>
+                <S.CardTitle>오늘의 일정 브리핑</S.CardTitle>
+                {briefing?.reason === 'AVAILABLE' && <S.RedDot />}
+              </S.BriefingHeader>
+              <S.BriefingContent>
+                {isLoading ? (
+                  <S.ScheduleItem>AI가 브리핑을 생성하고 있습니다. . .</S.ScheduleItem>
+                ) : briefing?.reason === 'AVAILABLE' && briefing.briefInfo ? (
+                  <S.ScheduleList>
+                    {briefing.briefInfo.map((item, index) => (
+                      <S.ScheduleItem key={index}>
+                        <span className="time">{formatTime(item.startTime)}</span>
+                        <span className="content">{item.title}</span>
+                      </S.ScheduleItem>
+                    ))}
+                  </S.ScheduleList>
+                ) : (
+                  <S.ScheduleItem>
+                    <span className="content">
+                      {getEmptyMessage(briefing?.reason) || '오늘의 브리핑을 확인할 수 없습니다.'}
+                    </span>
                   </S.ScheduleItem>
-                ))}
-              </S.ScheduleList>
-            ) : (
-              <S.ScheduleItem>
-                <span className="content">
-                  {getEmptyMessage(briefing?.reason) || '오늘의 브리핑을 확인할 수 없습니다.'}
-                </span>
-              </S.ScheduleItem>
-            )}
-          </S.BriefingContent>
-          <S.BadgeRow>
-            <S.Badge>
-              <span>{briefing?.eventCount ?? 0}</span>일정
-            </S.Badge>
-            <S.Badge>
-              <span>{briefing?.toDoCount ?? 0}</span>
-              <S.TodoText>할 일</S.TodoText>
-            </S.Badge>
-          </S.BadgeRow>
-        </S.BriefingCard>
+                )}
+              </S.BriefingContent>
+              <S.BadgeRow>
+                <S.Badge>
+                  <span>{briefing?.eventCount ?? 0}</span>일정
+                </S.Badge>
+                <S.Badge>
+                  <span>{briefing?.toDoCount ?? 0}</span>
+                  <S.TodoText>할 일</S.TodoText>
+                </S.Badge>
+              </S.BadgeRow>
+            </S.BriefingCard>
 
-        {reminders?.map((reminder) => {
-          return (
-            <S.Card key={reminder.id}>
-              <S.CardHeader>
-                <S.Tag type="remind">리마인드</S.Tag>
-                <S.IconWrapper>
-                  <BellIcon />
-                </S.IconWrapper>
-              </S.CardHeader>
+            {reminders?.map((reminder) => {
+              return (
+                <S.Card key={reminder.id}>
+                  <S.CardHeader>
+                    <S.Tag type="remind">리마인드</S.Tag>
+                    <S.IconWrapper>
+                      <BellIcon />
+                    </S.IconWrapper>
+                  </S.CardHeader>
 
-              <S.CardText>{reminder.message}</S.CardText>
-            </S.Card>
-          )
-        })}
+                  <S.CardText>{reminder.message}</S.CardText>
+                </S.Card>
+              )
+            })}
 
-        {suggestions.map((item) => (
-          <S.Card key={item.id}>
-            <S.CardHeader>
-              <S.Tag type="ai">AI 제안</S.Tag>
-              <SparkleIcon startColor="#4684C1" endColor="#00DCCC" size={42} />
-            </S.CardHeader>
+            {suggestions.map((item) => (
+              <S.Card key={item.id}>
+                <S.CardHeader>
+                  <S.Tag type="ai">AI 제안</S.Tag>
+                  <SparkleIcon startColor="#4684C1" endColor="#00DCCC" size={42} />
+                </S.CardHeader>
 
-            <S.CardText>{item.content}</S.CardText>
+                <S.CardText>{item.content}</S.CardText>
 
-            <S.ButtonRow>
-              <S.GhostButton onClick={() => handleReject(item.id)}>거절</S.GhostButton>
-              <S.PrimaryButton onClick={() => handleAccept(item.id)}>등록</S.PrimaryButton>
-            </S.ButtonRow>
-          </S.Card>
-        ))}
+                <S.ButtonRow>
+                  <S.GhostButton onClick={() => handleReject(item.id)}>거절</S.GhostButton>
+                  <S.PrimaryButton onClick={() => handleAccept(item.id)}>등록</S.PrimaryButton>
+                </S.ButtonRow>
+              </S.Card>
+            ))}
+          </S.LeftCol>
+          <AIChatModal />
+        </S.GridContainer>
       </S.Left>
-      <AIChatModal />
     </S.Container>
   )
 }
