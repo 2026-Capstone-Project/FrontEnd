@@ -25,7 +25,11 @@ const TodoStatus = ({ progress, total }: { progress: number; total: number }) =>
             <S.Dot $index={1} />
             <S.Dot $index={2} />
           </S.DotRow>
-          <S.EmptyMessage>오늘 등록된 할 일이 없어요, 새로운 할 일을 추가해보세요.</S.EmptyMessage>
+          <S.EmptyMessage>
+            오늘 등록된 할 일이 없어요.
+            <br />
+            새로운 할 일을 추가해보세요.
+          </S.EmptyMessage>
         </S.EmptyState>
       )}
     </S.Wrapper>
