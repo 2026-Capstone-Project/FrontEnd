@@ -1,7 +1,7 @@
-/** @jsxImportSource @emotion/react */
 import type { FriendData } from '@/shared/types/friends/friends'
 
 import * as S from './Friend.styles'
+import * as F from './FriendItem.style'
 
 interface FriendItemProps extends FriendData {
   type: 'list' | 'request'
@@ -18,68 +18,19 @@ export default function FriendItem({
   onDelete,
 }: FriendItemProps) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        padding: '12px 0',
-      }}
-    >
-      <div
-        style={{
-          width: '56px',
-          height: '56px',
-          borderRadius: '10px',
-          background: avatarColor,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginRight: '20px',
-          fontWeight: 'bold',
-          fontSize: '18px',
-          color: '#666',
-          flexShrink: 0,
-        }}
-      >
-        {name[0]}
-      </div>
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        <div style={{ fontSize: '15px' }}>
-          <span
-            style={{
-              fontSize: '16px',
-              fontWeight: 700,
-              color: '#333',
-              letterSpacing: '-0.3px',
-            }}
-          >
+    <F.Container>
+      <F.Avatar color={avatarColor}>{name[0]}</F.Avatar>
+      <F.Content>
+        <F.NameLine>
+          <F.Name>
             {name}
             {type === 'list' ? ' ·' : ''}
-          </span>
-          {info && (
-            <span
-              style={{
-                color: '#5c7cff',
-                marginLeft: '8px',
-                fontSize: '13px',
-                fontWeight: 500,
-              }}
-            >
-              {info}
-            </span>
-          )}
-        </div>
-        <div
-          style={{
-            fontSize: '14px',
-            color: '#999',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {email}
-        </div>
-      </div>
-      <div style={{ display: 'flex', gap: '8px' }}>
+          </F.Name>
+          {info && <F.Info>{info}</F.Info>}
+        </F.NameLine>
+        <F.Email>{email}</F.Email>
+      </F.Content>
+      <F.Actions>
         {type === 'list' ? (
           <S.CommonButton bgColor="#fdf2f2" textColor="#ff4d4f" onClick={() => onDelete?.(id)}>
             삭제
@@ -94,7 +45,7 @@ export default function FriendItem({
             </S.CommonButton>
           </>
         )}
-      </div>
-    </div>
+      </F.Actions>
+    </F.Container>
   )
 }

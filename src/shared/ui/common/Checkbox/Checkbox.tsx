@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { useId } from 'react'
 
-import Check from '@/shared/assets/icons/rounded_check.svg?react'
+import Check from '@/assets/icons/common/rounded_check.svg?react'
 
 import * as S from './Checkbox.style'
 const Checkbox = ({

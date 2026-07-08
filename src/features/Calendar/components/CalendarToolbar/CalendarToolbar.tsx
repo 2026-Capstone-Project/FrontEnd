@@ -1,7 +1,7 @@
 import moment from 'moment'
 import { type ToolbarProps } from 'react-big-calendar'
 
-import Arrow from '@/shared/assets/icons/chevron.svg?react'
+import Arrow from '@/assets/icons/common/chevron.svg?react'
 import { theme } from '@/shared/styles/theme'
 
 import { CustomViewButton } from '../CustomViewButton/CustomViewButton'

@@ -1,5 +1,8 @@
 import styled from '@emotion/styled'
 
+import { media } from '@/shared/styles/media'
+import { theme } from '@/shared/styles/theme'
+
 export const PageLayout = styled.div`
   display: flex;
   gap: 24px;
@@ -10,13 +13,14 @@ export const PageLayout = styled.div`
   max-width: 1200px;
   box-sizing: border-box;
 
-  @media (max-width: 1024px) {
-    padding: 20px;
-  }
-
-  @media (max-width: 800px) {
+  ${media.down('1040px')} {
     flex-direction: column;
     padding: 16px;
+    gap: 16px;
+  }
+
+  ${media.down(theme.breakPoints.tablet)} {
+    padding: 0;
     gap: 16px;
   }
 `
@@ -27,7 +31,7 @@ export const Column = styled.div<{ width: string }>`
   gap: 24px;
   width: ${(props) => props.width};
 
-  @media (max-width: 768px) {
+  ${media.down('1040px')} {
     width: 100% !important;
     gap: 16px;
   }
@@ -44,12 +48,6 @@ export const SharedHeader = styled.div<{ bgColor?: string }>`
   align-items: center;
 
   border-bottom: 1px solid rgba(0, 0, 0, 0.03);
-
-  @media (max-width: 768px) {
-    width: 100% !important;
-    margin: -16px -16px 0 -16px;
-    padding: 16px;
-  }
 `
 
 export const HeaderTitle = styled.h2<{ color?: string }>`
@@ -65,8 +63,8 @@ export const HeaderTitle = styled.h2<{ color?: string }>`
 `
 
 export const HeaderBadge = styled.div`
-  background: border-radius: 30px;
-  background: #594FCA;
+  border-radius: 30px;
+  background: #594fca;
   color: #ffffff;
   font-size: 13px;
   font-weight: 700;
@@ -106,7 +104,7 @@ export const SharedContent = styled.div<{ bgColor?: string; maxHeight?: string }
     background: #dee2e6;
   }
 
-  @media (max-width: 768px) {
+  ${media.down('1040px')} {
     width: 100% !important;
     margin: 0;
   }
@@ -134,10 +132,6 @@ export const SectionContainer = styled.div<{ bgColor?: string; maxHeight?: strin
     &::-webkit-scrollbar-thumb {
       background: #dee2e6;
     }
-  }
-
-  @media (max-width: 800px) {
-    padding: 16px;
   }
 `
 
@@ -188,4 +182,8 @@ export const CommonButton = styled.button<{ bgColor: string; textColor: string }
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  ${media.down(theme.breakPoints.tablet)} {
+    padding: 12px 16px;
+    font-size: 12px;
+  }
 `

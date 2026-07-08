@@ -1,18 +1,19 @@
-/** @jsxImportSource @emotion/react */
 import { useEffect, useState } from 'react'
 
+import AddIcon from '@/assets/icons/common/add.svg?react'
+import SearchIcon from '@/assets/icons/common/search.svg?react'
 import * as S from '@/features/Friends/Friend.styles'
 import FriendListSection from '@/features/Friends/FriendListSection'
 import ScheduleItem from '@/features/Friends/ScheduleItem'
 import SharedScheduleItem from '@/features/Friends/SharedScheduleItem'
 import { eventShareApi } from '@/shared/api/friends/eventShare'
 import { friendApi, friendRequestApi } from '@/shared/api/friends/friends'
-import AddIcon from '@/shared/assets/icons/add.svg?react'
-import SearchIcon from '@/shared/assets/icons/search.svg?react'
 import { useCustomQuery } from '@/shared/hooks/common/customQuery'
 import { useFriendMutations } from '@/shared/hooks/friends/useFriendsMutations'
 import type { FriendItem, ReceivedFriendRequestItem } from '@/shared/types/friends/friends'
 import AddFriendModal from '@/shared/ui/Modals/AddFriendsModal/AddFriendsModal'
+
+import * as P from './FriendsPage.styles'
 
 export default function FriendsPage() {
   const [searchKeyword, setSearchKeyword] = useState<string>('')
@@ -115,52 +116,21 @@ export default function FriendsPage() {
           maxHeight="330px"
           onDelete={handleDeleteFriend}
           headerAction={
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(true)}
-              aria-label="친구 추가"
-              style={{
-                width: '54px',
-                height: '35px',
-                background: '#f5f5f5',
-                border: 'none',
-                borderRadius: '20px',
-                cursor: 'pointer',
-                padding: '8px 16px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
+            <P.AddButton type="button" onClick={() => setIsModalOpen(true)} aria-label="친구 추가">
               <AddIcon />
-            </button>
+            </P.AddButton>
           }
         >
-          <div style={{ position: 'relative', marginBottom: '16px' }}>
-            <input
+          <P.SearchWrapper>
+            <P.SearchInput
               placeholder="친구 검색"
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '17px 40px 16px 20px',
-                borderRadius: '20px',
-                border: '1px solid #eee',
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
             />
-            <SearchIcon
-              style={{
-                position: 'absolute',
-                right: 20,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                width: '20px',
-                height: '20px',
-              }}
-            />
-          </div>
+            <P.SearchIconWrapper>
+              <SearchIcon />
+            </P.SearchIconWrapper>
+          </P.SearchWrapper>
         </FriendListSection>
 
         <S.SectionContainer>
@@ -169,69 +139,18 @@ export default function FriendsPage() {
           </S.SectionTitle>
           <S.ScrollArea maxHeight="100px">
             {requestsData.length === 0 ? (
-              <div
-                style={{ padding: '16px 0', color: '#999', fontSize: '14px', textAlign: 'center' }}
-              >
-                받은 친구 요청이 없습니다.
-              </div>
+              <P.EmptyRequest>받은 친구 요청이 없습니다.</P.EmptyRequest>
             ) : (
               requestsData.map((item) => (
-                <div
-                  key={item.id}
-                  style={{ display: 'flex', alignItems: 'center', padding: '12px 0' }}
-                >
-                  <div
-                    style={{
-                      width: '56px',
-                      height: '56px',
-                      borderRadius: '10px',
-                      background: item.avatarColor,
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      marginRight: '20px',
-                      fontWeight: 'bold',
-                      fontSize: '18px',
-                      color: '#666',
-                      flexShrink: 0,
-                    }}
-                  >
-                    {item.name.charAt(0)}
-                  </div>
-                  <div
-                    style={{
-                      flex: 1,
-                      minWidth: 0,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '4px',
-                    }}
-                  >
-                    <div style={{ fontSize: '15px' }}>
-                      <span
-                        style={{
-                          fontSize: '16px',
-                          fontWeight: 700,
-                          color: '#333',
-                          letterSpacing: '-0.3px',
-                        }}
-                      >
-                        {item.name}
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        fontSize: '14px',
-                        color: '#999',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
-                      {item.email}
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
+                <P.RequestItem key={item.id}>
+                  <P.RequestAvatar color={item.avatarColor}>{item.name.charAt(0)}</P.RequestAvatar>
+                  <P.RequestInfo>
+                    <P.RequestNameLine>
+                      <P.RequestName>{item.name}</P.RequestName>
+                    </P.RequestNameLine>
+                    <P.RequestEmail>{item.email}</P.RequestEmail>
+                  </P.RequestInfo>
+                  <P.RequestActions>
                     <S.CommonButton
                       bgColor="#f5f5f5"
                       textColor="#999"
@@ -246,8 +165,8 @@ export default function FriendsPage() {
                     >
                       수락
                     </S.CommonButton>
-                  </div>
-                </div>
+                  </P.RequestActions>
+                </P.RequestItem>
               ))
             )}
           </S.ScrollArea>
@@ -278,40 +197,12 @@ export default function FriendsPage() {
                 />
               ))
             ) : (
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '60px 20px',
-                  textAlign: 'center',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: '18px',
-                    fontWeight: 700,
-                    color: '#333333',
-                    marginBottom: '12px',
-                    letterSpacing: '-0.3px',
-                  }}
-                >
-                  아직 알림이 없어요
-                </div>
-
-                <div
-                  style={{
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    color: '#868e96',
-                    lineHeight: '1.5',
-                    letterSpacing: '-0.2px',
-                  }}
-                >
+              <P.EmptyInvitation>
+                <P.EmptyInvitationTitle>아직 알림이 없어요</P.EmptyInvitationTitle>
+                <P.EmptyInvitationText>
                   새로운 일정이나 변경 사항이 생기면 알려드릴게요
-                </div>
-              </div>
+                </P.EmptyInvitationText>
+              </P.EmptyInvitation>
             )}
           </S.SharedContent>
         </S.SectionContainer>
@@ -332,18 +223,7 @@ export default function FriendsPage() {
               />
             ))
           ) : (
-            <div
-              style={{
-                padding: '30px 20px',
-                textAlign: 'center',
-                color: '#adb5bd',
-                background: '#fff',
-                borderRadius: '20px',
-                fontSize: '14px',
-              }}
-            >
-              공유된 일정 없습니다.
-            </div>
+            <P.EmptyShared>공유된 일정 없습니다.</P.EmptyShared>
           )}
         </S.SectionContainer>
       </S.Column>

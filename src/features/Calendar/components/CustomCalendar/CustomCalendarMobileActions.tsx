@@ -1,7 +1,7 @@
 import moment from 'moment'
 import type { View } from 'react-big-calendar'
 
-import Plus from '@/shared/assets/icons/plus.svg?react'
+import Plus from '@/assets/icons/common/plus.svg?react'
 import { theme } from '@/shared/styles/theme'
 
 import { CustomViewButton } from '../CustomViewButton/CustomViewButton'

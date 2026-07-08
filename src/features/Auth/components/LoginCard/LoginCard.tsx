@@ -1,6 +1,6 @@
-import GoogleIcon from '@/assets/icons/google.svg?react'
-import KakaoIcon from '@/assets/icons/kakao.svg?react'
-import NaverIcon from '@/assets/icons/naver.svg?react'
+import GoogleIcon from '@/assets/social/google.svg?react'
+import KakaoIcon from '@/assets/social/kakao.svg?react'
+import NaverIcon from '@/assets/social/naver.svg?react'
 import { redirectToSocialLogin } from '@/shared/api/auth/auth'
 
 import * as S from './LoginCard.style'

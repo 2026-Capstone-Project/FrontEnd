@@ -29,7 +29,4 @@ const ContentWrapper = styled.div`
   ${media.down(theme.breakPoints.tablet)} {
     padding: 16px 24px;
   }
-  ${media.down(theme.breakPoints.mobile)} {
-    padding: 8px 16px;
-  }
 `

@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { useEffect, useRef, useState } from 'react'
 
-import Arrow from '@/shared/assets/icons/chevron.svg?react'
+import Arrow from '@/assets/icons/common/chevron.svg?react'
 import { EVENT_COLORS } from '@/shared/constants/event'
 import { theme } from '@/shared/styles/theme'
 import type { EventColorType } from '@/shared/types/event/event'
