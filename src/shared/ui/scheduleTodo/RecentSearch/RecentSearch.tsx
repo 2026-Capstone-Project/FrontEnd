@@ -1,4 +1,4 @@
-import Close from '@/shared/assets/icons/close.svg?react'
+import Close from '@/assets/icons/common/close.svg?react'
 import { theme } from '@/shared/styles/theme'
 
 import * as S from './RecentSearch.style'

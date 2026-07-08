@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
-import Arrow from '@/shared/assets/icons/chevron.svg?react'
-import Close from '@/shared/assets/icons/close.svg?react'
+import Arrow from '@/assets/icons/common/chevron.svg?react'
+import Close from '@/assets/icons/common/close.svg?react'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { ScheduleEditorFormValues } from '@/shared/types/event/event'
 import type { ScheduleShareFriend } from '@/shared/types/schedule/shareFriend'

@@ -1,7 +1,7 @@
 import type { MouseEventHandler } from 'react'
 
-import Repeat from '@/shared/assets/icons/rotate.svg?react'
-import Trash from '@/shared/assets/icons/trash-2.svg?react'
+import Repeat from '@/assets/icons/common/rotate.svg?react'
+import Trash from '@/assets/icons/common/trash-2.svg?react'
 import { theme } from '@/shared/styles/theme'
 import { DeleteConfirmModal } from '@/shared/ui/Modals'
 

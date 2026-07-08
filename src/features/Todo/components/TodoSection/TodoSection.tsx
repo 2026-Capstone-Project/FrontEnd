@@ -1,4 +1,4 @@
-import Plus from '@/shared/assets/icons/plus.svg?react'
+import Plus from '@/assets/icons/common/plus.svg?react'
 import { useGetTodoQuery } from '@/shared/hooks/query/useTodoQueries'
 import TodoEditorModal from '@/shared/ui/Modals/TodoEditor'
 

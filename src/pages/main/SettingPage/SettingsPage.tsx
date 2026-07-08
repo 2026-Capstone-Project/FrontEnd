@@ -1,9 +1,9 @@
 import { type FC, type SVGProps, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import GoogleIcon from '@/assets/social/google.svg?react'
-import KakaoIcon from '@/assets/social/kakao.svg?react'
-import NaverIcon from '@/assets/social/naver.svg?react'
+import GoogleIcon from '@/assets/social/google_withBack.svg?react'
+import KakaoIcon from '@/assets/social/kakao_withBack.svg?react'
+import NaverIcon from '@/assets/social/naver_withBack.svg?react'
 import Modal from '@/features/Common/Modal'
 import { fetchUserInfo, logoutAPI } from '@/shared/api/auth/auth'
 import { queryClient } from '@/shared/api/queryClient'

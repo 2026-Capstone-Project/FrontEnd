@@ -1,5 +1,4 @@
-/** @jsxImportSource @emotion/react */
-import * as S from './Friend.styles'
+import * as S from './SharedScheduleItem.style'
 
 interface SharedScheduleItemProps {
   eventId: number
@@ -42,72 +41,19 @@ export default function SharedScheduleItem({
   }
 
   return (
-    <div
-      style={{
-        background: '#fff',
-        padding: '16px 20px',
-        borderRadius: '20px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '12px',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.02)',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-        <span
-          style={{
-            color: accentColor,
-            fontSize: '18px',
-            lineHeight: 1,
-          }}
-        >
-          ●
-        </span>
-        <span
-          style={{
-            fontWeight: 700,
-            fontSize: '16px',
-            color: '#333',
-          }}
-        >
-          {title}
-        </span>
-      </div>
+    <S.Container>
+      <S.TitleArea>
+        <S.Dot color={accentColor}>●</S.Dot>
+        <S.Title>{title}</S.Title>
+        <S.DateText>{displayDate}</S.DateText>
+      </S.TitleArea>
 
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px',
-          marginRight: '12px',
-        }}
-      >
-        <span style={{ fontSize: '14px', color: '#868e96' }}>{displayDate}</span>
-
-        <div
-          style={{
-            backgroundColor: '#EBEAF8',
-            color: '#594fca',
-            padding: '8px 12px',
-            borderRadius: '10px',
-            fontSize: '13px',
-            fontWeight: 600,
-            whiteSpace: 'nowrap',
-          }}
-        >
-          공유자: {sharerName}
-        </div>
-      </div>
-
-      <S.CommonButton
-        bgColor="#fff1f0"
-        textColor="#ff4d4f"
-        style={{ padding: '8px 14px', borderRadius: '10px', fontSize: '13px' }}
-        onClick={handleCancelShare}
-      >
-        공유 취소
-      </S.CommonButton>
-    </div>
+      <S.MetaArea>
+        <S.SharerBadge>공유자: {sharerName}</S.SharerBadge>
+        <S.CancelButton bgColor="#fff1f0" textColor="#ff4d4f" onClick={handleCancelShare}>
+          공유 취소
+        </S.CancelButton>
+      </S.MetaArea>
+    </S.Container>
   )
 }

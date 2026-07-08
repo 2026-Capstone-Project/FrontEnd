@@ -1,15 +1,19 @@
 import { useQueryClient } from '@tanstack/react-query' // 1. useQueryClient 임포트
 import React, { useEffect, useRef, useState } from 'react'
 
+import ChatIcon from '@/assets/icons/common/chat.svg'
+import RobotIcon from '@/assets/icons/common/robot.svg'
 import { nlpApi } from '@/shared/api/home/home'
-import ChatIcon from '@/shared/assets/icons/chat.svg'
-import RobotIcon from '@/shared/assets/icons/robot.svg'
 import type { ChatMessage } from '@/shared/types/home/home'
+import { SparkleIcon } from '@/shared/ui/icons/SparkleIcon'
 
-import { SparkleIcon } from '../Home/Icon/SparkleIcon'
 import * as S from './AIChatModal.styles'
 
-function AIChatModal() {
+interface AIChatModalProps {
+  isHome?: boolean
+}
+
+function AIChatModal({ isHome = true }: AIChatModalProps) {
   const queryClient = useQueryClient()
   const [inputValue, setInputValue] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -85,9 +89,10 @@ function AIChatModal() {
   }
 
   const isChatEmpty = messages.length === 0 && !isLoading
+  const hideEmptyChatBox = !isHome && isChatEmpty
 
   return (
-    <S.Container>
+    <S.Container isCompact={hideEmptyChatBox}>
       <S.Title>
         <S.IconWrapper>
           <SparkleIcon startColor="#4684C1" endColor="#00DCCC" size={24} />
@@ -95,7 +100,7 @@ function AIChatModal() {
         AI 비서에게 일정을 맡기세요
       </S.Title>
 
-      <S.ChatBox ref={chatBoxRef} isEmpty={isChatEmpty}>
+      <S.ChatBox ref={chatBoxRef} isEmpty={isChatEmpty} isHidden={hideEmptyChatBox}>
         {isChatEmpty ? (
           <S.EmptyState>
             <img src={ChatIcon} alt="채팅 시작" width="150" height="150" />

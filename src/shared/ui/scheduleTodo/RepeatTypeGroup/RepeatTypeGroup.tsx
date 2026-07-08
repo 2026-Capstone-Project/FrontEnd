@@ -1,4 +1,4 @@
-import Rotate from '@/shared/assets/icons/rotate.svg?react'
+import Rotate from '@/assets/icons/common/rotate.svg?react'
 import { MAIN_OPTIONS } from '@/shared/constants/event'
 import type { CustomRepeatBasis, RepeatType } from '@/shared/types/recurrence/repeat'
 

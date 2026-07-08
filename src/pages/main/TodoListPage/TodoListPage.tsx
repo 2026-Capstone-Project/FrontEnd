@@ -1,6 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { useMemo } from 'react'
 
+import { AIChatModalButton } from '@/features/Common/AIChatModalButton'
 import TodoSection from '@/features/Todo/components/TodoSection/TodoSection'
 import TodoStatus from '@/features/Todo/components/TodoStatus/TodoStatus'
 import { getTodoProgressDateParam, getTodoWeekTitle } from '@/features/Todo/utils/todoPage'
@@ -30,6 +31,7 @@ export default function TodoListPage() {
           />
         </div>
       </S.Wrapper>
+      <AIChatModalButton />
     </S.PageWrapper>
   )
 }

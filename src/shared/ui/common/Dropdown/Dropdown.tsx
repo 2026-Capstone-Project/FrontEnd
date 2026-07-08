@@ -2,7 +2,7 @@
 
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 
-import Arrow from '@/shared/assets/icons/chevron.svg?react'
+import Arrow from '@/assets/icons/common/chevron.svg?react'
 import { theme } from '@/shared/styles/theme'
 
 import * as S from './Dropdown.style'
