@@ -1,6 +1,7 @@
 import type {
   ActionApiResponse,
   InvitationsApiResponse,
+  LeaveEventResponse,
   SharedEventsApiResponse,
 } from '@/shared/types/eventShare/eventShare'
 
@@ -30,6 +31,12 @@ export const eventShareApi = {
 
   getInvitations: async (): Promise<InvitationsApiResponse> => {
     const { data } = await axiosInstance.get<InvitationsApiResponse>(`${BASE_URL}/invitations`)
+    return data
+  },
+  leaveEvent: async (eventId: number): Promise<LeaveEventResponse> => {
+    const { data } = await axiosInstance.delete<LeaveEventResponse>(
+      `/events/${eventId}/participants/leave`,
+    )
     return data
   },
 }

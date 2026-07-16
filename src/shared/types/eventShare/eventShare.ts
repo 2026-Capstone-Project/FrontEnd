@@ -32,3 +32,5 @@ export interface InvitationsResult {
 export type InvitationsApiResponse = TCommonResponse<InvitationsResult>
 
 export type ActionApiResponse = TCommonResponse<null>
+
+export type LeaveEventResponse = TCommonResponse<null>
