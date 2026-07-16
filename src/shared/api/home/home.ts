@@ -1,5 +1,6 @@
 import type {
   BriefingResponse,
+  ChatHistoryResponse,
   ChatResponse,
   ReminderResponse,
   SuggestionListResponse,
@@ -45,6 +46,10 @@ export const suggestionApi = {
 export const nlpApi = {
   sendMessage: async (message: string): Promise<ChatResponse> => {
     const res = await axiosInstance.post<ChatResponse>('/chat', { message })
+    return res.data
+  },
+  getHistory: async (): Promise<ChatHistoryResponse> => {
+    const res = await axiosInstance.get<ChatHistoryResponse>('/chat/history')
     return res.data
   },
 }
