@@ -1,4 +1,4 @@
-import { useQueryClient } from '@tanstack/react-query' // 1. useQueryClient 임포트
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import React, { useEffect, useRef, useState } from 'react'
 
 import ChatIcon from '@/assets/icons/common/chat.svg'
@@ -20,11 +20,31 @@ function AIChatModal({ isHome = true }: AIChatModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const chatBoxRef = useRef<HTMLDivElement>(null)
 
+  const { data: historyData, isLoading: isHistoryLoading } = useQuery({
+    queryKey: ['chatHistory'],
+    queryFn: nlpApi.getHistory,
+  })
+
+  useEffect(() => {
+    if (historyData?.isSuccess && historyData.result) {
+      const rawMessages = historyData.result.messages
+      const mappedMessages: ChatMessage[] = Array.isArray(rawMessages)
+        ? rawMessages.map((msg) => ({
+            id: crypto.randomUUID(),
+            sender: msg.role === 'user' ? 'user' : 'bot',
+            text: msg.content ?? '',
+          }))
+        : []
+
+      setMessages(mappedMessages)
+    }
+  }, [historyData])
+
   useEffect(() => {
     if (chatBoxRef.current) {
       chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight
     }
-  }, [messages, isLoading])
+  }, [messages, isLoading, isHistoryLoading])
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return
@@ -52,6 +72,8 @@ function AIChatModal({ isHome = true }: AIChatModalProps) {
         }
         setMessages((prev) => [...prev, botMessage])
 
+        queryClient.invalidateQueries({ queryKey: ['chatHistory'] })
+
         if (response.result.action === 'UPDATED') {
           queryClient.invalidateQueries({ queryKey: ['calendar'] })
           queryClient.invalidateQueries({ queryKey: ['events'] })
@@ -67,14 +89,18 @@ function AIChatModal({ isHome = true }: AIChatModalProps) {
           },
         ])
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'AI 비서 서버와 연결에 실패했습니다. 잠시 후 다시 시도해주세요.'
+
       setMessages((prev) => [
         ...prev,
         {
           id: crypto.randomUUID(),
           sender: 'bot',
-          text: 'AI 비서 서버와 연결에 실패했습니다. 잠시 후 다시 시도해주세요.',
+          text: `연결에 실패했습니다. (원인: ${errorMessage})`,
         },
       ])
     } finally {
@@ -88,7 +114,7 @@ function AIChatModal({ isHome = true }: AIChatModalProps) {
     }
   }
 
-  const isChatEmpty = messages.length === 0 && !isLoading
+  const isChatEmpty = messages.length === 0 && !isLoading && !isHistoryLoading
   const hideEmptyChatBox = !isHome && isChatEmpty
 
   return (
@@ -101,7 +127,14 @@ function AIChatModal({ isHome = true }: AIChatModalProps) {
       </S.Title>
 
       <S.ChatBox ref={chatBoxRef} isEmpty={isChatEmpty} isHidden={hideEmptyChatBox}>
-        {isChatEmpty ? (
+        {isHistoryLoading ? (
+          <S.BotMessageWrapper>
+            <img src={RobotIcon} width={32} height={32} style={{ flexShrink: 0 }} alt="robot" />
+            <S.BotContentArea>
+              <S.BotFallbackBubble>잠시만 기다려주세요...</S.BotFallbackBubble>
+            </S.BotContentArea>
+          </S.BotMessageWrapper>
+        ) : isChatEmpty ? (
           <S.EmptyState>
             <img src={ChatIcon} alt="채팅 시작" width="150" height="150" />
           </S.EmptyState>
@@ -150,11 +183,11 @@ function AIChatModal({ isHome = true }: AIChatModalProps) {
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="예시) 내일 오후 3시 치과 진료 받으러 감"
-          disabled={isLoading}
+          disabled={isLoading || isHistoryLoading}
         />
         <S.SendButton
           onClick={handleSendMessage}
-          disabled={isLoading || !inputValue.trim()}
+          disabled={isLoading || isHistoryLoading || !inputValue.trim()}
           aria-label="전송"
         >
           ↑

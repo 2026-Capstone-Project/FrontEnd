@@ -75,3 +75,16 @@ export interface ChatMessage {
   text: string
   action?: ChatActionType
 }
+
+export type ChatHistoryResponse = TCommonResponse<ChatHistory>
+
+export interface ChatHistory {
+  messages: boolean | undefined
+  result: {
+    messages: {
+      role: 'user' | 'assistant'
+      content: string
+    }[]
+    summary: string | null
+  }
+}
