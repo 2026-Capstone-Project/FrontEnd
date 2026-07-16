@@ -1,6 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { eventShareApi } from '@/shared/api/friends/eventShare'
+import { getErrorMessage } from '@/shared/utils'
+import { useToastStore } from '@/store/useToastStore'
 
 import * as S from './SharedScheduleItem.style'
 
@@ -24,6 +26,7 @@ export default function SharedScheduleItem({
   onCancelSuccess,
 }: SharedScheduleItemProps) {
   const queryClient = useQueryClient()
+  const { showToast } = useToastStore()
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return ''
@@ -48,13 +51,31 @@ export default function SharedScheduleItem({
         queryClient.invalidateQueries({ queryKey: ['calendar'] })
         queryClient.invalidateQueries({ queryKey: ['events'] })
         queryClient.invalidateQueries({ queryKey: ['todos'] })
+
+        showToast({
+          title: '그룹 탈퇴 완료',
+          message: '성공적으로 탈퇴되었습니다.',
+          toastType: 'success',
+        })
+
         onCancelSuccess?.()
       } else {
-        alert(response.message || '탈퇴 처리에 실패했습니다.')
+        showToast({
+          title: '탈퇴 처리 실패',
+          message: response.message || '탈퇴 처리에 실패했습니다.',
+          toastType: 'error',
+        })
       }
     },
-    onError: () => {
-      alert('서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.')
+    onError: (error) => {
+      console.error(error)
+      const errorMessage = getErrorMessage(error)
+
+      showToast({
+        title: '오류 발생',
+        message: errorMessage || '서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.',
+        toastType: 'error',
+      })
     },
   })
 

@@ -1,4 +1,4 @@
-import { useQueryClient, useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import React, { useEffect, useRef, useState } from 'react'
 
 import ChatIcon from '@/assets/icons/common/chat.svg'
@@ -90,12 +90,17 @@ function AIChatModal({ isHome = true }: AIChatModalProps) {
         ])
       }
     } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'AI 비서 서버와 연결에 실패했습니다. 잠시 후 다시 시도해주세요.'
+
       setMessages((prev) => [
         ...prev,
         {
           id: crypto.randomUUID(),
           sender: 'bot',
-          text: 'AI 비서 서버와 연결에 실패했습니다. 잠시 후 다시 시도해주세요.',
+          text: `연결에 실패했습니다. (원인: ${errorMessage})`,
         },
       ])
     } finally {
