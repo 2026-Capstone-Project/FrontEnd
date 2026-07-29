@@ -3,6 +3,7 @@ import type { TCommonResponse } from '../common/common'
 export interface SharedEvent {
   eventId: number
   ownerName: string
+  isOwner: boolean
   title: string
   startDate: string
   endDate: string

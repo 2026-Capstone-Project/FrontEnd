@@ -219,6 +219,7 @@ export default function FriendsPage() {
                 endDate={item.endDate}
                 sharerName={item.ownerName}
                 accentColor={getAccentColor(index + 3)}
+                isOwner={item.isOwner}
                 onCancelSuccess={handleActionSuccess}
               />
             ))
