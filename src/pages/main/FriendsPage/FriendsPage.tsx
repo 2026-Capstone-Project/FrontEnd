@@ -11,6 +11,7 @@ import { friendApi, friendRequestApi } from '@/shared/api/friends/friends'
 import { useCustomQuery } from '@/shared/hooks/common/customQuery'
 import { useFriendMutations } from '@/shared/hooks/friends/useFriendsMutations'
 import type { FriendItem, ReceivedFriendRequestItem } from '@/shared/types/friends/friends'
+import PageMeta from '@/shared/ui/common/PageMeta/PageMeta'
 import AddFriendModal from '@/shared/ui/Modals/AddFriendsModal/AddFriendsModal'
 
 import * as P from './FriendsPage.styles'
@@ -108,6 +109,7 @@ export default function FriendsPage() {
 
   return (
     <S.PageLayout>
+      <PageMeta title="친구" noIndex />
       <S.Column width="40%">
         <FriendListSection
           title="친구"

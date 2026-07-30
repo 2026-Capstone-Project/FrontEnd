@@ -16,7 +16,8 @@ jobs:
       - name: Node 설치
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          # Vite 7은 Node 20.19+ 를 요구합니다.
+          node-version: 20
 
       - name: 의존성 설치
         run: npm install
@@ -26,6 +27,8 @@ jobs:
         env:
           VITE_SERVER_URL: ${{ secrets.VITE_SERVER_URL }}
           VITE_KAKAO_API: ${{ secrets.VITE_KAKAO_API }}
+          # canonical / og:url / sitemap에 쓰이는 배포 도메인입니다. (예: https://calio.co.kr)
+          VITE_SITE_URL: ${{ secrets.VITE_SITE_URL }}
 
       - name: AWS 로그인
         uses: aws-actions/configure-aws-credentials@v2
@@ -34,8 +37,22 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: S3 업로드
-        run: aws s3 sync dist s3://${{ secrets.S3_BUCKET_NAME }} --delete
+      # 파일명에 해시가 붙는 /assets 는 영구 캐시, HTML은 매번 재검증하도록 나눠서 올립니다.
+      - name: S3 업로드 (해시 자산 - 장기 캐시)
+        run: |
+          aws s3 sync dist/assets s3://${{ secrets.S3_BUCKET_NAME }}/assets --delete \
+            --cache-control "public, max-age=31536000, immutable"
+
+      - name: S3 업로드 (아이콘 / robots / sitemap)
+        run: |
+          aws s3 sync dist s3://${{ secrets.S3_BUCKET_NAME }} --delete \
+            --exclude "assets/*" --exclude "index.html" \
+            --cache-control "public, max-age=3600"
+
+      - name: S3 업로드 (index.html - 캐시 재검증)
+        run: |
+          aws s3 cp dist/index.html s3://${{ secrets.S3_BUCKET_NAME }}/index.html \
+            --cache-control "no-cache, must-revalidate" --content-type "text/html; charset=utf-8"
 
       - name: CloudFront 캐시 삭제
         run: aws cloudfront create-invalidation --distribution-id "${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}" --paths "/*"

@@ -3,6 +3,7 @@ import AIChatModal from '@/features/Common/AIChatModal'
 import { fetchReminders, fetchTodayBriefing } from '@/shared/api/home/home'
 import { useCustomQuery } from '@/shared/hooks/common/customQuery'
 import { useSuggestions } from '@/shared/hooks/query/useSuggestion'
+import PageMeta from '@/shared/ui/common/PageMeta/PageMeta'
 import { SparkleIcon } from '@/shared/ui/icons/SparkleIcon'
 
 import * as S from './HomePage.styles'
@@ -45,6 +46,7 @@ export default function HomePage() {
 
   return (
     <S.Container>
+      <PageMeta title="홈" noIndex />
       <S.Left>
         <S.DateTitle>{formatDateKorean(briefing?.date)}</S.DateTitle>
         <S.SubTitle>AI가 오늘의 일정을 한눈에, 쉽게 정리해드려요</S.SubTitle>

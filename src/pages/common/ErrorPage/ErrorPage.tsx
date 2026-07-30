@@ -1,5 +1,7 @@
 import { useNavigate, useRouteError, useSearchParams } from 'react-router-dom'
 
+import PageMeta from '@/shared/ui/common/PageMeta/PageMeta'
+
 import * as S from './ErrorPage.styles'
 
 export default function ErrorPage() {
@@ -13,6 +15,7 @@ export default function ErrorPage() {
 
   return (
     <S.Container>
+      <PageMeta title="페이지를 찾을 수 없어요" noIndex />
       <S.Title>문제가 발생했어요</S.Title>
       <S.Description>{description}</S.Description>
       <S.ButtonRow>

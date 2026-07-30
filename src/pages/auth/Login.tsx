@@ -4,12 +4,15 @@ import LandingFriends from '@/assets/login/LandingFriends.svg'
 import LandingRobot from '@/assets/login/LandingRobot.svg'
 import logo from '@/assets/logo.svg'
 import LoginCard from '@/features/Auth/components/LoginCard/LoginCard'
+import PageMeta from '@/shared/ui/common/PageMeta/PageMeta'
 
 import * as S from './Login.styles'
 
 export default function Login() {
   return (
     <S.Wrapper>
+      {/* 로그인 화면은 검색 노출 가치가 없고, 랜딩과 내용이 겹쳐 색인에서 제외합니다. */}
+      <PageMeta title="로그인" noIndex />
       <S.Card>
         <S.Left>
           <S.Logo src={logo} alt="Cali/o Logo" />

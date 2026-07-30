@@ -2,14 +2,247 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <meta name="Calio" content="말하는 대로 움직이는 일정" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>말하는 대로 움직이는 일정, Calio</title>
+
+    <title>Calio(캘리오) | 말 한마디로 일정이 완성되는 AI 일정 관리</title>
+    <meta
+      name="description"
+      content="Calio는 자연어로 말하면 AI가 일정과 할 일을 자동으로 등록해주는 일정 관리 서비스입니다. 반복 일정 추천부터 친구와의 일정 공유까지 한 곳에서 관리하세요."
+    />
+    <link rel="canonical" href="%SITE_URL%/" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#fafafa" />
+
+    <!-- Open Graph (카카오톡 / 슬랙 / 페이스북 링크 미리보기) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Calio" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="Calio(캘리오) | 말 한마디로 일정이 완성되는 AI 일정 관리" />
+    <meta
+      property="og:description"
+      content="자연어로 말하면 AI가 일정과 할 일을 자동으로 등록해줘요. 반복 일정 추천과 친구 일정 공유까지 한 번에."
+    />
+    <meta property="og:url" content="%SITE_URL%/" />
+    <meta property="og:image" content="%SITE_URL%/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Calio 서비스 대표 이미지" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Calio(캘리오) | 말 한마디로 일정이 완성되는 AI 일정 관리" />
+    <meta
+      name="twitter:description"
+      content="자연어로 말하면 AI가 일정과 할 일을 자동으로 등록해줘요. 반복 일정 추천과 친구 일정 공유까지 한 번에."
+    />
+    <meta name="twitter:image" content="%SITE_URL%/og-image.jpg" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- 검색 결과에 서비스 정보를 리치하게 노출하기 위한 구조화 데이터입니다. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Calio",
+        "alternateName": "캘리오",
+        "url": "%SITE_URL%/",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "inLanguage": "ko-KR",
+        "description": "자연어로 말하면 AI가 일정과 할 일을 자동으로 등록해주는 일정 관리 서비스입니다.",
+        "featureList": [
+          "말하면 바로 등록돼요",
+          "캘리오가 먼저 제안해요",
+          "일정도, 할 일도 여기 다 있어요",
+          "친구와 함께하는 일정도 쉽게"
+        ],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "KRW"
+        }
+      }
+    </script>
+
+    <!--
+      웹폰트는 JS 실행 이후가 아니라 HTML 파싱 단계에서 요청되어야 LCP가 빨라집니다.
+      (이전에는 Emotion GlobalStyle 안에 있어서 번들 실행 후에야 다운로드가 시작됐습니다.)
+    -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff"
+      href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff"
+      crossorigin
+    />
+    <style>
+      @font-face {
+        font-family: 'GmarketSansMedium';
+        src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff')
+          format('woff');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'KIMM_Light';
+        src: url('https://cdn.jsdelivr.net/gh/fontbee/font@main/Kimm/KIMM_Light.woff2')
+          format('woff2');
+        font-weight: 300;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      /*
+        리셋 CSS는 Emotion GlobalStyle(JS)에 있어서 번들 실행 전에는 적용되지 않습니다.
+        그대로 두면 정적 셸이 브라우저 기본 body margin(8px)만큼 밀린 채로 그려졌다가
+        React 마운트 시점에 8px 튀므로, 최소한의 리셋만 여기서 먼저 적용합니다.
+      */
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background-color: #fafafa;
+      }
+
+      /*
+        JS 번들 실행 전까지 노출되는 랜딩 히어로 정적 셸입니다.
+        - 검색/공유 크롤러가 JS 없이 읽는 유일한 본문입니다.
+        - LCP를 JS 다운로드 이후가 아니라 HTML 파싱 시점에 확정시킵니다.
+        React가 마운트되면 동일한 히어로로 교체되므로,
+        Landing.styles.ts의 Page / Nav / HeroTitle / HeroText / StartLink 값과 맞춰야 합니다.
+      */
+      .app-shell {
+        display: flex;
+        width: 100%;
+        min-height: 100vh;
+        flex-direction: column;
+        justify-content: center;
+        padding: 0 clamp(24px, 11vw, 150px) 120px;
+        box-sizing: border-box;
+        color: #214a57;
+        font-family:
+          'GmarketSansMedium',
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background:
+          radial-gradient(
+            circle at 50% 0%,
+            rgba(255, 255, 255, 0.92),
+            rgba(255, 255, 255, 0) 28rem
+          ),
+          linear-gradient(180deg, #d9f4f3 0%, #eef9fb 26%, #f7fbfd 48%, #ecfbff 78%, #d6f3f7 100%);
+      }
+      .app-shell__nav {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        width: 100%;
+        max-width: 1040px;
+        margin: 84px auto 0;
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .app-shell__tagline {
+        padding-left: 12px;
+        border-left: 3px solid rgba(33, 74, 87, 0.35);
+      }
+      .app-shell__hero {
+        width: 100%;
+        max-width: 1040px;
+        margin: 84px auto 0;
+        text-align: right;
+      }
+      .app-shell__hero h1 {
+        margin: 0;
+        color: #123f50;
+        font-size: clamp(32px, 4vw, 46px);
+        line-height: 1.25;
+      }
+      .app-shell__hero p {
+        margin: 36px 0 30px;
+        color: rgba(33, 74, 87, 0.58);
+        font-size: 16px;
+        line-height: 2;
+      }
+      .app-shell__cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 210px;
+        height: 54px;
+        border-radius: 999px;
+        background: #087491;
+        color: #fff;
+        font-size: 15px;
+        text-decoration: none;
+        box-shadow: 0 16px 24px rgba(8, 116, 145, 0.24);
+      }
+      @media (max-width: 768px) {
+        .app-shell__nav {
+          gap: 10px;
+          font-size: 12px;
+        }
+        .app-shell__hero {
+          margin-top: 70px;
+          text-align: center;
+        }
+        .app-shell__hero h1 {
+          font-size: 30px;
+          line-height: 1.35;
+        }
+        .app-shell__hero p {
+          margin: 22px 0 26px;
+          font-size: 14px;
+          line-height: 1.8;
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="modal-root"></div>
-    <div id="root"></div>
+    <div id="root">
+      <div class="app-shell">
+        <div class="app-shell__nav">
+          <span class="app-shell__tagline">현대인을 위한 AI 일정 비서</span>
+          <span>Cali/o</span>
+        </div>
+        <div class="app-shell__hero">
+          <h1>말 한마디로 일정이 완성된다</h1>
+          <p>
+            자연어로 입력하면 AI가 자동으로 일정을 등록해드려요.<br />
+            친구와 함께하는 일정도 손쉽게 공유할 수 있어요.
+          </p>
+          <a class="app-shell__cta" href="/login">AI 일정 관리 시작하기</a>
+        </div>
+      </div>
+    </div>
+    <script>
+      /*
+        위 셸은 랜딩(`/`) 전용 내용입니다. SPA라 모든 경로가 이 HTML을 받으므로
+        (1) 랜딩이 아닌 경로, (2) 마지막으로 확인된 상태가 로그인인 경우에는 먼저 비웁니다.
+        module 스크립트는 defer라서 이 스크립트가 항상 먼저 실행됩니다.
+      */
+      ;(function () {
+        var isLanding = window.location.pathname === '/'
+        var isLoggedIn = false
+
+        try {
+          isLoggedIn = localStorage.getItem('calio.isLoggedIn') === '1'
+        } catch (error) {
+          /* localStorage를 못 쓰는 환경이면 로그인 힌트만 포기합니다. */
+        }
+
+        if (!isLanding || isLoggedIn) {
+          document.getElementById('root').textContent = ''
+        }
+      })()
+    </script>
     <script type="module" src="/src/app/main.tsx"></script>
   </body>
 </html>

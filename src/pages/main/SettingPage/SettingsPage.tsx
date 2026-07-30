@@ -11,6 +11,7 @@ import { SettingsAPI } from '@/shared/api/settings/settings'
 import { useCustomQuery, useCustomSuspenseQuery } from '@/shared/hooks/common/customQuery'
 import { useSettingsMutation } from '@/shared/hooks/query'
 import type { CalendarView, ReminderTiming } from '@/shared/types/settings/settings'
+import PageMeta from '@/shared/ui/common/PageMeta/PageMeta'
 import { useAuthStore } from '@/store/useAuthStore'
 
 import * as S from './Settings.styles'
@@ -56,6 +57,7 @@ export default function SettingsPage() {
 
   return (
     <S.Container>
+      <PageMeta title="설정" noIndex />
       <S.HeaderWrapper>
         <S.HeaderContent>
           <h1>설정</h1>

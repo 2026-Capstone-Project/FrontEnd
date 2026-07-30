@@ -7,6 +7,7 @@ import { mapSettingsDefaultView } from '@/features/Calendar/hooks/useStoredCalen
 import { AIChatModalButton } from '@/features/Common/AIChatModalButton'
 import { SettingsAPI } from '@/shared/api/settings/settings'
 import { useCustomSuspenseQuery } from '@/shared/hooks/common/customQuery'
+import PageMeta from '@/shared/ui/common/PageMeta/PageMeta'
 
 import * as S from './CalendarPage.styles'
 const CalendarPage = () => {
@@ -21,6 +22,7 @@ const CalendarPage = () => {
 
   return (
     <S.PageWrapper>
+      <PageMeta title="캘린더" noIndex />
       <CustomCalendar initialView={initialView} onSelectedDateChange={setSelectedDate} />
       <div
         ref={cardAreaRef}

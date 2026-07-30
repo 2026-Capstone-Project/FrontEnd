@@ -1,6 +1,5 @@
 import type { RouteObject } from 'react-router-dom'
 
-import SettingsPage from '@/pages/main/SettingPage/SettingsPage'
 import SettingLayout from '@/shared/layout/SettingLayout'
 
 const SettingRoutes: RouteObject = {
@@ -9,7 +8,9 @@ const SettingRoutes: RouteObject = {
   children: [
     {
       index: true,
-      element: <SettingsPage />,
+      lazy: async () => ({
+        Component: (await import('@/pages/main/SettingPage/SettingsPage')).default,
+      }),
     },
   ],
 }

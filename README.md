@@ -4,7 +4,7 @@
     말 한마디로 일정이 완성되는 AI 일정 관리 서비스<br />
     <strong>2026 Capstone Frontend</strong>
   </p>
-  <img src="./public/readme-cover.png" alt="Calio 대표 이미지" width="100%" />
+  <img src="./docs/readme-cover.png" alt="Calio 대표 이미지" width="100%" />
   <br />
   <br />
   <p>
@@ -108,12 +108,14 @@ npm run build
 ```bash
 VITE_DEV_MODE=true
 VITE_SERVER_URL=https://example.com
+VITE_SITE_URL=https://calio.co.kr
 ```
 
-| Key               | Description                                                                                      |
-| ----------------- | ------------------------------------------------------------------------------------------------ |
-| `VITE_DEV_MODE`   | React Query DevTools 표시 여부를 제어합니다. 로컬에서는 `true`, 배포에서는 `false`를 권장합니다. |
-| `VITE_SERVER_URL` | API 서버 URL입니다.                                                                              |
+| Key               | Description                                                                                         |
+| ----------------- | --------------------------------------------------------------------------------------------------- |
+| `VITE_DEV_MODE`   | React Query DevTools 표시 여부를 제어합니다. 로컬에서는 `true`, 배포에서는 `false`를 권장합니다.    |
+| `VITE_SERVER_URL` | API 서버 URL입니다.                                                                                 |
+| `VITE_SITE_URL`   | 배포 도메인입니다. `canonical`, `og:url`, `sitemap.xml`에 사용되며 배포 워크플로 시크릿과 맞춥니다. |
 
 ## 🗂 Project Structure
 
