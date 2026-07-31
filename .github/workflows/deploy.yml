@@ -38,9 +38,12 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       # 파일명에 해시가 붙는 /assets 는 영구 캐시, HTML은 매번 재검증하도록 나눠서 올립니다.
+      # assets에는 --delete를 쓰지 않습니다. 배포 시점에 열려 있던 구버전 탭이
+      # 이전 해시의 lazy 청크를 요청하므로, 지우면 라우트 이동이 실패합니다.
+      # 해시 파일명이라 충돌은 없고, 오래된 청크는 필요 시 수동/수명주기 정책으로 정리합니다.
       - name: S3 업로드 (해시 자산 - 장기 캐시)
         run: |
-          aws s3 sync dist/assets s3://${{ secrets.S3_BUCKET_NAME }}/assets --delete \
+          aws s3 sync dist/assets s3://${{ secrets.S3_BUCKET_NAME }}/assets \
             --cache-control "public, max-age=31536000, immutable"
 
       - name: S3 업로드 (아이콘 / robots / sitemap)

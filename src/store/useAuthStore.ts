@@ -6,6 +6,7 @@ interface AuthState {
   logout: () => void
 }
 
+/** index.html의 정적 셸 인라인 스크립트도 이 키를 리터럴로 읽습니다. 변경 시 함께 수정하세요. */
 const AUTH_HINT_KEY = 'calio.isLoggedIn'
 
 /**

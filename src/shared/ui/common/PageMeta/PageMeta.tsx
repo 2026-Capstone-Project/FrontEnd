@@ -51,6 +51,10 @@ const setPropertyContent = (property: string, content: string) => {
   tag.setAttribute('content', content)
 }
 
+const removeTag = (selector: string) => {
+  document.head.querySelector(selector)?.remove()
+}
+
 export default function PageMeta({
   title,
   description,
@@ -67,11 +71,16 @@ export default function PageMeta({
     if (description) {
       setMetaContent('description', description)
       setPropertyContent('og:description', description)
+    } else {
+      // 이전 페이지(랜딩)의 description이 다른 페이지에 잔류하지 않도록 지웁니다.
+      removeTag('meta[name="description"]')
+      removeTag('meta[property="og:description"]')
     }
 
     if (noIndex) {
-      // index.html의 canonical(`/`)이 남아 있으면 색인 제외 페이지가 랜딩을 가리키게 됩니다.
-      document.head.querySelector('link[rel="canonical"]')?.remove()
+      // index.html의 canonical(`/`)·og:url이 남아 있으면 색인 제외 페이지가 랜딩을 가리키게 됩니다.
+      removeTag('link[rel="canonical"]')
+      removeTag('meta[property="og:url"]')
 
       return
     }

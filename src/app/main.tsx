@@ -5,7 +5,7 @@ import React, { useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
 
-import { getAuthRouter, getMainRouter } from '@/routes/Router'
+import { disposeAuthRouter, disposeMainRouter, getAuthRouter, getMainRouter } from '@/routes/Router'
 import axiosInstance from '@/shared/api/axios'
 import { resetAuthRecoveryState } from '@/shared/api/axios'
 import GlobalStyle from '@/shared/styles/GlobalStyle'
@@ -44,6 +44,12 @@ const App = () => {
 
     initAuth()
   }, [login, logout])
+
+  /* 라우터 교체 후, 더 이상 쓰지 않는 쪽의 history 구독을 해제합니다. */
+  useEffect(() => {
+    if (isLoggedIn) disposeAuthRouter()
+    else disposeMainRouter()
+  }, [isLoggedIn])
 
   return <RouterProvider router={isLoggedIn ? getMainRouter() : getAuthRouter()} />
 }

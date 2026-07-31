@@ -7,8 +7,15 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 /** VITE_SITE_URL이 없을 때 사용하는 기본 배포 도메인입니다. */
 const FALLBACK_SITE_URL = 'https://calio.co.kr'
 
-/** 검색엔진에 노출하지 않는 경로입니다. (로그인 이후에만 존재하는 화면 + OAuth 콜백) */
-const PRIVATE_PATHS = ['/login/callback/', '/calendar', '/todo', '/friends', '/settings']
+/**
+ * robots.txt에서 크롤링 자체를 막는 경로입니다.
+ *
+ * OAuth 콜백만 막습니다. URL에 인가 코드가 실리므로 크롤러가 접근할 이유가 없습니다.
+ * 로그인 이후 화면(/calendar 등)은 여기 넣지 않습니다. Disallow하면 크롤러가
+ * 페이지의 noindex 메타를 영영 읽지 못해, 외부 링크가 생겼을 때 "차단됨" 상태로
+ * URL만 색인될 수 있습니다. 해당 페이지들은 PageMeta의 noindex에만 맡깁니다.
+ */
+const CRAWL_BLOCKED_PATHS = ['/login/callback/']
 
 /**
  * 사이트맵에 넣는 공개 경로입니다.
@@ -36,7 +43,7 @@ function seoPlugin(siteUrl: string): Plugin {
     generateBundle() {
       const robots = [
         'User-agent: *',
-        ...PRIVATE_PATHS.map((privatePath) => `Disallow: ${privatePath}`),
+        ...CRAWL_BLOCKED_PATHS.map((blockedPath) => `Disallow: ${blockedPath}`),
         '',
         `Sitemap: ${siteUrl}/sitemap.xml`,
         '',

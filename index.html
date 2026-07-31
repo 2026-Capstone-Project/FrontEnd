@@ -233,6 +233,7 @@
         var isLoggedIn = false
 
         try {
+          /* 키는 useAuthStore.ts의 AUTH_HINT_KEY와 같아야 합니다. 변경 시 함께 수정하세요. */
           isLoggedIn = localStorage.getItem('calio.isLoggedIn') === '1'
         } catch (error) {
           /* localStorage를 못 쓰는 환경이면 로그인 힌트만 포기합니다. */

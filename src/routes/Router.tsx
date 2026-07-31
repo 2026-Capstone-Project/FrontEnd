@@ -19,9 +19,13 @@ type Router = ReturnType<typeof createBrowserRouter>
 let authRouter: Router | null = null
 let mainRouter: Router | null = null
 
+/*
+  라우트 lazy 청크 로드가 실패해도(배포 직후 구버전 탭 등) react-router 기본
+  에러 화면 대신 ErrorPage가 처리하도록 최상위에 errorElement를 둡니다.
+*/
 export const getAuthRouter = () =>
   (authRouter ??= createBrowserRouter([
-    AuthRoutes,
+    { ...AuthRoutes, errorElement: <ErrorPage /> },
     {
       path: '*',
       element: <ErrorPage />,
@@ -30,10 +34,25 @@ export const getAuthRouter = () =>
 
 export const getMainRouter = () =>
   (mainRouter ??= createBrowserRouter([
-    MainRoutes,
-    SettingRoutes,
+    { ...MainRoutes, errorElement: <ErrorPage /> },
+    { ...SettingRoutes, errorElement: <ErrorPage /> },
     {
       path: '*',
       element: <ErrorPage />,
     },
   ]))
+
+/*
+  로그인/로그아웃으로 라우터가 교체된 뒤에도 이전 라우터는 history 구독을 유지해,
+  뒤로가기(popstate) 시 비활성 라우터가 URL을 매칭하며 자기 lazy 청크를 받아올 수 있습니다.
+  교체 시점에 이전 라우터를 dispose하고, 다시 필요해지면 새로 만듭니다.
+*/
+export const disposeAuthRouter = () => {
+  authRouter?.dispose()
+  authRouter = null
+}
+
+export const disposeMainRouter = () => {
+  mainRouter?.dispose()
+  mainRouter = null
+}
