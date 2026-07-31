@@ -1,7 +1,7 @@
-import moment from 'moment'
 import { useCallback } from 'react'
 
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import dayjs from '@/shared/utils/dayjs'
 
 type UseCalendarTodoActionsArgs = {
   events: CalendarEvent[]
@@ -29,7 +29,7 @@ export const useCalendarTodoActions = ({
       toggleEventDone(eventId, 'todo')
       patchCompleteTodoMutate({
         todoId: eventId,
-        occurrenceDate: moment(target.start).format('YYYY-MM-DD'),
+        occurrenceDate: dayjs(target.start).format('YYYY-MM-DD'),
         isCompleted: nextCompleted,
       })
     },

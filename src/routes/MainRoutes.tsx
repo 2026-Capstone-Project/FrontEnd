@@ -1,29 +1,36 @@
 import type { RouteObject } from 'react-router-dom'
 
-import CalendarPage from '@/pages/main/CalendarPage/CalendarPage'
-import FriendsPage from '@/pages/main/FriendsPage/FriendsPage'
-import Home from '@/pages/main/HomePage/HomePage'
-import TodoListPage from '@/pages/main/TodoListPage/TodoListPage'
 import MainLayout from '@/shared/layout/MainLayout'
 
+/*
+  로그인 이후 화면은 모두 lazy로 분리합니다.
+  react-big-calendar, dayjs, kakao maps SDK 같은 무거운 의존성이
+  랜딩 진입 청크에 섞이지 않도록 하는 것이 목적입니다.
+*/
 const MainRoutes: RouteObject = {
   element: <MainLayout />,
   children: [
     {
       path: '/',
-      element: <Home />,
+      lazy: async () => ({ Component: (await import('@/pages/main/HomePage/HomePage')).default }),
     },
     {
       path: '/calendar',
-      element: <CalendarPage />,
+      lazy: async () => ({
+        Component: (await import('@/pages/main/CalendarPage/CalendarPage')).default,
+      }),
     },
     {
       path: '/todo',
-      element: <TodoListPage />,
+      lazy: async () => ({
+        Component: (await import('@/pages/main/TodoListPage/TodoListPage')).default,
+      }),
     },
     {
       path: '/friends',
-      element: <FriendsPage />,
+      lazy: async () => ({
+        Component: (await import('@/pages/main/FriendsPage/FriendsPage')).default,
+      }),
     },
   ],
 }

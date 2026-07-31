@@ -1,7 +1,6 @@
-import moment from 'moment'
-
 import { theme } from '@/shared/styles/theme'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import dayjs from '@/shared/utils/dayjs'
 
 import {
   DEFAULT_ALL_DAY_TITLE,
@@ -18,9 +17,10 @@ const buildEventId = (prevCount: number, date: Date) => date.valueOf() + prevCou
 
 /** 기본 제목/기간을 가지는 새 캘린더 이벤트를 생성합니다. */
 export const createEvent = (date: Date, index: number, allDay = false): CalendarEvent => {
-  const start = moment(date)
-  const eventDurationMs = moment.duration(DEFAULT_EVENT_DURATION_HOURS, 'hours')
-  const end = allDay ? start.clone().endOf('day') : start.clone().add(eventDurationMs)
+  const start = dayjs(date)
+  const end = allDay
+    ? start.clone().endOf('day')
+    : start.clone().add(DEFAULT_EVENT_DURATION_HOURS, 'hour')
   return {
     id: buildEventId(index, date),
     title: allDay ? DEFAULT_ALL_DAY_TITLE : DEFAULT_EVENT_TITLE,
@@ -53,8 +53,8 @@ export const updateEventRange = (
     (occurrenceDate ? item.occurrenceDate === occurrenceDate : true)
       ? {
           ...item,
-          start: moment(start).format('YYYY-MM-DDTHH:mm'),
-          end: moment(end).format('YYYY-MM-DDTHH:mm'),
+          start: dayjs(start).format('YYYY-MM-DDTHH:mm'),
+          end: dayjs(end).format('YYYY-MM-DDTHH:mm'),
         }
       : item,
   )
@@ -64,7 +64,7 @@ export const getDayPropStyle = (calendarDate: Date, selectedDate: Date | null) =
   if (!selectedDate) {
     return {}
   }
-  return moment(selectedDate).isSame(calendarDate, 'day')
+  return dayjs(selectedDate).isSame(calendarDate, 'day')
     ? {
         style: {
           backgroundColor: theme.colors.lightGray,

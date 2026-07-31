@@ -1,22 +1,21 @@
 /** @jsxImportSource @emotion/react */
-import 'moment/locale/ko'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 
-import moment from 'moment'
 import type { View } from 'react-big-calendar'
-import { Calendar, momentLocalizer } from 'react-big-calendar'
+import { Calendar, dayjsLocalizer } from 'react-big-calendar'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 
 import { useCustomCalendarController } from '@/features/Calendar/hooks/useCustomCalendarController'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import dayjs from '@/shared/utils/dayjs'
 
 import CalendarModals from './CalendarModals'
 import * as S from './CustomCalendar.style'
 import CustomCalendarDialogs from './CustomCalendarDialogs'
 import CustomCalendarMobileActions from './CustomCalendarMobileActions'
 
-moment.locale('ko')
-const localizer = momentLocalizer(moment)
+// ko 로케일 적용은 shared/utils/dayjs에서 전역으로 처리된다.
+const localizer = dayjsLocalizer(dayjs)
 const DragAndDropCalendar = withDragAndDrop<CalendarEvent, object>(Calendar)
 export type { SelectDateSource } from './CustomCalendar.types'
 

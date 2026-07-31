@@ -1,4 +1,3 @@
-import moment from 'moment'
 import { useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
@@ -8,6 +7,7 @@ import type { ItemEditorDraft } from '@/shared/types/modal/itemEditor'
 import ScheduleEditorModal from '@/shared/ui/Modals/ScheduleEditor'
 import TodoEditorModal from '@/shared/ui/Modals/TodoEditor'
 import { buildDefaultItemEditorDraft } from '@/shared/utils'
+import dayjs from '@/shared/utils/dayjs'
 
 import type { CalendarEventActions } from './CustomCalendar.types'
 
@@ -105,7 +105,7 @@ const CalendarModals = ({
   const safeDetailEventId = isModalEditing && !isTodoModal ? modalEventId : null
   const occurrenceDate = useMemo(() => {
     if (modalEvent?.occurrenceDate) {
-      return moment(modalEvent.occurrenceDate).format('YYYY-MM-DDTHH:mm:ss')
+      return dayjs(modalEvent.occurrenceDate).format('YYYY-MM-DDTHH:mm:ss')
     }
     const base =
       modalEvent?.start instanceof Date
@@ -113,7 +113,7 @@ const CalendarModals = ({
         : modalEvent?.start
           ? new Date(modalEvent.start)
           : modalDate
-    return base ? moment(base).format('YYYY-MM-DDTHH:mm:ss') : ''
+    return base ? dayjs(base).format('YYYY-MM-DDTHH:mm:ss') : ''
   }, [modalDate, modalEvent])
   const { data } = useDetailEventQuery(safeDetailEventId, occurrenceDate)
   const detailEvent = useMemo<CalendarEvent | null>(() => {

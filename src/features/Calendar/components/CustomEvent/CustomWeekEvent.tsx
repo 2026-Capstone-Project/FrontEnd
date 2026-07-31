@@ -1,8 +1,8 @@
-import moment from 'moment'
 import React, { type MouseEvent, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import People from '@/assets/icons/people.svg?react'
+import dayjs from '@/shared/utils/dayjs'
 
 import { getColorPalette } from '../../utils/colorPalette'
 import type { CalendarEvent } from '../CustomView/CustomDayView'
@@ -12,8 +12,8 @@ const formatTimeRange = (event: CalendarEvent) => {
   if (event.isAllDay) {
     return '종일'
   }
-  const start = moment(event.start).format('HH:mm')
-  const end = moment(event.end).format('HH:mm')
+  const start = dayjs(event.start).format('HH:mm')
+  const end = dayjs(event.end).format('HH:mm')
   return `${start} ~ ${end}`
 }
 

@@ -1,5 +1,4 @@
 // 훅: react-big-calendar 설정/컴포넌트/props를 생성합니다.
-import moment from 'moment'
 import type { ComponentProps, ComponentType } from 'react'
 import { useMemo } from 'react'
 import type {
@@ -24,6 +23,7 @@ import {
 import { getEventOccurrenceKey } from '@/features/Calendar/utils/helpers/dayViewHelpers'
 import { getViewConfig } from '@/features/Calendar/utils/viewConfig'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import dayjs from '@/shared/utils/dayjs'
 
 import { buildCalendarConfig } from '../domain/config'
 
@@ -184,8 +184,8 @@ export const useCalendarRbcProps = ({
       daySpan?: (start: Date, end: Date) => number
     }
     nextLocalizer.daySpan = (start: Date, end: Date) => {
-      const startDay = moment(start).startOf('day')
-      const endDay = moment(end).startOf('day')
+      const startDay = dayjs(start).startOf('day')
+      const endDay = dayjs(end).startOf('day')
       const diff = endDay.diff(startDay, 'days')
       return diff + 1
     }
@@ -213,10 +213,10 @@ export const useCalendarRbcProps = ({
         eventPropGetter:
           view === Views.MONTH
             ? (event) => {
-                const start = moment(event.start)
-                const end = moment(event.end)
-                const monthStart = moment(date).startOf('month')
-                const monthEnd = moment(date).endOf('month')
+                const start = dayjs(event.start)
+                const end = dayjs(event.end)
+                const monthStart = dayjs(date).startOf('month')
+                const monthEnd = dayjs(date).endOf('month')
                 const overlaps =
                   end.isSameOrAfter(monthStart, 'day') && start.isSameOrBefore(monthEnd, 'day')
                 return overlaps ? {} : { style: { display: 'none' } }

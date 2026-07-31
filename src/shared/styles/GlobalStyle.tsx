@@ -7,25 +7,10 @@ export default function GlobalStyle() {
     <Global
       styles={css`
         ${reset}
-        @font-face {
-          font-family: 'GmarketSansMedium';
-          src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff')
-            format('woff');
-        }
-        @font-face {
-          font-family: 'KIMM_Light';
-          src: url('https://cdn.jsdelivr.net/gh/fontbee/font@main/Kimm/KIMM_Light.woff2')
-            format('woff2');
-          font-weight: 300;
-          font-style: normal;
-          font-display: swap;
-        }
-        @font-face {
-          font-family: 'NanumSquare';
-          src: url('https://cdn.rawgit.com/moonspam/NanumSquare/master/nanumsquare.css');
-          font-style: normal;
-          font-display: swap;
-        }
+        /*
+          @font-face 선언은 index.html로 옮겼습니다.
+          Emotion Global 안에 두면 JS 번들이 실행된 뒤에야 폰트 다운로드가 시작돼 LCP가 늦어집니다.
+        */
         body {
           font-family:
             'Pretendard',

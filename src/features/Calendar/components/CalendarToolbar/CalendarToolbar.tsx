@@ -1,8 +1,8 @@
-import moment from 'moment'
 import { type ToolbarProps } from 'react-big-calendar'
 
 import Arrow from '@/assets/icons/common/chevron.svg?react'
 import { theme } from '@/shared/styles/theme'
+import dayjs from '@/shared/utils/dayjs'
 
 import { CustomViewButton } from '../CustomViewButton/CustomViewButton'
 import * as S from './CalendarToolbar.style'
@@ -13,7 +13,7 @@ const CustomToolbar = <TEvent extends object>({
   onNavigate,
   view,
 }: ToolbarProps<TEvent>) => {
-  const formattedLabel = moment(date).format('YYYY년 M월')
+  const formattedLabel = dayjs(date).format('YYYY년 M월')
   return (
     <S.ToolbarWrapper>
       <CustomViewButton view={view} onView={onView} className="view-buttons" />

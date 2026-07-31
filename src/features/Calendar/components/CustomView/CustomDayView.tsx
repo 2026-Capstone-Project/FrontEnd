@@ -1,9 +1,9 @@
-import moment from 'moment'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import type { NavigateAction, ViewStatic } from 'react-big-calendar'
 
 import { formatWeekday } from '@/features/Calendar/utils/formatters'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import dayjs from '@/shared/utils/dayjs'
 
 import { TIMED_SLOT_CONFIG } from '../../domain/constants'
 import {
@@ -50,8 +50,8 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
   onEventClick,
   onEventDoubleClick,
 }) => {
-  const currentDate = moment(date)
-  const isToday = currentDate.isSame(moment(), 'day')
+  const currentDate = dayjs(date)
+  const isToday = currentDate.isSame(dayjs(), 'day')
 
   // 날짜 전체를 차지하는 이벤트만 추려서 위쪽 배너에서 보여줍니다.
   const allDayEvents = events
@@ -105,7 +105,7 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
     <S.DayViewContainer>
       <S.DateInfo>
         <S.DateLabel>{formatWeekday(date)}요일</S.DateLabel>
-        <S.DateCircle highlight={isToday}>{moment(date).format('D')}</S.DateCircle>
+        <S.DateCircle highlight={isToday}>{dayjs(date).format('D')}</S.DateCircle>
       </S.DateInfo>
 
       <S.CalendarWrapper>
@@ -149,14 +149,14 @@ const CustomDayView: React.FC<CustomDayViewProps> & ViewStatic = ({
   )
 }
 
-CustomDayView.title = (date: Date) => moment(date).format('YYYY년 M월 D일')
+CustomDayView.title = (date: Date) => dayjs(date).format('YYYY년 M월 D일')
 
 CustomDayView.navigate = (date: Date, action: NavigateAction) => {
   switch (action) {
     case 'PREV':
-      return moment(date).subtract(1, 'day').toDate()
+      return dayjs(date).subtract(1, 'day').toDate()
     case 'NEXT':
-      return moment(date).add(1, 'day').toDate()
+      return dayjs(date).add(1, 'day').toDate()
     default:
       return date
   }

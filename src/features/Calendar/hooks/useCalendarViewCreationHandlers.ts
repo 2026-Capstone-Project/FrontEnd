@@ -1,9 +1,9 @@
-import moment from 'moment'
 import { useCallback } from 'react'
 
 import { useCalendarCreateHandlers } from '@/features/Calendar/hooks/useCalendarCreateHandlers'
 import { useDayViewHandlers } from '@/features/Calendar/hooks/useDayViewHandlers'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import dayjs from '@/shared/utils/dayjs'
 
 type UseCalendarViewCreationHandlersArgs = {
   view: Parameters<typeof useCalendarCreateHandlers>[0]['view']
@@ -55,7 +55,7 @@ export const useCalendarViewCreationHandlers = ({
 
   const handleWeekViewCreateEvent = useCallback(
     (slotDate: Date) => {
-      const start = moment(slotDate).startOf('day').set({ hour: 9, minute: 0, second: 0 }).toDate()
+      const start = dayjs(slotDate).startOf('day').hour(9).minute(0).second(0).toDate()
       const createdId = enqueueEvent(start, false)
       if (createdId != null) {
         handleAddEvent(start, createdId)
