@@ -91,12 +91,24 @@ npm run dev
 npm run build
 ```
 
+빌드 마지막 단계에서 `scripts/prerender.mjs`가 라우트별 정적 HTML을 생성합니다.
+
+- `/`, `/login`은 실제 React 트리를 렌더해 본문까지 HTML에 담습니다. JS를 실행하지 않는
+  크롤러와 링크 미리보기 봇이 읽는 내용이자, 번들 다운로드 전에 보이는 첫 화면입니다.
+- 로그인 이후 화면(`/calendar` 등)은 본문 없이 `noindex` 메타만 맞춘 HTML을 만듭니다.
+- 라우트별 제목/설명/색인 여부의 원본은 `src/shared/seo/routeMeta.ts` 한 곳입니다.
+  런타임(`PageMeta`)과 빌드 타임(프리렌더)이 같은 상수를 사용합니다.
+
+> ⚠️ `/login` 등 루트가 아닌 경로의 정적 HTML이 실제로 서빙되려면 CloudFront에
+> `infra/cloudfront-spa-router.js` 함수를 연결해야 합니다. 연결 전에는 모든 경로가
+> 기존처럼 `/index.html`(랜딩)로 폴백되며, 앱 동작에는 문제가 없습니다.
+
 ## 📜 Scripts
 
-| Command           | Description                                         |
-| ----------------- | --------------------------------------------------- |
-| `npm run dev`     | Vite 개발 서버를 실행합니다.                        |
-| `npm run build`   | TypeScript 빌드 후 Vite 프로덕션 빌드를 생성합니다. |
+| Command           | Description                                                    |
+| ----------------- | -------------------------------------------------------------- |
+| `npm run dev`     | Vite 개발 서버를 실행합니다.                                   |
+| `npm run build`   | TypeScript 빌드 → Vite 프로덕션 빌드 → 라우트별 프리렌더.      |
 | `npm run lint`    | ESLint로 전체 코드를 검사합니다.                    |
 | `npm run preview` | 빌드 결과를 로컬에서 미리 확인합니다.               |
 | `npm run prepare` | Husky Git hook을 설치합니다.                        |

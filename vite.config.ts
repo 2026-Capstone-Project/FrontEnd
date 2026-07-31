@@ -4,8 +4,7 @@ import { defineConfig, loadEnv, type Plugin } from 'vite'
 import svgr from 'vite-plugin-svgr'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
-/** VITE_SITE_URL이 없을 때 사용하는 기본 배포 도메인입니다. */
-const FALLBACK_SITE_URL = 'https://calio.co.kr'
+import { resolveSiteUrl } from './src/shared/seo/routeMeta'
 
 /**
  * robots.txt에서 크롤링 자체를 막는 경로입니다.
@@ -20,9 +19,7 @@ const CRAWL_BLOCKED_PATHS = ['/login/callback/']
 /**
  * 사이트맵에 넣는 공개 경로입니다.
  *
- * `/login`은 넣지 않습니다. SPA라 모든 경로가 같은 index.html을 받기 때문에
- * JS를 실행하지 않는 크롤러에게는 `/login`도 랜딩 title/canonical로 보입니다.
- * 색인 가치도 없어서 페이지 자체를 noindex로 두고 사이트맵에서 제외합니다.
+ * `/login`은 프리렌더 대상이지만 색인 가치가 없어 noindex로 두고 사이트맵에서 제외합니다.
  */
 const PUBLIC_ROUTES = [{ path: '/', priority: '1.0', changefreq: 'weekly' }]
 
@@ -110,7 +107,7 @@ const manualChunk = (id: string) => {
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const siteUrl = (env.VITE_SITE_URL || FALLBACK_SITE_URL).replace(/\/$/, '')
+  const siteUrl = resolveSiteUrl(env.VITE_SITE_URL)
 
   return {
     plugins: [

@@ -7,15 +7,12 @@ import GoogleIcon from '@/assets/social/google.svg?react'
 import KakaoIcon from '@/assets/social/kakao.svg?react'
 import NaverIcon from '@/assets/social/naver.svg?react'
 import { redirectToSocialLogin } from '@/shared/api/auth/auth'
+import { LANDING_META } from '@/shared/seo/routeMeta'
 import PageMeta from '@/shared/ui/common/PageMeta/PageMeta'
 
 import { features } from './components/features'
 import { FeatureVisual } from './components/FeatureVisual'
 import * as S from './Landing.styles'
-
-const LANDING_TITLE = 'Calio(캘리오) | 말 한마디로 일정이 완성되는 AI 일정 관리'
-const LANDING_DESCRIPTION =
-  'Calio는 자연어로 말하면 AI가 일정과 할 일을 자동으로 등록해주는 일정 관리 서비스입니다. 반복 일정 추천부터 친구와의 일정 공유까지 한 곳에서 관리하세요.'
 
 export default function Landing() {
   const pageRef = useRef<HTMLElement>(null)
@@ -49,7 +46,7 @@ export default function Landing() {
   return (
     <S.Page ref={pageRef}>
       {/* 구조화 데이터(JSON-LD)는 index.html에 정적으로 넣어 JS 없는 크롤러도 읽게 했습니다. */}
-      <PageMeta title={LANDING_TITLE} description={LANDING_DESCRIPTION} canonicalPath="/" />
+      <PageMeta {...LANDING_META} />
       <S.Hero>
         <S.Circle $width="491px" $color="rgba(146, 255, 233, 0.70)" $top="30%" $left="50%" />
         <S.Circle $width="723px" $color="rgba(141, 207, 225, 0.90)" $top="10%" $left="10%" />

@@ -49,12 +49,15 @@ jobs:
       - name: S3 업로드 (아이콘 / robots / sitemap)
         run: |
           aws s3 sync dist s3://${{ secrets.S3_BUCKET_NAME }} --delete \
-            --exclude "assets/*" --exclude "index.html" \
+            --exclude "assets/*" --exclude "*.html" \
             --cache-control "public, max-age=3600"
 
-      - name: S3 업로드 (index.html - 캐시 재검증)
+      # 라우트별 프리렌더 결과(index.html, login/index.html, ...)를 한 번에 올립니다.
+      # HTML은 항상 재검증해야 배포 직후 구버전 문서가 남지 않습니다.
+      - name: S3 업로드 (HTML - 캐시 재검증)
         run: |
-          aws s3 cp dist/index.html s3://${{ secrets.S3_BUCKET_NAME }}/index.html \
+          aws s3 sync dist s3://${{ secrets.S3_BUCKET_NAME }} \
+            --exclude "*" --include "*.html" --exclude "assets/*" \
             --cache-control "no-cache, must-revalidate" --content-type "text/html; charset=utf-8"
 
       - name: CloudFront 캐시 삭제

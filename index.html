@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!--
+      아래 블록은 빌드 시 scripts/prerender.mjs가 라우트별로 다시 생성합니다.
+      운영 기준 원본은 src/shared/seo/routeMeta.ts이고, 여기 값은 `npm run dev`용 기본값입니다.
+      마커(seo:start / seo:end)를 지우면 프리렌더가 실패합니다.
+    -->
+    <!--seo:start-->
     <title>Calio(캘리오) | 말 한마디로 일정이 완성되는 AI 일정 관리</title>
     <meta
       name="description"
@@ -12,30 +18,7 @@
     <link rel="canonical" href="%SITE_URL%/" />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#fafafa" />
-
-    <!-- Open Graph (카카오톡 / 슬랙 / 페이스북 링크 미리보기) -->
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Calio" />
-    <meta property="og:locale" content="ko_KR" />
-    <meta property="og:title" content="Calio(캘리오) | 말 한마디로 일정이 완성되는 AI 일정 관리" />
-    <meta
-      property="og:description"
-      content="자연어로 말하면 AI가 일정과 할 일을 자동으로 등록해줘요. 반복 일정 추천과 친구 일정 공유까지 한 번에."
-    />
-    <meta property="og:url" content="%SITE_URL%/" />
-    <meta property="og:image" content="%SITE_URL%/og-image.jpg" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Calio 서비스 대표 이미지" />
-
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Calio(캘리오) | 말 한마디로 일정이 완성되는 AI 일정 관리" />
-    <meta
-      name="twitter:description"
-      content="자연어로 말하면 AI가 일정과 할 일을 자동으로 등록해줘요. 반복 일정 추천과 친구 일정 공유까지 한 번에."
-    />
-    <meta name="twitter:image" content="%SITE_URL%/og-image.jpg" />
+    <!--seo:end-->
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
@@ -96,9 +79,9 @@
       }
 
       /*
-        리셋 CSS는 Emotion GlobalStyle(JS)에 있어서 번들 실행 전에는 적용되지 않습니다.
-        그대로 두면 정적 셸이 브라우저 기본 body margin(8px)만큼 밀린 채로 그려졌다가
-        React 마운트 시점에 8px 튀므로, 최소한의 리셋만 여기서 먼저 적용합니다.
+        프리렌더된 라우트는 Emotion 리셋이 아래 <style>로 함께 들어오지만,
+        본문 없이 메타만 만드는 라우트에는 그게 없습니다.
+        그 경우에도 기본 body margin(8px) 때문에 첫 페인트가 밀리지 않도록 최소한만 둡니다.
       */
       html,
       body {
@@ -109,138 +92,43 @@
         background-color: #fafafa;
       }
 
-      /*
-        JS 번들 실행 전까지 노출되는 랜딩 히어로 정적 셸입니다.
-        - 검색/공유 크롤러가 JS 없이 읽는 유일한 본문입니다.
-        - LCP를 JS 다운로드 이후가 아니라 HTML 파싱 시점에 확정시킵니다.
-        React가 마운트되면 동일한 히어로로 교체되므로,
-        Landing.styles.ts의 Page / Nav / HeroTitle / HeroText / StartLink 값과 맞춰야 합니다.
-      */
-      .app-shell {
-        display: flex;
-        width: 100%;
-        min-height: 100vh;
-        flex-direction: column;
-        justify-content: center;
-        padding: 0 clamp(24px, 11vw, 150px) 120px;
-        box-sizing: border-box;
-        color: #214a57;
-        font-family:
-          'GmarketSansMedium',
-          system-ui,
-          -apple-system,
-          sans-serif;
-        background:
-          radial-gradient(
-            circle at 50% 0%,
-            rgba(255, 255, 255, 0.92),
-            rgba(255, 255, 255, 0) 28rem
-          ),
-          linear-gradient(180deg, #d9f4f3 0%, #eef9fb 26%, #f7fbfd 48%, #ecfbff 78%, #d6f3f7 100%);
-      }
-      .app-shell__nav {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        width: 100%;
-        max-width: 1040px;
-        margin: 84px auto 0;
-        font-size: 15px;
-        font-weight: 700;
-      }
-      .app-shell__tagline {
-        padding-left: 12px;
-        border-left: 3px solid rgba(33, 74, 87, 0.35);
-      }
-      .app-shell__hero {
-        width: 100%;
-        max-width: 1040px;
-        margin: 84px auto 0;
-        text-align: right;
-      }
-      .app-shell__hero h1 {
-        margin: 0;
-        color: #123f50;
-        font-size: clamp(32px, 4vw, 46px);
-        line-height: 1.25;
-      }
-      .app-shell__hero p {
-        margin: 36px 0 30px;
-        color: rgba(33, 74, 87, 0.58);
-        font-size: 16px;
-        line-height: 2;
-      }
-      .app-shell__cta {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 210px;
-        height: 54px;
-        border-radius: 999px;
-        background: #087491;
-        color: #fff;
-        font-size: 15px;
-        text-decoration: none;
-        box-shadow: 0 16px 24px rgba(8, 116, 145, 0.24);
-      }
-      @media (max-width: 768px) {
-        .app-shell__nav {
-          gap: 10px;
-          font-size: 12px;
-        }
-        .app-shell__hero {
-          margin-top: 70px;
-          text-align: center;
-        }
-        .app-shell__hero h1 {
-          font-size: 30px;
-          line-height: 1.35;
-        }
-        .app-shell__hero p {
-          margin: 22px 0 26px;
-          font-size: 14px;
-          line-height: 1.8;
-        }
-      }
     </style>
   </head>
   <body>
     <div id="modal-root"></div>
-    <div id="root">
-      <div class="app-shell">
-        <div class="app-shell__nav">
-          <span class="app-shell__tagline">현대인을 위한 AI 일정 비서</span>
-          <span>Cali/o</span>
-        </div>
-        <div class="app-shell__hero">
-          <h1>말 한마디로 일정이 완성된다</h1>
-          <p>
-            자연어로 입력하면 AI가 자동으로 일정을 등록해드려요.<br />
-            친구와 함께하는 일정도 손쉽게 공유할 수 있어요.
-          </p>
-          <a class="app-shell__cta" href="/login">AI 일정 관리 시작하기</a>
-        </div>
-      </div>
-    </div>
+    <div id="root"></div>
     <script>
       /*
-        위 셸은 랜딩(`/`) 전용 내용입니다. SPA라 모든 경로가 이 HTML을 받으므로
-        (1) 랜딩이 아닌 경로, (2) 마지막으로 확인된 상태가 로그인인 경우에는 먼저 비웁니다.
+        #root의 정적 HTML은 data-prerender-path 경로 전용으로 생성된 내용입니다.
+        (1) 다른 경로가 이 HTML을 받았거나 (SPA fallback)
+        (2) 마지막으로 확인된 상태가 로그인이면 (로그인 후 화면은 프리렌더 대상이 아님)
+        React가 마운트되기 전에 먼저 비워, 잘못된 화면이 잠깐 보이지 않게 합니다.
         module 스크립트는 defer라서 이 스크립트가 항상 먼저 실행됩니다.
       */
       ;(function () {
-        var isLanding = window.location.pathname === '/'
-        var isLoggedIn = false
+        var root = document.getElementById('root')
+        if (!root) return
 
         try {
-          /* 키는 useAuthStore.ts의 AUTH_HINT_KEY와 같아야 합니다. 변경 시 함께 수정하세요. */
-          isLoggedIn = localStorage.getItem('calio.isLoggedIn') === '1'
-        } catch (error) {
-          /* localStorage를 못 쓰는 환경이면 로그인 힌트만 포기합니다. */
-        }
+          var normalize = function (value) {
+            return value.length > 1 ? value.replace(/\/$/, '') : value
+          }
+          var isLoggedIn = false
 
-        if (!isLanding || isLoggedIn) {
-          document.getElementById('root').textContent = ''
+          try {
+            /* 키는 useAuthStore.ts의 AUTH_HINT_KEY와 같아야 합니다. 변경 시 함께 수정하세요. */
+            isLoggedIn = localStorage.getItem('calio.isLoggedIn') === '1'
+          } catch (error) {
+            /* localStorage를 못 쓰는 환경이면 로그인 힌트만 포기합니다. */
+          }
+
+          var prerenderPath = normalize(root.getAttribute('data-prerender-path') || '/')
+
+          if (isLoggedIn || prerenderPath !== normalize(window.location.pathname)) {
+            root.textContent = ''
+          }
+        } catch (error) {
+          /* 힌트를 못 읽으면 정적 HTML을 그대로 두고 React 마운트에 맡깁니다. */
         }
       })()
     </script>
