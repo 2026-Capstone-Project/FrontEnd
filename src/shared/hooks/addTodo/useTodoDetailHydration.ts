@@ -1,4 +1,3 @@
-import moment from 'moment'
 import { useEffect, useRef } from 'react'
 import type { UseFormSetValue } from 'react-hook-form'
 
@@ -6,6 +5,7 @@ import { useGetDetailTodoQuery } from '@/shared/hooks/query/useTodoQueries'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import { type RepeatConfigSchema, type TodoEditorFormValues } from '@/shared/types/event/event'
 import { defaultRepeatConfig } from '@/shared/types/recurrence/repeat'
+import dayjs from '@/shared/utils/dayjs'
 import { mapRecurrenceGroupToRepeatConfig } from '@/shared/utils/index'
 
 type UseTodoDetailHydrationProps = {
@@ -29,7 +29,7 @@ export const useTodoDetailHydration = ({
   const isPersistedTodo =
     isEditing && eventId != null && eventId !== 0 && !initialEvent?.isTemporary
   const shouldFetchDetail = isPersistedTodo
-  const detailOccurrenceDate = moment(date).format('YYYY-MM-DD')
+  const detailOccurrenceDate = dayjs(date).format('YYYY-MM-DD')
   const { data: detailData } = useGetDetailTodoQuery(
     Number(eventId),
     detailOccurrenceDate,
@@ -83,8 +83,8 @@ export const useTodoDetailHydration = ({
   }, [detailData, isEditing, setValue])
 
   const occurrenceDate = detailData?.result?.occurrenceDate
-    ? moment(detailData.result.occurrenceDate).format('YYYY-MM-DD')
-    : moment(todoDate ?? date).format('YYYY-MM-DD')
+    ? dayjs(detailData.result.occurrenceDate).format('YYYY-MM-DD')
+    : dayjs(todoDate ?? date).format('YYYY-MM-DD')
 
   return {
     detailData,

@@ -1,7 +1,7 @@
-import moment from 'moment'
 import { useCallback } from 'react'
 
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import dayjs from '@/shared/utils/dayjs'
 
 type UseCalendarDraftEventArgs = {
   events: CalendarEvent[]
@@ -53,11 +53,11 @@ export const useCalendarDraftEvent = ({
       if (modal.isOpen && !isModalEditing && modal.eventId != null) {
         const draftEvent = events.find((eventItem) => eventItem.id === modal.eventId)
         if (draftEvent) {
-          const currentStart = moment(draftEvent.start)
-          const currentEnd = moment(draftEvent.end)
+          const currentStart = dayjs(draftEvent.start)
+          const currentEnd = dayjs(draftEvent.end)
           const shouldKeepAllDay = draftEvent.isAllDay ?? allDay
           const durationMs = Math.max(currentEnd.diff(currentStart), 0)
-          const nextStart = shouldKeepAllDay ? moment(start).startOf('day') : moment(start)
+          const nextStart = shouldKeepAllDay ? dayjs(start).startOf('day') : dayjs(start)
           const nextEnd = shouldKeepAllDay
             ? (() => {
                 const spanDays = Math.max(

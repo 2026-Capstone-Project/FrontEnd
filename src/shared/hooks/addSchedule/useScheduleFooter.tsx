@@ -1,4 +1,3 @@
-import moment from 'moment'
 import type { ReactNode } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { type UseFormGetValues } from 'react-hook-form'
@@ -10,6 +9,7 @@ import type { EventColorType, ScheduleEditorFormValues } from '@/shared/types/ev
 import type { RecurrenceEventScope } from '@/shared/types/recurrence/recurrence'
 import type { RepeatConfig } from '@/shared/types/recurrence/repeat'
 import SelectColor from '@/shared/ui/scheduleTodo/SelectColor/SelectColor'
+import dayjs from '@/shared/utils/dayjs'
 
 type UseScheduleFooterProps = {
   repeatConfig: RepeatConfig
@@ -105,7 +105,7 @@ export const useScheduleFooter = ({
       {
         eventId: eventIdRef.current,
         params: {
-          occurrenceDate: moment(occurrenceDateRef.current).format('YYYY-MM-DDTHH:mm:ss'),
+          occurrenceDate: dayjs(occurrenceDateRef.current).format('YYYY-MM-DDTHH:mm:ss'),
         },
       },
       {

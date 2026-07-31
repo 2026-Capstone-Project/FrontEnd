@@ -1,4 +1,3 @@
-import moment from 'moment'
 import React from 'react'
 import type { NavigateAction, ViewStatic } from 'react-big-calendar'
 import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
@@ -20,6 +19,7 @@ import {
   KOREAN_WEEKDAYS,
 } from '@/features/Calendar/utils/weekViewLayout'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import dayjs from '@/shared/utils/dayjs'
 
 import { TodoCheckbox } from '../CustomEvent/CustomEvent.style'
 import * as S from './weekView'
@@ -41,7 +41,7 @@ const formatTime = (event: CalendarEvent) => {
   if (event.isAllDay || isDateOnlyString(event.start)) {
     return '종일'
   }
-  return moment(event.start).format('HH:mm')
+  return dayjs(event.start).format('HH:mm')
 }
 
 const buildEventAriaLabel = (event: CalendarEvent) => {
@@ -68,7 +68,7 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
     [weekDays],
   )
   const allDaySectionRef = React.useRef<HTMLElement | null>(null)
-  const today = moment()
+  const today = dayjs()
   const weeklyAllDayEvents = React.useMemo(() => getWeeklyAllDayEvents(events), [events])
   const allDaySegments = React.useMemo(
     () => buildAllDaySegments(weeklyAllDayEvents, weekDayDates),
@@ -341,16 +341,16 @@ const CustomWeekView: React.ComponentType<WeekProps> & ViewStatic = (({
 CustomWeekView.navigate = (date: Date, action: NavigateAction) => {
   switch (action) {
     case 'PREV':
-      return moment(date).subtract(1, 'week').toDate()
+      return dayjs(date).subtract(1, 'week').toDate()
     case 'NEXT':
-      return moment(date).add(1, 'week').toDate()
+      return dayjs(date).add(1, 'week').toDate()
     default:
       return date
   }
 }
 
 CustomWeekView.title = (date: Date) => {
-  const start = moment(date).startOf('week')
+  const start = dayjs(date).startOf('week')
   const end = start.clone().endOf('week')
   return `${start.format('YYYY년 M월 D일')} - ${end.format('M월 D일')}`
 }

@@ -1,10 +1,10 @@
-import moment from 'moment'
 import { useCallback } from 'react'
 
 import { getEventOccurrenceScope } from '@/features/Calendar/utils/helpers/calendarRecurrenceScope'
 import { resolveOccurrenceDateTime } from '@/features/Calendar/utils/helpers/dayViewHelpers'
 import type { RecurrenceEventSeriesScope } from '@/shared/constants/recurrenceScope'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import dayjs from '@/shared/utils/dayjs'
 import { useToastStore } from '@/store/useToastStore'
 
 import type { PatchTodoTiming } from './useCalendarTodoTimingPatch'
@@ -79,8 +79,8 @@ export const useCalendarDayViewTiming = ({
           ...(patchScope ? { scope: patchScope } : {}),
         },
         eventData: {
-          startTime: moment(start).format('YYYY-MM-DDTHH:mm:ss'),
-          endTime: moment(end).format('YYYY-MM-DDTHH:mm:ss'),
+          startTime: dayjs(start).format('YYYY-MM-DDTHH:mm:ss'),
+          endTime: dayjs(end).format('YYYY-MM-DDTHH:mm:ss'),
           isAllDay: false,
         },
       })

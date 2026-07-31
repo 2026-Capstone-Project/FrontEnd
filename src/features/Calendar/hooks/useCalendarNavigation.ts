@@ -1,7 +1,8 @@
-import moment from 'moment'
 import { useCallback } from 'react'
 import type { View } from 'react-big-calendar'
 import { Views } from 'react-big-calendar'
+
+import dayjs from '@/shared/utils/dayjs'
 
 type UseCalendarNavigationArgs = {
   view: View
@@ -16,7 +17,7 @@ type UseCalendarNavigationArgs = {
 
 // 캘린더뷰가 변할 때, selectedDate을 뷰의 시작 날짜로 초기화
 const getViewStartDate = (baseDate: Date, baseView: View) => {
-  const base = moment(baseDate)
+  const base = dayjs(baseDate)
   if (baseView === Views.MONTH) {
     return base.startOf('month').toDate()
   }

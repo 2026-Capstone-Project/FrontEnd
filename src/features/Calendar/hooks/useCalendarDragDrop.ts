@@ -1,4 +1,3 @@
-import moment from 'moment'
 import { useCallback } from 'react'
 import type { View } from 'react-big-calendar'
 import { Views } from 'react-big-calendar'
@@ -12,6 +11,7 @@ import type {
   RecurrenceGroup,
   RecurrenceTodoScope,
 } from '@/shared/types/recurrence/recurrence'
+import dayjs from '@/shared/utils/dayjs'
 import {
   normalizeRecurrenceGroupPayload,
   toWeekday,
@@ -124,7 +124,7 @@ export const useCalendarDragDrop = ({
       moveEvent(args)
       if (view !== Views.MONTH && view !== Views.WEEK) return
       if (event.type === 'todo') {
-        const defaultOccurrenceDate = moment(event.occurrenceDate ?? event.start).format(
+        const defaultOccurrenceDate = dayjs(event.occurrenceDate ?? event.start).format(
           'YYYY-MM-DD',
         )
         patchTodoTiming(event, start as Date, {
@@ -133,8 +133,8 @@ export const useCalendarDragDrop = ({
         })
         return
       }
-      const nextStart = moment(start).format('YYYY-MM-DDTHH:mm:ss')
-      const nextEnd = moment(end).format('YYYY-MM-DDTHH:mm:ss')
+      const nextStart = dayjs(start).format('YYYY-MM-DDTHH:mm:ss')
+      const nextEnd = dayjs(end).format('YYYY-MM-DDTHH:mm:ss')
       const occurrenceDate = resolveOccurrenceDateTime(event.occurrenceDate, event.start)
       patchEventMutate({
         eventId: event.id,

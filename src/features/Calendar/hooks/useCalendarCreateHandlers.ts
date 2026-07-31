@@ -1,9 +1,9 @@
-import moment from 'moment'
 import { useCallback } from 'react'
 import type { SlotInfo, View } from 'react-big-calendar'
 
 import { useCalendarCreateEvent } from '@/features/Calendar/hooks'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import dayjs from '@/shared/utils/dayjs'
 
 type UseCalendarCreateHandlersArgs = {
   view: View
@@ -33,9 +33,9 @@ export const useCalendarCreateHandlers = ({
 
   const handleDayViewCreateEvent = useCallback(
     (slotDate: Date) => {
-      const startBase = moment(slotDate).set({ second: 0, millisecond: 0 })
+      const startBase = dayjs(slotDate).second(0).millisecond(0)
       const snappedMinute = startBase.minute() < 30 ? 0 : 30
-      const start = startBase.set({ minute: snappedMinute }).toDate()
+      const start = startBase.minute(snappedMinute).toDate()
       const createdId = enqueueEvent(start, false)
       if (createdId != null) {
         onAddEvent(start, createdId)

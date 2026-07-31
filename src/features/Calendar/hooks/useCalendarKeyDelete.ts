@@ -1,4 +1,3 @@
-import moment from 'moment'
 import { useEffect } from 'react'
 
 import { normalizeDate } from '@/features/Calendar/utils/helpers/calendarPageHelpers'
@@ -9,6 +8,7 @@ import {
 import { RECURRENCE_TODO_SCOPE } from '@/shared/constants/recurrenceScope'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { RecurrenceTodoScope } from '@/shared/types/recurrence/recurrence'
+import dayjs from '@/shared/utils/dayjs'
 
 type UseCalendarKeyDeleteArgs = {
   isModalOpen: boolean
@@ -86,7 +86,7 @@ export const useCalendarKeyDelete = ({
       if (selectedEvent.type === 'todo') {
         onDeleteTodo({
           todoId: selectedEvent.id,
-          occurrenceDate: selectedEvent.occurrenceDate ?? moment(baseDate).format('YYYY-MM-DD'),
+          occurrenceDate: selectedEvent.occurrenceDate ?? dayjs(baseDate).format('YYYY-MM-DD'),
           scope: isRecurringEvent ? RECURRENCE_TODO_SCOPE.THIS_TODO : undefined,
         })
         onClearSelection()

@@ -1,7 +1,7 @@
-import moment from 'moment'
 import type { stringOrDate } from 'react-big-calendar'
 
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import dayjs, { type Dayjs } from '@/shared/utils/dayjs'
 
 import { TIMED_SLOT_CONFIG } from '../../domain/constants'
 import { getColorPalette } from '../colorPalette'
@@ -25,23 +25,23 @@ export const isDateOnlyString = (value?: stringOrDate) =>
 
 // day view 렌더링 전 이벤트를 시작 시각 기준으로 정렬한다.
 export const compareByStart = (a: CalendarEvent, b: CalendarEvent) =>
-  moment(a.start).diff(moment(b.start))
+  dayjs(a.start).diff(dayjs(b.start))
 
 // 반복 일정의 각 occurrence를 안정적으로 식별하기 위한 키를 생성한다.
 export const getEventOccurrenceKey = (event: CalendarEvent) =>
-  `${event.id}_${moment(event.start).format('YYYY-MM-DDTHH:mm')}`
+  `${event.id}_${dayjs(event.start).format('YYYY-MM-DDTHH:mm')}`
 
 // occurrenceDate가 있으면 우선 사용하고, 없으면 start를 사용해 일관된 datetime 문자열을 만든다.
 export const resolveOccurrenceDateTime = (
   occurrenceDate: CalendarEvent['occurrenceDate'] | undefined,
   fallbackStart: CalendarEvent['start'] | Date,
-) => moment(occurrenceDate ?? fallbackStart).format('YYYY-MM-DDTHH:mm:ss')
+) => dayjs(occurrenceDate ?? fallbackStart).format('YYYY-MM-DDTHH:mm:ss')
 
 // 며칠짜리 일정이 특정 날짜를 포함하는지 판별한다.
 export const eventCoversDate = (event: CalendarEvent, date: Date) => {
-  const start = moment(event.start)
-  const end = moment(event.end)
-  return moment(date).isBetween(start.startOf('day'), end.endOf('day'), undefined, '[]')
+  const start = dayjs(event.start)
+  const end = dayjs(event.end)
+  return dayjs(date).isBetween(start.startOf('day'), end.endOf('day'), undefined, '[]')
 }
 
 // 이벤트를 오전/오후 컬럼 단위 시각 슬롯으로 변환하고 겹침 레이아웃 정보를 계산한다.
@@ -53,23 +53,23 @@ export const buildTimedSlots = (
   const { MIN_HEIGHT, MAX_VISUAL_HOURS, COLUMNS } = TIMED_SLOT_CONFIG
   const columns: TimedSlotEvent[][] = COLUMNS.map(() => [])
 
-  const dayStart = moment(date).startOf('day')
+  const dayStart = dayjs(date).startOf('day')
   const dayEnd = dayStart.clone().add(24, 'hours')
   const noon = dayStart.clone().add(12, 'hours')
 
   events.forEach((event) => {
     const palette = getColorPalette(event.color)
-    const start = moment(event.start)
-    const end = moment(event.end)
-    const clampedStart = moment.max(start, dayStart)
-    const clampedEnd = moment.min(end, dayEnd)
+    const start = dayjs(event.start)
+    const end = dayjs(event.end)
+    const clampedStart = start.isAfter(dayStart) ? start : dayStart
+    const clampedEnd = end.isBefore(dayEnd) ? end : dayEnd
 
     if (!clampedEnd.isAfter(clampedStart)) {
       return
     }
 
     // 표시 구간(한 컬럼 내 시작/종료)을 실제 픽셀 좌표(top/height)로 변환한다.
-    const pushSegment = (segmentStart: moment.Moment, segmentEnd: moment.Moment) => {
+    const pushSegment = (segmentStart: Dayjs, segmentEnd: Dayjs) => {
       const columnIndex = segmentStart.hour() < 12 ? 0 : 1
       const columnStart = dayStart.clone().add(COLUMNS[columnIndex], 'hours')
       const minutesSinceColumnStart = segmentStart.diff(columnStart, 'minutes')
