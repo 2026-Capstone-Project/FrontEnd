@@ -33,6 +33,12 @@ export const eventShareApi = {
     const { data } = await axiosInstance.get<InvitationsApiResponse>(`${BASE_URL}/invitations`)
     return data
   },
+  deleteEventParticipants: async (eventId: number): Promise<LeaveEventResponse> => {
+    const { data } = await axiosInstance.delete<LeaveEventResponse>(
+      `/events/${eventId}/participants`,
+    )
+    return data
+  },
   leaveEvent: async (eventId: number): Promise<LeaveEventResponse> => {
     const { data } = await axiosInstance.delete<LeaveEventResponse>(
       `/events/${eventId}/participants/leave`,

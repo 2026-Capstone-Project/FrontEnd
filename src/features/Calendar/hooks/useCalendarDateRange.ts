@@ -1,11 +1,12 @@
-import moment from 'moment'
 import { useMemo } from 'react'
 import { type View, Views } from 'react-big-calendar'
+
+import dayjs from '@/shared/utils/dayjs'
 
 // 캘린더 뷰와 기준 날짜로 API 조회 범위를 계산하는 훅
 export const useCalendarDateRange = (view: View, date: Date) =>
   useMemo(() => {
-    const base = moment(date)
+    const base = dayjs(date)
     if (view === Views.MONTH) {
       return {
         startDate: base.clone().startOf('month').format('YYYY-MM-DD'),

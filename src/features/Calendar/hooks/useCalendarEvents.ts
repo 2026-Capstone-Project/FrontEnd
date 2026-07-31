@@ -1,8 +1,8 @@
-import moment from 'moment'
 import { useCallback, useEffect, useState } from 'react'
 import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import dayjs from '@/shared/utils/dayjs'
 
 import { createEvent, normalizeDate, updateEventRange } from '../utils/helpers/calendarPageHelpers'
 
@@ -102,8 +102,8 @@ export const useCalendarEvents = (options: UseCalendarEventsOptions = {}) => {
           event.id === eventId && (occurrenceDate ? event.occurrenceDate === occurrenceDate : true)
             ? {
                 ...event,
-                start: moment(start).format('YYYY-MM-DDTHH:mm'),
-                end: moment(end).format('YYYY-MM-DDTHH:mm'),
+                start: dayjs(start).format('YYYY-MM-DDTHH:mm'),
+                end: dayjs(end).format('YYYY-MM-DDTHH:mm'),
                 isAllDay: allDay,
               }
             : event,

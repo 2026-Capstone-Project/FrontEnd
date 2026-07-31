@@ -7,6 +7,8 @@ import GoogleIcon from '@/assets/social/google.svg?react'
 import KakaoIcon from '@/assets/social/kakao.svg?react'
 import NaverIcon from '@/assets/social/naver.svg?react'
 import { redirectToSocialLogin } from '@/shared/api/auth/auth'
+import { LANDING_META } from '@/shared/seo/routeMeta'
+import PageMeta from '@/shared/ui/common/PageMeta/PageMeta'
 
 import { features } from './components/features'
 import { FeatureVisual } from './components/FeatureVisual'
@@ -43,6 +45,8 @@ export default function Landing() {
 
   return (
     <S.Page ref={pageRef}>
+      {/* 구조화 데이터(JSON-LD)는 index.html에 정적으로 넣어 JS 없는 크롤러도 읽게 했습니다. */}
+      <PageMeta {...LANDING_META} />
       <S.Hero>
         <S.Circle $width="491px" $color="rgba(146, 255, 233, 0.70)" $top="30%" $left="50%" />
         <S.Circle $width="723px" $color="rgba(141, 207, 225, 0.90)" $top="10%" $left="10%" />
@@ -57,7 +61,7 @@ export default function Landing() {
         <S.Circle $width="449px" $color="rgba(236, 235, 255, 0.50)" $top="30%" $left="30%" />
         <S.Circle $width="538px" $color="rgba(84, 152, 208, 0.5)" $top="60%" $left="80%" />
         <S.Circle $width="491px" $color="rgba(146, 255, 233, 0.70)" $top="40%" $left="40%" />
-        <S.BackgroundText>
+        <S.BackgroundText aria-hidden="true">
           Calendar
           <br /> + i/O
         </S.BackgroundText>

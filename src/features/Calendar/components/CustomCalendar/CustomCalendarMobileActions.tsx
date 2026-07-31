@@ -1,8 +1,8 @@
-import moment from 'moment'
 import type { View } from 'react-big-calendar'
 
 import Plus from '@/assets/icons/common/plus.svg?react'
 import { theme } from '@/shared/styles/theme'
+import dayjs from '@/shared/utils/dayjs'
 
 import { CustomViewButton } from '../CustomViewButton/CustomViewButton'
 import * as S from './CustomCalendar.style'
@@ -15,7 +15,7 @@ type CustomCalendarMobileActionsProps = {
 }
 
 const buildDefaultAddEventDate = (currentDate: Date) =>
-  moment(currentDate).startOf('day').set({ hour: 9, minute: 0, second: 0, millisecond: 0 }).toDate()
+  dayjs(currentDate).startOf('day').hour(9).toDate()
 
 const CustomCalendarMobileActions = ({
   view,

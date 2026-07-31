@@ -1,8 +1,9 @@
-import moment from 'moment'
 import type { ComponentType } from 'react'
 import { createElement } from 'react'
 import type { Components, Formats, HeaderProps, View } from 'react-big-calendar'
 import { Views } from 'react-big-calendar'
+
+import dayjs from '@/shared/utils/dayjs'
 
 import CustomHeader from '../components/CalendarHeader/CalendarHeader'
 import type { CalendarEvent } from '../components/CustomView/CustomDayView'
@@ -21,7 +22,7 @@ type ViewConfig = {
 // react-big-calendar format 콜백을 앱 공통 포맷으로 연결한다.
 const weekdayFormat = (date: Date) => formatWeekday(date)
 const dayHeaderFormat = (date: Date) => formatDayHeaderLabel(date)
-const timeGutterFormat = (date: Date) => moment(date).format('HH:00')
+const timeGutterFormat = (date: Date) => dayjs(date).format('HH:00')
 
 // 주간 헤더에서만 "+" 액션을 주입할 수 있도록 동적 헤더 컴포넌트를 만든다.
 const createWeekHeader = (options?: ViewConfigOptions): ComponentType<HeaderProps> => {

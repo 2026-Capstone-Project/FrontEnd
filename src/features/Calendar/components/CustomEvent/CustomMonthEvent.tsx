@@ -1,9 +1,9 @@
-import moment from 'moment'
 import { type MouseEvent, useRef, useState } from 'react'
 import type { EventProps } from 'react-big-calendar'
 import { createPortal } from 'react-dom'
 
 import People from '@/assets/icons/people.svg?react'
+import dayjs from '@/shared/utils/dayjs'
 
 import { getColorPalette } from '../../utils/colorPalette'
 import type { CalendarEvent } from '../CustomView/CustomDayView'
@@ -14,7 +14,7 @@ const formatTimeRange = (event: CalendarEvent) => {
     return '종일'
   }
 
-  const start = moment(event.start).format('HH:mm')
+  const start = dayjs(event.start).format('HH:mm')
   return `${start}`
 }
 

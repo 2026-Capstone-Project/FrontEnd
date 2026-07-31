@@ -1,7 +1,7 @@
-import moment from 'moment'
 import type { MutableRefObject, Ref } from 'react'
 
 import People from '@/assets/icons/people.svg?react'
+import dayjs from '@/shared/utils/dayjs'
 
 import type { CalendarEvent } from '../../../../../shared/types/calendar/types'
 import { TIMED_SLOT_CONFIG } from '../../../domain/constants'
@@ -26,7 +26,7 @@ export const renderTimeSlotRows = (
     const hourLabel = `${String(hour).padStart(2, '0')}:00`
     const isLast = index === TOTAL_SLOTS - 1
 
-    const slotDate = moment(date).hour(hour).minute(0).second(0).millisecond(0).toDate()
+    const slotDate = dayjs(date).hour(hour).minute(0).second(0).millisecond(0).toDate()
 
     if (isLast) {
       return null

@@ -1,4 +1,3 @@
-import moment from 'moment'
 import { useCallback, useRef } from 'react'
 
 import { buildRecurringGroupForFutureDrop } from '@/features/Calendar/hooks/useCalendarDragDrop'
@@ -10,6 +9,7 @@ import { getDetailTodo } from '@/shared/api/todo/api'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
 import type { RecurrenceGroup, RecurrenceTodoScope } from '@/shared/types/recurrence/recurrence'
 import type { PatchTodoRequestDTO } from '@/shared/types/todo/types'
+import dayjs from '@/shared/utils/dayjs'
 
 type PatchTodoPayload = {
   todoId: number
@@ -50,12 +50,12 @@ export const useCalendarTodoTimingPatch = ({ patchTodoMutate }: UseCalendarTodoT
       start: Date,
       options?: { scope?: RecurrenceTodoScope; occurrenceDate?: string },
     ) => {
-      const startDate = moment(start).format('YYYY-MM-DD')
+      const startDate = dayjs(start).format('YYYY-MM-DD')
       const occurrenceDate =
         options?.occurrenceDate ??
-        moment(todoEvent.occurrenceDate ?? todoEvent.start).format('YYYY-MM-DD')
+        dayjs(todoEvent.occurrenceDate ?? todoEvent.start).format('YYYY-MM-DD')
       const patchScope = options?.scope ?? getTodoOccurrenceScope(Boolean(todoEvent.isRecurring))
-      const dueTime = todoEvent.isAllDay ? undefined : moment(start).format('HH:mm')
+      const dueTime = todoEvent.isAllDay ? undefined : dayjs(start).format('HH:mm')
 
       const submitPatch = (recurrenceGroup?: RecurrenceGroup) => {
         patchTodoMutate({

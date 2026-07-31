@@ -1,0 +1,48 @@
+name: Lighthouse CI
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+  workflow_dispatch:
+
+# 같은 PR에 새 커밋이 올라오면 이전 실행은 취소합니다.
+concurrency:
+  group: lighthouse-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 코드 가져오기
+        uses: actions/checkout@v4
+
+      - name: Node 설치
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 의존성 설치
+        run: npm install
+
+      - name: 빌드
+        run: npm run build
+        env:
+          VITE_SERVER_URL: ${{ secrets.VITE_SERVER_URL }}
+          VITE_KAKAO_API: ${{ secrets.VITE_KAKAO_API }}
+          # canonical / og:url이 실제 배포 도메인으로 나와야 SEO 감사 결과가 배포 환경과 같아집니다.
+          VITE_SITE_URL: ${{ secrets.VITE_SITE_URL }}
+
+      # 임계값은 lighthouserc.json에 있고, 측정 기준(2026-07-31, 모바일 프리셋)은 다음과 같습니다.
+      #   SEO 100 / 접근성 94 / 모범사례 96 / 성능 79
+      #   FCP 1.8s · LCP 5.4s · TBT 0ms · CLS 0 · script 147kB · font 598kB
+      #
+      # SEO / 접근성 / 스크립트 용량 / CLS는 실패(error)로 막고, 성능은 경고(warn)만 냅니다.
+      # CI 러너 성능 편차로 점수가 흔들리기 때문에 관계없는 PR까지 막히는 것을 피하기 위함입니다.
+      # 성능 79의 원인은 전적으로 CDN 웹폰트 598kB(전체 전송량의 78%)입니다.
+      # 폰트를 서브셋/자체 호스팅하면 임계값을 함께 올려주세요.
+      - name: Lighthouse CI 실행
+        run: npx --yes @lhci/cli@0.15.1 autorun

@@ -1,9 +1,9 @@
-import moment from 'moment'
 import { useCallback } from 'react'
 import type { SlotInfo, View } from 'react-big-calendar'
 import { Views } from 'react-big-calendar'
 
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import dayjs from '@/shared/utils/dayjs'
 
 type UseCalendarCreateEventArgs = {
   view: View
@@ -23,9 +23,7 @@ export const useCalendarCreateEvent = ({
         view === Views.WEEK && slotInfo.action === 'select' && slotInfo.slots.length === 1
       if (slotInfo.action !== 'doubleClick' && !isWeekSingleClick) return false
 
-      const start = moment(slotInfo.start)
-        .set({ hour: 9, minute: 0, second: 0, millisecond: 0 })
-        .toDate()
+      const start = dayjs(slotInfo.start).hour(9).minute(0).second(0).millisecond(0).toDate()
       const createdId = enqueueEvent(start, false)
       if (createdId != null) {
         onCreated(start, createdId)

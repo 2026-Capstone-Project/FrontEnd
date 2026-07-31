@@ -1,9 +1,9 @@
-import moment from 'moment'
 import { useCallback, useState } from 'react'
 
 import type { DeleteConfirmState } from '@/features/Calendar/components/CustomCalendar/CustomCalendar.types'
 import { getEventOccurrenceScope } from '@/features/Calendar/utils/helpers/calendarRecurrenceScope'
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import dayjs from '@/shared/utils/dayjs'
 
 type UseCalendarDeleteConfirmArgs = {
   events: CalendarEvent[]
@@ -67,7 +67,7 @@ export const useCalendarDeleteConfirm = ({
           eventId,
           params: {
             ...(isRecurringEvent ? { scope: getEventOccurrenceScope(isRecurringEvent) } : {}),
-            occurrenceDate: moment(occurrenceDate).format('YYYY-MM-DDTHH:mm:ss'),
+            occurrenceDate: dayjs(occurrenceDate).format('YYYY-MM-DDTHH:mm:ss'),
           },
         },
         {

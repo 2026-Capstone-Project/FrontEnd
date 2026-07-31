@@ -1,6 +1,5 @@
-import moment from 'moment'
-
 import type { CalendarEvent } from '@/shared/types/calendar/types'
+import dayjs from '@/shared/utils/dayjs'
 
 import {
   compareByStart,
@@ -20,7 +19,7 @@ export type AllDaySegment = {
 }
 
 export const buildWeekDays = (date: Date) => {
-  const weekStart = moment(date).startOf('week')
+  const weekStart = dayjs(date).startOf('week')
   return Array.from({ length: 7 }, (_, index) => weekStart.clone().add(index, 'day'))
 }
 
@@ -82,8 +81,8 @@ export const buildWeekDropRange = (
   targetDate: Date,
   dropAsAllDay: boolean,
 ) => {
-  const originalStart = moment(draggingEvent.start)
-  const originalEnd = moment(draggingEvent.end)
+  const originalStart = dayjs(draggingEvent.start)
+  const originalEnd = dayjs(draggingEvent.end)
   const originalStartDay = originalStart.clone().startOf('day')
   const originalEndDay = originalEnd.clone().startOf('day')
   const originalAllDay = draggingEvent.isAllDay || isDateOnlyString(draggingEvent.start)
@@ -91,13 +90,12 @@ export const buildWeekDropRange = (
   const useAllDayTime = dropAsAllDay || originalAllDay
 
   const nextStart = useAllDayTime
-    ? moment(targetDate).startOf('day')
-    : moment(targetDate).set({
-        hour: originalStart.hour(),
-        minute: originalStart.minute(),
-        second: originalStart.second(),
-        millisecond: originalStart.millisecond(),
-      })
+    ? dayjs(targetDate).startOf('day')
+    : dayjs(targetDate)
+        .hour(originalStart.hour())
+        .minute(originalStart.minute())
+        .second(originalStart.second())
+        .millisecond(originalStart.millisecond())
   const nextEnd = useAllDayTime
     ? (() => {
         const spanDays = Math.max(originalEndDay.diff(originalStartDay, 'days') + 1, 1)

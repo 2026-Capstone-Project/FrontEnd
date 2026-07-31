@@ -320,7 +320,8 @@ export const Circle = styled.div<{
   }
 `
 
-export const BackgroundText = styled.h1`
+/** 배경 장식용 텍스트입니다. h1은 HeroTitle 하나만 유지해야 하므로 div로 둡니다. */
+export const BackgroundText = styled.div`
   position: absolute;
   z-index: 0;
   top: 24px;
