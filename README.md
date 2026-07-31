@@ -4,7 +4,7 @@
     말 한마디로 일정이 완성되는 AI 일정 관리 서비스<br />
     <strong>2026 Capstone Frontend</strong>
   </p>
-  <img src="./docs/readme-cover.png" alt="Calio 대표 이미지" width="100%" />
+  <img src="./docs/readme-cover.webp" alt="Calio 대표 이미지" width="100%" />
   <br />
   <br />
   <p>
