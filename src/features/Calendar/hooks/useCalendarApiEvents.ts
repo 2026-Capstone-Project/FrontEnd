@@ -33,9 +33,11 @@ const toTodoEvent = (todo: TodoType): CalendarEvent => {
   const start = todo.isAllDay
     ? buildLocalDateTime(todo.occurrenceDate)
     : buildLocalDateTime(todo.occurrenceDate, todo.dueTime)
+  // 할 일은 시점 데이터이므로, 임의로 붙인 30분 duration이 날짜 경계를 넘지 않도록 막는다.
+  const endOfDay = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 23, 59, 59, 999)
   const end = todo.isAllDay
-    ? new Date(start.getFullYear(), start.getMonth(), start.getDate(), 23, 59, 0, 0)
-    : new Date(start.getTime() + 30 * 60 * 1000)
+    ? endOfDay
+    : new Date(Math.min(start.getTime() + 30 * 60 * 1000, endOfDay.getTime()))
   return {
     id: todo.todoId,
     occurrenceDate: todo.occurrenceDate,
